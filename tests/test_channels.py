@@ -1,5 +1,6 @@
 # File to test functions in src/channels.py
 
+import pytest
 from src.channels import channels_list, channels_listall, channels_create
 
 def test_channels_list():
