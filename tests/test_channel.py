@@ -1,7 +1,7 @@
 # File to test functions in src/channel.py
 
 import pytest
-from src.channel import channel_invite, channel_details, channel_messages, channel_leave, channel_join, channel_addowner, channel_removeowner
+from src.channel import *
 
 def test_channel_invite():
     pass
