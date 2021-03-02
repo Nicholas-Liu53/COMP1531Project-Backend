@@ -2,6 +2,7 @@
 
 import pytest
 from src.channel import channel_invite_v1, channel_details_v1, channel_messages_v1, channel_leave_v1, channel_join_v1, channel_addowner_v1, channel_removeowner_v1
+import src.auth, src.channels
 
 def test_channel_invite():
     pass
