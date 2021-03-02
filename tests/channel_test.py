@@ -6,6 +6,7 @@ import src.auth, src.channels
 
 from src.channels import channels_create_v1, channels_list_v1
 from src.message import message_send_v1
+from src.error import AccessError, InputError
 
 def test_channel_invite():
     pass
@@ -27,15 +28,18 @@ def test_channel_messages():
     #Send one message in channel 
     message_send_v1(1, "Yggdrasil", "First Message")
     
-    with pytest.raises(Exception):
+    with pytest.raises(InputError):
         #Test 1: returns input error when start is greater than total number of 
         # messages in channel
         channel_messages_v1(1, "Yggdrasil", 4)
         
-        #Test 2: returns access error when authorised user not a member of channel
-        channel_messages_v1(2, "Yggdrasil", 0)
-        #Test 3: Raises exception when channel_id is invalid 
+        #Test 2: Raises input error when channel_id is invalid 
         channel_messages_v1(1, "fakeChannel", 0) 
+        
+    with pytest.raises(AccessError):
+        #Test 3: returns access error when authorised user not a member of channel
+        channel_messages_v1(2, "Yggdrasil", 0)
+
         
     #Test 4: if there are less than 50 messages, returns -1 in "end"
     assert channel_messages_v1(1, "Yggdrasil", 0) == -1
