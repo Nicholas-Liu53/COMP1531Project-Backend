@@ -4,6 +4,14 @@ import pytest
 from src.channel import channel_invite_v1, channel_details_v1, channel_messages_v1, channel_leave_v1, channel_join_v1, channel_addowner_v1, channel_removeowner_v1
 import src.auth, src.channels, src.other
 
+AuID    = 'auth_user_id'
+uID     = 'u_id'
+cID     = 'channel_id'
+chans   = 'channels'
+allMems = 'all_members'
+fName   = 'name_first'
+lName   = 'name_last'
+
 def test_channel_invite():
     pass
 
@@ -22,14 +30,6 @@ def test_channel_join():
     userID2 = src.auth.auth_register_v1("lolrofl@gmail.com", "pr3ttynAme", "S", "S")
     userID3 = src.auth.auth_register_v1("zodiac@gmail.com", "T3dCruz", "T", "C")
     userID4 = src.auth.auth_register_v1("ocasio@gmail.com", "Alex4ndr1a", "A", "O")
-
-    AuID    = 'auth_user_id'
-    uID     = 'u_id'
-    cID     = 'channel_id'
-    chans   = 'channels'
-    allMems = 'all_members'
-    fName   = 'name_first'
-    lName   = 'name_last'
 
     # userID1 made public channel 'TrumpPence'
     firstChannel = src.channels.channels_create_v1(userID1[AuID], 'TrumpPence', True)

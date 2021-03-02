@@ -4,6 +4,14 @@ import pytest
 from src.channels import channels_list_v1, channels_listall_v1, channels_create_v1
 import src.auth, src.channel, src.other
 
+AuID    = 'auth_user_id'
+uID     = 'u_id'
+cID     = 'channel_id'
+chans   = 'channels'
+allMems = 'all_members'
+fName   = 'name_first'
+lName   = 'name_last'
+
 def test_channels_list():
     pass
 
@@ -14,10 +22,6 @@ def test_channels_create():
     #* Setup users and create shorthand for strings for testing code
     userID1 = src.auth.auth_register_v1("ayelmao@gmail.com", "Bl00dO4th", "C", "L")
     userID2 = src.auth.auth_register_v1("lolrofl@gmail.com", "pr3ttynAme", "S", "S")
-    
-    AuID   = 'auth_user_id'
-    cID   = 'channel_id'
-    chans = 'channels'
 
     # Test 1: Newly created public channel by userID1 appears in both of his channel list
     firstChannel = channels_create_v1(userID1[AuID], 'Oogway', True)
