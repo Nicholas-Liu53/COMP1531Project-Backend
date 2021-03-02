@@ -1,4 +1,4 @@
-import data
+import src.data
 
 def auth_login_v1(email, password):
     return {
