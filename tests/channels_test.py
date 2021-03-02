@@ -2,23 +2,52 @@
 
 import pytest
 from src.channels import channels_list_v1, channels_listall_v1, channels_create_v1
+from src.error import AccessError, InputError
 import src.auth, src.channel
 
 def test_channels_list():
-    # Test 1: For an empty data file, test if running the function with any auth_user_id returns anything
-    ## Should raise an AccessError
-    # Test 2: Add users but don't join any channels. Test if running the function with their auth_user_id returns anything
-    # Test 3: Add users to the channel and test if running the function returns the correct input
-    # Test 4: Ensure that the function returns the correct data type
-    
-    pass
+    # Test 1: When calling the function with an invalid auth_user_id should raise an AccessError
+    with pytest.raises(AccessError):
+        channels_list_v1("wrongid")
+
+    # Setup users and create shorthand for strings for testing code
+    userID1 = src.auth.auth_register_v1("lmbao@gmail.com", "lmshao", "K", "H")
+
+    AuID = 'auth_user_id'
+    cID = 'channel_id'
+    chans = 'channels'
+
+    # Test 2: When calling the function with a valid auth_user_id, only the channels that user has joined should appear
+    firstChannel = channels_create_v1(userID1[AuID], 'Marmot', True)
+    assert channels_list_v1(userID1[AuID]) == []
+    src.channel.channel_invite_v1(userID1[AuID], firstChannel[cID],userID1[AuID])
+    assert channels_list_v1(userID1[AuID]) == [{cID: firstChannel, 'channel_name': 'Marmot', 'owner_members: []', 'all_members: []'}]
 
 def test_channels_listall():
-    # Test 1: If a user with an invalid auth_user_id is inputed, an AccessError is raised
-    # Test 2: Ensure that the function returns the correct data type
-    # Test 3: Ensure that both public and private channels are displayed
-    # Test 4: Add users but don't join any channels. Test if running the function with their auth_user_id returns anything
-    # Test 5: Add users to the channel and test if running the function returns the correct input
+    # Test 1: When calling the function with an invalid auth_user_id should raise an AccessError
+    with pytest.raises(AccessError):
+        channels_list_v1("noonehasthis")
+
+    # Setup users and create shorthand for strings for testing code
+    userID1 = src.auth.auth_register_v1("first@gmail.com", "pass", "D", "C")
+    userID2 = src.auth.auth_register_v1("second@gmail.com", "word", "L", "M")
+
+    AuID = 'auth_user_id'
+    cID = 'channel_id'
+    chans = 'channels'
+
+    # Test 2: When calling the function with a valid auth_user_id, both private and public channels are displayed even if the user is not a member
+    firstChannel = channels_create_v1(userID1[AuID], 'JS', True)
+    secondChannel = channels_create_v1(userID2[AuID], 'NEZ', False)
+    assert len(channels_list_v1(userID1)) == 2
+
+    # Test 3: When adding users to channels, this should not affect the output of the program
+    src.channel.channel_invite_v1(userID1[AuID], firstChannel[cID],userID1[AuID])
+    assert len(channels_list_v1(userID1)) == 2
+
+    # Test 4: When running the function for two different valid auth_user_ids, the return should be the same
+    assert channels_list_v1(userID1) == channels_list_v1(userID2)
+
     pass
 
 def test_channels_create():
