@@ -16,17 +16,20 @@ def test_auth_login_valid_multiple():
     assert auth_login_v1("ericamondy@gmail.com", "1234567") == "ericamondy"
 
 def test_auth_login_invalid_email():
+    with pytest.raises(InputError):
     return_val = auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
-    assert auth_login_v1("caricoleman.com", "1234567") == "InputError"
+    auth_login_v1("caricoleman.com", "1234567")
 
 def test_auth_login_invalid_not_registered_email():
+    with pytest.raises(InputError):
     return_val = auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
-    assert auth_login_v1("caricolema@gmail.com", "1234567") == "InputError"   
-    assert auth_login_v1("ericamondy@gmail.com", "1234567") == "InputError" 
+    auth_login_v1("caricolema@gmail.com", "1234567") 
+    auth_login_v1("ericamondy@gmail.com", "1234567")  
 
 def test_auth_login_invalid_incorrect_password():
+    with pytest.raises(InputError):
     return_val = auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
-    assert auth_login_v1("caricoleman@gmail.com", "12345") == "InputError"
+    auth_login_v1("caricoleman@gmail.com", "12345")
 
 def test_auth_register_valid():
     assert auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman") == "caricoleman"
@@ -67,25 +70,32 @@ def test_auth_register_valid_long_name_multiple():
     assert auth_register_v1("caricoleman@hotmail.com", "1234567", "cariiiiiiiiiiiiiii", "coleman") == "cariiiiiiiiiiiiiiico0"
 
 def test_auth_register_invalid_email():
-    assert auth_register_v1("caricoleman.com", "1234567", "cari", "coleman") == "InputError"
+    with pytest.raises(InputError):
+    auth_register_v1("caricoleman.com", "1234567", "cari", "coleman") 
     
 def test_auth_register_invalid_same_email():
+    with pytest.raises(InputError):
     assert auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman") == "caricoleman"
-    assert auth_register_v1("caricoleman@yahoo.com", "1234567", "erica", "mondy") == "InputError"
+    auth_register_v1("caricoleman@yahoo.com", "1234567", "erica", "mondy")
 
 def test_auth_register_invalid_password():
-    assert auth_register_v1("caricoleman@gmail.com", "1234", "cari", "coleman") == "InputError"
+    with pytest.raises(InputError):
+    auth_register_v1("caricoleman@gmail.com", "1234", "cari", "coleman") 
 
 def test_auth_register_invalid_long_first_name():
-    assert auth_register_v1("caricoleman@gmail.com", "1234567", "cariiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", "coleman") == "InputError"
+    with pytest.raises(InputError):
+    auth_register_v1("caricoleman@gmail.com", "1234567", "cariiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", "coleman") 
 
 def test_auth_register_invalid_long_last_name():
-    assert auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "colemaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaan") == "InputError"
+    with pytest.raises(InputError):
+    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "colemaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaan") 
 
 def test_auth_register_invalid_no_first_name():
-    assert auth_register_v1("caricoleman@gmail.com", "1234567", "", "coleman") == "InputError"
+    with pytest.raises(InputError):
+    auth_register_v1("caricoleman@gmail.com", "1234567", "", "coleman") 
 
 def test_auth_register_invalid_no_last_name():
-    assert auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "") == "InputError"
+    with pytest.raises(InputError):
+    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "") 
 
    
