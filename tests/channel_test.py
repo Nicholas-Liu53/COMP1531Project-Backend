@@ -17,7 +17,7 @@ def test_channel_invite():
 
     #* Test 1: Does userID2 get successfully invited to channel "Coolkids"
     channel_invite_v1(userID1[auth_user_id], privateChannel[channel_id], userID2[u_id])
-    assert {u_id: userID2[auth_user_id], name_first: 'Darius', name_last: 'Kuan'} in channel_details_v1(userID1[auth_user_id], privateChannel[channel_id])[all_members]
+    assert {'user_id': userID2[auth_user_id], 'name_first': 'Darius', 'name_last': 'Kuan'} in channel_details_v1(userID1[auth_user_id], privateChannel[channel_id])[all_members]
 
     #* Test 2: is InputError raised when channel_id does not refer to valid channel
     with pytest.raises(InputError) as e:
@@ -42,11 +42,11 @@ def test_channel_details():
 
     #* Test 1: Using the authorised user, does the channel details get presented for one user in channel
     assert channel_details_v1(userID1[auth_user_id], realChannel[channel_id]) == { channel_name : "ChannelINFO", owner_members: [ {
-        u_id : userID1[u_id], 
-        first_name: "Vincent",
-        last_name: 'Le',
-        email: 'testing1@gmail.com'
-        }] }
+        'user_id' : userID1[u_id], 
+        'first_name': "Vincent",
+        'last_name': 'Le',
+        'email': 'testing1@gmail.com'
+    }] }
     
     #* Test 2: Is InputError raised when Channel ID is not a valid channel
     with pytest.raises(AccessError) as e:
