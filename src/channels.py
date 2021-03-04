@@ -55,4 +55,3 @@ def check_auth_user_id(auth_user_id):
         if auth_user_id == d[uID]:
             return
     raise AccessError
-
