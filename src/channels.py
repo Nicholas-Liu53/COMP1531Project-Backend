@@ -1,6 +1,14 @@
 import src.data
 from src.error import InputError, AccessError
 
+AuID    = 'auth_user_id'
+uID     = 'u_id'
+cID     = 'channel_id'
+allMems = 'all_members'
+cName   = 'channel_name'
+fName   = 'name_first'
+lName   = 'name_last'
+
 def channels_list_v1(auth_user_id):
     # First, check if auth_user-id is a valid user_id
     try:
@@ -10,9 +18,12 @@ def channels_list_v1(auth_user_id):
     
     output = []
     # Find channels that user is part of and add them to the output list
-    for dictionary in src.data.channels:
-        if auth_user_id in dictionary['all_members']:
-            output.append(dictionary)
+    for d in src.data.channels:
+        if auth_user_id in d['all_members']:
+            channel = {}
+            channel[cID] = d[cID]
+            channel[cName] = d[cName]
+            output.append(channel)
 
     return {'channels': output}
 def channels_listall_v1(auth_user_id):
@@ -23,7 +34,13 @@ def channels_listall_v1(auth_user_id):
         print("Access error, please try again")
 
     # If auth_user_id is valid, then it should print all channels in data
-    return {src.data.channels}
+    output = []
+    for d in src.data.channels:
+        channel = {}
+        channel[cID] = d[cID]
+        channel[cName] = d[cName]
+        output.append(channel)
+    return {'channels': output}
 
 def channels_create_v1(auth_user_id, name, is_public):
     return {
@@ -34,8 +51,8 @@ def channels_create_v1(auth_user_id, name, is_public):
 def check_auth_user_id(auth_user_id):
     
     uID = 'user_id'
-    for dictionary in src.data.users:
-        if auth_user_id == dictionary[uID]:
+    for d in src.data.users:
+        if auth_user_id == d[uID]:
             return
     raise AccessError
 
