@@ -40,9 +40,9 @@ def test_channel_join():
     channel_join_v1(userID3[AuID], firstChannel[cID])
     assert {uID: userID3[AuID], fName: 'T', lName: "C"} in channel_details_v1(userID1[AuID], firstChannel[cID])[allMems]
 
-    #* Test 2: If userID4 successfully joins private channel 'BidenHarris'
+    #* Test 2: If userID4 unsuccessfully joins private channel 'BidenHarris'
     channel_join_v1(userID4[AuID], firstChannel[cID])
-    assert {uID: userID4[AuID], fName: 'A', lName: "O"} in channel_details_v1(userID2[AuID], secondChannel[cID])[allMems]
+    assert {uID: userID4[AuID], fName: 'A', lName: "O"} not in channel_details_v1(userID2[AuID], secondChannel[cID])[allMems]
 
     #* Test 3: userID3 and userID4 aren't in channels they haven't joined 
     assert {uID: userID3[AuID], fName: 'T', lName: "C"} not in channel_details_v1(userID2[AuID], secondChannel[cID])[allMems]

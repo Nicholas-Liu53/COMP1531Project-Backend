@@ -63,8 +63,21 @@ def channel_join_v1(auth_user_id, channel_id):
         # If channel is private, AccessError
         raise AccessError
 
+    # Time to find the user details
+    userFound = False
+    j = 0
+    while not userFound:
+        if i >= len(src.data.users):
+            # If user doesn't exist in database, inputError
+            raise InputError
+        elif src.data.users[j]['user_id']:
+            userFound = True
+        j += 1
+
+    j -= 1      # Undo extra increment
+
     # Time to add the user into the channel
-    src.data.channels[i]['all_members'].append(auth_user_id)
+    src.data.channels[i]['all_members'].append(src.data.users[j])
 
     # Done, return empty list 
     return {
