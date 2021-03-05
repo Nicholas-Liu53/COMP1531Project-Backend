@@ -9,6 +9,7 @@ users (list):
         first_name
         last_name
         email
+        handle_str
         password
 
 channels (list):
@@ -25,6 +26,7 @@ users = [
         'first_name': None,
         'last_name': None,
         'email': None,
+        'handle_str': None,
         'password': None
     }
 ]
@@ -34,6 +36,7 @@ channels = [
         'channel_id': None,
         'channel_name': None,
         'owner_members': [],
-        'all_members': []
+        'all_members': [],
+        'is_public': None
     }
 ]
