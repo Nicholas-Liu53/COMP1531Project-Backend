@@ -21,7 +21,7 @@ def test_channels_list():
         channels_list_v1("wrongid")
 
     # Setup users and create shorthand for strings for testing code
-    userID1 = src.auth.auth_register_v1("lmbao@gmail.com", "lmshao", "K", "H")
+    userID1 = src.auth.auth_register_v1("lmbao@gmail.com", "lmshaoo", "K", "H")
     
     # Test 2: When calling the function with a valid auth_user_id, only the channels that user has joined should appear
     firstChannel = channels_create_v1(userID1[AuID], 'Marmot', True)
@@ -36,8 +36,8 @@ def test_channels_listall():
         channels_list_v1("noonehasthis")
 
     # Setup users and create shorthand for strings for testing code
-    userID1 = src.auth.auth_register_v1("first@gmail.com", "pass", "D", "C")
-    userID2 = src.auth.auth_register_v1("second@gmail.com", "word", "L", "M")
+    userID1 = src.auth.auth_register_v1("first@gmail.com", "password", "D", "C")
+    userID2 = src.auth.auth_register_v1("second@gmail.com", "password", "L", "M")
 
     # Test 2: When calling the function with a valid auth_user_id, both private and public channels are displayed even if the user is not a member
     firstChannel = channels_create_v1(userID1[AuID], 'JS', True)

@@ -18,8 +18,9 @@ def channels_list_v1(auth_user_id):
     for d in src.data.channels:
         if auth_user_id in d['all_members']:
             channel = {}
-            channel[cID] = d[cID]
-            channel[cName] = d[cName]
+        channel[cID] = d[cID]
+        channel[cName] = d[cName]
+        if channel[cID] != None and channel[cName] != None:
             output.append(channel)
 
     return {'channels': output}
@@ -36,7 +37,8 @@ def channels_listall_v1(auth_user_id):
         channel = {}
         channel[cID] = d[cID]
         channel[cName] = d[cName]
-        output.append(channel)
+        if channel[cID] != None and channel[cName] != None:
+            output.append(channel)
     return {'channels': output}
 
 def channels_create_v1(auth_user_id, name, is_public):
@@ -48,6 +50,9 @@ def channels_create_v1(auth_user_id, name, is_public):
 def check_auth_user_id(auth_user_id):
     
     for d in src.data.users:
-        if auth_user_id == d[uID]:
-            return
+        try:
+            if auth_user_id == d[uID]:
+                return
+        except Exception:
+            pass
     raise AccessError
