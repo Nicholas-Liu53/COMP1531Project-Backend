@@ -19,29 +19,28 @@ channels (list):
         owner members (list of user_id's)
         all members (list of user_id's)
 '''
-#* Like so
-"""
+
 users = [
     {
+        '''
         'user_id': ____,
         'first_name': ____,
         'last_name': ____,
         'email': ____,
         'password': ____,
         'handle_string': ____,
+        '''
     }
 ]
 
 channels = [
     {
+        '''
         'channel_id': ____,
         'is_public': ____,
         'channel_name': ____,
         'owner_members': [],
         'all_members': [],
+        '''
     }
 ]
-"""
-
-user = []
-channels = []

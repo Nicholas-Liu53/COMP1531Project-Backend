@@ -57,9 +57,9 @@ def channel_join_v1(auth_user_id, channel_id):
             channelFound = True
         i += 1
 
-    i =- 1      # Undo extra increment
+    i -= 1      # Undo extra increment
 
-    if src.data.channels[i]['is_public'] == True:
+    if src.data.channels[i]['is_public'] == False:
         # If channel is private, AccessError
         raise AccessError
 

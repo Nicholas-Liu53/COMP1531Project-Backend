@@ -41,6 +41,7 @@ def test_channel_join():
     secondChannel = src.channels.channels_create_v1(userID2[AuID], 'BidenHarris', False)
 
     #* Test 1: If userID3 successfully joins public channel 'TrumpPence'
+    # print(firstChannel)
     channel_join_v1(userID3[AuID], firstChannel[cID])
     assert {uID: userID3[AuID], fName: 'T', lName: "C"} in channel_details_v1(userID3[AuID], firstChannel[cID])[allMems]
 
