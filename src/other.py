@@ -2,22 +2,24 @@ import src.data
 
 def clear_v1():
 
-    data.users = [
+    src.data.users = [
         {
             'user_id': None,
             'first_name': None,
             'last_name': None,
             'email': None,
-            'password': None
+            'password': None,
+            'handle_string': None,
         }
     ]
 
-    data.channels = [
+    src.data.channels = [
         {
-            'channel_id': None,
+            'channel_id': 1,
+            'is_public': None,
             'channel_name': None,
             'owner_members': [],
-            'all_members': []
+            'all_members': [],
         }
     ]
 

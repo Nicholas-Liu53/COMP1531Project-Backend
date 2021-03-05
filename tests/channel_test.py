@@ -25,6 +25,10 @@ def test_channel_leave():
     pass
 
 def test_channel_join():
+    #* Ensure database is empty
+    #! Clearing data
+    src.other.clear_v1()
+
     #* Setup users and channels and create shorthand for strings for testing code
     userID1 = src.auth.auth_register_v1("ayelmao@gmail.com", "Bl00dO4th", "C", "L")
     userID2 = src.auth.auth_register_v1("lolrofl@gmail.com", "pr3ttynAme", "S", "S")
@@ -38,15 +42,15 @@ def test_channel_join():
 
     #* Test 1: If userID3 successfully joins public channel 'TrumpPence'
     channel_join_v1(userID3[AuID], firstChannel[cID])
-    assert {uID: userID3[AuID], fName: 'T', lName: "C"} in channel_details_v1(userID1[AuID], firstChannel[cID])[allMems]
+    assert {uID: userID3[AuID], fName: 'T', lName: "C"} in channel_details_v1(userID3[AuID], firstChannel[cID])[allMems]
 
     #* Test 2: If userID4 unsuccessfully joins private channel 'BidenHarris'
     channel_join_v1(userID4[AuID], firstChannel[cID])
-    assert {uID: userID4[AuID], fName: 'A', lName: "O"} not in channel_details_v1(userID2[AuID], secondChannel[cID])[allMems]
+    assert {uID: userID4[AuID], fName: 'A', lName: "O"} not in channel_details_v1(userID4[AuID], secondChannel[cID])[allMems]
 
     #* Test 3: userID3 and userID4 aren't in channels they haven't joined 
-    assert {uID: userID3[AuID], fName: 'T', lName: "C"} not in channel_details_v1(userID2[AuID], secondChannel[cID])[allMems]
-    assert {uID: userID4[AuID], fName: 'A', lName: "O"} not in channel_details_v1(userID1[AuID], firstChannel[cID])[allMems]
+    assert {uID: userID3[AuID], fName: 'T', lName: "C"} not in channel_details_v1(userID3[AuID], secondChannel[cID])[allMems]
+    assert {uID: userID4[AuID], fName: 'A', lName: "O"} not in channel_details_v1(userID4[AuID], firstChannel[cID])[allMems]
 
     #* Finished testing for this function
     #! Clearing data

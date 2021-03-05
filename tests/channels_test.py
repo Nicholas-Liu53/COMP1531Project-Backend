@@ -19,6 +19,10 @@ def test_channels_listall():
     pass
 
 def test_channels_create():
+    #* Ensure database is empty
+    #! Clearing data
+    src.other.clear_v1()
+    
     #* Setup users and create shorthand for strings for testing code
     userID1 = src.auth.auth_register_v1("ayelmao@gmail.com", "Bl00dO4th", "C", "L")
     userID2 = src.auth.auth_register_v1("lolrofl@gmail.com", "pr3ttynAme", "S", "S")
