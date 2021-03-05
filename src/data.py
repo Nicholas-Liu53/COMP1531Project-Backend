@@ -14,6 +14,7 @@ users (list):
 channels (list):
     each element of list is a channel dictionary containing:
         channel_id
+        is_public (bool)
         channel_name
         owner members (list of user_id's)
         all members (list of user_id's)
@@ -32,6 +33,7 @@ users = [
 channels = [
     {
         'channel_id': None,
+        'is_public': None
         'channel_name': None,
         'owner_members': [],
         'all_members': []
