@@ -1,5 +1,5 @@
 import src.data
-import src.error
+from src.error import AccessError, InputError
 
 def channels_list_v1(auth_user_id):
     return {

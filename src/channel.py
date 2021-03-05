@@ -1,5 +1,5 @@
 import src.data
-import src.error
+from src.error import AccessError, InputError
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
     return {
