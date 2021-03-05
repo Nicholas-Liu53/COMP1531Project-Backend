@@ -26,8 +26,8 @@ users = [
         'first_name': None,
         'last_name': None,
         'email': None,
-        'handle_str': None,
-        'password': None
+        'password': None,
+        'handle_string': None
     }
 ]
 
