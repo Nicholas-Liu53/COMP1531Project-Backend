@@ -19,24 +19,29 @@ channels (list):
         owner members (list of user_id's)
         all members (list of user_id's)
 '''
-
+#* Like so
+"""
 users = [
     {
-        'user_id': None,
-        'first_name': None,
-        'last_name': None,
-        'email': None,
-        'password': None,
-        'handle_string': None,
+        'user_id': ____,
+        'first_name': ____,
+        'last_name': ____,
+        'email': ____,
+        'password': ____,
+        'handle_string': ____,
     }
 ]
 
 channels = [
     {
-        'channel_id': 1,
-        'is_public': None,
-        'channel_name': None,
+        'channel_id': ____,
+        'is_public': ____,
+        'channel_name': ____,
         'owner_members': [],
         'all_members': [],
     }
 ]
+"""
+
+user = []
+channels = []

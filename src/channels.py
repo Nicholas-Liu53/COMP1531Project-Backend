@@ -38,7 +38,7 @@ def channels_create_v1(auth_user_id, name, is_public):
         if j >= len(src.data.users):
             # If user doesn't exist in database, inputError
             raise InputError
-        elif src.data.users[j]['user_id']:
+        elif src.data.users[j]['user_id'] == auth_user_id:
             userFound = True
         j += 1
 
