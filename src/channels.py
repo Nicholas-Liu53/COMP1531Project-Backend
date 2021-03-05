@@ -1,5 +1,5 @@
 import src.data
-# import error
+import src.error
 
 def channels_list_v1(auth_user_id):
     return {
@@ -29,11 +29,11 @@ def channels_create_v1(auth_user_id, name, is_public):
 
     # Identify the new channel ID
     # Which is an increment of the most recent channel id
-    newID = data.channels[len(data.channels) - 1]['channel_id'] + 1
+    newID = src.data.channels[len(src.data.channels) - 1]['channel_id'] + 1
     
     # Add this new channel into the channels data list
     # The only member is the auth user that created this channel
-    data.channels.append(
+    src.data.channels.append(
         {
             'channel_id': newID,
             'is_public': is_public,

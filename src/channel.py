@@ -1,4 +1,5 @@
 import src.data
+import src.error
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
     return {
@@ -48,22 +49,22 @@ def channel_join_v1(auth_user_id, channel_id):
 
     # Loop throug channel data base until channel is found
     while not channelFound:
-        if i >= len(data.channels):
+        if i >= len(src.data.channels):
             # If channel doesn't exist in database, inputError
             raise InputError
-        elif data.channels[i]['channel_id'] == channel_id:
+        elif src.data.channels[i]['channel_id'] == channel_id:
             # If channel is found
             channelFound = True
         i += 1
 
     i =- 1      # Undo extra increment
 
-    if data.channels[i]['is_public'] == True:
+    if src.data.channels[i]['is_public'] == True:
         # If channel is private, AccessError
         raise AccessError
 
     # Time to add the user into the channel
-    data.channels[i]['all_members'].append(auth_user_id)
+    src.data.channels[i]['all_members'].append(auth_user_id)
 
     # Done, return empty list 
     return {

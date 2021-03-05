@@ -33,7 +33,7 @@ users = [
 
 channels = [
     {
-        'channel_id': None,
+        'channel_id': 1,
         'is_public': None,
         'channel_name': None,
         'owner_members': [],
