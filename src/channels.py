@@ -11,10 +11,7 @@ lName   = 'name_last'
 
 def channels_list_v1(auth_user_id):
     # First, check if auth_user-id is a valid user_id
-    try:
-        check_auth_user_id(auth_user_id)
-    except AccessError:
-        print("Access error, please try again")
+    check_auth_user_id(auth_user_id)
     
     output = []
     # Find channels that user is part of and add them to the output list
@@ -50,7 +47,6 @@ def channels_create_v1(auth_user_id, name, is_public):
 # Function that checks if auth_user_id is valid
 def check_auth_user_id(auth_user_id):
     
-    uID = 'user_id'
     for d in src.data.users:
         if auth_user_id == d[uID]:
             return
