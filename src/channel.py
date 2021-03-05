@@ -1,9 +1,9 @@
-import data
-from error import InputError, AccessError
+import src.data
+from src.error import InputError, AccessError
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
     #check if channel_id is valid
-    for check in data.channels:
+    for check in src.data.channels:
         passed = False
         if check["channel_id"] == channel_id:
             passed = True
@@ -13,7 +13,7 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
 
     # check if user is authorised to invite
 
-    for chans in data.channels:
+    for chans in src.data.channels:
         userAuth = False
         if chans["channel_id"] == channel_id:
             for users in chans["all_members"]:
@@ -25,14 +25,14 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
                     
     # should check for auth_user_id in channel info first for owners
     inviteUser = {}
-    for user in data.users:
+    for user in src.data.users:
         if user["user_id"] == u_id: # finds desired u_id
             inviteUser == user.copy()
     if inviteUser == {}:
         raise InputError
     
     # now searches for channel_id
-    for chan in data.channels:
+    for chan in src.data.channels:
         if chan["channel_id"] == channel_id:
             # no duplicates
             chan["all_members"].append(inviteUser) if inviteUser not in chan["all_members"] else None
