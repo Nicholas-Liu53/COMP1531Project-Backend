@@ -1,5 +1,5 @@
 import src.data
-import error
+# import error
 
 def channels_list_v1(auth_user_id):
     return {
@@ -35,11 +35,11 @@ def channels_create_v1(auth_user_id, name, is_public):
     # The only member is the auth user that created this channel
     data.channels.append(
         {
-            'channel_id': newID
-            'is_public': is_public
-            'channel_name': name
-            'owner_member': [auth_user_id]
-            'all_members': [auth_user_id]
+            'channel_id': newID,
+            'is_public': is_public,
+            'channel_name': name,
+            'owner_member': [auth_user_id],
+            'all_members': [auth_user_id],
         }
     )
 

@@ -26,16 +26,17 @@ users = [
         'first_name': None,
         'last_name': None,
         'email': None,
-        'password': None
+        'password': None,
+        'handle_string': None,
     }
 ]
 
 channels = [
     {
         'channel_id': None,
-        'is_public': None
+        'is_public': None,
         'channel_name': None,
         'owner_members': [],
-        'all_members': []
+        'all_members': [],
     }
 ]
