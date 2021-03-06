@@ -1,8 +1,9 @@
 # File to test functions in src/auth.py
 from src.error import AccessError, InputError
 import pytest
-from src.auth import auth_login_v1, auth_register_v1, clear_v1
+from src.auth import auth_login_v1, auth_register_v1
 import src.channel, src.channels
+from src.other import clear_v1
 
 def test_auth_login_valid():
     clear_v1()

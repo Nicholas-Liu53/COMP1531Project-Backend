@@ -36,7 +36,6 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
         if chan["channel_id"] == channel_id:
             # no duplicates
             chan["all_members"].append(inviteUser) if inviteUser not in chan["all_members"] else None
-            # print(chan)
     return {   
     }
 
@@ -65,7 +64,6 @@ def channel_details_v1(auth_user_id, channel_id):
     for details in src.data.channels:
         if details["channel_id"] == channel_id:
             # filteres the information to be displayed
-
             filteredDetails = dict((item, details[item]) for item in ["channel_name"] if item in details)
 
             # takes only user_id, first and last name
@@ -75,6 +73,8 @@ def channel_details_v1(auth_user_id, channel_id):
                 filteredOwner.update(dict((key,value) for key, value in user.items() if key == "user_id"))
                 filteredOwner.update(dict((key,value) for key, value in user.items() if key == "name_first"))
                 filteredOwner.update(dict((key,value) for key, value in user.items() if key == "name_last"))
+                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "email"))
+                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "handle_string"))
                 ownmem.append(filteredOwner)
             dictAllOwn = {"owner_members": ownmem}
             filteredDetails.update(dictAllOwn)
@@ -85,6 +85,8 @@ def channel_details_v1(auth_user_id, channel_id):
                 filteredUser.update(dict((key,value) for key, value in user.items() if key == "user_id"))
                 filteredUser.update(dict((key,value) for key, value in user.items() if key == "name_first"))
                 filteredUser.update(dict((key,value) for key, value in user.items() if key == "name_last"))
+                filteredUser.update(dict((key,value) for key, value in user.items() if key == "email"))
+                filteredUser.update(dict((key,value) for key, value in user.items() if key == "handle_string"))
                 allmem.append(filteredUser)
             dictAllMem = {"all_members" : allmem}
             filteredDetails.update(dictAllMem)
@@ -137,7 +139,7 @@ def channel_join_v1(auth_user_id, channel_id):
         if j >= len(src.data.users):
             # If user doesn't exist in database, AccessError
             raise AccessError
-        elif src.data.users[j]['user_id']:
+        elif src.data.users[j]['user_id'] == auth_user_id:
             userFound = True
         j += 1
 

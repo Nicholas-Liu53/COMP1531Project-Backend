@@ -14,8 +14,10 @@ fName   = 'name_first'
 lName   = 'name_last'
 
 def test_channel_invite():
+    #* Ensure database is empty
     #! Clearing data
     src.other.clear_v1()
+
     #* Create user and channel for user to be invited
     #* Users
     userID1 = src.auth.auth_register_v1("testing1@gmail.com", "Monkey", "Vincent", "Le")
@@ -25,8 +27,13 @@ def test_channel_invite():
 
     #* Test 1: Does userID2 get successfully invited to channel "Coolkids"
     channel_invite_v1(userID1[AuID], privateChannel[cID], userID2[AuID])
-    print(channel_details_v1(userID1[AuID], privateChannel[cID]))
-    assert {uID: userID2[AuID], fName: 'Darius', lName: 'Kuan'} in channel_details_v1(userID1[AuID], privateChannel[cID])[allMems]
+    assert {
+        uID: userID2[AuID], 
+        fName: 'Darius', 
+        lName: 'Kuan', 
+        'email': "testing2@gmail.com", 
+        'handle_string': "dariuskuan"
+    } in channel_details_v1(userID1[AuID], privateChannel[cID])[allMems]
     
     #* Test 2: is InputError raised when cID does not refer to valid channel
     with pytest.raises(InputError) as e:
@@ -37,36 +44,56 @@ def test_channel_invite():
         channel_invite_v1(userID1[AuID], "ThischannelIDdoesNotExist", "DoesntExist")
     
     #* Test 4: is AccessError raised when auth_uID is not already a member of the channel
-    userID3 = src.auth.auth_register_v1("imposter@gmail.com", "g2g2g", "Among", "Us")
+    userID3 = src.auth.auth_register_v1("imposter@gmail.com", "g2g2gkden", "Among", "Us")
     with pytest.raises(AccessError) as e:
         channel_invite_v1(userID3[AuID], privateChannel[cID], userID2[AuID])
 
-    pass
+    #* Finished testing for this function
+    #! Clearing data
+    src.other.clear_v1()
+
 
 def test_channel_details():
-    '''auth_uID, cID'''
+    #* Ensure database is empty
+    #! Clearing data
+    src.other.clear_v1()
+    
+    # Creating users and channels
     userID1 = src.auth.auth_register_v1("testing4@gmail.com", "Monkey1", "Vincentd", "Lee")
     userID2 = src.auth.auth_register_v1("testing3@gmail.com", "jonkey1", "Imposterd", "Kuand")
     realChannel = src.channels.channels_create_v1(userID1[AuID], 'ChannelINFO', True)
 
     #* Test 1: Using the authorised user, does the channel details get presented for one user in channel
-    assert channel_details_v1(userID1[AuID], realChannel[cID]) == { 'channel_name' : "ChannelINFO", 'owner_members': [ {
-        'user_id' : userID1[uID], 
-        'first_name': "Vincent",
-        'last_name': 'Le',
-        'email': 'testing1@gmail.com'
-    }] }
+    
+    assert channel_details_v1(userID1[AuID], realChannel[cID]) == {
+        'channel_name': "ChannelINFO", 
+        'owner_members':[{
+            'user_id': userID1[AuID], 
+            'name_first': "Vincentd",
+            'name_last': 'Lee',
+            'email': 'testing4@gmail.com',
+            'handle_string': 'vincentdlee',
+        }],
+        'all_members':[{
+            'user_id': userID1[AuID], 
+            'name_first': "Vincentd",
+            'name_last': 'Lee',
+            'email': 'testing4@gmail.com',
+            'handle_string': 'vincentdlee',
+        }]
+    }
     
     #* Test 2: Is InputError raised when Channel ID is not a valid channel
-    with pytest.raises(AccessError) as e:
+    with pytest.raises(InputError) as e:
         channel_details_v1(userID1[AuID], 'InvalidID')
 
     #* Test 3: Is AccessError raised when the user is not membber of channel with the channel id
     with pytest.raises(AccessError) as e:
         channel_details_v1(userID2[AuID], realChannel[cID])
     
-
-    pass
+    #* Finished testing for this function
+    #! Clearing data
+    src.other.clear_v1()
 
 def test_channel_messages():
     pass
@@ -92,17 +119,23 @@ def test_channel_join():
 
     #* Test 1: If userID3 successfully joins public channel 'TrumpPence'
     channel_join_v1(userID3[AuID], firstChannel[cID])
-    assert {uID: userID3[AuID], fName: 'T', lName: "C"} in channel_details_v1(userID3[AuID], firstChannel[cID])[allMems]
+    assert {
+        uID: userID3[AuID],
+        fName: 'T',
+        lName: "C",
+        'email': "zodiac@gmail.com",
+        'handle_string': "tc",
+    } in channel_details_v1(userID3[AuID], firstChannel[cID])[allMems]
 
     #* Test 2: If userID4 unsuccessfully joins private channel 'BidenHarris'
     with pytest.raises(AccessError): 
         # Check if AccessError is raised when trying to join a private channel
-        channel_join_v1(userID4[AuID], firstChannel[cID])
-    assert {uID: userID4[AuID], fName: 'A', lName: "O"} not in channel_details_v1(userID4[AuID], secondChannel[cID])[allMems]
+        channel_join_v1(userID4[AuID], secondChannel[cID])
 
     #* Test 3: userID3 and userID4 aren't in channels they haven't joined 
-    assert {uID: userID3[AuID], fName: 'T', lName: "C"} not in channel_details_v1(userID3[AuID], secondChannel[cID])[allMems]
-    assert {uID: userID4[AuID], fName: 'A', lName: "O"} not in channel_details_v1(userID4[AuID], firstChannel[cID])[allMems]
+    with pytest.raises(AccessError):
+        channel_details_v1(userID3[AuID], secondChannel[cID])[allMems]
+        channel_details_v1(userID4[AuID], firstChannel[cID])[allMems]
 
     #* Test 4: Check if InputError is raised when channel does not exist
     #! Clearing data
