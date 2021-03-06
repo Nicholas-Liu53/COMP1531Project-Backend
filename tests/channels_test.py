@@ -2,10 +2,7 @@
 
 import pytest
 from src.channels import channels_list_v1, channels_listall_v1, channels_create_v1
-<<<<<<< HEAD
 from src.error import AccessError, InputError
-=======
->>>>>>> liu/project-backend
 import src.auth, src.channel, src.other
 
 AuID    = 'auth_user_id'
