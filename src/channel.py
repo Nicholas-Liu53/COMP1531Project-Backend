@@ -42,27 +42,53 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
 
 
 def channel_details_v1(auth_user_id, channel_id):
-    return {
-        'name': 'Hayden',
-        'owner_members': [
-            {
-                'u_id': 1,
-                'email': 'email@gmail.com',
-                'name_first': 'Hayden',
-                'name_last': 'Jacobs',
-                'handle_str': 'haydenjacobs'
-            }
-        ],
-        'all_members': [
-            {
-                'u_id': 1,
-                'email': 'email@gmail.com',
-                'name_first': 'Hayden',
-                'name_last': 'Jacobs',
-                'handle_str': 'haydenjacobs'
-            }
-        ],
-    }
+    # check for valid channel
+    for check in src.data.channels:
+        passed = False
+        if check["channel_id"] == channel_id:
+            passed = True
+            break
+    if passed == False:
+        raise InputError
+
+    # check if user is authorised for channel
+    for chans in src.data.channels:
+        userAuth = False
+        if chans["channel_id"] == channel_id:
+            for users in chans["all_members"]:
+                if users['user_id'] == auth_user_id:
+                    userAuth = True
+                    break
+            if userAuth == False:
+                raise AccessError
+    for details in src.data.channels:
+        if details["channel_id"] == channel_id:
+            # filteres the information to be displayed
+
+            filteredDetails = dict((item, details[item]) for item in ["channel_name"] if item in details)
+
+            # takes only user_id, first and last name
+            ownmem = []
+            for user in details["owner_members"]:
+                filteredOwner = {}
+                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "user_id"))
+                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "first_name"))
+                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "last_name"))
+                ownmem.append(filteredOwner)
+            dictAllOwn = {"owner_members": ownmem}
+            filteredDetails.update(dictAllOwn)
+
+            allmem = []
+            for user in details["all_members"]:
+                filteredUser = {}
+                filteredUser.update(dict((key,value) for key, value in user.items() if key == "user_id"))
+                filteredUser.update(dict((key,value) for key, value in user.items() if key == "first_name"))
+                filteredUser.update(dict((key,value) for key, value in user.items() if key == "last_name"))
+                allmem.append(filteredUser)
+            dictAllMem = {"all_members" : allmem}
+            filteredDetails.update(dictAllMem)
+
+    return filteredDetails
 
 def channel_messages_v1(auth_user_id, channel_id, start):
     return {
