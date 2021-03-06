@@ -1,54 +1,27 @@
 import src.data
+from src.error import AccessError, InputError
 
-def channel_invite_v1(auth_user_id, channel_id, u_id):
+def channels_list_v1(auth_user_id):
     return {
-    }
-
-def channel_details_v1(auth_user_id, channel_id):
-    return {
-        'name': 'Hayden',
-        'owner_members': [
+        'channels': [
             {
-                'u_id': 1,
-                'name_first': 'Hayden',
-                'name_last': 'Jacobs',
-            }
-        ],
-        'all_members': [
-            {
-                'u_id': 1,
-                'name_first': 'Hayden',
-                'name_last': 'Jacobs',
+                'channel_id': 1,
+                'name': 'My Channel',
             }
         ],
     }
 
-def channel_messages_v1(auth_user_id, channel_id, start):
+def channels_listall_v1(auth_user_id):
     return {
-        'messages': [
+        'channels': [
             {
-                'message_id': 1,
-                'u_id': 1,
-                'message': 'Hello world',
-                'time_created': 1582426789,
+                'channel_id': 1,
+                'name': 'My Channel',
             }
         ],
-        'start': 0,
-        'end': 50,
     }
 
-def channel_leave_v1(auth_user_id, channel_id):
+def channels_create_v1(auth_user_id, name, is_public):
     return {
-    }
-
-def channel_join_v1(auth_user_id, channel_id):
-    return {
-    }
-
-def channel_addowner_v1(auth_user_id, channel_id, u_id):
-    return {
-    }
-
-def channel_removeowner_v1(auth_user_id, channel_id, u_id):
-    return {
+        'channel_id': 1,
     }

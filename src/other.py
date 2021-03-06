@@ -1,3 +1,5 @@
+import src.data
+
 def clear_v1():
     pass
 
