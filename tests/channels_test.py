@@ -21,13 +21,13 @@ def test_channels_list():
 
     # Setup users and create shorthand for strings for testing code
     userID1 = src.auth.auth_register_v1("first@gmail.com", "password", "D", "C")
-
+    userID2 = src.auth.auth_register_v1("second@gmail.com", "password", "L", "M")
 
     # Test 2: When calling the function with a valid auth_user_id, only the channels that user has joined should appear
-    firstChannel = channels_create_v1(userID1[AuID], 'Marmclearot', True)
-    assert channels_list_v1(userID1[AuID]) == {'channels': []}
-    src.channel.channel_join_v1(userID1[AuID], firstChannel[cID])
-    assert channels_list_v1(userID1[AuID]) == {'channels': [{cID: firstChannel[cID], cName: 'Marmot'}]}
+    firstChannel = channels_create_v1(userID1[AuID], 'Marmot', True)
+    assert channels_list_v1(userID2[AuID]) == {'channels': []}
+    src.channel.channel_join_v1(userID2[AuID], firstChannel[cID])
+    assert channels_list_v1(userID2[AuID]) == {'channels': [{cID: firstChannel[cID], cName: 'Marmot'}]}
 
 def test_channels_listall():
     # Test 1: When calling the function with an invalid auth_user_id should raise an AccessError
