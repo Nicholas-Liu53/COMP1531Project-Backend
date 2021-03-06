@@ -76,7 +76,7 @@ def channels_create_v1(auth_user_id, name, is_public):
             'channel_id': newID,
             'is_public': is_public,
             'channel_name': name,
-            'owner_member': [src.data.users[j]],
+            'owner_members': [src.data.users[j]],
             'all_members': [src.data.users[j]],
         }
     )

@@ -9,6 +9,7 @@ users (list):
         first_name
         last_name
         email
+        handle_str
         password
 
 channels (list):
@@ -24,8 +25,8 @@ users = [
     {
         '''
         'user_id': ____,
-        'first_name': ____,
-        'last_name': ____,
+        'name_first': ____,
+        'name_last': ____,
         'email': ____,
         'password': ____,
         'handle_string': ____,
