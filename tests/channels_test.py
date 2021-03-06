@@ -3,6 +3,7 @@
 import pytest
 from src.channels import channels_list_v1, channels_listall_v1, channels_create_v1
 import src.auth, src.channel, src.other
+from src.error import AccessError, InputError
 
 AuID    = 'auth_user_id'
 uID     = 'user_id'
@@ -28,23 +29,27 @@ def test_channels_create():
     userID1 = src.auth.auth_register_v1("ayelmao@gmail.com", "Bl00dO4th", "C", "L")
     userID2 = src.auth.auth_register_v1("lolrofl@gmail.com", "pr3ttynAme", "S", "S")
 
-    # Test 1: Newly created public channel by userID1 appears in both of his channel list
+    #* Test 1: Newly created public channel by userID1 appears in both of his channel list
     firstChannel = channels_create_v1(userID1[AuID], 'Oogway', True)
     assert {cID: firstChannel[cID], cName: 'Oogway'} in channels_list_v1(userID1[AuID])[chans]
     assert {cID: firstChannel[cID], cName: 'Oogway'} in channels_listall_v1(userID1[AuID])[chans]
 
-    # Test 2: Make sure this channel doesn't appear in userID2's channel list, but does in listall
+    #* Test 2: Make sure this channel doesn't appear in userID2's channel list, but does in listall
     assert {cID: firstChannel[cID], cName: 'Oogway'} not in channels_list_v1(userID2[AuID])[chans]
     assert {cID: firstChannel[cID], cName: 'Oogway'} in channels_listall_v1(userID2[AuID])[chans]
 
-    # Test 3: Newly created private channel by userID2 appears in his channel list
+    #* Test 3: Newly created private channel by userID2 appears in his channel list
     secondChannel = channels_create_v1(userID2[AuID], 'Yayot', False)
     assert {cID: secondChannel[cID], cName: 'Yayot'} in channels_list_v1(userID2[AuID])[chans]
     assert {cID: secondChannel[cID], cName: 'Yayot'} in channels_listall_v1(userID2[AuID])[chans]
 
-    # Test 4: Make sure this channel doesn't appear in of userID1's channel lists
+    #* Test 4: Make sure this channel doesn't appear in of userID1's channel lists
     assert {cID: secondChannel[cID], cName: 'Yayot'} not in channels_list_v1(userID1[AuID])[chans]
     assert {cID: secondChannel[cID], cName: 'Yayot'} in channels_listall_v1(userID1[AuID])[chans]
+
+    #* Test 5: InputError is raised when the channel name is more than 20 chars
+    with pytest.raises(InputError):
+        channels_create_v1(userID1[AuID], 'abcdefghijklmnopqrstuvwxyz', True)
 
     #* Finished testing for this function
     #! Clearing data
