@@ -22,14 +22,6 @@ channels (list):
 
 users = [
     {
-<<<<<<< HEAD
-        'user_id': None,
-        'first_name': None,
-        'last_name': None,
-        'email': None,
-        'password': None,
-        'handle_string': None
-=======
         '''
         'user_id': ____,
         'first_name': ____,
@@ -38,7 +30,6 @@ users = [
         'password': ____,
         'handle_string': ____,
         '''
->>>>>>> lam
     }
 ]
 
