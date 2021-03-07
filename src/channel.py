@@ -131,6 +131,24 @@ def channel_details_v1(auth_user_id, channel_id):
     return filteredDetails
 
 def channel_messages_v1(auth_user_id, channel_id, start):
+
+    '''
+    channel_messages_v1 returns up to 50 messages within a specified channel.
+    
+    Arguments:
+        auth_user_id (int) - The id of the user that is calling the channel details. Must be present within that channel's "all_members".
+        channel_id (int) - The id of the desired channel which we want details of.
+        start(int) - The index of the message that they wish to start returning from.
+    
+    Exceptions:
+        InputError - Occurs when channel_id is not valid or start is greater than total number of messages in channel.
+        AccessError - Occurs when authorised user is not a member of channel with channel_id.
+    
+    Return Value:
+        Returns up to 50 messages alongside a start and and end value.
+    '''
+
+
     #ASSUMPTION: MESSAGES IS A LIST containing all the messages in channel 
     
     #Handling of input and access errors 
