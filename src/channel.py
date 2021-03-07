@@ -1,7 +1,5 @@
 import src.data
 from src.error import AccessError, InputError
-
-from src.error import AccessError, InputError
 from src.channels import channels_listall_v1, channels_list_v1
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
@@ -102,17 +100,29 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     #Handling of input and access errors 
     #Input error: Channel ID is not a valid channel 
     #This is the case
-    if channel_id not in src.channels.channels_listall_v1(auth_user_id):
-        return InputError
+    channelFound = False 
+    for channel in src.channels.channels_listall_v1(auth_user_id)["channels"]:
+        if channel_id == channel["channel_id"]:
+            channelFound = True
     
+    if not channelFound:
+        raise InputError
+
+           
     #Input error: Start is greater than total number of messages in list 
-    if start > len(messages_log):
-        return InputError
+    if start > len(src.data.messages_log):
+        raise InputError
     
     #Access error: When auth_user_id is not a member of channel with channel_id 
-    if channel_id not in src.channls.channels_list_v1(auth_user_id):
-        return AccessError
+    userFound = False 
+    for channel in src.channels.channels_list_v1(auth_user_id)["channels"]:
+        if channel_id == channel["channel_id"]:
+            userFound = True
+    
+    if not userFound:
+        raise AccessError
 
+    
     #First, find how many messages there are in channel after start 
     #Create new list for this so that index 0 is oldest message and 50 will be start index 
     messagesList = []
@@ -121,11 +131,16 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     #and index 50 will be the message at 'start'
     #want to count back from 50 to message with index 'start-49' or until 50 messages have been counted out
     counter = start + 50
+
+    if len(src.data.messages_log) < counter: 
+        counter = len(src.data.messages_log) - 1 
+    
     while (counter > -1 and counter > start): 
-        currentMessage = messages_log[counter]
+        print(counter)
+        currentMessage = src.data.messages_log[counter]
         insert.messagesList(currentMessage)
         counter -= 1    
-
+    
     #Now our correct messages are in list messagesList from oldest to newest order     
     #Case 1: Less than 50 messages 
     #Returns -1 as end
