@@ -128,8 +128,8 @@ def check_auth_user_id(auth_user_id):
     """
     for d in src.data.users:
         try:
-        if auth_user_id == d[uID]:
-            return
+            if auth_user_id == d[uID]:
+                return
         except Exception:
             pass
     raise AccessError
