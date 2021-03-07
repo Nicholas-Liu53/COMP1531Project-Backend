@@ -42,7 +42,7 @@ channels = [
         'channel_name': ____,
         'owner_members': [],
         'all_members': [],
-        'messages': [
+        'messages_log': [
             {
                 'time_stamp': _____,
                 'handle_string': _____,
