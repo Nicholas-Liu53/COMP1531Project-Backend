@@ -44,8 +44,9 @@ channels = [
         'all_members': [],
         'messages_log': [
             {
-                'time_stamp': _____,
-                'handle_string': _____,
+                'time_created': _____,
+                'user_id': _____,
+                'message_id': ______,
                 'message_string': _______,
             },
         ]
