@@ -38,7 +38,7 @@ channels = [
     }
 ]
 
-messages [ 
+messages = [ 
     {
         'message_id': None,
         'u_id': None,
