@@ -7,21 +7,21 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     '''
     channel_invite_v1 checks if a user is authorised to invite another user to a channel and then automatically adds the
     desired user to the specific channel dictionary within the list contained in "all_members".
- 
+
     Arguments:
         auth_user_id (int) - The integer id of a user within both the user list and channel "all_members" calling the function to invite another user
         channel_id (int) - The integer id of the channel that we want to invite a user to. Should be present in the channels list.
         u_id (int) - The integer id of a user that the authorised user wants to invite to that specific channel.
-  
+
     Exceptions:
         InputError - Occurs when the channel_id used as a parameter does not already exist in the channels list.
         InputError - Occurs when the u_id or id of the user that we are trying to invite does not already exist within the users list.
         AccessError - Occurs when the user calling the function is not authorised as a member of that channel, meaning the id is not present in "all_members" within channel dictioanry.
- 
+
     Return Value:
         Returns an empty list on passing all Exceptions, with changes being made directly to our data.py  
     '''
- 
+
     #check if channel_id is valid
     for check in src.data.channels:
         passed = False
@@ -162,7 +162,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     if not channelFound:
         raise InputError
 
-           
+
     #Input error: Start is greater than total number of messages in list 
     if start > len(src.data.messages_log):
         raise InputError
@@ -239,6 +239,25 @@ def channel_leave_v1(auth_user_id, channel_id):
     }
 
 def channel_join_v1(auth_user_id, channel_id):
+    '''
+    Takes in a user's id and a channel's id and adds that user to that given channel.
+        --> Specifically adds it to the 'all_members' list in the channel dictionary 
+    If the channel is private then the user isn't added. (See more in Exceptions)
+
+    Arguments:
+        auth_user_id (int) - The id of the user that wants to join the channel
+        channel_id   (int) - The id of the channel that the user wants to join
+
+    Exceptions:
+        InputError - Occurs when the channel_id inputted does not belong to any channel that exists in the database
+        AccessError - Occurs when 
+                            1) the channel that the user is trying to join is private
+                            2) The auth_user_id inputted does not belong to any user
+
+    Return Value:
+        Returns an empty list regardless of conditions :)
+    '''
+
     # Find the channel in the database
     channelFound = False
     i = 0
