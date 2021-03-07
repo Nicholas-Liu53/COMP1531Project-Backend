@@ -9,6 +9,7 @@ users (list):
         first_name
         last_name
         email
+        handle_str
         password
 
 channels (list):
@@ -18,14 +19,21 @@ channels (list):
         channel_name
         owner members (list of user_id's)
         all members (list of user_id's)
-'''
 
+
+messages (list):
+    each element of list is a message containing:
+    message_id
+    u_id
+    message
+    time_created
+'''
 users = [
     {
         '''
         'user_id': ____,
-        'first_name': ____,
-        'last_name': ____,
+        'name_first': ____,
+        'name_last': ____,
         'email': ____,
         'password': ____,
         'handle_string': ____,
@@ -43,4 +51,16 @@ channels = [
         'all_members': [],
         '''
     }
+]
+
+messages_log = [
+    {
+        '''
+        'channel_id': _____,
+        'time_created': _____,
+        'user_id': _____,
+        'message_id': ______,
+        'message_string': _______,
+        '''
+    },
 ]

@@ -73,8 +73,44 @@ def channels_listall_v1(auth_user_id):
     }
 
 def channels_create_v1(auth_user_id, name, is_public):
+    # Ensure an InputError when the channel name is 
+    # more than 20 characters long
+    if len(name) > 20:
+        raise InputError
+
+    # Time to find the user details
+    userFound = False
+    j = 0
+    while not userFound:
+        if j >= len(src.data.users):
+            # If user doesn't exist in database, AccessError
+            raise AccessError
+        elif src.data.users[j][uID] == auth_user_id:
+            userFound = True
+        j += 1
+
+    j -= 1      # Undo extra increment
+
+    # Identify the new channel ID
+    # Which is an increment of the most recent channel id
+    newID = len(src.data.channels)
+
+
+    # Add this new channel into the channels data list
+    # The only member is the auth user that created this channel
+    src.data.channels.append(
+        {
+            'channel_id': newID,
+            'is_public': is_public,
+            'channel_name': name,
+            'owner_members': [src.data.users[j]],
+            'all_members': [src.data.users[j]],
+        }
+    )
+
+    # Return a dictionary containing the new channel ID 
     return {
-        'channel_id': 1,
+        'channel_id': newID,
     }
 
 # Function that checks if auth_user_id is valid

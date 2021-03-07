@@ -2,9 +2,6 @@ import src.data
 from src.error import AccessError, InputError
 import re
 
-def clear_v1():
-    src.data.users = []
-
 def auth_login_v1(email, password):
     for user in src.data.users:
         if email == user['email'] and password == user['password']:
@@ -16,6 +13,11 @@ def auth_login_v1(email, password):
 
 
 def auth_register_v1(email, password, name_first, name_last):
+    #* Storing name_first & name_list so original names 
+    #* unaffected by handle generation
+    nameF = name_first
+    nameL = name_last
+
     # setting all characters to lowercase
     name_first = name_first.lower()
     name_last = name_last.lower()
@@ -49,7 +51,7 @@ def auth_register_v1(email, password, name_first, name_last):
     if len(name_first) < 1 or len(name_first) > 50:
         raise InputError
 
-     # checking if last_name ranges between 1 - 50
+    # checking if last_name ranges between 1 - 50
     if len(name_last) < 1 or len(name_last) > 50:
         raise InputError
 
@@ -80,11 +82,13 @@ def auth_register_v1(email, password, name_first, name_last):
     src.data.users.append({
         'email' : email,
         'password' : password,
-        'name_first' : name_first,
-        'name_last' : name_last,
+        'name_first' : nameF,
+        'name_last' : nameL,
         'user_id' : user_id,
         'handle_string' : handle_string,
     })
     return {
         'auth_user_id': user_id,
     }
+    
+    
