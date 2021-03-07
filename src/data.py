@@ -42,6 +42,11 @@ channels = [
         'channel_name': ____,
         'owner_members': [],
         'all_members': [],
+        'messages': {
+            'time_stamp': _____,
+            'handle_string': _____,
+            'message': _______,
+        },
         '''
     }
 ]
