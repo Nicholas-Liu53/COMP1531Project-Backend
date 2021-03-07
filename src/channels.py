@@ -126,10 +126,7 @@ def check_auth_user_id(auth_user_id):
     Return Value:
         AccessError is raised when the function cannot find a user with a matching user_id
     """
-    for d in src.data.users:
-        try:
-            if auth_user_id == d[uID]:
-                return
-        except Exception:
-            pass
+    for user in src.data.users:
+        if auth_user_id == user[uID]:
+            return
     raise AccessError
