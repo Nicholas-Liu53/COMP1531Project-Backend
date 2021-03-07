@@ -2,27 +2,6 @@ import src.data
 from src.error import AccessError, InputError
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
-
-    '''
-    channel_invite_v1 checks if a user is authorised to invite another user to a channel and then automatically adds the 
-    desired user to the specific channel dictionary within the list contained in "all_members".
-
-    Arguments:
-        auth_user_id (int) - The integer id of a user within both the user list and channel "all_members" calling the function to invite another user
-        channel_id (int) - The integer id of the channel that we want to invite a user to. Should be present in the channels list.
-        u_id (int) - The integer id of a user that the authorised user wants to invite to that specific channel.
-    
-    Exceptions:
-        InputError - Occurs when the channel_id used as a parameter does not already exist in the channels list.
-        InputError - Occurs when the u_id or id of the user that we are trying to invite does not already exist within the users list.
-        AccessError - Occurs when the user calling the function is not authorised as a member of that channel, meaning the id is not present in "all_members" within channel dictioanry.
-
-    Return Value:
-        Returns an empty list on passing all Exceptions, with changes being made directly to our data.py   
-    '''
-
-   
-
     #check if channel_id is valid
     for check in src.data.channels:
         passed = False
@@ -33,6 +12,7 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
         raise InputError
 
     # check if user is authorised to invite
+
     for chans in src.data.channels:
         userAuth = False
         if chans["channel_id"] == channel_id:
@@ -54,7 +34,7 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     # now searches for channel_id
     for chan in src.data.channels:
         if chan["channel_id"] == channel_id:
-            # ensure no duplicates
+            # no duplicates
             chan["all_members"].append(inviteUser) if inviteUser not in chan["all_members"] else None
     return {   
     }
@@ -62,23 +42,6 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
 
 
 def channel_details_v1(auth_user_id, channel_id):
-
-    '''
-    channel_details_v1 calls upon a new copy of the desired channel dictionary that only contains filtered keys and values that is public.
-    Does not include private information such as password.
-
-    Arguments:
-        auth_user_id (int) - The id of the user that is calling the channel details. Must be present within that channel's "all_members"
-        channel_id (int) - The id of the desired channel which we want details of.
-    
-    Exceptions:
-        InputError - Occurs when the channel_id used as a parameter does not already exist in the channels list.
-        AccessError - Occurs when the user calling the function is not authorised as a member of that channel, meaning the id is not present in "all_members" within channel dictioanry.
-    
-    Return Value:
-        Returns filteredDetails on succesfully creating a copy of the channel we want, with only the filtered information. The return is a dictionary.
-    '''
-
     # check for valid channel
     for check in src.data.channels:
         passed = False
@@ -103,7 +66,7 @@ def channel_details_v1(auth_user_id, channel_id):
             # filteres the information to be displayed
             filteredDetails = dict((item, details[item]) for item in ["channel_name"] if item in details)
 
-            # takes only user_id, first, last name, handle string and email. Excludes private information
+            # takes only user_id, first and last name
             ownmem = []
             for user in details["owner_members"]:
                 filteredOwner = {}
@@ -125,8 +88,6 @@ def channel_details_v1(auth_user_id, channel_id):
                 filteredUser.update(dict((key,value) for key, value in user.items() if key == "email"))
                 filteredUser.update(dict((key,value) for key, value in user.items() if key == "handle_string"))
                 allmem.append(filteredUser)
-            
-            # Updates the new dictionary to contain all neccesary information
             dictAllMem = {"all_members" : allmem}
             filteredDetails.update(dictAllMem)
 
