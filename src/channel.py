@@ -106,7 +106,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
         return InputError
     
     #Input error: Start is greater than total number of messages in list 
-    if start > len(messages):
+    if start > len(messages_log):
         return InputError
     
     #Access error: When auth_user_id is not a member of channel with channel_id 
@@ -122,7 +122,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     #want to count back from 50 to message with index 'start-49' or until 50 messages have been counted out
     counter = start + 50
     while (counter > -1 and counter > start): 
-        currentMessage = messages[counter]
+        currentMessage = messages_log[counter]
         insert.messagesList(currentMessage)
         counter -= 1    
 

@@ -103,8 +103,8 @@ def test_channel_details():
 def test_channel_messages():
 
     #Setup user_id
-    userID1 = src.auth.auth_register_v1("1531@gmail.com", "123", "Tom", "Zhang")
-    userID2 = src.auth.auth_register_v1("comp@gmail.com", "456", "Jack", "P")
+    userID1 = src.auth.auth_register_v1("1531@gmail.com", "123456", "Tom", "Zhang")
+    userID2 = src.auth.auth_register_v1("comp@gmail.com", "456789", "Jack", "P")
     
 
     #Create public channel by user_id 1
