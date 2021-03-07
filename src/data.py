@@ -19,8 +19,15 @@ channels (list):
         channel_name
         owner members (list of user_id's)
         all members (list of user_id's)
-'''
 
+
+messages (list):
+    each element of list is a message containing:
+    message_id
+    u_id
+    message
+    time_created
+'''
 users = [
     {
         '''
