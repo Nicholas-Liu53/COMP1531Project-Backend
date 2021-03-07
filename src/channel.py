@@ -91,7 +91,6 @@ def channel_messages_v1(auth_user_id, channel_id, start):
             }
         ],
         
-        #Change start 
         'start': 0,
         'end': 50,
     }
