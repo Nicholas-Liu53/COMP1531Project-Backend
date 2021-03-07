@@ -147,9 +147,6 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     Return Value:
         Returns up to 50 messages alongside a start and and end value.
     '''
-
-
-    #ASSUMPTION: MESSAGES IS A LIST containing all the messages in channel 
     
     #Handling of input and access errors 
     #Input error: Channel ID is not a valid channel 
@@ -190,7 +187,6 @@ def channel_messages_v1(auth_user_id, channel_id, start):
         counter = len(src.data.messages_log) - 1 
     
     while (counter > -1 and counter > start): 
-        print(counter)
         currentMessage = src.data.messages_log[counter]
         insert.messagesList(currentMessage)
         counter -= 1    
@@ -219,21 +215,6 @@ def channel_messages_v1(auth_user_id, channel_id, start):
         'end': endValue,
     }
 
-'''
-    return {
-        'messages': [
-            {
-                'message_id': 1,
-                'u_id': 1,
-                'message': 'Hello world',
-                'time_created': 1582426789,
-            }
-        ],
-        
-        'start': 0,
-        'end': 50,
-    }
-'''
 def channel_leave_v1(auth_user_id, channel_id):
     return {
     }
