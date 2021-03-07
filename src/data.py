@@ -37,3 +37,12 @@ channels = [
         'all_members': []
     }
 ]
+
+messages [ 
+    {
+        'message_id': None,
+        'u_id': None,
+        'message': [],
+        'time_created': [],
+    }
+]
