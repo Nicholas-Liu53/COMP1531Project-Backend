@@ -3,6 +3,22 @@ from src.error import AccessError, InputError
 import re
 
 def auth_login_v1(email, password):
+    """ Checks if inputted email is present within the registered users
+        If email is present, checks that the inputted password matches the password stored for 
+        that particular registered email. 
+
+        Arguments:
+            email (str): The email of the user
+            password (str): The password of the user
+
+        Exceptions:
+            InputError : occurs when the inputted email isn't present within the registered users
+            InputError : occurs when the inputted password does not match the password stored for that particular inputted email
+
+        Return Value:
+            Returns (dict) containing user_id corresponding to the inputted email and password 
+
+    """
     for user in src.data.users:
         if email == user['email'] and password == user['password']:
             return {
@@ -13,6 +29,28 @@ def auth_login_v1(email, password):
 
 
 def auth_register_v1(email, password, name_first, name_last):
+    """ With the inputted data (email, password, name_first, name_last), checks whether the format of the data are valid. 
+        If the data is valid, inserts (registers) the inputted information into a dictionary containing all users information
+        and appends that information onto the user data list. Also creates a formatted handlestring which consists of the users first and last name which has a maximum character length 
+        of 20 characters unless there are duplicates. 
+
+        Arguments:
+            email (str): The email of the user
+            password (str): The password of the user
+            name_first (str): The first name of the user
+            name_last (str): The last name of the user 
+
+        Exceptions:
+            InputError : occurs when the inputted email is not a valid email format
+            InputError : occurs when the inputted email has already been used to register another user
+            InputError : occurs when the inputted password has a length less than 6 characters
+            InputError : occurs when the inputted name_first has a length that does not range between 1 - 50 characters
+            InputError : occurs when the inputted name_first has a length that does not range between 1 - 50 characters
+
+        Return Value:
+            Returns (dict) containing user_id corresponding to the inputted email, password, name_first and name_last
+
+    """
     #* Storing name_first & name_list so original names 
     #* unaffected by handle generation
     nameF = name_first
