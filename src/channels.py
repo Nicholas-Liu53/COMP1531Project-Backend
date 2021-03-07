@@ -73,6 +73,24 @@ def channels_listall_v1(auth_user_id):
     }
 
 def channels_create_v1(auth_user_id, name, is_public):
+    '''
+    Creates a channel and adds the user into that channel as both an owner and member
+
+    Arguments:
+        auth_user_id (int)  - The int id of the user that wants to create a channel
+        name         (str)  - The name of the channel that the user wants to create, comes as one string
+        is_public    (bool) - The boolean value of whether this channel is to be public or private
+                                True  --> Channel is to be public
+                                False --> Channel is to be private
+
+    Exceptions:
+        InputError  - Occurs when the intended length of the channel name is too long (21 chars or greater)
+        AccessError - Occurs when the auth_user_id inputted does not belong to any user in the database
+
+    Return Value:
+        Returns a dictionary with the key being 'channel_id' and the value of the newly created channel's id
+    '''
+
     # Ensure an InputError when the channel name is 
     # more than 20 characters long
     if len(name) > 20:
