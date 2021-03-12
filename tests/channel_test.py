@@ -130,6 +130,11 @@ def test_channel_messages():
         channel_messages_v1(userID2[AuID], firstChannel[cID], 0)
 
         
+    with pytest.raises(AccessError):
+        #Test 3: returns access error when authorised user not a member of channel
+        channel_messages_v1(2, "Yggdrasil", 0)
+
+        
     #Test 4: if there are less than 50 messages, returns -1 in "end"
     assert channel_messages_v1(userID1[AuID], firstChannel[cID], 0)["end"] == -1
     
