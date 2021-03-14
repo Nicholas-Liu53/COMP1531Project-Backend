@@ -30,6 +30,7 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
             break
     if passed == False:
         raise InputError
+    
 
     # check if user is authorised to invite
     for chans in src.data.channels:

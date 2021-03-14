@@ -104,12 +104,12 @@ def test_channel_messages():
     #* Ensure database is empty
     #! Clearing data
     src.other.clear_v1()
-    #Setup user_id
+    #* Setup user_id
     userID1 = src.auth.auth_register_v1("1531@gmail.com", "123456", "Tom", "Zhang")
     userID2 = src.auth.auth_register_v1("comp@gmail.com", "456789", "Jack", "P")
     
 
-    #Create public channel by user_id 1
+    #* reate public channel by user_id 1
     firstChannel = channels_create_v1(userID1[AuID], 'Yggdrasil', True)
     
     '''
@@ -118,15 +118,15 @@ def test_channel_messages():
     '''
 
     with pytest.raises(InputError):
-        #Test 1: returns input error when start is greater than total number of 
-        # messages in channel
+        #* Test 1: returns input error when start is greater than total number of 
+        #* messages in channel
         channel_messages_v1(userID1[AuID], firstChannel[cID], 4)
         
-        #Test 2: Raises input error when channel_id is invalid 
+        #* Test 2: Raises input error when channel_id is invalid 
         channel_messages_v1(userID1[AuID], -1, 0) 
         
     with pytest.raises(AccessError):
-        #Test 3: returns access error when authorised user not a member of channel
+        #* Test 3: returns access error when authorised user not a member of channel
         channel_messages_v1(userID2[AuID], firstChannel[cID], 0)
 
         
