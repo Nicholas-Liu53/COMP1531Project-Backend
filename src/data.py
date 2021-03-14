@@ -29,38 +29,38 @@ messages (list):
     time_created
 '''
 users = [
+    '''
     {
-        '''
         'user_id': ____,
         'name_first': ____,
         'name_last': ____,
         'email': ____,
         'password': ____,
         'handle_string': ____,
-        '''
     }
+    '''
 ]
 
 channels = [
+    '''
     {
-        '''
         'channel_id': ____,
         'is_public': ____,
         'channel_name': ____,
         'owner_members': [],
         'all_members': [],
-        '''
     }
+    '''
 ]
 
 messages_log = [
+    '''
     {
-        '''
         'channel_id': _____,
         'time_created': _____,
         'user_id': _____,
         'message_id': ______,
         'message_string': _______,
-        '''
     },
+    '''
 ]

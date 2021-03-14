@@ -243,6 +243,11 @@ def channel_join_v1(auth_user_id, channel_id):
     channelFound = False
     i = 0
 
+    if len(src.data.channels) == 0:
+        raise InputError
+    elif type(channel in src.data.channels) is not dict:
+        raise InputError
+
     # Loop throug channel data base until channel is found
     while not channelFound:
         if i >= len(src.data.channels):
