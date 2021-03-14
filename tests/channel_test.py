@@ -40,16 +40,16 @@ def test_channel_invite():
     } in channel_details_v1(userID1[AuID], privateChannel[cID])[allMems]
     
     #* Test 2: is InputError raised when cID does not refer to valid channel
-    with pytest.raises(InputError) as e:
+    with pytest.raises(InputError):
         channel_invite_v1(userID1[AuID], "ThischannelIDdoesNotExist", userID2[AuID])
     
     #* Test 3: is InputError raised when u_id isnt a valid user
-    with pytest.raises(InputError) as e:
+    with pytest.raises(InputError):
         channel_invite_v1(userID1[AuID], "ThischannelIDdoesNotExist", "DoesntExist")
     
     #* Test 4: is AccessError raised when auth_uID is not already a member of the channel
     userID3 = src.auth.auth_register_v1("imposter@gmail.com", "g2g2gkden", "Among", "Us")
-    with pytest.raises(AccessError) as e:
+    with pytest.raises(AccessError):
         channel_invite_v1(userID3[AuID], privateChannel[cID], userID2[AuID])
 
     #* Finished testing for this function
@@ -88,11 +88,11 @@ def test_channel_details():
     }
     
     #* Test 2: Is InputError raised when Channel ID is not a valid channel
-    with pytest.raises(InputError) as e:
+    with pytest.raises(InputError):
         channel_details_v1(userID1[AuID], 'InvalidID')
 
     #* Test 3: Is AccessError raised when the user is not membber of channel with the channel id
-    with pytest.raises(AccessError) as e:
+    with pytest.raises(AccessError):
         channel_details_v1(userID2[AuID], realChannel[cID])
     
     #* Finished testing for this function
@@ -209,6 +209,6 @@ def test_channel_join():
 
 def test_channel_addowner():
     pass
- 
+
 def test_channel_removeowner():    
     pass

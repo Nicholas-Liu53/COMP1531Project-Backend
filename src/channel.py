@@ -188,7 +188,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     
     while (counter > -1 and counter > start): 
         currentMessage = src.data.messages_log[counter]
-        insert.messagesList(currentMessage)
+        messagesList.insert(currentMessage)
         counter -= 1    
     
     #Now our correct messages are in list messagesList from oldest to newest order     
@@ -243,10 +243,10 @@ def channel_join_v1(auth_user_id, channel_id):
     channelFound = False
     i = 0
 
-    if len(src.data.channels) == 0:
-        raise InputError
-    elif type(channel in src.data.channels) is not dict:
-        raise InputError
+    # if len(src.data.channels) == 0:
+    #     raise InputError
+    # elif type(channel in src.data.channels) is not dict:
+    #     raise InputError
 
     # Loop throug channel data base until channel is found
     while not channelFound:
