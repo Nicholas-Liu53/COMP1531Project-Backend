@@ -36,8 +36,7 @@ users = [
         'name_last': None,
         'email': None,
         'password': None,
-        'handle_string': None
-        
+        'handle_string': None,
     }
 ]
 
@@ -59,6 +58,6 @@ messages_log = [
         'time_created': None,
         'user_id': None,
         'message_id': None,
-        'message_string': None
-    }
+        'message_string': None,
+    },
 ]

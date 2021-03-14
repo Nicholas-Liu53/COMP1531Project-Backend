@@ -189,7 +189,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     
     while (counter > -1 and counter > start): 
         currentMessage = src.data.messages_log[counter]
-        insert.messagesList(currentMessage)
+        messagesList.insert(currentMessage)
         counter -= 1    
     
     #Now our correct messages are in list messagesList from oldest to newest order     
