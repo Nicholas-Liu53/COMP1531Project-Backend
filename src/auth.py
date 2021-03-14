@@ -20,7 +20,7 @@ def auth_login_v1(email, password):
 
     """
     for user in src.data.users:
-        if email == user['email'] and password == user['password']:
+        if email == user.get('email') and password == user.get('password'):
             return {
                 'auth_user_id': user['user_id'],
             }
