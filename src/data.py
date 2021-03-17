@@ -36,6 +36,7 @@ users = [
         'email': None,
         'password': None,
         'handle_string': None,
+        'permission_id': None,
     }
 ]
 
