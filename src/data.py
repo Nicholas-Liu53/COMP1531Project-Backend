@@ -53,7 +53,7 @@ messages_log = [
     {
         'channel_id': None,
         'time_created': None,
-        'handle_string': None,
+        'user_id': None,
         'message_id': None,
         'message_string': None,
     },
