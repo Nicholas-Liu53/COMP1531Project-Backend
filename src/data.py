@@ -52,8 +52,8 @@ channels = [
 messages_log = [
     {
         'channel_id': None,
-        'time_created': None,
         'handle_string': None,
+        'time_created': None,
         'message_id': None,
         'message_string': None,
     },
