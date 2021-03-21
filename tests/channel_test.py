@@ -70,7 +70,7 @@ def test_channel_details():
     #* Test 1: Using the authorised user, does the channel details get presented for one user in channel
     
     assert channel_details_v1(userID1[AuID], realChannel[cID]) == {
-        'channel_name': "ChannelINFO", 
+        'name': "ChannelINFO", 
         'owner_members':[{
             'user_id': userID1[AuID], 
             'name_first': "Vincentd",

@@ -44,7 +44,7 @@ channels = [
     {
         'channel_id': None,
         'is_public': None,
-        'channel_name': None,
+        'name': None,
         'owner_members': [],
         'all_members': [],
     }
