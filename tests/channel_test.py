@@ -6,7 +6,7 @@ import src.auth, src.channels, src.other
 from src.error import InputError, AccessError
 
 AuID    = 'auth_user_id'
-uID     = 'user_id'
+uID     = 'u_id'
 cID     = 'channel_id'
 chans   = 'channels'
 allMems = 'all_members'
@@ -72,14 +72,14 @@ def test_channel_details():
     assert channel_details_v1(userID1[AuID], realChannel[cID]) == {
         'name': "ChannelINFO", 
         'owner_members':[{
-            'user_id': userID1[AuID], 
+            'u_id': userID1[AuID], 
             'name_first': "Vincentd",
             'name_last': 'Lee',
             'email': 'testing4@gmail.com',
             'handle_string': 'vincentdlee',
         }],
         'all_members':[{
-            'user_id': userID1[AuID], 
+            'u_id': userID1[AuID], 
             'name_first': "Vincentd",
             'name_last': 'Lee',
             'email': 'testing4@gmail.com',

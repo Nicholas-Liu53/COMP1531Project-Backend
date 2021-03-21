@@ -2,7 +2,7 @@ import src.data
 from src.error import AccessError, InputError
 
 AuID    = 'auth_user_id'
-uID     = 'user_id'
+uID     = 'u_id'
 cID     = 'channel_id'
 allMems = 'all_members'
 cName   = 'name'
@@ -31,7 +31,7 @@ def channels_list_v1(auth_user_id):
     # Find channels that user is part of and add them to the output list
     for chanD in src.data.channels:
         for memberD in chanD['all_members']:
-            if auth_user_id is memberD['user_id']:
+            if auth_user_id is memberD['u_id']:
                 channel = {}
                 channel[cID] = chanD[cID]
                 channel[cName] = chanD[cName]
