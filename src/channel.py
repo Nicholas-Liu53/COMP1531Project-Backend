@@ -101,7 +101,7 @@ def channel_details_v1(auth_user_id, channel_id):
         if details["channel_id"] == channel_id:
 
             # filteres the information to be displayed
-            filteredDetails = dict((item, details[item]) for item in ["channel_name"] if item in details)
+            filteredDetails = dict((item, details[item]) for item in ["name"] if item in details)
 
             # takes only user_id, first and last name
             ownmem = []

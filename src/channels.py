@@ -5,7 +5,7 @@ AuID    = 'auth_user_id'
 uID     = 'user_id'
 cID     = 'channel_id'
 allMems = 'all_members'
-cName   = 'channel_name'
+cName   = 'name'
 fName   = 'name_first'
 lName   = 'name_last'
 chans   = 'channels'
@@ -111,7 +111,10 @@ def channels_create_v1(auth_user_id, name, is_public):
 
     # Identify the new channel ID
     # Which is an increment of the most recent channel id
-    newID = len(src.data.channels)
+    if not len(src.data.channels):
+        newID = len(src.data.channels)
+    else:
+        newID = src.data.channels[-1][cID] + 1
 
 
     # Add this new channel into the channels data list
@@ -120,7 +123,7 @@ def channels_create_v1(auth_user_id, name, is_public):
         {
             'channel_id': newID,
             'is_public': is_public,
-            'channel_name': name,
+            'name': name,
             'owner_members': [src.data.users[j]],
             'all_members': [src.data.users[j]],
         }
