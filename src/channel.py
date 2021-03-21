@@ -23,8 +23,8 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     '''
 
     #check if channel_id is valid
+    passed = False
     for check in src.data.channels:
-        passed = False
         if check['channel_id'] == channel_id:
             passed = True
             break
@@ -79,8 +79,8 @@ def channel_details_v1(auth_user_id, channel_id):
     '''
 
     # check for valid channel
+    passed = False
     for check in src.data.channels:
-        passed = False
         if check["channel_id"] == channel_id:
             passed = True
             break
