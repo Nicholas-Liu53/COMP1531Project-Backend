@@ -7,7 +7,7 @@ import src.auth, src.channel, src.other
 from src.error import AccessError, InputError
 
 AuID    = 'auth_user_id'
-uID     = 'user_id'
+uID     = 'u_id'
 cID     = 'channel_id'
 allMems = 'all_members'
 cName   = 'name'

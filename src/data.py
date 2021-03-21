@@ -30,7 +30,7 @@ messages (list):
 '''
 users = [
     {
-        'user_id': None,
+        'u_id': None,
         'name_first': None,
         'name_last': None,
         'email': None,
