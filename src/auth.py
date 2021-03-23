@@ -93,7 +93,7 @@ def auth_register_v1(email, password, name_first, name_last):
     if len(name_last) < 1 or len(name_last) > 50:
         raise InputError
 
-    # constructing the user_id from first and last name     
+    # constructing the handlestring from first and last name     
     # checking for total length of first and last name 
     if len(name_first) > 20:
         handle_string = name_first[0:21]
@@ -108,13 +108,13 @@ def auth_register_v1(email, password, name_first, name_last):
     
     # checking for duplicated names   
     for user in src.data.users:
-        if handle_string == user['handle_string']:
+        if handle_string == user['handle_string'][0:-1]:
             if trailing_int > 0:
                 handle_string = handle_string[0:-1] + str(trailing_int)
             else:
                 handle_string = handle_string + str(trailing_int)
             trailing_int += 1
-
+    
     user_id = len(src.data.users)
 
     src.data.users.append({
