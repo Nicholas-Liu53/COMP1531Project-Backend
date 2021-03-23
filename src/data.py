@@ -11,6 +11,8 @@ users (list):
         email
         handle_str
         password
+        permission of user
+        session_id
 
 channels (list):
     each element of list is a channel dictionary containing:
@@ -37,6 +39,7 @@ users = [
         'password': None,
         'handle_string': None,
         'permission_id': None,
+        'session_id': [],
     }
 ]
 

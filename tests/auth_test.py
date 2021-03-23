@@ -4,6 +4,7 @@ import pytest
 from src.auth import auth_login_v1, auth_register_v1
 import src.channel, src.channels
 from src.other import clear_v1
+import jwt
 
 def test_auth_login_valid():
     clear_v1()
