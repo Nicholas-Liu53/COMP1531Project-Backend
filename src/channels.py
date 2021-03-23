@@ -35,8 +35,7 @@ def channels_list_v1(auth_user_id):
                 channel = {}
                 channel[cID] = chanD[cID]
                 channel[cName] = chanD[cName]
-                if channel[cID] != None and channel[cName] != None:
-                    output.append(channel)
+                output.append(channel)
 
     return {
         'channels': output
@@ -66,8 +65,7 @@ def channels_listall_v1(auth_user_id):
         channel = {}
         channel[cID] = d[cID]
         channel[cName] = d[cName]
-        if channel[cID] != None and channel[cName] != None:
-            output.append(channel)
+        output.append(channel)
     return {
         'channels': output
     }
