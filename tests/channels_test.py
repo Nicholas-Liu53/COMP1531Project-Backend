@@ -4,13 +4,12 @@ import pytest
 from src.channels import channels_list_v1, channels_listall_v1, channels_create_v1
 from src.error import AccessError, InputError
 import src.auth, src.channel, src.other
-from src.error import AccessError, InputError
 
 AuID    = 'auth_user_id'
-uID     = 'user_id'
+uID     = 'u_id'
 cID     = 'channel_id'
 allMems = 'all_members'
-cName   = 'channel_name'
+cName   = 'name'
 fName   = 'name_first'
 lName   = 'name_last'
 chans   = 'channels'

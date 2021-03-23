@@ -20,9 +20,9 @@ def auth_login_v1(email, password):
 
     """
     for user in src.data.users:
-        if email == user['email'] and password == user['password']:
+        if email == user.get('email') and password == user.get('password'):
             return {
-                'auth_user_id': user['user_id'],
+                'auth_user_id': user['u_id'],
             }
     raise InputError    
 
@@ -122,7 +122,7 @@ def auth_register_v1(email, password, name_first, name_last):
         'password' : password,
         'name_first' : nameF,
         'name_last' : nameL,
-        'user_id' : user_id,
+        'u_id' : user_id,
         'handle_string' : handle_string,
     })
     return {

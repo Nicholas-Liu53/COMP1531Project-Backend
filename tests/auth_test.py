@@ -7,13 +7,13 @@ from src.other import clear_v1
 
 def test_auth_login_valid():
     clear_v1()
-    return_val = auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
     assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'auth_user_id': 0,}
 
 def test_auth_login_valid_multiple():
     clear_v1()
-    return_val1 = auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
-    return_val2 = auth_register_v1("ericamondy@gmail.com", "1234567", "erica", "mondy") 
+    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v1("ericamondy@gmail.com", "1234567", "erica", "mondy") 
 
     assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'auth_user_id': 0,}  
     assert auth_login_v1("ericamondy@gmail.com", "1234567") == {'auth_user_id': 1,}
@@ -21,20 +21,20 @@ def test_auth_login_valid_multiple():
 def test_auth_login_invalid_email():
     clear_v1()
     with pytest.raises(InputError):
-        return_val = auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+        auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
         auth_login_v1("caricoleman.com", "1234567")
 
 def test_auth_login_invalid_not_registered_email():
     clear_v1()
     with pytest.raises(InputError):
-        return_val = auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+        auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
         auth_login_v1("caricolema@gmail.com", "1234567") 
         auth_login_v1("ericamondy@gmail.com", "1234567")  
 
 def test_auth_login_invalid_incorrect_password():
     clear_v1()
     with pytest.raises(InputError):
-        return_val = auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+        auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
         auth_login_v1("caricoleman@gmail.com", "12345")
 
 def test_auth_register_valid():
@@ -120,5 +120,3 @@ def test_auth_register_invalid_no_last_name():
     clear_v1()
     with pytest.raises(InputError):
         auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "") 
-
-   
