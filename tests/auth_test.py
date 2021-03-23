@@ -4,6 +4,7 @@ import pytest
 from src.auth import auth_login_v1, auth_register_v1
 import src.channel, src.channels
 from src.other import clear_v1
+import jwt
 
 def test_auth_login_valid():
     clear_v1()
@@ -59,6 +60,7 @@ def test_auth_register_valid_same_name_multiple():
     assert auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman") == {'auth_user_id': 0,}
     assert auth_register_v1("caricoleman@hotmail.com", "1234567", "cari", "coleman") == {'auth_user_id': 1,}
     assert auth_register_v1("caricoleman@yahoo.com", "1234567", "cari", "coleman") == {'auth_user_id': 2,}
+    assert auth_register_v1("caricoleman@bing.com", "1234567", "cari", "coleman") == {'auth_user_id': 3,}
 
 def test_auth_register_valid_front_capatilised():
     clear_v1()
@@ -79,6 +81,10 @@ def test_auth_register_valid_at_symbol():
 def test_auth_register_valid_long_name():
     clear_v1()
     assert auth_register_v1("caricoleman@gmail.com", "1234567", "cariiiiiiiiiiiiiii", "coleman") == {'auth_user_id': 0,}
+    
+def test_auth_register_valid_long_first_name():
+    clear_v1()
+    assert auth_register_v1("caricoleman@gmail.com", "1234567", "cariiiiiiiiiiiiiiiiiii", "coleman") == {'auth_user_id': 0,}
 
 def test_auth_register_valid_long_name_multiple():
     clear_v1()
