@@ -8,11 +8,12 @@ AuID    = 'auth_user_id'
 uID     = 'u_id'
 cID     = 'channel_id'
 allMems = 'all_members'
-cName   = 'name'
+Name   = 'name'
 fName   = 'name_first'
 lName   = 'name_last'
 chans   = 'channels'
 token   = 'token'
+dmID    = 'dm_id'
 
 SECRET = 'MENG'
 
@@ -27,12 +28,13 @@ def test_dm_list():
 def test_dm_valid_create():
     src.other.clear_v1()
     #* Ensuring dm_id and dm_name are correct when creating valid dm
-    '''
-    Register two users
-    Creator of the dm invites other user to DM
-    Ensure outputs are correct
-    '''
-    pass
+    user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Steve", "Irwin")
+    user2 = src.auth.auth_register_v1("first@gmail.com", "password", "Jonah", "from Tonga")
+    expected = {
+        dmID = 0,
+        Name = 'jonahfromtonga, steveirwin',
+    }
+    assert dm_create_v1(user1[token], [user2[AuID]]) == expected
 
 def test_dm_id_increasing():
     src.other.clear_v1()
@@ -83,11 +85,11 @@ def test_dm_create_errors():
     with pytest.raises(InputError):
         dm_create_v1(user1[token], [invalid_u_id])
 
+    removedUser = src.auth.auth_register_v1("second@gmail.com", "password", "Yusuf", "Bideen")   
     src.other.clear_v1()
-    user1 = src.auth.auth_register_v1("second@gmail.com", "password", "Yusuf", "Bideen")
-    invalid_token = jwt.encode({'hotel?': 'trivago'}, SECRET, algorithm='HS256')
+    user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Hotel?", "Trivago")
     with pytest.raises(AccessError):
-        dm_create_v1(invalid_token, [user1[auth_user_id]])
+        dm_create_v1(removedUser[token], [user1[AuID]])
 
 def test_dm_remove():
     pass
