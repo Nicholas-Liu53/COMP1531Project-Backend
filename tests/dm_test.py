@@ -1,3 +1,4 @@
+import pytest
 import src.data
 from src.dm import dm_details_v1, dm_list_v1, dm_create_v1, dm_remove_v1, dm_invite_v1, dm_leave_v1, dm_messages_v1
 from src.error import AccessError, InputError
@@ -29,10 +30,10 @@ def test_dm_valid_create():
     src.other.clear_v1()
     #* Ensuring dm_id and dm_name are correct when creating valid dm
     user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v1("first@gmail.com", "password", "Jonah", "from Tonga")
+    user2 = src.auth.auth_register_v1("second@gmail.com", "password", "Jonah", "from Tonga")
     expected = {
-        dmID = 0,
-        Name = 'jonahfromtonga, steveirwin',
+        dmID: 0,
+        Name: 'jonahfromtonga, steveirwin',
     }
     assert dm_create_v1(user1[token], [user2[AuID]]) == expected
 
