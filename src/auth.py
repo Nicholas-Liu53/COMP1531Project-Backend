@@ -1,6 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 import re
+from jwt import encode
 
 def auth_login_v1(email, password):
     """ Checks if inputted email is present within the registered users
