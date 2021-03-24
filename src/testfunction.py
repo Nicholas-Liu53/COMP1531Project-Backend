@@ -45,7 +45,6 @@ def channel_details_v1(auth_user_id, channel_id):
     for check in channels:
         if check["channel_id"] == channel_id:
             passed = True
-            break
     if not passed:
         raise InputError
 

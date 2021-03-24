@@ -1,6 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 from src.channels import channels_listall_v1, channels_list_v1
+import jwt
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
     
@@ -34,8 +35,8 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
 
     # check if user is authorised to invite
     for chans in src.data.channels:
-        userAuth = False
         if chans["channel_id"] == channel_id:
+            userAuth = False
             for users in chans["all_members"]:
                 if users['u_id'] == auth_user_id:
                     userAuth = True
@@ -90,8 +91,8 @@ def channel_details_v1(auth_user_id, channel_id):
 
     # check if user is authorised for channel
     for chans in src.data.channels:
-        userAuth = False
         if chans["channel_id"] == channel_id:
+            userAuth = False
             for users in chans["all_members"]:
                 if users['u_id'] == auth_user_id:
                     userAuth = True
@@ -278,16 +279,50 @@ def channel_join_v1(auth_user_id, channel_id):
     return {
     }
 
-def channel_addowner_v1(auth_user_id, channel_id, u_id):
+def channel_addowner_v1(token, channel_id, u_id):
     #if not a user in the channel, add it to all membs too
     # for access error, check permission id first and if permission id isnt of the Dreams owner, check owner list of channels
     # ALLWAYS CHECK FOR PERMISSION ID FIRST FOR DREAM OWNERS
-
+    for chans in src.data.channels:
+        if chans["channel_id"] == channel_id:
+            userAuth = False
+            for users in chans["owner_members"]:
+                if token in users['session_id']:
+                    userAuth = True
+            if not userAuth:
+                raise AccessError
     
+    passed = False
+    for check in src.data.channels:
+        if check['channel_id'] == channel_id:
+            passed = True
+            break
+    if not passed:
+        raise InputError
+
+
     return {
     }
 
-def channel_removeowner_v1(auth_user_id, channel_id, u_id):
+def channel_removeowner_v1(token, channel_id, u_id):
     # does not remove from all membs
+    for chans in src.data.channels:
+        if chans["channel_id"] == channel_id:
+            userAuth = False
+            for users in chans["owner_members"]:
+                if token in users['session_id']:
+                    userAuth = True
+            if not userAuth:
+                raise AccessError
+    
+    passed = False
+    for check in src.data.channels:
+        if check['channel_id'] == channel_id:
+            passed = True
+            break
+    if not passed:
+        raise InputError
+
+
     return {
     }
