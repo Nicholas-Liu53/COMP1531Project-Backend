@@ -47,6 +47,28 @@ def test_dm_details_errors():
     pass
 
 def test_dm_list():
+    src.other.clear_v1()
+    #* User is not part of any DM
+    '''
+    < Register 3 users >
+    < Create DM with first 2 users >
+    < Call the function with third user>
+    '''
+    src.other.clear_v1()
+    #* User is part of the only DM
+    '''
+    < Register 2 users >
+    < Create DM with both users >
+    < Both users call function, make sure expected output is correct >
+    '''
+    src.other.clear_v1()
+    #* User is part of some of the DMs
+    '''
+    < Register 3 users >
+    < Create DM with all users >
+    < Create DM with only first 2 >
+    < Call the function with third user>
+    '''
     pass
 
 def test_dm_create_valid():
@@ -131,13 +153,6 @@ def test_dm_create_errors():
     with pytest.raises(InputError):
         dm_create_v1(user1[token], [invalid_u_id])
 
-    removedUser = src.auth.auth_register_v1("second@gmail.com", "password", "Yusuf", "Bideen")   
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Hotel?", "Trivago")
-    
-    with pytest.raises(AccessError):
-        dm_create_v1(removedUser[token], [user1[AuID]])
-
 def test_dm_remove():
     pass
 
@@ -149,3 +164,12 @@ def test_dm_leave():
 
 def test_dm_messages():
     pass
+
+def test_dm_unauthorised_user():
+    #* Test for unauthorised users for all dm functions
+    removedUser = src.auth.auth_register_v1("second@gmail.com", "password", "Yusuf", "Bideen")   
+    src.other.clear_v1()
+    user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Hotel?", "Trivago")
+    
+    with pytest.raises(AccessError):
+        dm_create_v1(removedUser[token], [user1[AuID]])
