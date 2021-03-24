@@ -23,8 +23,8 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     '''
 
     #check if channel_id is valid
+    passed = False
     for check in src.data.channels:
-        passed = False
         if check['channel_id'] == channel_id:
             passed = True
             break
@@ -37,7 +37,7 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
         userAuth = False
         if chans["channel_id"] == channel_id:
             for users in chans["all_members"]:
-                if users['user_id'] == auth_user_id:
+                if users['u_id'] == auth_user_id:
                     userAuth = True
                     break
             if userAuth == False:
@@ -46,7 +46,7 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     # should check for auth_user_id in channel info first for owners
     inviteUser = {}
     for user in src.data.users:
-        if user["user_id"] == u_id: # finds desired u_id
+        if user["u_id"] == u_id: # finds desired u_id
             inviteUser = user.copy()
     if inviteUser == {}:
         raise InputError
@@ -80,8 +80,8 @@ def channel_details_v1(auth_user_id, channel_id):
     '''
 
     # check for valid channel
+    passed = False
     for check in src.data.channels:
-        passed = False
         if check["channel_id"] == channel_id:
             passed = True
             break
@@ -93,7 +93,7 @@ def channel_details_v1(auth_user_id, channel_id):
         userAuth = False
         if chans["channel_id"] == channel_id:
             for users in chans["all_members"]:
-                if users['user_id'] == auth_user_id:
+                if users['u_id'] == auth_user_id:
                     userAuth = True
                     break
             if userAuth == False:
@@ -102,13 +102,13 @@ def channel_details_v1(auth_user_id, channel_id):
         if details["channel_id"] == channel_id:
 
             # filteres the information to be displayed
-            filteredDetails = dict((item, details[item]) for item in ["channel_name"] if item in details)
+            filteredDetails = dict((item, details[item]) for item in ["name"] if item in details)
 
             # takes only user_id, first and last name
             ownmem = []
             for user in details["owner_members"]:
                 filteredOwner = {}
-                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "user_id"))
+                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "u_id"))
                 filteredOwner.update(dict((key,value) for key, value in user.items() if key == "name_first"))
                 filteredOwner.update(dict((key,value) for key, value in user.items() if key == "name_last"))
                 filteredOwner.update(dict((key,value) for key, value in user.items() if key == "email"))
@@ -120,7 +120,7 @@ def channel_details_v1(auth_user_id, channel_id):
             allmem = []
             for user in details["all_members"]:
                 filteredUser = {}
-                filteredUser.update(dict((key,value) for key, value in user.items() if key == "user_id"))
+                filteredUser.update(dict((key,value) for key, value in user.items() if key == "u_id"))
                 filteredUser.update(dict((key,value) for key, value in user.items() if key == "name_first"))
                 filteredUser.update(dict((key,value) for key, value in user.items() if key == "name_last"))
                 filteredUser.update(dict((key,value) for key, value in user.items() if key == "email"))
@@ -267,7 +267,7 @@ def channel_join_v1(auth_user_id, channel_id):
         if j >= len(src.data.users):
             # If user doesn't exist in database, AccessError
             raise AccessError
-        elif src.data.users[j]['user_id'] == auth_user_id:
+        elif src.data.users[j]['u_id'] == auth_user_id:
             userFound = True
         j += 1
 

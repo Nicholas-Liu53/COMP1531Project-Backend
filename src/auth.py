@@ -1,6 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 import re
+from jwt import encode
 
 def auth_login_v1(email, password):
     """ Checks if inputted email is present within the registered users
@@ -22,7 +23,7 @@ def auth_login_v1(email, password):
     for user in src.data.users:
         if email == user.get('email') and password == user.get('password'):
             return {
-                'auth_user_id': user['user_id'],
+                'auth_user_id': user['u_id'],
             }
     raise InputError    
 
@@ -93,7 +94,7 @@ def auth_register_v1(email, password, name_first, name_last):
     if len(name_last) < 1 or len(name_last) > 50:
         raise InputError
 
-    # constructing the user_id from first and last name     
+    # constructing the handlestring from first and last name     
     # checking for total length of first and last name 
     if len(name_first) > 20:
         handle_string = name_first[0:21]
@@ -104,17 +105,17 @@ def auth_register_v1(email, password, name_first, name_last):
     else:    
         handle_string = name_first + name_last
     
-    trailing_int = 0 
+    if check_handle(handle_string):
     
-    # checking for duplicated names   
-    for user in src.data.users:
-        if handle_string == user['handle_string']:
-            if trailing_int > 0:
-                handle_string = handle_string[0:-1] + str(trailing_int)
-            else:
-                handle_string = handle_string + str(trailing_int)
-            trailing_int += 1
-
+        trailing_int = 0 
+        
+        # checking for duplicated names   
+        for user in src.data.users:
+            if check_handle(handle_string + str(trailing_int)):
+                trailing_int += 1
+        
+        handle_string = handle_string + str(trailing_int)
+      
     user_id = len(src.data.users)
 
     src.data.users.append({
@@ -122,11 +123,20 @@ def auth_register_v1(email, password, name_first, name_last):
         'password' : password,
         'name_first' : nameF,
         'name_last' : nameL,
-        'user_id' : user_id,
+        'u_id' : user_id,
         'handle_string' : handle_string,
     })
     return {
-        'auth_user_id': user_id,
+        'auth_user_id': user_id
     }
+
+def check_handle(handle_string):
+    for user in src.data.users:
+        if handle_string == user['handle_string']:
+            return True
     
+    return False
+
+    
+  
     

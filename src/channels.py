@@ -2,10 +2,10 @@ import src.data
 from src.error import AccessError, InputError
 
 AuID    = 'auth_user_id'
-uID     = 'user_id'
+uID     = 'u_id'
 cID     = 'channel_id'
 allMems = 'all_members'
-cName   = 'channel_name'
+cName   = 'name'
 fName   = 'name_first'
 lName   = 'name_last'
 chans   = 'channels'
@@ -31,7 +31,7 @@ def channels_list_v1(auth_user_id):
     # Find channels that user is part of and add them to the output list
     for chanD in src.data.channels:
         for memberD in chanD['all_members']:
-            if auth_user_id is memberD['user_id']:
+            if auth_user_id is memberD['u_id']:
                 channel = {}
                 channel[cID] = chanD[cID]
                 channel[cName] = chanD[cName]
@@ -111,7 +111,10 @@ def channels_create_v1(auth_user_id, name, is_public):
 
     # Identify the new channel ID
     # Which is an increment of the most recent channel id
-    newID = len(src.data.channels)
+    if not len(src.data.channels):
+        newID = len(src.data.channels)
+    else:
+        newID = src.data.channels[-1][cID] + 1
 
 
     # Add this new channel into the channels data list
@@ -120,7 +123,7 @@ def channels_create_v1(auth_user_id, name, is_public):
         {
             'channel_id': newID,
             'is_public': is_public,
-            'channel_name': name,
+            'name': name,
             'owner_members': [src.data.users[j]],
             'all_members': [src.data.users[j]],
         }
