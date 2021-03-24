@@ -20,13 +20,36 @@ SECRET = 'MENG'
 
 #! Make sure to clear before every test
 
-def test_dm_details():
+def test_dm_details_valid():
+    src.other.clear_v1()
+    '''
+    <Register 2 users>
+    <Create DM with both users>
+    <Both users call function, make sure expected output is correct>
+    '''
+    pass
+
+def test_dm_details_errors():
+    src.other.clear_v1()
+    #* InputError - dm_id is not a valid DM
+    '''
+    <Register 2 users>
+    <Attempt to create a DM with both users>
+    '''
+
+    src.other.clear_v1()
+    #* AccessError - authorised user is not part of this DM
+    '''
+    <Register 3 users>
+    <Create DM with first 2 users>
+    <3rd user attempts to call function>
+    '''
     pass
 
 def test_dm_list():
     pass
 
-def test_dm_valid_create():
+def test_dm_create_valid():
     src.other.clear_v1()
     user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Steve", "Irwin")
     user2 = src.auth.auth_register_v1("second@gmail.com", "password", "Jonah", "from Tonga")
