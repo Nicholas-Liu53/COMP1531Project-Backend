@@ -102,13 +102,12 @@ def channel_details_v1(auth_user_id, channel_id):
         if details["channel_id"] == channel_id:
 
             # filteres the information to be displayed
-            filteredDetails = dict((item, details[item]) for item in ["name"] if item in details)
+            filteredDetails = dict((item, details[item]) for item in ["name","is_public"] if item in details)
 
             # takes only user_id, first and last name
             ownmem = []
             for user in details["owner_members"]:
                 filteredOwner = {}
-                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "u_id"))
                 filteredOwner.update(dict((key,value) for key, value in user.items() if key == "name_first"))
                 filteredOwner.update(dict((key,value) for key, value in user.items() if key == "name_last"))
                 filteredOwner.update(dict((key,value) for key, value in user.items() if key == "email"))
@@ -120,7 +119,6 @@ def channel_details_v1(auth_user_id, channel_id):
             allmem = []
             for user in details["all_members"]:
                 filteredUser = {}
-                filteredUser.update(dict((key,value) for key, value in user.items() if key == "u_id"))
                 filteredUser.update(dict((key,value) for key, value in user.items() if key == "name_first"))
                 filteredUser.update(dict((key,value) for key, value in user.items() if key == "name_last"))
                 filteredUser.update(dict((key,value) for key, value in user.items() if key == "email"))
@@ -281,9 +279,15 @@ def channel_join_v1(auth_user_id, channel_id):
     }
 
 def channel_addowner_v1(auth_user_id, channel_id, u_id):
+    #if not a user in the channel, add it to all membs too
+    # for access error, check permission id first and if permission id isnt of the Dreams owner, check owner list of channels
+    # ALLWAYS CHECK FOR PERMISSION ID FIRST FOR DREAM OWNERS
+
+    
     return {
     }
 
 def channel_removeowner_v1(auth_user_id, channel_id, u_id):
+    # does not remove from all membs
     return {
     }
