@@ -11,18 +11,44 @@ SECRET = 'meng'
 def test_auth_login_valid():
     clear_v1()
     auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
-    token = encode({'session_id': 0, 'user_id': 0}, SECRET, algorithm='HS256')
+    token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
     assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
 
 def test_auth_login_valid_multiple():
     clear_v1()
     auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
-    token1 = encode({'session_id': 0, 'user_id': 0}, SECRET, algorithm='HS256')
+    token1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
     auth_register_v1("ericamondy@gmail.com", "1234567", "erica", "mondy") 
-    token2 = encode({'session_id': 0, 'user_id': 1}, SECRET, algorithm='HS256')
+    token2 = encode({'session_id': 1, 'user_id': 1}, SECRET, algorithm='HS256')
 
     assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}  
     assert auth_login_v1("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
+
+def test_auth_login_valid_sessions():
+    clear_v1()
+    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    token1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman") 
+    token2 = encode({'session_id': 2, 'user_id': 0}, SECRET, algorithm='HS256')
+
+    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}  
+    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 0,}
+
+def test_auth_login_valid_multiple_sessions():
+    clear_v1()
+    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    token1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman") 
+    token2 = encode({'session_id': 2, 'user_id': 0}, SECRET, algorithm='HS256')
+    auth_register_v1("ericamondy@gmail.com", "1234567", "erica", "mondy") 
+    token3 = encode({'session_id': 1, 'user_id': 1}, SECRET, algorithm='HS256')
+    auth_register_v1("ericamondy@gmail.com", "1234567", "erica", "mondy") 
+    token4 = encode({'session_id': 2, 'user_id': 1}, SECRET, algorithm='HS256')
+
+    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}  
+    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 0,}
+    assert auth_login_v1("ericamondy@gmail.com", "1234567") == {'token': token3, 'auth_user_id': 0,}
+    assert auth_login_v1("ericamondy@gmail.com", "1234567") == {'token': token4, 'auth_user_id': 0,}
 
 def test_auth_login_invalid_email():
     clear_v1()
@@ -36,6 +62,11 @@ def test_auth_login_invalid_not_registered_email():
         auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
         auth_login_v1("caricolema@gmail.com", "1234567") 
         auth_login_v1("ericamondy@gmail.com", "1234567")  
+
+def test_auth_login_invalid_empty():
+    clear_v1()
+    with pytest.raises(InputError):        
+        auth_login_v1("caricolema@gmail.com", "1234567") 
 
 def test_auth_login_invalid_incorrect_password():
     clear_v1()
@@ -60,7 +91,7 @@ def test_auth_register_valid_multiple():
     assert auth_register_v1("ericamondy@gmail.com", "1234567", "erica", "mondy") == {'token': token2, 'auth_user_id': 1,}
     assert auth_register_v1("hilarybently@gmail.com", "1234567", "hilary", "bently") == {'token': token3, 'auth_user_id': 2,}
     assert auth_register_v1("kentonwatkins@gmail.com", "1234567", "kenton", "watkins") == {'token': token4, 'auth_user_id': 3,}
-    assert auth_register_v1("caludiamarley@gmail.com", "1234567", "claudia", "marley") == {'token': token5, 'auth_user_id': 4,}    
+    assert auth_register_v1("claudiamarley@gmail.com", "1234567", "claudia", "marley") == {'token': token5, 'auth_user_id': 4,}    
 
 def test_auth_register_valid_same_name():
     clear_v1()
