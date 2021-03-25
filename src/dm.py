@@ -20,12 +20,17 @@ seshID    = 'session_id'
 
 def dm_details_v1(token, dm_id):
     auth_user_id, _ = decode(token)
-    for dmDetails in src.data.dms:
-        if dm_id == dmDetails[dmID]:
-            if auth_user_id in dmDetails['all_members']:
-                pass
-            raise AccessError
-        raise InputError
+    dm_name, dmMembers = get_members(-1, dm_id)
+    if auth_user_id not in dmMembers:
+        raise AccessError
+    mOutput = []
+    for user in dmMembers:
+        mOutput.append(get_user(user))
+
+    return {
+        Name: dm_name,
+        'members': mOutput,
+    }
 
 def dm_list_v1(token):
     auth_user_id, _ = decode(token)
@@ -98,4 +103,28 @@ def get_handle(user_id):
     for user in src.data.users:
         if user_id == user[uID]:
             return user[handle]
+    raise InputError
+
+def get_members(channel_id, dm_id):
+    if dm_id == -1:
+        for chanDetails in src.data.channels:
+            if channel_id == chanDetails[cID]:
+                return chanDetails[Name], chanDetails[allMems]
+        raise InputError
+    else:
+        for dmDetails in src.data.dms:
+            if dm_id == dmDetails[dmID]:
+                return dmDetails[Name], dmDetails[allMems]
+        raise InputError
+
+def get_user(user_id):
+    for user in src.data.users:
+        if user_id == user[uID]:
+            return {
+                uID: user[uID],
+                'email': user['email'],
+                'name_first': user['name_first'],
+                'name_last': user['name_last'],
+                'handle_string': user['handle_string'],
+            }
     raise InputError
