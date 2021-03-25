@@ -1,11 +1,14 @@
 import src.data
 from src.error import AccessError, InputError
+import jwt
+
+SECRET  = 'MENG'
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
 cID     = 'channel_id'
 allMems = 'all_members'
-cName   = 'name'
+Name    = 'name'
 fName   = 'name_first'
 lName   = 'name_last'
 chans   = 'channels'
@@ -25,7 +28,7 @@ def channels_list_v1(auth_user_id):
         Each channel is represented by a dictionary containing types { channel_id, name }
     """
     # First, check if auth_user-id is a valid user_id
-    check_auth_user_id(auth_user_id)
+    get_user(auth_user_id)
 
     output = []
     # Find channels that user is part of and add them to the output list
@@ -34,12 +37,18 @@ def channels_list_v1(auth_user_id):
             if auth_user_id is memberD['u_id']:
                 channel = {}
                 channel[cID] = chanD[cID]
-                channel[cName] = chanD[cName]
+                channel[Name] = chanD[Name]
                 output.append(channel)
 
     return {
         'channels': output
     }
+
+def channels_list_v2(token):
+    pass
+
+def channels_listall_v2(token):
+    pass
 
 def channels_listall_v1(auth_user_id):
     """
@@ -58,13 +67,13 @@ def channels_listall_v1(auth_user_id):
         Each channel is represented by a dictionary containing types { channel_id, name }
     """
     
-    check_auth_user_id(auth_user_id)
+    get_user(auth_user_id)
 
     output = []
     for d in src.data.channels:
         channel = {}
         channel[cID] = d[cID]
-        channel[cName] = d[cName]
+        channel[Name] = d[Name]
         output.append(channel)
     return {
         'channels': output
@@ -133,19 +142,26 @@ def channels_create_v1(auth_user_id, name, is_public):
     }
 
 # Function that checks if auth_user_id is valid
-def check_auth_user_id(auth_user_id):
-    """
-    Function that checks if auth_user_id is valid
-    An auth_user_id is valid if there exists a user with that user_id
+def get_user(user_id):
+    for user in src.data.users:
+        if user_id == user[uID]:
+            return {
+                uID: user[uID],
+                'email': user['email'],
+                'name_first': user['name_first'],
+                'name_last': user['name_last'],
+                'handle_string': user['handle_string'],
+            }
+    raise AccessError
 
-    Arguments:
-        auth_user_id (int): The user_id of the user calling the function
+def decode(token):
+    auth_user_id, session_id = jwt.decode(token, SECRET, algorithm='HS256')
+    check_session(auth_user_id, session_id)
+    return auth_user_id, session_id
 
-
-    Return Value:
-        AccessError is raised when the function cannot find a user with a matching user_id
-    """
+def check_session(auth_user_id, session_id):
     for user in src.data.users:
         if auth_user_id == user[uID]:
-            return
+            if session_id in user[session_id]:
+                return
     raise AccessError
