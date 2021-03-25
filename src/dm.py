@@ -10,7 +10,7 @@ uID       = 'u_id'
 cID       = 'channel_id'
 creatorID = 'creator_id'
 allMems   = 'all_members'
-Name     = 'name'
+Name      = 'name'
 fName     = 'name_first'
 lName     = 'name_last'
 chans     = 'channels'
@@ -22,7 +22,20 @@ def dm_details_v1(token, dm_id):
     pass
 
 def dm_list_v1(token):
-    pass
+    auth_user_id, _ = decode(token)
+    output = []
+    for dmD in src.data.dms:
+        for memberD in dmD['all_members']:
+            if auth_user_id is memberD['u_id']:
+                dm = {}
+                dm[dmID] = dmD[dmID]
+                dm[Name] = dmD[Name]
+                output.append(dm)
+    
+    return {
+        'dms': output
+    }
+    
 
 def dm_create_v1(token, u_ids):
     creator_id, _ = decode(token)
