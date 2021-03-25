@@ -167,9 +167,13 @@ def test_dm_messages():
 
 def test_dm_unauthorised_user():
     #* Test for unauthorised users for all dm functions
-    removedUser = src.auth.auth_register_v1("second@gmail.com", "password", "Yusuf", "Bideen")   
+    removedUser = src.auth.auth_register_v1("removed@gmail.com", "password", "Yusuf", "Bideen")   
     src.other.clear_v1()
     user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Hotel?", "Trivago")
-    
+    user2 = src.auth.auth_register_v1("second@gmail.com", "password", "Hotel?", "Trivago")
+    dm1 = dm_create_v1(user1[token], [user2[uID]])
+
     with pytest.raises(AccessError):
-        dm_create_v1(removedUser[token], [user1[AuID]])
+        dm_details_v1(removedUser[token], dm1[dm_id])
+        dm_list_v1(removedUser[token])
+        dm_create_v1(removedUser[token], [user1[uID]])
