@@ -185,6 +185,6 @@ def test_dm_unauthorised_user():
     dm1 = dm_create_v1(user1[token], [user2[AuID]])
 
     with pytest.raises(AccessError):
-        dm_details_v1(removedUser[token], dm1[dm_id])
+        dm_details_v1(removedUser[token], dm1[dmID])
         dm_list_v1(removedUser[token])
         dm_create_v1(removedUser[token], [user1[AuID]])
