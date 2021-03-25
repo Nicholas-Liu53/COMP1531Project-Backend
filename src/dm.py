@@ -10,7 +10,7 @@ uID       = 'u_id'
 cID       = 'channel_id'
 creatorID = 'creator_id'
 allMems   = 'all_members'
-cName     = 'name'
+Name     = 'name'
 fName     = 'name_first'
 lName     = 'name_last'
 chans     = 'channels'
@@ -28,9 +28,9 @@ def dm_create_v1(token, u_ids):
     creator_id, _ = decode(token)
 
     if len(src.data.dms) == 0:
-        dmID = 0
+        dm_ID = 0
     else:
-        dmID = src.data.dms[-1][dmID] + 1
+        dm_ID = src.data.dms[-1][dmID] + 1
 
     dmUsers = u_ids.append(creator_id)
     handles = []
@@ -38,6 +38,13 @@ def dm_create_v1(token, u_ids):
         handles.append(get_handle(user))
     handles.sort()
     dm_name = ', '.join(handles)
+
+    src.data.users.append({
+        dmID: dm_ID,
+        Name: dm_name,
+        creatorID: creator_id,
+        'all_members': dmUsers,
+    })
 
     return {
         'dm_id': dmID,
