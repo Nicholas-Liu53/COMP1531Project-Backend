@@ -6,7 +6,6 @@ import src.auth, src.channels, src.other
 from src.error import InputError, AccessError
 from src.channels import channels_create_v1, channels_list_v1
 from src.message import message_send_v1
-from src.error import AccessError, InputErrors
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
