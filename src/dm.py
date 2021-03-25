@@ -19,17 +19,23 @@ dmID      = 'dm_id'
 seshID    = 'session_id'
 
 def dm_details_v1(token, dm_id):
-    pass
+    auth_user_id, _ = decode(token)
+    for dmDetails in src.data.dms:
+        if dm_id == dmDetails[dmID]:
+            if auth_user_id in dmDetails['all_members']:
+                pass
+            raise AccessError
+        raise InputError
 
 def dm_list_v1(token):
     auth_user_id, _ = decode(token)
     output = []
-    for dmD in src.data.dms:
-        for memberD in dmD['all_members']:
-            if auth_user_id is memberD['u_id']:
+    for dmDetails in src.data.dms:
+        for memberD in dmDetails['all_members']:
+            if auth_user_id == memberD['u_id']:
                 dm = {}
-                dm[dmID] = dmD[dmID]
-                dm[Name] = dmD[Name]
+                dm[dmID] = dmDetails[dmID]
+                dm[Name] = dmDetails[Name]
                 output.append(dm)
     
     return {
