@@ -53,6 +53,14 @@ channels = [
     }
 ]
 
+dms = [
+    {
+        'dm_id': None,
+        'name': None,
+        'creator_id': None,
+    }
+]
+
 messages_log = [
     {
         'channel_id': None,
