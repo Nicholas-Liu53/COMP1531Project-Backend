@@ -14,6 +14,8 @@ cName     = 'name'
 fName     = 'name_first'
 lName     = 'name_last'
 chans     = 'channels'
+handle    = 'handle_string'
+dmID      = 'dm_id'
 seshID    = 'session_id'
 
 def dm_details_v1(token, dm_id):
@@ -23,6 +25,24 @@ def dm_list_v1(token):
     pass
 
 def dm_create_v1(token, u_ids):
+    creator_id, _ = decode(token)
+
+    if len(src.data.dms) == 0:
+        dmID = 0
+    else:
+        dmID = src.data.dms[-1][dmID] + 1
+
+    dmUsers = u_ids.append(creator_id)
+    handles = []
+    for user in dmUsers:
+        handles.append(get_handle(user))
+    handles.sort()
+    dm_name = ', '.join(handles)
+
+    return {
+        'dm_id': dmID,
+        'dm_name': dm_name
+    }
 
 def dm_remove_v1(token, dm_id):
     pass
@@ -47,3 +67,9 @@ def check_session(auth_user_id, session_id):
             if session_id in user[session_id]:
                 return
     raise AccessError
+
+def get_handle(user_id):
+    for user in src.data.users:
+        if user_id == user[uID]:
+            return user[handle]
+    raise InputError
