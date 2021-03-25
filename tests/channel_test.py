@@ -4,6 +4,8 @@ import pytest
 from src.channel import channel_invite_v1, channel_details_v1, channel_messages_v1, channel_leave_v1, channel_join_v1, channel_addowner_v1, channel_removeowner_v1
 import src.auth, src.channels, src.other
 from src.error import InputError, AccessError
+from src.channels import channels_create_v1, channels_list_v1
+from src.message import message_send_v1
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
@@ -12,10 +14,6 @@ chans   = 'channels'
 allMems = 'all_members'
 fName   = 'name_first'
 lName   = 'name_last'
-
-from src.channels import channels_create_v1, channels_list_v1
-from src.message import message_send_v1
-from src.error import AccessError, InputError
 
 def test_channel_invite():
     #* Ensure database is empty

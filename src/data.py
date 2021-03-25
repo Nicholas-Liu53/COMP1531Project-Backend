@@ -64,10 +64,12 @@ dms = [
 
 messages_log = [
     {
+        # If message is in channel, dm_id is None (not -1), in other words, don't store a value
         'channel_id': None,
+        'dm_id': None,
         'handle_string': None,
         'time_created': None,
         'message_id': None,
-        'message_string': None,
+        'message_string': None,     # For message/share/v1, the optional message will be stored in message string
     },
 ]
