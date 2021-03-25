@@ -122,4 +122,4 @@ def get_user(user_id):
                 'name_last': user['name_last'],
                 'handle_string': user['handle_string'],
             }
-    raise InputError
+    raise AccessError
