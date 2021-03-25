@@ -59,7 +59,8 @@ def dm_create_v1(token, u_ids):
     dmUsers = u_ids.append(creator_id)
     handles = []
     for user in dmUsers:
-        handles.append(get_handle(user))
+        userInfo = get_user(user)
+        handles.append(userInfo[handle])
     handles.sort()
     dm_name = ', '.join(handles)
 
@@ -98,12 +99,6 @@ def check_session(auth_user_id, session_id):
             if session_id in user[session_id]:
                 return
     raise AccessError
-
-def get_handle(user_id):
-    for user in src.data.users:
-        if user_id == user[uID]:
-            return user[handle]
-    raise InputError
 
 def get_members(channel_id, dm_id):
     if dm_id == -1:
