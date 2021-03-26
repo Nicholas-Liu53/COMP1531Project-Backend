@@ -15,13 +15,7 @@ allMems = 'all_members'
 ownMems = 'owner_members'
 fName   = 'name_first'
 lName   = 'name_last'
-<<<<<<< HEAD
 token = 'token'
-from src.channels import channels_create_v1, channels_list_v1
-from src.message import message_send_v1
-from src.error import AccessError, InputError
-=======
->>>>>>> master
 
 def test_channel_invite():
     #* Ensure database is empty

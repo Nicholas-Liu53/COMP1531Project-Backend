@@ -3,7 +3,21 @@ from src.error import AccessError, InputError
 from src.channels import channels_listall_v1, channels_list_v1
 import jwt
 
-def channel_invite_v1(auth_user_id, channel_id, u_id):
+def check_session(auth_user_id, session_id):
+    for user in src.data.users:
+        if auth_user_id == user['u_id']:
+            if session_id in user['session_id']:
+                return
+    raise AccessError
+
+
+def decode(token):
+    payload = jwt.decode(token, "MENG", algorithms = 'HS256')
+    auth_user_id, session_id = payload.get('session_id'), payload.get('user_id')
+    check_session(auth_user_id, session_id)
+    return auth_user_id, session_id
+
+def channel_invite_v1(token, channel_id, u_id):
     
     '''
     channel_invite_v1 checks if a user is authorised to invite another user to a channel and then automatically adds the
@@ -22,6 +36,8 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     Return Value:
         Returns an empty list on passing all Exceptions, with changes being made directly to our data.py  
     '''
+
+    auth_user_id, _ = decode(token)
 
     #check if channel_id is valid
     passed = False
@@ -62,7 +78,7 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
 
 
 
-def channel_details_v1(auth_user_id, channel_id):
+def channel_details_v1(token, channel_id):
 
     '''
     channel_details_v1 calls upon a new copy of the desired channel dictionary that only contains filtered keys and values that is public.
@@ -79,6 +95,8 @@ def channel_details_v1(auth_user_id, channel_id):
     Return Value:
         Returns filteredDetails on succesfully creating a copy of the channel we want, with only the filtered information. The return is a dictionary.
     '''
+
+    auth_user_id, _ = decode(token)
 
     # check for valid channel
     passed = False
@@ -283,22 +301,54 @@ def channel_addowner_v1(token, channel_id, u_id):
     #if not a user in the channel, add it to all membs too
     # for access error, check permission id first and if permission id isnt of the Dreams owner, check owner list of channels
     # ALLWAYS CHECK FOR PERMISSION ID FIRST FOR DREAM OWNERS
-    for chans in src.data.channels:
-        if chans["channel_id"] == channel_id:
-            userAuth = False
-            for users in chans["owner_members"]:
-                if token in users['session_id']:
-                    userAuth = True
-            if not userAuth:
-                raise AccessError
+    # Make user with user id u_id an owner of this channel
+    # When user with user id u_id is already an owner of the channel INPUT ERROR
+      
+    auth_user_id, _ = decode(token)
     
     passed = False
     for check in src.data.channels:
         if check['channel_id'] == channel_id:
             passed = True
-            break
     if not passed:
         raise InputError
+    for chans in src.data.channels:
+        if chans["channel_id"] == channel_id:
+            alreadyOwner = False
+            for users in chans["owner_members"]:
+                if users['u_id'] == u_id:
+                    alreadyOwner = True
+            if alreadyOwner == True:
+                raise InputError
+
+    # Access error
+    dreamsOwner = False
+    for users in src.data.users:
+        if users['u_id'] == auth_user_id:
+            if users['permission_id'] == 1:
+                dreamsOwner = True
+    for chans in src.data.channels:
+        if chans["channel_id"] == channel_id:
+            userAuth = False
+            for users in chans["owner_members"]:
+                if users['u_id'] == auth_user_id:
+                    userAuth = True
+                    break
+    
+    if dreamsOwner == False and userAuth == False:
+        raise AccessError
+    
+    inviteUser = {}
+    for user in src.data.users:
+        if user["u_id"] == u_id: # finds desired u_id
+            inviteUser = user.copy()
+    # now searches for channel_id
+    for chan in src.data.channels:
+        if chan["channel_id"] == channel_id:
+            # ensure no duplicates
+            chan["all_members"].append(inviteUser) if inviteUser not in chan["all_members"] else None
+            chan["owner_members"].append(inviteUser) if inviteUser not in chan["owner_members"] else None
+
 
 
     return {
@@ -306,14 +356,7 @@ def channel_addowner_v1(token, channel_id, u_id):
 
 def channel_removeowner_v1(token, channel_id, u_id):
     # does not remove from all membs
-    for chans in src.data.channels:
-        if chans["channel_id"] == channel_id:
-            userAuth = False
-            for users in chans["owner_members"]:
-                if token in users['session_id']:
-                    userAuth = True
-            if not userAuth:
-                raise AccessError
+    auth_user_id, _ = decode(token)
     
     passed = False
     for check in src.data.channels:
@@ -322,6 +365,38 @@ def channel_removeowner_v1(token, channel_id, u_id):
             break
     if not passed:
         raise InputError
+    for chans in src.data.channels:
+        if chans["channel_id"] == channel_id:
+            userisOwner = False
+            for users in chans["owner_members"]:
+                if users['u_id'] == u_id:
+                    userisOwner = True
+                    break
+            if not userisOwner:
+                raise InputError
+
+    # Access error
+    dreamsOwner = False
+    for users in src.data.users:
+        if users['u_id'] == auth_user_id:
+            if users['permission_id'] == 1:
+                dreamsOwner = True
+    
+    for chans in src.data.channels:
+        if chans["channel_id"] == channel_id:
+            userAuth = False
+            for users in chans["owner_members"]:
+                if users['u_id'] == auth_user_id:
+                    userAuth = True
+
+    if dreamsOwner == False and userAuth == False:
+        raise AccessError
+
+    for chan in src.data.channels:
+        if chan["channel_id"] == channel_id:
+            for users in chan["owner_members"]:
+                if users["u_id"] == u_id:
+                    chan["owner_members"].remove(users)
 
 
     return {
