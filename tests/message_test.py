@@ -1,7 +1,7 @@
 import pytest
-from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_share_v1
+from src.message import message_send_v2, message_remove_v1, message_edit_v1, message_share_v1
 from src.error import InputError, AccessError
-import src.channel, src.channels, src.auth, src.dm
+import src.channel, src.channels, src.auth, src.dm, src.message
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
@@ -12,7 +12,8 @@ ownMems = 'owner_members'
 fName   = 'name_first'
 lName   = 'name_last'
 token = 'token'
-
+mID = 'message_id'
+dmID = 'dm_id'
 # message_send_v1
 # When message is >1000 characters, InputError is raised
 # When authorised user is not part of the channel that they are trying to post in, AccessError is raised
@@ -45,5 +46,23 @@ def test_message_share():
     userID1 = src.auth.auth_register_v1("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
     userID2 = src.auth.auth_register_v1("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
     userID3 = src.auth.auth_register_v1("zodiac@gmail.com", "T3dCruz", "T", "C")
-
+    userID4 = src.auth.auth_register_v1("gmailgmail@gmail.com", "hiiiiii12345", "M", "C")
+    
     channelTest = src.channels.channels_create_v1(userID1[token], 'Channel', True)
+    src.channel.channel_invite_v1(userID1[token], channelTest[cID], userID2[AuID])
+    dmTest = src.dm.dm_create_v1(userID2[token],[userID4[AuID],userID3[AuID]])
+    
+    ogMessage = message_send_v2(userID1[token],channelTest[cID], "hello jeffrey meng") 
+
+    sharedMessage = message_share_v1(userID2[token], ogMessage[mID],'', -1, dmTest[dmID])
+
+    assert {
+        mID: sharedMessage[mID],
+        uID: userID2[AuID],
+        'message': "hello jeffrey meng"
+        
+    } in
+
+
+
+    
