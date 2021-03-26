@@ -70,34 +70,42 @@ def test_channels_list_valid():
     assert channels_list_v2(user2[token]) == {  
         'channels': [{cID: firstChannel[cID], Name: 'Oogway'}]
     }
-    src.channel.channel_leave_v1(user2[token], firstChannel[cID]):
+    src.channel.channel_leave_v1(user2[token], firstChannel[cID])
     assert channels_list_v2(user2[token]) == {
         'channels': []
     }
 
 def test_channels_listall_valid():
-    #* Private and public channels are both shown
-    '''
-    < Register 2 users>
-    < One creates a public and private channel>
-    < Other calls function >
-    '''
-    #* Joining/leaving channels does not affect the output
-    '''
-    < Register 2 users >
-    < One creates a channel >
-    < Invite other user >
-    < Call function >
-    < User leaves >
-    < Call function >
-    '''
-    #* Running the function for two different valid AuIDs shoud have the same result
-    '''
-    < Register 2 users >
-    < One creates a channel >
-    < Assert both function calls are equal >
-    '''
-    pass
+    src.other.clear_v1()
+    user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Steve", "Irwin")
+    user2 = src.auth.auth_register_v1("second@gmail.com", "password", "Jonah", "from Tonga")
+    firstChannel = channels_create_v1(user1[token], 'Oogway', True)
+    secondChannel = channels_create_v1(user1[token], 'NEZ', False)
+    assert channels_listall_v2(user2[token]) == {
+        'channels': [
+            {cID: firstChannel[cID], Name: 'Oogway'},
+            {cID: secondChannel[cID], Name: 'NEZ'},
+        ]
+    }
+    
+    src.other.clear_v1()
+    user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Steve", "Irwin")
+    user2 = src.auth.auth_register_v1("second@gmail.com", "password", "Jonah", "from Tonga")
+    firstChannel = channels_create_v1(user1[token], 'Oogway', True)
+    assert channels_listall_v2(user2[token]) == {
+        'channels': [{cID: firstChannel[cID], Name: 'Oogway'},]
+    }
+    src.channel.channel_join_v1(user2[token], firstChannel[cID])
+    assert channels_listall_v2(user2[token]) == {
+        'channels': [{cID: firstChannel[cID], Name: 'Oogway'},]
+    }
+
+    src.other.clear_v1()
+    user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Steve", "Irwin")
+    user2 = src.auth.auth_register_v1("second@gmail.com", "password", "Jonah", "from Tonga")
+    firstChannel = channels_create_v1(user1[token], 'Oogway', True)
+    secondChannel = channels_create_v1(user2[token], 'NEZ', False)
+    assert channels_listall_v2(user1[token]) == channels_listall_v2(user2[token])
 
 def test_channels_create():
     #* Ensure database is empty
