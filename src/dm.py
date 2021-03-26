@@ -89,7 +89,8 @@ def dm_messages_v1(token, dm_id, start):
     pass
 
 def decode(token):
-    auth_user_id, session_id = jwt.decode(token, SECRET, algorithm='HS256')
+    payload = jwt.decode(token, SECRET, algorithms='HS256')
+    auth_user_id, session_id = payload.get('session_id'), payload.get('user_id')
     check_session(auth_user_id, session_id)
     return auth_user_id, session_id
 
