@@ -1,7 +1,17 @@
 import pytest
-from src.message import message_send_v1, message_remove_v1, message_edit_v1
+from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_share_v1
 from src.error import InputError, AccessError
-import src.channel, src.channels, src.auth
+import src.channel, src.channels, src.auth, src.dm
+
+AuID    = 'auth_user_id'
+uID     = 'u_id'
+cID     = 'channel_id'
+chans   = 'channels'
+allMems = 'all_members'
+ownMems = 'owner_members'
+fName   = 'name_first'
+lName   = 'name_last'
+token = 'token'
 
 # message_send_v1
 # When message is >1000 characters, InputError is raised
@@ -21,3 +31,19 @@ import src.channel, src.channels, src.auth
 # When query_str is >1000 characters, InputError is raised
 # Test that users can only see messages in channels that they have joined
     # Test if a user who has joined no channels can see any messages
+
+# AccessError when:
+# the authorised user has not joined the channel or DM they are trying to share the message to
+
+def test_message_share():
+    #* Ensure database is empty
+    #! Clearing data
+
+    src.other.clear_v1()
+
+    userID0 = src.auth.auth_register_v1("ownerDreams@gmail.com", "GodOwner123", "Owner", "Owner")
+    userID1 = src.auth.auth_register_v1("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
+    userID2 = src.auth.auth_register_v1("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
+    userID3 = src.auth.auth_register_v1("zodiac@gmail.com", "T3dCruz", "T", "C")
+
+    channelTest = src.channels.channels_create_v1(userID1[token], 'Channel', True)
