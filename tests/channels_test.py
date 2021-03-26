@@ -16,14 +16,6 @@ lName   = 'name_last'
 chans   = 'channels'
 token   = 'token'
 
-"""
-    user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v1("second@gmail.com", "password", "Jonah", "from Tonga")
-    user3 = src.auth.auth_register_v1("third@gmail.com", "password", "Rock", "Sand")
-
-"""
-
-
 @pytest.fixture
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
