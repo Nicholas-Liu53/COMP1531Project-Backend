@@ -1,9 +1,10 @@
-# File to test functions in src/channels.py
-
 import pytest
-from src.channels import channels_list_v1, channels_listall_v1, channels_create_v1
+from src.channels import channels_list_v2, channels_listall_v2, channels_create_v1
 from src.error import AccessError, InputError
 import src.auth, src.channel, src.other
+import jwt
+
+SECRET = 'MENG'
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
@@ -14,43 +15,60 @@ fName   = 'name_first'
 lName   = 'name_last'
 chans   = 'channels'
 
-def test_channels_list():
-    # Test 1: When calling the function with an invalid auth_user_id should raise an AccessError
-    src.other.clear_v1()
+@pytest.fixture
+def invalid_token():
+    return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
+
+def test_channels_access_error(invalid_token):
     with pytest.raises(AccessError):
-        channels_list_v1("wrongid")
+        channels_list_v2(invalid_token)
+        channels_listall_v2(invalid_token)
 
-    # Setup users and create shorthand for strings for testing code
-    userID1 = src.auth.auth_register_v1("first@gmail.com", "password", "D", "C")
-    userID2 = src.auth.auth_register_v1("second@gmail.com", "password", "L", "M")
+def test_channels_list_valid():
+    #* User is part of no channels
+    '''
+    < Register 2 users >
+    < One creates a channel >
+    < Run function >
+    '''
+    #* User is part of some channels
+    '''
+    < Register 3 users >
+    < 2 create a channel for themselves >
+    < 3rd creates a channel and invites both >
+    < Run function >
+    '''
+    #* User is in all channels
+    '''
+    < Register user >
+    < Create a channel >
+    < Run function >
+    '''
+    pass
 
-    # Test 2: When calling the function with a valid auth_user_id, only the channels that user has joined should appear
-    firstChannel = channels_create_v1(userID1[AuID], 'Marmot', True)
-    assert channels_list_v1(userID2[AuID]) == {'channels': []}
-    src.channel.channel_join_v1(userID2[AuID], firstChannel[cID])
-    assert channels_list_v1(userID2[AuID]) == {'channels': [{cID: firstChannel[cID], cName: 'Marmot'}]}
-
-def test_channels_listall():
-    # Test 1: When calling the function with an invalid auth_user_id should raise an AccessError
-    src.other.clear_v1()
-    with pytest.raises(AccessError):
-        channels_listall_v1("noonehasthis")
-
-    # Setup users and create shorthand for strings for testing code
-    userID1 = src.auth.auth_register_v1("first@gmail.com", "password", "D", "C")
-    userID2 = src.auth.auth_register_v1("second@gmail.com", "password", "L", "M")
-
-    # Test 2: When calling the function with a valid auth_user_id, both private and public channels are displayed even if the user is not a member
-    firstChannel = channels_create_v1(userID1[AuID], 'JS', True)
-    secondChannel = channels_create_v1(userID1[AuID], 'NEZ', False)
-    assert channels_listall_v1(userID1[AuID]) == {'channels': [{cID: firstChannel[cID], cName: 'JS'}, {cID: secondChannel[cID], cName: 'NEZ'}]}
-
-    # Test 3: When adding users to channels, this should not affect the output of the program
-    src.channel.channel_join_v1(userID1[AuID], firstChannel[cID])
-    assert channels_listall_v1(userID1[AuID]) == {'channels': [{cID: firstChannel[cID], cName: 'JS'},{cID: secondChannel[cID], cName: 'NEZ'}]}
-
-    # Test 4: When running the function for two different valid auth_user_ids, the return should be the same
-    assert channels_listall_v1(userID1[AuID]) == channels_listall_v1(userID2[AuID])
+def test_channels_listall_valid():
+    #* Private and public channels are both shown
+    '''
+    < Register 2 users>
+    < One creates a public and private channel>
+    < Other calls function >
+    '''
+    #* Joining/leaving channels does not affect the output
+    '''
+    < Register 2 users >
+    < One creates a channel >
+    < Invite other user >
+    < Call function >
+    < User leaves >
+    < Call function >
+    '''
+    #* Running the function for two different valid AuIDs shoud have the same result
+    '''
+    < Register 2 users >
+    < One creates a channel >
+    < Assert both function calls are equal >
+    '''
+    pass
 
 def test_channels_create():
     #* Ensure database is empty
