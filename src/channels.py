@@ -13,25 +13,22 @@ fName   = 'name_first'
 lName   = 'name_last'
 chans   = 'channels'
 
-def channels_list_v1(auth_user_id):
-    """
+def channels_list_v2(token):
+    '''
     Provides a list of all channels (and their associated details) that the authorised user is part of
 
     Arguments:
-        auth_user_id (int): The user_id of the user calling the function
+        token (str): JWT containing { u_id, session_id }
 
     Exceptions:
-        AccessError - Occurs when the auth_user_id passed in is not a valid id
+        AccessError - Raised when the token passed in is not valid
 
     Return Value:
         Returns dictionary of a list of channels mapped to the key string 'channels'
         Each channel is represented by a dictionary containing types { channel_id, name }
-    """
-    # First, check if auth_user-id is a valid user_id
-    get_user(auth_user_id)
-
+    '''
+    auth_user_id, _ = decode(token)
     output = []
-    # Find channels that user is part of and add them to the output list
     for chanD in src.data.channels:
         for memberD in chanD['all_members']:
             if auth_user_id is memberD['u_id']:
@@ -39,36 +36,28 @@ def channels_list_v1(auth_user_id):
                 channel[cID] = chanD[cID]
                 channel[Name] = chanD[Name]
                 output.append(channel)
-
+    
     return {
         'channels': output
     }
 
-def channels_list_v2(token):
-    pass
-
 def channels_listall_v2(token):
-    pass
-
-def channels_listall_v1(auth_user_id):
-    """
+    '''
     Provides a list of all channels (and their associated details)
     Channels are provided irrespective of whether the member is part of the channel
     Both public and private channels are provided
 
     Arguments:
-        auth_user_id (int): The user_id of the user calling the function
+        token (str): JWT containing { u_id, session_id }
 
     Exceptions:
-        AccessError - Occurs when the auth_user_id passed in is not a valid id
+        AccessError - Raised when the token passed in is not valid
 
     Return Value:
         Returns dictionary of a list of channels mapped to the key string 'channels'
         Each channel is represented by a dictionary containing types { channel_id, name }
-    """
-    
-    get_user(auth_user_id)
-
+    '''
+    decode(token)
     output = []
     for d in src.data.channels:
         channel = {}
