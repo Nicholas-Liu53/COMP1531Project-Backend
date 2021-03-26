@@ -6,7 +6,7 @@ uID     = 'u_id'
 cID     = 'channel_id'
 allMems = 'all_members'
 cName   = 'name'
-fName   = 'name_first'
+fName   = 'name_first' d
 lName   = 'name_last'
 chans   = 'channels'
 
