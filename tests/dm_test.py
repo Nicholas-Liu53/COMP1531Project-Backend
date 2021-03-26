@@ -18,6 +18,10 @@ dmID    = 'dm_id'
 
 SECRET = 'MENG'
 
+@pytest.fixture
+def invalid_token():
+    return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
+
 #! Make sure to clear before every test
 
 def test_dm_details_valid():
@@ -176,15 +180,14 @@ def test_dm_leave():
 def test_dm_messages():
     pass
 
-def test_dm_unauthorised_user():
-    #* Test for unauthorised users for all dm functions
-    removedUser = src.auth.auth_register_v1("removed@gmail.com", "password", "Yusuf", "Bideen")   
+def test_dm_unauthorised_user(invalid_token):
+    #* Test for unauthorised users for all dm functions  
     src.other.clear_v1()
     user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Hotel?", "Trivago")
     user2 = src.auth.auth_register_v1("second@gmail.com", "password", "Hotel?", "Trivago")
     dm1 = dm_create_v1(user1[token], [user2[AuID]])
 
     with pytest.raises(AccessError):
-        dm_details_v1(removedUser[token], dm1[dmID])
-        dm_list_v1(removedUser[token])
-        dm_create_v1(removedUser[token], [user1[AuID]])
+        dm_details_v1(invalid_token, dm1[dmID])
+        dm_list_v1(invalid_token)
+        dm_create_v1(invalid_token, [user1[AuID]])
