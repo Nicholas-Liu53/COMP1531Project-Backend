@@ -100,10 +100,8 @@ def dm_remove_v1(token, dm_id):
 
     return {}
 
-
 #Ethan
 def dm_invite_v1(token, dm_id, u_id):
-
 #ASSUME: Do not need to add new user into dm_name
 
 #Invites a user to an existing dm
@@ -124,10 +122,12 @@ def dm_invite_v1(token, dm_id, u_id):
     if error_present = True:
         raise Exception("AccessError")
 
-
     #Now that errors are fixed, can invite user to DM
-
-
+    #Append their Uid to list of allMems list in dm_id dictionary
+    for items in range(0,len(src.data.dms)):
+        #How to differentiate between the dm_id within the dictionary and the one we want?
+        if src.data.dms[items]['dm_id'] = 'dm_id':
+            src.data.dms[items]['all_members'].append(u_id)
     return {}
 
 #Ethan
@@ -153,6 +153,17 @@ def dm_leave_v1(token, dm_id):
 
     #Now can remove user from DM with dm_id
 
+    #Is auth user id same as user Id, if not how to CHANGE IT
+
+    current_user = decode(token)
+    #remove their Uid from list of allMems list in dm_id dictionary
+    for items in range(0,len(src.data.dms)):
+        #How to differentiate between the dm_id within the dictionary and the one we want?
+        if src.data.dms[items]['dm_id'] = 'dm_id':
+                for members in src.data.dms[items][['all_members']]:
+                    #Is this too much nesting?
+                    if src.data.dms[items]['all_members'][members] = current_user:
+                        del src.data.dms[items]['all_members'][members]
     return {}
 
 def dm_messages_v1(token, dm_id, start):
