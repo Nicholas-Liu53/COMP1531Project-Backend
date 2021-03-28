@@ -155,7 +155,7 @@ def dm_leave_v1(token, dm_id):
 def dm_messages_v1(token, dm_id, start):
 
     auth_user_ID, - = decode(token)
-    message_count(-1, dm_id)
+    num_of_messages = message_count(-1, dm_id)
 
     #Handle errors
     #Input error 1:DM ID is not a valid DM
@@ -171,18 +171,30 @@ def dm_messages_v1(token, dm_id, start):
                 items['all_members'].remove(auth_user_ID)
 
     # Input error 2:start is greater than the total number of messages in the channel
-    if start <= len(messages):
+    if start <= num_of_messages:
         input_error = False
 
     if input_error:
         raise input_error
 
-    #After Nicks stuff
     desired_end = start + 50
-    #Case 1: There are enough messages in the dm: i.e more than 50 from start
-    if len(messages) > desired_end:
+    messages = []
 
-    #Case 2:Not enough messages in dm: i.e. end will be -1
+    #Get all dms
+    for objects in src.data.messages_log:
+        if dm_id == objects['dm_id']:
+            current_DM = objects.copy()
+            del current_DM[channel_id]
+            del current_DM[dm_id]
+            messages.append(current_DM)
+
+
+    #Case 1: There are enough messages in the dm: i.e more than 50 from start
+    if num_of_messages >= desired_end:
+        return {messages, start, desired_end}
+    else:
+        return {messages, start, -1}
+
     pass
 
 def decode(token):
