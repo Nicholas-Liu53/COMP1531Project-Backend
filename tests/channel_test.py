@@ -151,8 +151,6 @@ def test_channel_messages():
     pass
 
 def test_channel_leave():
-    pass
-    '''
     #* Ensure database is empty
     #! Clearing data
     src.other.clear_v1()
@@ -217,7 +215,6 @@ def test_channel_leave():
     #* Finished testing for this function
     #! Clearing data
     src.other.clear_v1()
-    '''
 
 
 def test_channel_join():
