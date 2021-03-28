@@ -1,26 +1,61 @@
 import pytest
-from src.message import message_send_v1, message_remove_v1, message_edit_v1
+from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_senddm_v1
 from src.error import InputError, AccessError
-import src.channel, src.channels, src.auth
+import src.channel, src.channels, src.auth, src.dm
+import jwt
 
-# message_send_v1
-# When message is >1000 characters, InputError is raised
-# When authorised user is not part of the channel that they are trying to post in, AccessError is raised
-# After the function is sucessfully run, ensure that the return value is correct
+AuID    = 'auth_user_id'
+uID     = 'u_id'
+cID     = 'channel_id'
+allMems = 'all_members'
+Name   = 'name'
+fName   = 'name_first'
+lName   = 'name_last'
+chans   = 'channels'
+token   = 'token'
+dmID    = 'dm_id'
 
-# message_edit_v1
-# When message is >1000 characters, InputError is raised
-# If there are no messages with matching message_id, InputError is raised
-# Ownership permission tests:
-    # Owner of Dreams should be able to edit anything
-    # Owner of channels should be able to edit anything in channels they own
-    # Non-owner of channels should only be able to edit their own messages
-# Test if a message has been edited successfully?
+@pytest.fixture
+def invalid_token():
+    return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
-# search_v1
-# When query_str is >1000 characters, InputError is raised
-# Test that users can only see messages in channels that they have joined
-    # Test if a user who has joined no channels can see any messages
+#* Test send functions together with message/send/v2
+#? Test if message_id increases correctly
 
-def test_senddm():
+def test_senddm_errors():
+    src.other.clear_v1()
+    user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Steve", "Irwin")
+    user2 = src.auth.auth_register_v1("second@gmail.com", "password", "Jonah", "from Tonga")
+    user3 = src.auth.auth_register_v1("third@gmail.com", "password", "Rock", "Sand")
+    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    
+    with pytest.raises(AccessError):
+        message_senddm_v1(user3[token], dm1[dmID], '')
+
+    src.other.clear_v1()
+    user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Steve", "Irwin")
+    invalid_dm_id = -1
+
+    with pytest.raises(InputError):
+        message_senddm_v1(user1[token], invalid_dm_id, '')
+
+    message = ''
+    for _ in range(1500):
+        message += 'a'
+    user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Steve", "Irwin")
+    user2 = src.auth.auth_register_v1("second@gmail.com", "password", "Jonah", "from Tonga")
+    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    with pytest.raises(InputError):
+        message_senddm_v1(user1[token], dm1[dmID], message)
+
+def test_senddm_multiple():
     pass
+
+def test_dm_unauthorised_user(invalid_token):
+    #* All unauthorised user tests
+    user1 = src.auth.auth_register_v1("first@gmail.com", "password", "Steve", "Irwin")
+    user2 = src.auth.auth_register_v1("second@gmail.com", "password", "Jonah", "from Tonga")
+    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    
+    with pytest.raises(AccessError):
+        message_senddm_v1(invalid_token, dm1[dmID], '')
