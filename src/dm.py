@@ -153,7 +153,8 @@ def dm_leave_v1(token, dm_id):
     return {}
 
 def dm_messages_v1(token, dm_id, start):
-    pass
+    auth_user_ID, _ = decode(token)
+    message_count(-1, dm_id)
 
 def decode(token):
     payload = jwt.decode(token, SECRET, algorithms='HS256')
@@ -191,3 +192,10 @@ def get_user(user_id):
                 'handle_string': user['handle_string'],
             }
     raise InputError
+
+def message_count(channel_id, dm_id):
+    counter = 0
+    for message in src.data.messages_log:
+        if channel_id == src.data.messages_log[cID] or dm_id == src.data.messages_log[dmID]:
+            counter += 1
+    return counter
