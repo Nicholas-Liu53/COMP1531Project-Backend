@@ -1,6 +1,8 @@
 import src.data
 from src.error import AccessError, InputError
 import jwt
+from datetime import timezone
+
 
 def check_session(auth_user_id, session_id):
     for user in src.data.users:
@@ -29,6 +31,10 @@ def message_edit_v1(auth_user_id, message_id, message):
     return {
     }
 
+def message_senddm_v1(token, dm_id, message):
+    return{
+        'message_id': 1
+    }
 def message_share_v1(token, og_message_id, message, channel_id, dm_id):
 
     # the authorised user has not joined the channel or DM they are trying to share the message to

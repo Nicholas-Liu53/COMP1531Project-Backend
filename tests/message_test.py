@@ -1,7 +1,9 @@
 import pytest
-from src.message import message_send_v2, message_remove_v1, message_edit_v1, message_share_v1
+from src.message import message_send_v2, message_remove_v1, message_edit_v1, message_share_v1, message_senddm_v1
 from src.error import InputError, AccessError
 import src.channel, src.channels, src.auth, src.dm, src.message
+from datetime import timezone, datetime
+
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
@@ -36,13 +38,12 @@ dmID = 'dm_id'
 # AccessError when:
 # the authorised user has not joined the channel or DM they are trying to share the message to
 
-def test_message_share():
+def test_message_share_todm():
     #* Ensure database is empty
     #! Clearing data
 
     src.other.clear_v1()
 
-    userID0 = src.auth.auth_register_v1("ownerDreams@gmail.com", "GodOwner123", "Owner", "Owner")
     userID1 = src.auth.auth_register_v1("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
     userID2 = src.auth.auth_register_v1("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
     userID3 = src.auth.auth_register_v1("zodiac@gmail.com", "T3dCruz", "T", "C")
@@ -54,14 +55,88 @@ def test_message_share():
     
     ogMessage = message_send_v2(userID1[token],channelTest[cID], "hello jeffrey meng") 
 
-    sharedMessage = message_share_v1(userID2[token], ogMessage[mID],'', -1, dmTest[dmID])
+    sharedMessage, now = message_share_v1(userID2[token], ogMessage[mID],'', -1, dmTest[dmID]), datetime.now()
+
+    timestamp = now.replace(tzinfo=timezone.utc).timestamp()
 
     assert {
         mID: sharedMessage[mID],
         uID: userID2[AuID],
-        'message': "hello jeffrey meng"
-        
-    } in
+        'message': "hello jeffrey meng",
+        'time_created': timestamp,
+    } in src.dm.dm_messages_v1(userID2[token],dmTest[dmID],0)['messages']
+
+    # userID1 is not in dmTest, raise access error
+    with pytest.raises(AccessError):
+        message_share_v1(userID1[token], ogMessage[mID], '', -1, dmTest[dmID])
+
+
+
+def test_message_share_tochannel():
+    #* Ensure database is empty
+    #! Clearing data
+
+    src.other.clear_v1()
+
+    userID0 = src.auth.auth_register_v1("ownerDreams@gmail.com", "GodOwner123", "Owner", "Owner")
+    userID1 = src.auth.auth_register_v1("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
+    userID2 = src.auth.auth_register_v1("zodiac@gmail.com", "T3dCruz", "T", "C")
+
+    channelTest = src.channels.channels_create_v1(userID0[token], 'Channel', True)
+    channelTest2 = src.channels.channels_create_v1(userID1[token], 'Channel', True)
+
+    src.channel.channel_invite_v1(userID1[token], channelTest2[cID], userID0[AuID])
+    src.channel.channel_invite_v1(userID0[token], channelTest[cID], userID2[AuID])
+
+    ogMessage = message_send_v2(userID0[token],channelTest[cID], "hello jeffrey meng") 
+
+    sharedMessage, now = message_share_v1(userID0[token], ogMessage[mID],'vincent', channelTest2[cID], -1), datetime.now()
+
+    timestamp = now.replace(tzinfo=timezone.utc).timestamp()
+
+    assert {
+        mID: sharedMessage[mID],
+        uID: userID0[AuID],
+        'message': "hello jeffrey meng | vincent",
+        'time_created': timestamp,
+    } in src.channel.channel_messages_v1(userID1[token],channelTest2[cID],0)['messages']
+
+    with pytest.raises(AccessError):
+        message_share_v1(userID2[token], ogMessage[mID], '', channelTest2[cID], -1)
+
+def test_message_share_dmtodm():
+    
+    #* Ensure database is empty
+    #! Clearing data
+
+    src.other.clear_v1()
+
+    userID1 = src.auth.auth_register_v1("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
+    userID2 = src.auth.auth_register_v1("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
+    userID3 = src.auth.auth_register_v1("zodiac@gmail.com", "T3dCruz", "T", "C")
+    userID4 = src.auth.auth_register_v1("gmailgmail@gmail.com", "hiiiiii12345", "M", "C")
+    
+    dmTest = src.dm.dm_create_v1(userID2[token],[userID4[AuID],userID3[AuID]])
+    dmTest2 = src.dm.dm_create_v1(userID1[token],[userID2[AuID]])
+
+    ogMessage = message_senddm_v1(userID1[token], dmTest2[dmID], 'hello meng')
+
+    sharedMessage, now = message_share_v1(userID2[token], ogMessage[mID],'wow', -1, dmTest[dmID]), datetime.now()
+
+    timestamp = now.replace(tzinfo=timezone.utc).timestamp()
+
+    assert {
+        mID: sharedMessage[mID],
+        uID: userID2[AuID],
+        'message': "hello jeffrey meng | wow",
+        'time_created': timestamp,
+    } in src.dm.dm_messages_v1(userID4[token],dmTest[dmID],0)['messages']
+
+    with pytest.raises(AccessError):
+        message_share_v1(userID1[token], ogMessage[mID], '', -1, dmTest[dmID])
+
+
+
 
 
 
