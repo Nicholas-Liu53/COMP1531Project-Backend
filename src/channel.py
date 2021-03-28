@@ -36,25 +36,19 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
         userAuth = False
         if chans["channel_id"] == channel_id:
             for users in chans["all_members"]:
-                if users['u_id'] == auth_user_id:
+                if users == auth_user_id:
                     userAuth = True
                     break
             if userAuth == False:
                 raise AccessError
-                    
-    # should check for auth_user_id in channel info first for owners
-    inviteUser = {}
-    for user in src.data.users:
-        if user["u_id"] == u_id: # finds desired u_id
-            inviteUser = user.copy()
-    if inviteUser == {}:
-        raise InputError
-    
+
+    get_user(u_id)
+
     # now searches for channel_id
     for chan in src.data.channels:
         if chan["channel_id"] == channel_id:
             # ensure no duplicates
-            chan["all_members"].append(inviteUser) if inviteUser not in chan["all_members"] else None
+            chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
     return {   
     }
 
@@ -92,7 +86,7 @@ def channel_details_v1(auth_user_id, channel_id):
         userAuth = False
         if chans["channel_id"] == channel_id:
             for users in chans["all_members"]:
-                if users['u_id'] == auth_user_id:
+                if users == auth_user_id:
                     userAuth = True
                     break
             if userAuth == False:
@@ -101,30 +95,18 @@ def channel_details_v1(auth_user_id, channel_id):
         if details["channel_id"] == channel_id:
 
             # filteres the information to be displayed
-            filteredDetails = dict((item, details[item]) for item in ["name"] if item in details)
+            filteredDetails = dict((item, details[item]) for item in ["name", "is_public"] if item in details)
 
             # takes only user_id, first and last name
             ownmem = []
             for user in details["owner_members"]:
-                filteredOwner = {}
-                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "u_id"))
-                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "name_first"))
-                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "name_last"))
-                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "email"))
-                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "handle_string"))
-                ownmem.append(filteredOwner)
+                ownmem.append(get_user(user))
             dictAllOwn = {"owner_members": ownmem}
             filteredDetails.update(dictAllOwn)
 
             allmem = []
             for user in details["all_members"]:
-                filteredUser = {}
-                filteredUser.update(dict((key,value) for key, value in user.items() if key == "u_id"))
-                filteredUser.update(dict((key,value) for key, value in user.items() if key == "name_first"))
-                filteredUser.update(dict((key,value) for key, value in user.items() if key == "name_last"))
-                filteredUser.update(dict((key,value) for key, value in user.items() if key == "email"))
-                filteredUser.update(dict((key,value) for key, value in user.items() if key == "handle_string"))
-                allmem.append(filteredUser)
+                allmem.append(get_user(user))
             dictAllMem = {"all_members" : allmem}
             filteredDetails.update(dictAllMem)
 
@@ -255,10 +237,6 @@ def channel_join_v1(auth_user_id, channel_id):
 
     i -= 1      # Undo extra increment
 
-    if src.data.channels[i]['is_public'] == False:
-        # If channel is private, AccessError
-        raise AccessError
-
     # Time to find the user details
     userFound = False
     j = 0
@@ -272,8 +250,12 @@ def channel_join_v1(auth_user_id, channel_id):
 
     j -= 1      # Undo extra increment
 
+    if src.data.channels[i]['is_public'] == False and src.data.users[j]['permission_id'] is False:
+        # If channel is private, AccessError
+        raise AccessError
+
     # Time to add the user into the channel
-    src.data.channels[i]['all_members'].append(src.data.users[j])
+    src.data.channels[i]['all_members'].append(src.data.users[j]['u_id'])
 
     # Done, return empty list 
     return {
@@ -286,3 +268,15 @@ def channel_addowner_v1(auth_user_id, channel_id, u_id):
 def channel_removeowner_v1(auth_user_id, channel_id, u_id):
     return {
     }
+
+def get_user(user_id):
+    for user in src.data.users:
+        if user_id == user['u_id']:
+            return {
+                'u_id': user['u_id'],
+                'email': user['email'],
+                'name_first': user['name_first'],
+                'name_last': user['name_last'],
+                'handle_string': user['handle_string'],
+            }
+    raise InputError

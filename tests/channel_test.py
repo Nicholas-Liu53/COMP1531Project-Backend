@@ -152,6 +152,73 @@ def test_channel_messages():
 
 def test_channel_leave():
     pass
+    '''
+    #* Ensure database is empty
+    #! Clearing data
+    src.other.clear_v1()
+
+    #* Setup users and channels and create shorthand for strings for testing code
+    userID1 = src.auth.auth_register_v1("ayelmao@gmail.com", "Bl00dO4th", "C", "L")
+    userID2 = src.auth.auth_register_v1("lolrofl@gmail.com", "pr3ttynAme", "S", "S")
+    userID3 = src.auth.auth_register_v1("zodiac@gmail.com", "T3dCruz", "T", "C")
+    userID4 = src.auth.auth_register_v1("ocasio@gmail.com", "Alex4ndr1a", "A", "O")
+
+    # userID1 made public channel 'TrumpPence'
+    firstChannel = src.channels.channels_create_v1(userID1[AuID], 'TrumpPence', True)
+
+    #* userID2, userID3 and userID4 join public channel 'TrumpPence'
+    channel_join_v1(userID2[AuID], firstChannel[cID])
+    channel_join_v1(userID3[AuID], firstChannel[cID])
+    channel_join_v1(userID4[AuID], firstChannel[cID])
+
+    #* Make sure they joined
+    assert {
+        uID: userID2[AuID],
+        fName: 'S',
+        lName: "S",
+        'email': "lolrofl@gmail.com",
+        'handle_string': "ss",
+    } in channel_details_v1(userID2[AuID], firstChannel[cID])[allMems]
+    assert {
+        uID: userID3[AuID],
+        fName: 'T',
+        lName: "C",
+        'email': "zodiac@gmail.com",
+        'handle_string': "tc",
+    } in channel_details_v1(userID3[AuID], firstChannel[cID])[allMems]
+    assert {
+        uID: userID4[AuID],
+        fName: 'A',
+        lName: "O",
+        'email': "ocasio@gmail.com",
+        'handle_string': "ao",
+    } in channel_details_v1(userID4[AuID], firstChannel[cID])[allMems]
+
+    #* One of them gets removed
+    channel_leave_v1(userID3[AuID], firstChannel[cID])
+    assert {
+        uID: userID3[AuID],
+        fName: 'T',
+        lName: "C",
+        'email': "zodiac@gmail.com",
+        'handle_string': "tc",
+    } not in channel_details_v1(userID1[AuID], firstChannel[cID])[allMems]
+
+    #* Another gets removed 
+    channel_leave_v1(userID4[AuID], firstChannel[cID])
+    assert {
+        uID: userID4[AuID],
+        fName: 'A',
+        lName: "O",
+        'email': "ocasio@gmail.com",
+        'handle_string': "ao",
+    } not in channel_details_v1(userID1[AuID], firstChannel[cID])[allMems]
+
+    #* Finished testing for this function
+    #! Clearing data
+    src.other.clear_v1()
+    '''
+
 
 def test_channel_join():
     #* Ensure database is empty
@@ -173,10 +240,10 @@ def test_channel_join():
     channel_join_v1(userID3[AuID], firstChannel[cID])
     assert {
         uID: userID3[AuID],
-        fName: 'T',
-        lName: "C",
         'email': "zodiac@gmail.com",
-        'handle_string': "tc",
+        fName: "T",
+        lName: "C",
+        'handle_string': 'tc'
     } in channel_details_v1(userID3[AuID], firstChannel[cID])[allMems]
 
     #* Test 2: If userID4 unsuccessfully joins private channel 'BidenHarris'

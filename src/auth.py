@@ -115,7 +115,7 @@ def auth_register_v1(email, password, name_first, name_last):
                 trailing_int += 1
         
         handle_string = handle_string + str(trailing_int)
-      
+
     user_id = len(src.data.users)
 
     src.data.users.append({
@@ -138,5 +138,5 @@ def check_handle(handle_string):
     return False
 
     
-  
+
     

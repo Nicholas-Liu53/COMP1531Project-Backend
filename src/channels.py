@@ -30,13 +30,12 @@ def channels_list_v1(auth_user_id):
     output = []
     # Find channels that user is part of and add them to the output list
     for chanD in src.data.channels:
-        for memberD in chanD['all_members']:
-            if auth_user_id is memberD['u_id']:
-                channel = {}
-                channel[cID] = chanD[cID]
-                channel[cName] = chanD[cName]
-                if channel[cID] != None and channel[cName] != None:
-                    output.append(channel)
+        if auth_user_id in chanD['all_members']:
+            channel = {}
+            channel[cID] = chanD[cID]
+            channel[cName] = chanD[cName]
+            if channel[cID] != None and channel[cName] != None:
+                output.append(channel)
 
     return {
         'channels': output
@@ -124,8 +123,8 @@ def channels_create_v1(auth_user_id, name, is_public):
             'channel_id': newID,
             'is_public': is_public,
             'name': name,
-            'owner_members': [src.data.users[j]],
-            'all_members': [src.data.users[j]],
+            'owner_members': [src.data.users[j][uID]],
+            'all_members': [src.data.users[j][uID]],
         }
     )
 
