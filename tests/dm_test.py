@@ -219,6 +219,43 @@ def test_dm_leave():
     pass
 
 def test_dm_messages():
+    src.other.clear_v1()
+    userID1 = src.auth.auth_register_v1("1531@gmail.com", "123456", "Tom", "Zhang")
+    userID2 = src.auth.auth_register_v1("comp@gmail.com", "456789", "Jack", "P")
+    userID2 = src.auth.auth_register_v1("hello@gmail.com", "1357", "Harry", "J")
+    dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
+    invalid_dm_id = -1
+
+    #Input error when DM ID not valid or start is greater than # of messages in DM
+    with pytest.raises(InputError):
+        #DM ID not valid
+        dm_messages_v1(userID1[token], invalid_dm_id, 0)
+        #Start greater than # of messages in DM
+        dm_messages_v1(userID1[token], dm_0['dm_id'], 1)
+
+    #Access error when Authorised user is not a member of DM with dm_id
+    with pytest.raises(AccessError):
+        dm_messages_v1(userID3[token], dm_0['dm_id'],0)
+
+    assert dm_messages_v1(userID1[token], dm_0['dm_id'],0) == {[], 0, -1}
+    #Add certain number of DM's to dm_0 e.g. 10
+    message_counter = 0
+    while message_counter < 10:
+        MESSAGESEND
+        message_counter += 1
+
+    assert dm_messages_v1(userID1[token], dm_0['dm_id'],0) == {['0','1','2','3','4','5','6','7','8','9','10'], 0, -1}
+
+    #add so that there are 51 messages in DM
+    while message_counter < 51:
+        MESSAGE SOUND
+        message_counter += 1
+
+    assert dm_messages_v1(userID1[token], dm_0['dm_id'], 0) == {['0','1','2','3','4','5','6','7','8','9','10','11','12',
+                                                                 '13','14','15','16','17','18','19','20','21','22','23',
+                                                                 '24','25','26','27','28','29','30','31','32','33','34',
+                                                                 '35','36','37','38','39','40','41','42','43','44','45',
+                                                                 '46','47','48','49','50'], 0, 50}
     pass
 
 def test_dm_unauthorised_user(invalid_token):
