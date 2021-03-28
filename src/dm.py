@@ -225,7 +225,7 @@ def get_user(user_id):
 
 def message_count(channel_id, dm_id):
     counter = 0
-    if dm_id == -1
+    if dm_id == -1:
         for message in src.data.messages_log:
             if channel_id == src.data.messages_log[cID]:
             counter += 1
