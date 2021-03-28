@@ -21,3 +21,6 @@ import src.channel, src.channels, src.auth
 # When query_str is >1000 characters, InputError is raised
 # Test that users can only see messages in channels that they have joined
     # Test if a user who has joined no channels can see any messages
+
+def test_senddm():
+    pass
