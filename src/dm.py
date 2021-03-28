@@ -154,48 +154,37 @@ def dm_leave_v1(token, dm_id):
 
 def dm_messages_v1(token, dm_id, start):
 
-    auth_user_ID, - = decode(token)
+    auth_user_id, _ = decode(token)
     num_of_messages = message_count(-1, dm_id)
 
-    #Handle errors
-    #Input error 1:DM ID is not a valid DM
-    #Access error: Authorised user is not a member of DM with dm_id
-    input_error = True
-    for items in src.data.dms:
-        # Loop for input errors:
-        if dm_id == items['dm_id']:
-            input_error = False
-            if auth_user_ID not in items['all_members']:
-                raise AccessError
-            else:
-                items['all_members'].remove(auth_user_ID)
-
+    _, dmMembers = get_members(-1, dm_id)
+    if auth_user_id not in dmMembers:
+        raise AccessError
+    
     # Input error 2:start is greater than the total number of messages in the channel
-    if start <= num_of_messages:
-        input_error = False
-
-    if input_error:
-        raise input_error
+    if start > num_of_messages:
+        raise InputError
 
     desired_end = start + 50
+    if num_of_messages < desired_end:
+    desired_end = -1
     messages = []
 
     #Get all dms
+    current_dm = 0
     for objects in src.data.messages_log:
-        if dm_id == objects['dm_id']:
+        if dm_id == objects['dm_id'] and current_dm >= start and len(messages < 50):
             current_DM = objects.copy()
             del current_DM[channel_id]
             del current_DM[dm_id]
             messages.append(current_DM)
+            current_dm += 1
 
-
-    #Case 1: There are enough messages in the dm: i.e more than 50 from start
-    if num_of_messages >= desired_end:
-        return {messages, start, desired_end}
-    else:
-        return {messages, start, -1}
-
-    pass
+    return {
+        'messages': messages,
+        'start': start,
+        'end': desired_end,
+    }
 
 def decode(token):
     payload = jwt.decode(token, SECRET, algorithms='HS256')
