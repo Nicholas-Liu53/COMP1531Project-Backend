@@ -195,7 +195,12 @@ def get_user(user_id):
 
 def message_count(channel_id, dm_id):
     counter = 0
-    for message in src.data.messages_log:
-        if channel_id == src.data.messages_log[cID] or dm_id == src.data.messages_log[dmID]:
+    if dm_id == -1
+        for message in src.data.messages_log:
+            if channel_id == src.data.messages_log[cID]:
+            counter += 1
+    else:
+        for message in src.data.messages_log:
+            if dm_id == src.data.messages_log[dmID]:
             counter += 1
     return counter
