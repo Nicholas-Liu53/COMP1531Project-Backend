@@ -170,88 +170,52 @@ def test_dm_create_errors():
 
 #Ethan
 def test_dm_remove():
-
-    #Assumption that when DM is removed other DM id's remain constant
     src.other.clear_v1()
     userID1 = src.auth.auth_register_v1("1531@gmail.com", "123456", "Tom", "Zhang")
     userID2 = src.auth.auth_register_v1("comp@gmail.com", "456789", "Jack", "P")
     dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
     dm_1 = dm_create_v1(userID1[token], [userID2[AuID]])
     invalid_dm_id = -1
-
-    #Test for InputError- when dm_id does not match up i.e if its -1 or 3
     with pytest.raises(InputError):
         dm_remove_v1(userID1[token], invalid_dm_id)
-
-    #Test for AccessError- when user is not original DM creator
     with pytest.raises(ExceptionError):
-        #Change token into token of user2 and some random number
         dm_remove_v1(userID2[token], dm_0['dm_id'])
-
-    #Success Test case
-    #Remove first dm sent
     dm_remove_v1(userID1[token],dm_0['dm_id'])
     assert dm_list_v1(userID1[token]) == {'dms': [dm_1['dm_id']]}
     assert dm_list_v1(userID2[token]) == {'dms': [dm_1['dm_id']]}
-
     pass
 
-#Ethan
 def test_dm_invite():
-
     src.other.clear_v1()
     userID1 = src.auth.auth_register_v1("1531@gmail.com", "123456", "Tom", "Zhang")
     userID2 = src.auth.auth_register_v1("comp@gmail.com", "456789", "Jack", "P")
     userID3 = src.auth.auth_register_v1("hello@gmail.com", "xyz", "Paul", "J")
-    userID4 = src.auth.auth_register_v1("goodbye@gmail.com", "1231", "John", "S")
-
     dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
     invalid_dm_id = -1
-
-    #Test for InputError- when dm_id does not refer to an existing dm
     with pytest.raises(InputError):
         dm_invite_v1(userID1[token], invalid_dm_id, userID3)
-
-    #Test for AccessError- if authorised user is not a member of the DM
-    #change auth_id to userID4 and try to invite 3
     with pytest.raises(AccessError):
         dm_invite_v1(userID4[token], dm_0['dm_id'], userID3)
-
-    #Success Case
-    #Invite UserID3 to DM with DM_ID 1 so contains user 1,2,3
     dm_invite_v1(userID1[token], dm_0['dm_id'], userID3)
     assert dm_list_v1(userID1[token]) == {'dms': [dm_0['dm_id']]}
     assert  dm_list_v1(userID2[token]) == {'dms': [dm_0['dm_id']]}
     assert dm_list_v1(userID3[token]) == {'dms': [dm_0['dm_id']]}
-    assert dm_list_v1(userID4[token]) == {'dms': []}
-
     pass
 
-#Ethan
 def test_dm_leave():
-
     src.other.clear_v1()
     userID1 = src.auth.auth_register_v1("1531@gmail.com", "123456", "Tom", "Zhang")
     userID2 = src.auth.auth_register_v1("comp@gmail.com", "456789", "Jack", "P")
     userID3 = src.auth.auth_register_v1("hello@gmail.com", "xyz", "Paul", "J")
-
     dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
     invalid_dm_id = -1
-    #Test for InputError- when dm_id does not refer to an existing dm
     with pytest.raises(InputError):
         dm_leave_v1(userID1[token], invalid_dm_id)
-
-    #Test for AccessError- if authorised user is not a member of the DM
-    #change auth_id to userID3 and try to leave dm 0
     with pytest.raises(AccessError):
         dm_leave_v1(userID3[token], dm_0['dm_id'])
-
-    #Success Test case
     dm_leave_v1(userID2[token], dm_0['dm_id'])
-
     assert dm_list_v1(userID1[token]) == {'dms': [dm_0['dm_id']]}
     assert dm_list_v1(userID2[token]) == {'dms': []}
-
     pass
 
 def test_dm_messages():
