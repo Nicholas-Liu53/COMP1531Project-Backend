@@ -1,6 +1,9 @@
 import src.data
 from src.error import AccessError, InputError
 from src.channels import channels_listall_v1, channels_list_v1
+import jwt
+
+SECRET = "MENG"
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
     
@@ -197,29 +200,64 @@ def channel_messages_v1(auth_user_id, channel_id, start):
         'end': endValue,
     }
 
-def channel_leave_v1(auth_user_id, channel_id):
+def channel_leave_v1(token, channel_id):
+    '''
+    Takes in a user's id and a channel's id and removes that user from that given channel.
+    Follows the rules channel_remove_owner_v1 if the user is an owner
+
+    Arguments:
+        auth_user_id (int) - The id of the user that is to leave the channel
+        channel_id   (int) - The id of the channel that the user is to leave
+
+    Exceptions:
+        InputError - Occurs when the channel_id inputted does not belong to any channel that exists in the database
+        AccessError - Occurs when 
+                            2) The auth_user_id inputted does not belong to any user that is in the channel
+
+    Return Value:
+        Returns an empty list regardless of conditions :)
+    '''
+
+    auth_user_id, _ = decode(token)
+
+    # Get the channel directory from data.py
+    channelData = get_channel(channel_id)
+
+    # If the user is an owner
+    if token in channelData['owner_members']:
+        channel_removeowner_v1(auth_user_id, channel_id)
+
+    # Check if user is in the channel
+    if token not in channelData['all_members']:
+        raise AccessError
+
+    # Time to remove from all_members list
+    channelData['all_members'].remove(auth_user_id)
+
     return {
     }
 
-def channel_join_v1(auth_user_id, channel_id):
+def channel_join_v1(token, channel_id):
     '''
     Takes in a user's id and a channel's id and adds that user to that given channel.
         --> Specifically adds it to the 'all_members' list in the channel dictionary 
     If the channel is private then the user isn't added. (See more in Exceptions)
 
     Arguments:
-        auth_user_id (int) - The id of the user that wants to join the channel
+        token              - The token of the user that wants to join the channel
         channel_id   (int) - The id of the channel that the user wants to join
 
     Exceptions:
         InputError - Occurs when the channel_id inputted does not belong to any channel that exists in the database
         AccessError - Occurs when 
                             1) the channel that the user is trying to join is private
-                            2) The auth_user_id inputted does not belong to any user
+                            2) The token inputted does not belong to any user
 
     Return Value:
         Returns an empty list regardless of conditions :)
     '''
+
+    auth_user_id, _ = decode(token)
 
     # Find the channel in the database
     channelFound = False
@@ -280,3 +318,15 @@ def get_user(user_id):
                 'handle_string': user['handle_string'],
             }
     raise InputError
+
+def get_channel(channel_id):
+    for channel in src.data.channels:
+        if channel_id == channel['channel_id']:
+            return channel
+    raise InputError
+
+def decode(token):
+    payload = jwt.decode(token, SECRET, algorithms='HS256')
+    auth_user_id, session_id = payload.get('session_id'), payload.get('user_id')
+    check_session(auth_user_id, session_id)
+    return auth_user_id, session_id

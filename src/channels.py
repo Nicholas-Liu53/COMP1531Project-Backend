@@ -1,5 +1,6 @@
 import src.data
 from src.error import AccessError, InputError
+import jwt
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
@@ -9,6 +10,7 @@ cName   = 'name'
 fName   = 'name_first'
 lName   = 'name_last'
 chans   = 'channels'
+SECRET = "MENG"
 
 def channels_list_v1(auth_user_id):
     """
@@ -71,12 +73,12 @@ def channels_listall_v1(auth_user_id):
         'channels': output
     }
 
-def channels_create_v1(auth_user_id, name, is_public):
+def channels_create_v1(token, name, is_public):
     '''
     Creates a channel and adds the user into that channel as both an owner and member
 
     Arguments:
-        auth_user_id (int)  - The int id of the user that wants to create a channel
+        token               - The token id of the user that wants to create a channel
         name         (str)  - The name of the channel that the user wants to create, comes as one string
         is_public    (bool) - The boolean value of whether this channel is to be public or private
                                 True  --> Channel is to be public
@@ -89,6 +91,8 @@ def channels_create_v1(auth_user_id, name, is_public):
     Return Value:
         Returns a dictionary with the key being 'channel_id' and the value of the newly created channel's id
     '''
+
+    auth_user_id, _ = decode(token)
 
     # Ensure an InputError when the channel name is 
     # more than 20 characters long
@@ -150,3 +154,9 @@ def check_auth_user_id(auth_user_id):
         if auth_user_id == user[uID]:
             return
     raise AccessError
+
+def decode(token):
+    payload = jwt.decode(token, SECRET, algorithms='HS256')
+    auth_user_id, session_id = payload.get('session_id'), payload.get('user_id')
+    check_session(auth_user_id, session_id)
+    return auth_user_id, session_id
