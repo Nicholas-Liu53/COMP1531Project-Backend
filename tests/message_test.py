@@ -1,7 +1,9 @@
+# file to test functions in src/message.py
+
 import pytest
 from src.message import message_send_v2, message_remove_v1, message_edit_v1, message_share_v1, message_senddm_v1
 from src.error import InputError, AccessError
-import src.channel, src.channels, src.auth, src.dm, src.message
+import src.channel, src.channels, src.auth, src.dm, src.message, src.other
 from datetime import timezone, datetime
 
 
@@ -35,8 +37,7 @@ dmID = 'dm_id'
 # Test that users can only see messages in channels that they have joined
     # Test if a user who has joined no channels can see any messages
 
-# AccessError when:
-# the authorised user has not joined the channel or DM they are trying to share the message to
+
 
 def test_message_share_todm():
     #* Ensure database is empty

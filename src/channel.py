@@ -17,6 +17,19 @@ def decode(token):
     check_session(auth_user_id, session_id)
     return auth_user_id, session_id
 
+
+def get_user(user_id):
+    for user in src.data.users:
+        if user_id == user['user_id']:
+            return {
+                'user_id': user['user_id'],
+                'email': user['email'],
+                'name_first': user['name_first'],
+                'name_last': user['name_last'],
+                'handle_string': user['handle_string'],
+            }
+    raise InputError
+
 def channel_invite_v1(token, channel_id, u_id):
     
     '''
@@ -54,25 +67,21 @@ def channel_invite_v1(token, channel_id, u_id):
         if chans["channel_id"] == channel_id:
             userAuth = False
             for users in chans["all_members"]:
-                if users['u_id'] == auth_user_id:
+                if users == auth_user_id:
                     userAuth = True
                     break
             if userAuth == False:
                 raise AccessError
                     
     # should check for auth_user_id in channel info first for owners
-    inviteUser = {}
-    for user in src.data.users:
-        if user["u_id"] == u_id: # finds desired u_id
-            inviteUser = user.copy()
-    if inviteUser == {}:
-        raise InputError
-    
+
+    get_user(u_id)
+
     # now searches for channel_id
     for chan in src.data.channels:
         if chan["channel_id"] == channel_id:
             # ensure no duplicates
-            chan["all_members"].append(inviteUser) if inviteUser not in chan["all_members"] else None
+            chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
     return {   
     }
 
@@ -112,7 +121,7 @@ def channel_details_v1(token, channel_id):
         if chans["channel_id"] == channel_id:
             userAuth = False
             for users in chans["all_members"]:
-                if users['u_id'] == auth_user_id:
+                if users == auth_user_id:
                     userAuth = True
                     break
             if userAuth == False:
@@ -126,23 +135,13 @@ def channel_details_v1(token, channel_id):
             # takes only user_id, first and last name
             ownmem = []
             for user in details["owner_members"]:
-                filteredOwner = {}
-                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "name_first"))
-                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "name_last"))
-                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "email"))
-                filteredOwner.update(dict((key,value) for key, value in user.items() if key == "handle_string"))
-                ownmem.append(filteredOwner)
+                ownmem.append(get_user(user))
             dictAllOwn = {"owner_members": ownmem}
             filteredDetails.update(dictAllOwn)
 
             allmem = []
             for user in details["all_members"]:
-                filteredUser = {}
-                filteredUser.update(dict((key,value) for key, value in user.items() if key == "name_first"))
-                filteredUser.update(dict((key,value) for key, value in user.items() if key == "name_last"))
-                filteredUser.update(dict((key,value) for key, value in user.items() if key == "email"))
-                filteredUser.update(dict((key,value) for key, value in user.items() if key == "handle_string"))
-                allmem.append(filteredUser)
+                allmem.append(get_user(user))
             dictAllMem = {"all_members" : allmem}
             filteredDetails.update(dictAllMem)
 
@@ -316,7 +315,7 @@ def channel_addowner_v1(token, channel_id, u_id):
         if chans["channel_id"] == channel_id:
             alreadyOwner = False
             for users in chans["owner_members"]:
-                if users['u_id'] == u_id:
+                if users == u_id:
                     alreadyOwner = True
             if alreadyOwner == True:
                 raise InputError
@@ -338,18 +337,12 @@ def channel_addowner_v1(token, channel_id, u_id):
     if dreamsOwner == False and userAuth == False:
         raise AccessError
     
-    inviteUser = {}
-    for user in src.data.users:
-        if user["u_id"] == u_id: # finds desired u_id
-            inviteUser = user.copy()
     # now searches for channel_id
     for chan in src.data.channels:
         if chan["channel_id"] == channel_id:
             # ensure no duplicates
-            chan["all_members"].append(inviteUser) if inviteUser not in chan["all_members"] else None
-            chan["owner_members"].append(inviteUser) if inviteUser not in chan["owner_members"] else None
-
-
+            chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
+            chan["owner_members"].append(u_id) if u_id not in chan["owner_members"] else None
 
     return {
     }
@@ -369,7 +362,7 @@ def channel_removeowner_v1(token, channel_id, u_id):
         if chans["channel_id"] == channel_id:
             userisOwner = False
             for users in chans["owner_members"]:
-                if users['u_id'] == u_id:
+                if users == u_id:
                     userisOwner = True
                     break
             if not userisOwner:
@@ -395,7 +388,7 @@ def channel_removeowner_v1(token, channel_id, u_id):
     for chan in src.data.channels:
         if chan["channel_id"] == channel_id:
             for users in chan["owner_members"]:
-                if users["u_id"] == u_id:
+                if users == u_id:
                     chan["owner_members"].remove(users)
 
 

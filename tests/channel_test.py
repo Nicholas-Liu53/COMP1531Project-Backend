@@ -72,12 +72,14 @@ def test_channel_details():
         'name': "ChannelINFO", 
         'is_public': True,
         'owner_members':[{
+            'u_id': userID1[AuID],
             'name_first': "Vincentd",
             'name_last': 'Lee',
             'email': 'testing4@gmail.com',
             'handle_string': 'vincentdlee',
         }],
         'all_members':[{
+            'u_id': userID1[AuID], 
             'name_first': "Vincentd",
             'name_last': 'Lee',
             'email': 'testing4@gmail.com',
@@ -216,12 +218,14 @@ def test_channel_addowner():
 
     channel_addowner_v1(userID1[token], channelTest[cID], userID2[AuID])
     assert {
+        uID: userID2[AuID],        
         fName: 'Meng',
         lName: 'Jeffrey',
         'email': 'imthekewlest@gmail.com',
         'handle_string': 'mengjeffrey',
     } in channel_details_v1(userID1[token], channelTest[cID])[ownMems]
     assert {
+        uID: userID2[AuID],
         fName: 'Meng',
         lName: 'Jeffrey',
         'email': 'imthekewlest@gmail.com',
@@ -229,21 +233,22 @@ def test_channel_addowner():
     } in channel_details_v1(userID1[token], channelTest[cID])[allMems]
 
     channelTest2 = src.channels.channels_create_v1(userID1[token], 'Channel2', True)
+
     channel_addowner_v1(userID0[token], channelTest2[cID], userID2[AuID])
     assert {
+        uID: userID2[AuID],
         fName: 'Meng',
         lName: 'Jeffrey',
         'email': 'imthekewlest@gmail.com',
         'handle_string': 'mengjeffrey',
     } in channel_details_v1(userID2[token], channelTest2[cID])[ownMems]
     assert {
+        uID: userID2[AuID],
         fName: 'Meng',
         lName: 'Jeffrey',
         'email': 'imthekewlest@gmail.com',
         'handle_string': 'mengjeffrey',
     } in channel_details_v1(userID2[token], channelTest2[cID])[allMems]
-
-
 
     userID3 = src.auth.auth_register_v1("owner@gmail.com", "T3dCruz", "emfrigos", "Meng")
     # invalid channel
@@ -274,18 +279,21 @@ def test_channel_removeowner():
 
     channel_removeowner_v1(userID2[token], channelTest[cID], userID1[AuID])
     assert {
+        uID: userID2[AuID],
         fName: 'Meng',
         lName: 'Jeffrey',
         'email': 'imthekewlest@gmail.com',
         'handle_string': 'mengjeffrey',
     } in channel_details_v1(userID1[token], channelTest[cID])[ownMems]
     assert {
+        uID: userID2[AuID],
         fName: 'Meng',
         lName: 'Jeffrey',
         'email': 'imthekewlest@gmail.com',
         'handle_string': 'mengjeffrey',
     } in channel_details_v1(userID1[token], channelTest[cID])[allMems]
     assert{
+        uID: userID1[AuID],
         fName: 'Jeffrey',
         lName: 'Meng',
         'email': 'testing4@gmail.com',
