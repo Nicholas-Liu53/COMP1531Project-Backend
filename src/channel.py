@@ -311,6 +311,7 @@ def channel_addowner_v1(token, channel_id, u_id):
             passed = True
     if not passed:
         raise InputError
+        
     for chans in src.data.channels:
         if chans["channel_id"] == channel_id:
             alreadyOwner = False
