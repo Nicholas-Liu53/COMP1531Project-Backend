@@ -3,24 +3,28 @@ from src.message import message_send_v1, message_remove_v1, message_edit_v1
 from src.error import InputError, AccessError
 import src.channel, src.channels, src.auth
 
-# message_send_v1
-# When message is >1000 characters, InputError is raised
-# When authorised user is not part of the channel that they are trying to post in, AccessError is raised
-# After the function is sucessfully run, ensure that the return value is correct
+#* Test send functions together with message/send/v2
+#? Test if message_id increases correctly
 
-# message_edit_v1
-# When message is >1000 characters, InputError is raised
-# If there are no messages with matching message_id, InputError is raised
-# Ownership permission tests:
-    # Owner of Dreams should be able to edit anything
-    # Owner of channels should be able to edit anything in channels they own
-    # Non-owner of channels should only be able to edit their own messages
-# Test if a message has been edited successfully?
+def test_senddm_errors():
+    '''
+    #* Test if a authorised user who is not part of the DM they are posting to raises an Access Error
+    < Register 3 users >
+    < Create dm with 2 users >
+    < Try send a message with 3rd user >
+    #* Test if passing an invalid dm_id raises an InputError
+    < Register user >
+    < Try send a message with user >
+    #* Test if message is more than 1000 characters rauses an InputError
+    < Register 2 users >
+    < Create dm with both users >
+    < Try send a long message >
+    '''
+    pass
 
-# search_v1
-# When query_str is >1000 characters, InputError is raised
-# Test that users can only see messages in channels that they have joined
-    # Test if a user who has joined no channels can see any messages
+def test_senddm_multiple():
+    pass
 
-def test_senddm():
+def test_dm_unauthorised_user():
+    #* All unauthorised user tests
     pass
