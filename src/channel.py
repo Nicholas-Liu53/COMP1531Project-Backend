@@ -255,6 +255,8 @@ def channel_join_v1(auth_user_id, channel_id):
         Returns an empty list regardless of conditions :)
     '''
 
+    auth_user_id, _ = decode(token)
+
     # Find the channel in the database
     channelFound = False
     i = 0

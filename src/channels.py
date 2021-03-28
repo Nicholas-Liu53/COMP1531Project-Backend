@@ -74,7 +74,7 @@ def channels_listall_v1(auth_user_id):
         'channels': output
     }
 
-def channels_create_v1(auth_user_id, name, is_public):
+def channels_create_v1(token, name, is_public):
     '''
     Creates a channel and adds the user into that channel as both an owner and member
 
@@ -92,7 +92,7 @@ def channels_create_v1(auth_user_id, name, is_public):
     Return Value:
         Returns a dictionary with the key being 'channel_id' and the value of the newly created channel's id
     '''
-
+    auth_user_id, _ = decode(token)
     # Ensure an InputError when the channel name is 
     # more than 20 characters long
     if len(name) > 20:
