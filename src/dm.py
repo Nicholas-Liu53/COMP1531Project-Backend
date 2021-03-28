@@ -233,4 +233,5 @@ def message_count(channel_id, dm_id):
         for message in src.data.messages_log:
             if dm_id == src.data.messages_log[dmID]:
             counter += 1
+    
     return counter

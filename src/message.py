@@ -42,13 +42,17 @@ def message_senddm_v1(token, dm_id, message):
     now = datetime.now
     time_created = int(now.strftime("%s"))
     
-    return {
+    src.data.messages_log.append({
         cID: -1,
         dmID: dm_id,
         'message_id': message_id,
         uID: auth_user_id,
         'message': message, 
         'time_created': time_created,
+    })
+
+    return {
+        'message_id': message_id,
     }
 
 def decode(token):
