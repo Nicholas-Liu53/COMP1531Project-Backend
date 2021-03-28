@@ -1,9 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 from src.channels import channels_listall_v1, channels_list_v1
-import jwt
-
-SECRET = "MENG"
+from src.other import decode, get_channel, get_members, get_user
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
     
@@ -306,27 +304,3 @@ def channel_addowner_v1(auth_user_id, channel_id, u_id):
 def channel_removeowner_v1(auth_user_id, channel_id, u_id):
     return {
     }
-
-def get_user(user_id):
-    for user in src.data.users:
-        if user_id == user['u_id']:
-            return {
-                'u_id': user['u_id'],
-                'email': user['email'],
-                'name_first': user['name_first'],
-                'name_last': user['name_last'],
-                'handle_string': user['handle_string'],
-            }
-    raise InputError
-
-def get_channel(channel_id):
-    for channel in src.data.channels:
-        if channel_id == channel['channel_id']:
-            return channel
-    raise InputError
-
-def decode(token):
-    payload = jwt.decode(token, SECRET, algorithms='HS256')
-    auth_user_id, session_id = payload.get('session_id'), payload.get('user_id')
-    check_session(auth_user_id, session_id)
-    return auth_user_id, session_id

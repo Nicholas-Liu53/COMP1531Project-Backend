@@ -1,6 +1,6 @@
 import src.data
 from src.error import AccessError, InputError
-import jwt
+from src.other import decode, get_channel, get_members, get_user
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
@@ -154,9 +154,3 @@ def check_auth_user_id(auth_user_id):
         if auth_user_id == user[uID]:
             return
     raise AccessError
-
-def decode(token):
-    payload = jwt.decode(token, SECRET, algorithms='HS256')
-    auth_user_id, session_id = payload.get('session_id'), payload.get('user_id')
-    check_session(auth_user_id, session_id)
-    return auth_user_id, session_id
