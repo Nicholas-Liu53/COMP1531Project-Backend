@@ -223,7 +223,7 @@ def test_dm_invite():
     assert dm_list_v1(userID1[token]) == {'dms': [dm_0['dm_id']]}
     assert  dm_list_v1(userID2[token]) == {'dms': [dm_0['dm_id']]}
     assert dm_list_v1(userID3[token]) == {'dms': [dm_0['dm_id']]}
-    assert dm_list_v1(userID4[token]) == {'dms': [dm_0['dm_id']]}
+    assert dm_list_v1(userID4[token]) == {'dms': []}
 
     pass
 
