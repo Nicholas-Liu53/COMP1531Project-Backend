@@ -77,93 +77,79 @@ def dm_create_v1(token, u_ids):
     }
 
 #Ethan
-
 def dm_remove_v1(token, dm_id):
 #Remove an existing DM, can only be done by original creator of dm
 #ASSUMPTION: Rest of dms retain same dm_ids when a dm is removed
 
+    auth_user_ID, _ = decode(token)
     #First omit errors
     #Raise input error if dm_id is not valid DM number
-    if dm_id < 0 or dm_id > len(src.data.dms):
-        raise Exception("InputError")
-
+    #If dm_id not contained in list
     #AccessError when the user is not original DM creator
-    auth_user_ID = decode(token)
-    if (auth_user_ID != src.data.dms['creator_id']) is True:
-        raise Exception("AccessError")
+    input_error = True
+
+    for items in src.data.dms:
+        #Loop for input errors:
+        if dm_id == items['dm_id']:
+            input_error = False
+            if auth_user_ID != items['creator_id']:
+                raise AccessError
+
+    if input_error:
+        raise input_error
 
     #Now that errors are fixed, can remove the existing DM with dm_id
     #Loop through dm_list, once dm_id is found remove it
-    for i in range(0, len(src.data.dms)):
-        if DM_list[i]['dm_id'] == dm_id:
-            del DM_list[i]
+    for objects in src.data.dms:
+        if objects['dm_id'] == dm_id:
+            del objects
 
     return {}
 
 #Ethan
 def dm_invite_v1(token, dm_id, u_id):
 #ASSUME: Do not need to add new user into dm_name
-
 #Invites a user to an existing dm
-#Dm's will be contained like channels in a list, with each dm being a dictionary
 
+    #Check u_id
+    get_user(u_id)
+    auth_user_ID, _ = decode(token)
     #Raises Input Error when dm_id is not valid
-    if dm_id < 0 or dm_id > len(dm_list):
-        raise Exception("InputError")
     #Access error if auth user i.e token is not a member of dm
-    error_present = True
-    #Loop through dm list of token or auth user
-    #If dm_id is found then change it to false
-    result = dm_list_v1(token)
-    for i in range(len(0,result)):
-        if result[i] == dm_id:
-            error_present = False
+    input_error = True
+        for items in src.data.dms:
+            #Loop for input errors:
+            if dm_id == items['dm_id']:
+                input_error = False
+                if auth_user_ID not in items['all_members']:
+                    raise AccessError
+                else:
+                    items['all_members'].append(u_id)
 
-    if error_present = True:
-        raise Exception("AccessError")
+        if input_error:
 
-    #Now that errors are fixed, can invite user to DM
-    #Append their Uid to list of allMems list in dm_id dictionary
-    for items in range(0,len(src.data.dms)):
-        #How to differentiate between the dm_id within the dictionary and the one we want?
-        if src.data.dms[items]['dm_id'] = 'dm_id':
-            src.data.dms[items]['all_members'].append(u_id)
+            raise input_error
+
     return {}
 
-#Ethan
-@app.route('/dm/leave/v1', methods = ['POST'])
+
 def dm_leave_v1(token, dm_id):
 #Given a DM ID, user is removed as a member of this DM
-
+    auth_user_ID, _ = decode(token)
     #Raises InputError when dm_id is not valid
-    if dm_id < 0 or dm_id > len(dm_list):
-        raise Exception("InputError")
+    # Access error if auth_user is not a member of dm with dm_id
+    input_error = True
+        for items in src.data.dms:
+            #Loop for input errors:
+            if dm_id == items['dm_id']:
+                input_error = False
+                if auth_user_ID not in items['all_members']:
+                    raise AccessError
+                else:
+                    items['all_members'].remove(auth_user_ID)
 
-    # Access error if user is not a member of token
-    error_present = True
-    # Loop through dm list of token or auth user
-    # If dm_id is found then change it to false
-    result = dm_list_v1(token)
-    for i in range(len(0, result)):
-        if result[i] == dm_id:
-            error_present = False
-
-    if error_present = True:
-        raise Exception("AccessError")
-
-    #Now can remove user from DM with dm_id
-
-    #Is auth user id same as user Id, if not how to CHANGE IT
-
-    current_user = decode(token)
-    #remove their Uid from list of allMems list in dm_id dictionary
-    for items in range(0,len(src.data.dms)):
-        #How to differentiate between the dm_id within the dictionary and the one we want?
-        if src.data.dms[items]['dm_id'] = 'dm_id':
-                for members in src.data.dms[items][['all_members']]:
-                    #Is this too much nesting?
-                    if src.data.dms[items]['all_members'][members] = current_user:
-                        del src.data.dms[items]['all_members'][members]
+        if input_error:
+            raise input_error
     return {}
 
 def dm_messages_v1(token, dm_id, start):
@@ -204,4 +190,4 @@ def get_user(user_id):
                 'name_last': user['name_last'],
                 'handle_string': user['handle_string'],
             }
-    raise AccessError
+    raise InputError

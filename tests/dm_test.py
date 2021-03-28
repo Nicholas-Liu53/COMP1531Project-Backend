@@ -180,11 +180,11 @@ def test_dm_remove():
     invalid_dm_id = -1
 
     #Test for InputError- when dm_id does not match up i.e if its -1 or 3
-    with pytest.raises("InputError"):
+    with pytest.raises(InputError):
         dm_remove_v1(userID1[token], invalid_dm_id)
 
     #Test for AccessError- when user is not original DM creator
-    with pytest.raises("ExceptionError"):
+    with pytest.raises(ExceptionError):
         #Change token into token of user2 and some random number
         dm_remove_v1(userID2[token], dm_0['dm_id'])
 
@@ -209,12 +209,12 @@ def test_dm_invite():
     invalid_dm_id = -1
 
     #Test for InputError- when dm_id does not refer to an existing dm
-    with pytest.raises("InputError"):
+    with pytest.raises(InputError):
         dm_invite_v1(userID1[token], invalid_dm_id, userID3)
 
     #Test for AccessError- if authorised user is not a member of the DM
     #change auth_id to userID4 and try to invite 3
-    with pytest.raises("AccessError"):
+    with pytest.raises(AccessError):
         dm_invite_v1(userID4[token], dm_0['dm_id'], userID3)
 
     #Success Case
@@ -238,12 +238,12 @@ def test_dm_leave():
     dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
     invalid_dm_id = -1
     #Test for InputError- when dm_id does not refer to an existing dm
-    with pytest.raises("InputError"):
+    with pytest.raises(InputError):
         dm_leave_v1(userID1[token], invalid_dm_id)
 
     #Test for AccessError- if authorised user is not a member of the DM
     #change auth_id to userID3 and try to leave dm 0
-    with pytest.raises("AccessError"):
+    with pytest.raises(AccessError):
         dm_leave_v1(userID3[token], dm_0['dm_id'])
 
     #Success Test case
@@ -268,3 +268,6 @@ def test_dm_unauthorised_user(invalid_token):
         dm_details_v1(invalid_token, dm1[dmID])
         dm_list_v1(invalid_token)
         dm_create_v1(invalid_token, [user1[AuID]])
+        dm_remove_v1(invalid_token, dm1[dmID])
+        dm_invite_v1(invalid_token, dm1[dmID], user2[AuID])
+        dm_leave_v1(invalid_token, dm1[dmID])
