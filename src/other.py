@@ -1,6 +1,15 @@
 import src.data
 import jwt
 
+AuID    = 'auth_user_id'
+uID     = 'u_id'
+cID     = 'channel_id'
+allMems = 'all_members'
+cName   = 'name'
+fName   = 'name_first'
+lName   = 'name_last'
+chans   = 'channels'
+
 SECRET = 'MENG'
 
 def clear_v1():

@@ -235,7 +235,7 @@ def channel_leave_v1(token, channel_id):
     return {
     }
 
-def channel_join_v1(token, channel_id):
+def channel_join_v1(auth_user_id, channel_id):
     '''
     Takes in a user's id and a channel's id and adds that user to that given channel.
         --> Specifically adds it to the 'all_members' list in the channel dictionary 
@@ -254,8 +254,6 @@ def channel_join_v1(token, channel_id):
     Return Value:
         Returns an empty list regardless of conditions :)
     '''
-
-    auth_user_id, _ = decode(token)
 
     # Find the channel in the database
     channelFound = False
@@ -285,7 +283,7 @@ def channel_join_v1(token, channel_id):
         j += 1
 
     j -= 1      # Undo extra increment
-
+    
     if src.data.channels[i]['is_public'] == False and src.data.users[j]['permission_id'] is False:
         # If channel is private, AccessError
         raise AccessError
