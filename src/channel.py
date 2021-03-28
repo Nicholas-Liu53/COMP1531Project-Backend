@@ -1,6 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 from src.channels import channels_listall_v1, channels_list_v1
+from src.other import decode
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
     
