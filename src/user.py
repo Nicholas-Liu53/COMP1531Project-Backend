@@ -1,12 +1,13 @@
-def user_profile_v1(auth_user_id, u_id):
+import src.data
+from src.error import AccessError, InputError
+import re
+from src.other import decode, check_session, get_user
+
+def user_profile_v2(token, u_id):
+    auth_user_id, session_id = decode(token)
+
     return {
-        'user': {
-            'u_id': 1,
-            'email': 'cs1531@cse.unsw.edu.au',
-            'name_first': 'Hayden',
-            'name_last': 'Jacobs',
-            'handle_str': 'haydenjacobs',
-        },
+        'user': get_user(u_id)
     }
 
 def user_profile_setname_v1(auth_user_id, name_first, name_last):

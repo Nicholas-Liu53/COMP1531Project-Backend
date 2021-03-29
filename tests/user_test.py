@@ -1,119 +1,138 @@
 # File to test functions in src/user.py
 from src.error import AccessError, InputError
 import pytest
-from src.auth import auth_login_v1, auth_register_v1
-import src.channel, src.channels
+from src.user import user_profile_v2
+from src.auth import auth_register_v2, auth_login_v2
 from src.other import clear_v1
 from jwt import encode
 
-SECRET = 'meng'
-'''
+SECRET = 'MENG'
+
 def test_user_profile_valid():
     clear_v1()
-    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
+    assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
 
-    assert user_profile_v2(token, 0) == {
-        'u_id': 0, 
-        'email': "caricoleman@gmail.com", 
-        'first name': 'cari', 
-        'last name': 'coleman', 
-        'handle': 'caricoleman'
-        }
+    assert user_profile_v2(token, 0) == { 
+        'user':
+            {
+            'u_id': 0, 
+            'email': "caricoleman@gmail.com", 
+            'name_first': 'cari', 
+            'name_last': 'coleman', 
+            'handle_string': 'caricoleman'
+            }
+    }
 
 def test_user_profile_valid_multiple():
     clear_v1()
-    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     token1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
+    assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
 
-    auth_register_v1("ericamondy@gmail.com", "1234567", "erica", "mondy") 
+    auth_register_v2("ericamondy@gmail.com", "1234567", "erica", "mondy") 
     token2 = encode({'session_id': 1, 'user_id': 1}, SECRET, algorithm='HS256')
-    assert auth_login_v1("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
+    assert auth_login_v2("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
 
 
-    assert user_profile_v2(token1, 0) == {
-        'u_id': 0, 
-        'email': "caricoleman@gmail.com", 
-        'first name': 'cari', 
-        'last name': 'coleman', 
-        'handle': 'caricoleman'
-        }
+    assert user_profile_v2(token1, 0) == { 
+        'user':
+            {
+            'u_id': 0, 
+            'email': "caricoleman@gmail.com", 
+            'name_first': 'cari', 
+            'name_last': 'coleman', 
+            'handle_string': 'caricoleman'
+            }
+    }
 
-    assert user_profile_v2(token2, 0) == {
-        'u_id': 1, 
-        'email': "ericamondy@gmail.com", 
-        'first name': 'erica', 
-        'last name': 'mondy', 
-        'handle': 'ericamondy'
-    }    
+    assert user_profile_v2(token2, 1) == { 
+        'user':
+            {
+            'u_id': 1, 
+            'email': "ericamondy@gmail.com", 
+            'name_first': 'erica', 
+            'name_last': 'mondy', 
+            'handle_string': 'ericamondy'
+            }
+    }
+    
 
 def test_user_profile_invalid_user_id():
     clear_v1()
     with pytest.raises(InputError):
-        auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+        auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
         token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-        assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
+        assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
         user_profile_v2(token, 1)
 
 def test_user_setname_valid_first_name():
     clear_v1()
-    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
+    assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
 
     assert user_setname_v2(token, 'kari', 'coleman') == {}
 
-    assert  user_profile_v2(token, 0) == {
-        'u_id': 0, 
-        'email': "caricoleman@gmail.com", 
-        'first name': 'kari', 
-        'last name': 'coleman', 
-        'handle': 'caricoleman'
+    assert  user_profile_v2(token, 0) == { 
+        'user':
+            {
+            'u_id': 0, 
+            'email': "caricoleman@gmail.com", 
+            'name_first': 'kari', 
+            'name_last': 'coleman', 
+            'handle_string': 'caricoleman'
+            }
     }
 
 def test_user_setname_valid_last_name():
     clear_v1()
-    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
+    assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
 
     assert user_setname_v2(token, 'cari', 'koleman') == {}
 
-    assert  user_profile_v2(token, 0) == {
-        'u_id': 0, 
-        'email': "caricoleman@gmail.com", 
-        'first name': 'cari', 
-        'last name': 'koleman', 
-        'handle': 'caricoleman'
+    assert  user_profile_v2(token, 0) == { 
+        'user':
+            {
+            'u_id': 0, 
+            'email': "caricoleman@gmail.com", 
+            'name_first': 'cari', 
+            'name_last': 'koleman', 
+            'handle_string': 'caricoleman'
+            }
     }
 
 def test_user_setname_valid_both_names():
     clear_v1()
-    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
+    assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
 
     assert user_setname_v2(token, 'kari', 'koleman') == {}
 
-    assert  user_profile_v2(token, 0) == {
-        'u_id': 0, 
-        'email': "caricoleman@gmail.com", 
-        'first name': 'kari', 
-        'last name': 'koleman', 
-        'handle': 'caricoleman'
+    assert  user_profile_v2(token, 0) == { 
+        'user':
+            {
+            'u_id': 0, 
+            'email': "caricoleman@gmail.com", 
+            'name_first': 'kari', 
+            'name_last': 'koleman', 
+            'handle_string': 'caricoleman'
+            }
     }
 
 def test_user_setname_valid_multiple():
     clear_v1()
-    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     token1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
+    assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
 
-    auth_register_v1("ericamondy@gmail.com", "1234567", "erica", "mondy") 
+    auth_register_v2("ericamondy@gmail.com", "1234567", "erica", "mondy") 
     token2 = encode({'session_id': 1, 'user_id': 1}, SECRET, algorithm='HS256')
-    assert auth_login_v1("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
+    assert auth_login_v2("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
 
 
     assert user_setname_v2(token1, 'kari', 'koleman') == {}
@@ -139,44 +158,44 @@ def test_user_setname_valid_multiple():
 def test_user_setname_invalid_long_first_name():
     clear_v1()
     with pytest.raises(InputError):
-        auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+        auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
         token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-        assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
+        assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
 
         user_setname_v2(token, 'kariiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii', 'koleman') 
 
 def test_user_setname_invalid_no_first_name():
     clear_v1()
     with pytest.raises(InputError):
-        auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+        auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
         token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-        assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
+        assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
 
         user_setname_v2(token, '', 'koleman') 
 
 def test_user_setname_invalid_long_last_name():
     clear_v1()
     with pytest.raises(InputError):
-        auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+        auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
         token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-        assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
+        assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
 
         user_setname_v2(token, 'kari', 'kolemaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaan')           
 
 def test_user_setname_invalid_no_last_name():
     clear_v1()
     with pytest.raises(InputError):
-        auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+        auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
         token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-        assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
+        assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
 
         user_setname_v2(token, 'kari', '') 
 
 def test_user_setemail_valid():
     clear_v1()
-    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
+    assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
 
     assert user_setemail_v2(token, 'karicoleman@gmail.com')
 
@@ -190,13 +209,13 @@ def test_user_setemail_valid():
 
 def test_user_setname_valid_multiple():
     clear_v1()
-    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     token1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
+    assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
 
-    auth_register_v1("ericamondy@gmail.com", "1234567", "erica", "mondy") 
+    auth_register_v2("ericamondy@gmail.com", "1234567", "erica", "mondy") 
     token2 = encode({'session_id': 1, 'user_id': 1}, SECRET, algorithm='HS256')
-    assert auth_login_v1("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
+    assert auth_login_v2("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
 
 
     assert user_setemail_v2(token1, 'karicoleman@gmail.com') == {}
@@ -222,21 +241,21 @@ def test_user_setname_valid_multiple():
 def test_user_setemail_invalid_email():
     clear_v1()
     with pytest.raises(InputError):
-        auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+        auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
         token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-        assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
+        assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
 
         user_setemail_v2(token, 'karicoleman.com')
 
 def test_user_setemail_invalid_email_in_use():
     clear_v1()
-    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     token1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
+    assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
 
-    auth_register_v1("ericamondy@gmail.com", "1234567", "erica", "mondy") 
+    auth_register_v2("ericamondy@gmail.com", "1234567", "erica", "mondy") 
     token2 = encode({'session_id': 1, 'user_id': 1}, SECRET, algorithm='HS256')
-    assert auth_login_v1("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
+    assert auth_login_v2("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
 
 
     assert user_setemail_v2(token1, 'karicoleman@gmail.com') == {}
@@ -253,9 +272,9 @@ def test_user_setemail_invalid_email_in_use():
 
 def test_user_sethandle_valid():
     clear_v1()
-    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
+    assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
 
     assert user_sethandle_v2(token, 'karikoleman')
 
@@ -269,13 +288,13 @@ def test_user_sethandle_valid():
 
 def test_user_sethandle_valid_multiple():
     clear_v1()
-    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     token1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
+    assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
 
-    auth_register_v1("ericamondy@gmail.com", "1234567", "erica", "mondy") 
+    auth_register_v2("ericamondy@gmail.com", "1234567", "erica", "mondy") 
     token2 = encode({'session_id': 1, 'user_id': 1}, SECRET, algorithm='HS256')
-    assert auth_login_v1("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
+    assert auth_login_v2("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
 
 
     assert user_sethandle_v2(token1, 'karikoleman') == {}
@@ -301,30 +320,30 @@ def test_user_sethandle_valid_multiple():
 def test_user_sethandle_invalid_short_handle():
     clear_v1()
     with pytest.raises(InputError):
-        auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+        auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
         token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-        assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
+        assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
 
         user_sethandle_v2(token, 'cc')
 
 def test_user_sethandle_invalid_long_handle():
     clear_v1()
     with pytest.raises(InputError):
-        auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+        auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
         token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-        assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
+        assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
 
         user_sethandle_v2(token, 'cariiiiiiiiiiiiiiiiii')
 
 def test_user_sethandle_invalid_handle_in_use():
     clear_v1()
-    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     token1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
+    assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
 
-    auth_register_v1("ericamondy@gmail.com", "1234567", "erica", "mondy") 
+    auth_register_v2("ericamondy@gmail.com", "1234567", "erica", "mondy") 
     token2 = encode({'session_id': 1, 'user_id': 1}, SECRET, algorithm='HS256')
-    assert auth_login_v1("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
+    assert auth_login_v2("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
 
 
     assert user_sethandle_v2(token1, 'kari') == {}
@@ -341,9 +360,9 @@ def test_user_sethandle_invalid_handle_in_use():
 
 def test_users_all_v1_one():
     clear_v1()
-    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
+    assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
 
     assert users_all(token) == [
         {
@@ -357,13 +376,13 @@ def test_users_all_v1_one():
 
 def test_users_all_v1_two():
     clear_v1()
-    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     token1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
+    assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
 
-    auth_register_v1("ericamondy@gmail.com", "1234567", "erica", "mondy") 
+    auth_register_v2("ericamondy@gmail.com", "1234567", "erica", "mondy") 
     token2 = encode({'session_id': 1, 'user_id': 1}, SECRET, algorithm='HS256')
-    assert auth_login_v1("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
+    assert auth_login_v2("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
 
     assert users_all(token1) == [
         {
@@ -384,25 +403,25 @@ def test_users_all_v1_two():
 
 def test_users_all_v1_multiple():
     clear_v1()
-    auth_register_v1("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     token1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
+    assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
 
-    auth_register_v1("ericamondy@gmail.com", "1234567", "erica", "mondy") 
+    auth_register_v2("ericamondy@gmail.com", "1234567", "erica", "mondy") 
     token2 = encode({'session_id': 1, 'user_id': 1}, SECRET, algorithm='HS256')
-    assert auth_login_v1("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
+    assert auth_login_v2("ericamondy@gmail.com", "1234567") == {'token': token2, 'auth_user_id': 1,}
 
-    auth_register_v1("hilarybently@gmail.com", "1234567", "hillary", "bently") 
+    auth_register_v2("hilarybently@gmail.com", "1234567", "hillary", "bently") 
     token3 = encode({'session_id': 1, 'user_id': 2}, SECRET, algorithm='HS256')
-    assert auth_login_v1("hilarybently@gmail.com", "1234567") == {'token': token3, 'auth_user_id': 2,}
+    assert auth_login_v2("hilarybently@gmail.com", "1234567") == {'token': token3, 'auth_user_id': 2,}
 
-    auth_register_v1("kentonwatkins@gmail.com", "1234567", "kenton", "watkins") 
+    auth_register_v2("kentonwatkins@gmail.com", "1234567", "kenton", "watkins") 
     token4 = encode({'session_id': 1, 'user_id': 3}, SECRET, algorithm='HS256')
-    assert auth_login_v1("kentonwatkins@gmail.com", "1234567") == {'token': token4, 'auth_user_id': 3,}
+    assert auth_login_v2("kentonwatkins@gmail.com", "1234567") == {'token': token4, 'auth_user_id': 3,}
 
-    auth_register_v1("claudiamarley@gmail.com", "1234567", "claudia", "marley") 
+    auth_register_v2("claudiamarley@gmail.com", "1234567", "claudia", "marley") 
     token5 = encode({'session_id': 1, 'user_id': 4}, SECRET, algorithm='HS256')
-    assert auth_login_v1("caludiamarley@gmail.com", "1234567") == {'token': token5, 'auth_user_id': 4,}
+    assert auth_login_v2("caludiamarley@gmail.com", "1234567") == {'token': token5, 'auth_user_id': 4,}
 
     assert users_all(token1) == [
         {
@@ -441,4 +460,4 @@ def test_users_all_v1_multiple():
         'handle': 'claudiamarley'
         },
     ]
-'''
+

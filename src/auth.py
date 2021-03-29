@@ -154,10 +154,6 @@ def auth_login_v2(email, password):
             }
     raise InputError    
 
-
-
-
-
 def auth_register_v2(email, password, name_first, name_last):
     data_structure = auth_register_v1(email, password, name_first, name_last)
     auth_user_id = data_structure['auth_user_id']
