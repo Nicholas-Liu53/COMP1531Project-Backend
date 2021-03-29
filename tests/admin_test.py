@@ -25,10 +25,10 @@ def test_userpermissions_change():
     src.other.clear_v1()
 
     #first is always owner
-    userID0 = src.auth.auth_register_v1("ownerDreams@gmail.com", "GodOwner123", "Owner", "Owner")
+    userID0 = src.auth.auth_register_v2("ownerDreams@gmail.com", "GodOwner123", "Owner", "Owner")
 
-    userID1 = src.auth.auth_register_v1("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
-    userID2 = src.auth.auth_register_v1("peasantnotOwner@gmail.com", "emfrigoslover123", "Owner", "Not")
+    userID1 = src.auth.auth_register_v2("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
+    userID2 = src.auth.auth_register_v2("peasantnotOwner@gmail.com", "emfrigoslover123", "Owner", "Not")
 
 
     # Test if the user gets the permissions

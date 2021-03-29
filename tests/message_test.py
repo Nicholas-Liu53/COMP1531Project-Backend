@@ -18,6 +18,7 @@ lName   = 'name_last'
 token = 'token'
 mID = 'message_id'
 dmID = 'dm_id'
+token = 'token'
 # message_send_v1
 # When message is >1000 characters, InputError is raised
 # When authorised user is not part of the channel that they are trying to post in, AccessError is raised
@@ -45,10 +46,10 @@ def test_message_share_todm():
 
     src.other.clear_v1()
 
-    userID1 = src.auth.auth_register_v1("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
-    userID2 = src.auth.auth_register_v1("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
-    userID3 = src.auth.auth_register_v1("zodiac@gmail.com", "T3dCruz", "T", "C")
-    userID4 = src.auth.auth_register_v1("gmailgmail@gmail.com", "hiiiiii12345", "M", "C")
+    userID1 = src.auth.auth_register_v2("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
+    userID2 = src.auth.auth_register_v2("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
+    userID3 = src.auth.auth_register_v2("zodiac@gmail.com", "T3dCruz", "T", "C")
+    userID4 = src.auth.auth_register_v2("gmailgmail@gmail.com", "hiiiiii12345", "M", "C")
     
     channelTest = src.channels.channels_create_v1(userID1[token], 'Channel', True)
     src.channel.channel_invite_v1(userID1[token], channelTest[cID], userID2[AuID])
@@ -79,9 +80,9 @@ def test_message_share_tochannel():
 
     src.other.clear_v1()
 
-    userID0 = src.auth.auth_register_v1("ownerDreams@gmail.com", "GodOwner123", "Owner", "Owner")
-    userID1 = src.auth.auth_register_v1("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
-    userID2 = src.auth.auth_register_v1("zodiac@gmail.com", "T3dCruz", "T", "C")
+    userID0 = src.auth.auth_register_v2("ownerDreams@gmail.com", "GodOwner123", "Owner", "Owner")
+    userID1 = src.auth.auth_register_v2("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
+    userID2 = src.auth.auth_register_v2("zodiac@gmail.com", "T3dCruz", "T", "C")
 
     channelTest = src.channels.channels_create_v1(userID0[token], 'Channel', True)
     channelTest2 = src.channels.channels_create_v1(userID1[token], 'Channel', True)
@@ -112,10 +113,10 @@ def test_message_share_dmtodm():
 
     src.other.clear_v1()
 
-    userID1 = src.auth.auth_register_v1("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
-    userID2 = src.auth.auth_register_v1("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
-    userID3 = src.auth.auth_register_v1("zodiac@gmail.com", "T3dCruz", "T", "C")
-    userID4 = src.auth.auth_register_v1("gmailgmail@gmail.com", "hiiiiii12345", "M", "C")
+    userID1 = src.auth.auth_register_v2("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
+    userID2 = src.auth.auth_register_v2("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
+    userID3 = src.auth.auth_register_v2("zodiac@gmail.com", "T3dCruz", "T", "C")
+    userID4 = src.auth.auth_register_v2("gmailgmail@gmail.com", "hiiiiii12345", "M", "C")
     
     dmTest = src.dm.dm_create_v1(userID2[token],[userID4[AuID],userID3[AuID]])
     dmTest2 = src.dm.dm_create_v1(userID1[token],[userID2[AuID]])

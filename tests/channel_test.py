@@ -5,7 +5,7 @@ from src.channel import channel_invite_v1, channel_details_v1, channel_messages_
 import src.auth, src.channels, src.other
 from src.error import InputError, AccessError
 from src.channels import channels_create_v1, channels_list_v1
-from src.message import message_send_v1
+from src.message import message_send_v2
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
@@ -24,8 +24,8 @@ def test_channel_invite():
 
     #* Create user and channel for user to be invited
     #* Users
-    userID1 = src.auth.auth_register_v1("testing1@gmail.com", "Monkey", "Vincent", "Le")
-    userID2 = src.auth.auth_register_v1("testing2@gmail.com", "jonkey", "Darius", "Kuan")
+    userID1 = src.auth.auth_register_v2("testing1@gmail.com", "Monkey", "Vincent", "Le")
+    userID2 = src.auth.auth_register_v2("testing2@gmail.com", "jonkey", "Darius", "Kuan")
     #* Channel create
     privateChannel = src.channels.channels_create_v1(userID1[token], 'Coolkids', False)
 
@@ -47,7 +47,7 @@ def test_channel_invite():
         channel_invite_v1(userID1[token], "ThischannelIDdoesNotExist", "DoesntExist")
     
     #* Test 4: is AccessError raised when auth_uID is not already a member of the channel
-    userID3 = src.auth.auth_register_v1("imposter@gmail.com", "g2g2gkden", "Among", "Us")
+    userID3 = src.auth.auth_register_v2("imposter@gmail.com", "g2g2gkden", "Among", "Us")
     with pytest.raises(AccessError):
         channel_invite_v1(userID3[token], privateChannel[cID], userID2[AuID])
 
@@ -62,8 +62,8 @@ def test_channel_details():
     src.other.clear_v1()
     
     # Creating users and channels
-    userID1 = src.auth.auth_register_v1("testing4@gmail.com", "Monkey1", "Vincentd", "Lee")
-    userID2 = src.auth.auth_register_v1("testing3@gmail.com", "jonkey1", "Imposterd", "Kuand")
+    userID1 = src.auth.auth_register_v2("testing4@gmail.com", "Monkey1", "Vincentd", "Lee")
+    userID2 = src.auth.auth_register_v2("testing3@gmail.com", "jonkey1", "Imposterd", "Kuand")
     realChannel = src.channels.channels_create_v1(userID1[token], 'ChannelINFO', True)
 
     #* Test 1: Using the authorised user, does the channel details get presented for one user in channel
@@ -105,8 +105,8 @@ def test_channel_messages():
     #! Clearing data
     src.other.clear_v1()
     #* Setup user_id
-    userID1 = src.auth.auth_register_v1("1531@gmail.com", "123456", "Tom", "Zhang")
-    userID2 = src.auth.auth_register_v1("comp@gmail.com", "456789", "Jack", "P")
+    userID1 = src.auth.auth_register_v2("1531@gmail.com", "123456", "Tom", "Zhang")
+    userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
     
 
     #* reate public channel by user_id 1
@@ -161,10 +161,10 @@ def test_channel_join():
     src.other.clear_v1()
 
     #* Setup users and channels and create shorthand for strings for testing code
-    userID1 = src.auth.auth_register_v1("ayelmao@gmail.com", "Bl00dO4th", "C", "L")
-    userID2 = src.auth.auth_register_v1("lolrofl@gmail.com", "pr3ttynAme", "S", "S")
-    userID3 = src.auth.auth_register_v1("zodiac@gmail.com", "T3dCruz", "T", "C")
-    userID4 = src.auth.auth_register_v1("ocasio@gmail.com", "Alex4ndr1a", "A", "O")
+    userID1 = src.auth.auth_register_v2("ayelmao@gmail.com", "Bl00dO4th", "C", "L")
+    userID2 = src.auth.auth_register_v2("lolrofl@gmail.com", "pr3ttynAme", "S", "S")
+    userID3 = src.auth.auth_register_v2("zodiac@gmail.com", "T3dCruz", "T", "C")
+    userID4 = src.auth.auth_register_v2("ocasio@gmail.com", "Alex4ndr1a", "A", "O")
 
     # userID1 made public channel 'TrumpPence'
     firstChannel = src.channels.channels_create_v1(userID1[AuID], 'TrumpPence', True)
@@ -210,9 +210,9 @@ def test_channel_addowner():
 
     src.other.clear_v1()
 
-    userID0 = src.auth.auth_register_v1("ownerDreams@gmail.com", "GodOwner123", "Owner", "Owner")
-    userID1 = src.auth.auth_register_v1("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
-    userID2 = src.auth.auth_register_v1("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
+    userID0 = src.auth.auth_register_v2("ownerDreams@gmail.com", "GodOwner123", "Owner", "Owner")
+    userID1 = src.auth.auth_register_v2("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
+    userID2 = src.auth.auth_register_v2("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
 
     channelTest = src.channels.channels_create_v1(userID1[token], 'Channel', True)
 
@@ -250,7 +250,7 @@ def test_channel_addowner():
         'handle_string': 'mengjeffrey',
     } in channel_details_v1(userID2[token], channelTest2[cID])[allMems]
 
-    userID3 = src.auth.auth_register_v1("owner@gmail.com", "T3dCruz", "emfrigos", "Meng")
+    userID3 = src.auth.auth_register_v2("owner@gmail.com", "T3dCruz", "emfrigos", "Meng")
     # invalid channel
     with pytest.raises(InputError): 
         channel_addowner_v1(userID1[token], 999, userID3[AuID])
@@ -259,7 +259,7 @@ def test_channel_addowner():
     with pytest.raises(InputError):
         channel_addowner_v1(userID1[token], channelTest[cID], userID2[AuID])
 
-    userID4 = src.auth.auth_register_v1("owner123@gmail.com", "T3dCruz", "Mengsoris", "Meng")
+    userID4 = src.auth.auth_register_v2("owner123@gmail.com", "T3dCruz", "Mengsoris", "Meng")
 
     with pytest.raises(AccessError):
         channel_addowner_v1(userID3[token], channelTest[cID], userID4[AuID])
@@ -270,10 +270,10 @@ def test_channel_removeowner():
 
     src.other.clear_v1()
 
-    userID0 = src.auth.auth_register_v1("ownerDreams@gmail.com", "GodOwner123", "Owner", "Owner")
-    userID1 = src.auth.auth_register_v1("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
-    userID2 = src.auth.auth_register_v1("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
-    userID3 = src.auth.auth_register_v1("zodiac@gmail.com", "T3dCruz", "T", "C")
+    userID0 = src.auth.auth_register_v2("ownerDreams@gmail.com", "GodOwner123", "Owner", "Owner")
+    userID1 = src.auth.auth_register_v2("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
+    userID2 = src.auth.auth_register_v2("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
+    userID3 = src.auth.auth_register_v2("zodiac@gmail.com", "T3dCruz", "T", "C")
     channelTest = src.channels.channels_create_v1(userID1[token], 'Channel', True)
     channel_addowner_v1(userID1[token], channelTest[cID], userID2[AuID])
 

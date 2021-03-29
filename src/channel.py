@@ -1,7 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 from src.channels import channels_listall_v1, channels_list_v1
-from src.other import decode, get_channel, get_members, get_user, SECRET
+from src.other import decode, get_channel, get_members, get_user
 
 
 AuID      = 'auth_user_id'
