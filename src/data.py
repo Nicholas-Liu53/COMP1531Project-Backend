@@ -53,6 +53,15 @@ channels = [
     }
 ]
 
+dms = [
+    {
+        'dm_id': None,
+        'name': None,
+        'creator_id': None,
+        'all_members': [],
+    }
+]
+
 messages_log = [
     {
         # If message is in channel, dm_id is None (not -1), in other words, don't store a value

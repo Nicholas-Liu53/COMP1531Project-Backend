@@ -3,6 +3,8 @@ from src.error import AccessError, InputError
 import re
 from jwt import encode
 
+SECRET = 'MENG'
+
 def auth_login_v1(email, password):
     """ Checks if inputted email is present within the registered users
         If email is present, checks that the inputted password matches the password stored for 
@@ -22,6 +24,7 @@ def auth_login_v1(email, password):
     """
     for user in src.data.users:
         if email == user.get('email') and password == user.get('password'):
+            user['session_id'].append(user['session_id'][-1] + 1)
             return {
                 'auth_user_id': user['u_id'],
             }
@@ -125,6 +128,8 @@ def auth_register_v1(email, password, name_first, name_last):
         'name_last' : nameL,
         'u_id' : user_id,
         'handle_string' : handle_string,
+        'permission_id': 0,
+        'session_id': [0],
     })
     return {
         'auth_user_id': user_id
@@ -137,6 +142,30 @@ def check_handle(handle_string):
     
     return False
 
-    
+def auth_login_v2(email, password):  
+    for user in src.data.users:
+        if email == user.get('email') and password == user.get('password'):
+            new_session_id = user['session_id'][-1] + 1
+            user['session_id'].append(new_session_id)
+            token = encode({'session_id': new_session_id, 'user_id': user['u_id']}, SECRET, algorithm='HS256')
+            return {
+                'token': token,
+                'auth_user_id': user['u_id'],
+            }
+    raise InputError    
+
+
+
+
+
+def auth_register_v2(email, password, name_first, name_last):
+    data_structure = auth_register_v1(email, password, name_first, name_last)
+    auth_user_id = data_structure['auth_user_id']
+    token = encode({'session_id': 0, 'user_id': auth_user_id}, SECRET, algorithm='HS256')
+    return {
+        'token': token,
+        'auth_user_id': auth_user_id
+    }
+
   
     
