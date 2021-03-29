@@ -52,7 +52,14 @@ def test_senddm_errors():
         message_senddm_v1(user1[token], dm1[dmID], message)
 
 def test_senddm_multiple():
-    pass
+    src.other.clear_v1()
+    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
+    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
+    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    assert message_senddm_v1(user1[token], dm1[dmID], '') == {'message_id': 0}
+    assert message_senddm_v1(user1[token], dm1[dmID], '') == {'message_id': 1}
+    assert message_senddm_v1(user1[token], dm1[dmID], '') == {'message_id': 2}
+    assert message_senddm_v1(user1[token], dm1[dmID], '') == {'message_id': 3}
 
 def test_dm_unauthorised_user(invalid_token):
     #* All unauthorised user tests
