@@ -53,12 +53,22 @@ channels = [
     }
 ]
 
+dms = [
+    {
+        'dm_id': None,
+        'name': None,
+        'creator_id': None,
+        'all_members': [],
+    }
+]
+
 messages_log = [
     {
         'channel_id': None,
-        'handle_string': None,
-        'time_created': None,
+        'dm_id': None,
         'message_id': None,
-        'message_string': None,
+        'u_id': None,
+        'message': None, 
+        'time_created': None,
     },
 ]
