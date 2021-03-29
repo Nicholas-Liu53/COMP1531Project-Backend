@@ -63,6 +63,7 @@ def test_senddm_multiple():
 
 def test_dm_unauthorised_user(invalid_token):
     #* All unauthorised user tests
+    src.other.clear_v1()
     user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
     user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
     dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
