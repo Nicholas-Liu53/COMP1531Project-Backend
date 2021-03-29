@@ -4,7 +4,7 @@ import pytest
 from src.channel import channel_invite_v1, channel_details_v1, channel_messages_v1, channel_leave_v1, channel_join_v1, channel_addowner_v1, channel_removeowner_v1
 import src.auth, src.channels, src.other
 from src.error import InputError, AccessError
-from src.channels import channels_create_v1, channels_list_v1
+from src.channels import channels_create_v1, channels_list_v2
 from src.message import message_send_v1
 
 AuID    = 'auth_user_id'
@@ -31,7 +31,7 @@ def test_channel_invite():
     #* Test 1: Does userID2 get successfully invited to channel "Coolkids"
     channel_invite_v1(userID1[token], privateChannel[cID], userID2[token])
     assert {
-        uID: userID2[token], 
+        uID: userID2[AuID], 
         fName: 'Darius', 
         lName: 'Kuan', 
         'email': "testing2@gmail.com", 
@@ -72,14 +72,14 @@ def test_channel_details():
         'name': "ChannelINFO",
         'is_public': True, 
         'owner_members':[{
-            'u_id': userID1[token], 
+            'u_id': userID1[AuID], 
             'name_first': "Vincentd",
             'name_last': 'Lee',
             'email': 'testing4@gmail.com',
             'handle_string': 'vincentdlee',
         }],
         'all_members':[{
-            'u_id': userID1[token], 
+            'u_id': userID1[AuID], 
             'name_first': "Vincentd",
             'name_last': 'Lee',
             'email': 'testing4@gmail.com',
@@ -173,21 +173,21 @@ def test_channel_leave():
 
     #* Make sure they joined
     assert {
-        uID: userID2[token],
+        uID: userID2[AuID],
         fName: 'S',
         lName: "S",
         'email': "lolrofl@gmail.com",
         'handle_string': "ss",
     } in channel_details_v1(userID2[token], firstChannel[cID])[allMems]
     assert {
-        uID: userID3[token],
+        uID: userID3[AuID],
         fName: 'T',
         lName: "C",
         'email': "zodiac@gmail.com",
         'handle_string': "tc",
     } in channel_details_v1(userID3[token], firstChannel[cID])[allMems]
     assert {
-        uID: userID4[token],
+        uID: userID4[AuID],
         fName: 'A',
         lName: "O",
         'email': "ocasio@gmail.com",
@@ -238,7 +238,7 @@ def test_channel_join():
     #* Test 1: If userID3 successfully joins public channel 'TrumpPence'
     channel_join_v1(userID3[token], firstChannel[cID])
     assert {
-        uID: userID3[token],
+        uID: userID3[AuID],
         'email': "zodiac@gmail.com",
         fName: "T",
         lName: "C",

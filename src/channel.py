@@ -1,6 +1,6 @@
 import src.data
 from src.error import AccessError, InputError
-from src.channels import channels_listall_v1, channels_list_v1
+from src.channels import channels_listall_v2, channels_list_v2
 from src.other import decode, get_channel, get_members, get_user
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
@@ -54,7 +54,7 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     }
 
 
-def channel_details_v1(auth_user_id, channel_id):
+def channel_details_v1(token, channel_id):
 
     '''
     channel_details_v1 calls upon a new copy of the desired channel dictionary that only contains filtered keys and values that is public.
@@ -71,6 +71,8 @@ def channel_details_v1(auth_user_id, channel_id):
     Return Value:
         Returns filteredDetails on succesfully creating a copy of the channel we want, with only the filtered information. The return is a dictionary.
     '''
+
+    auth_user_id, _ = decode(token)
 
     # check for valid channel
     passed = False
@@ -222,11 +224,11 @@ def channel_leave_v1(token, channel_id):
     channelData = get_channel(channel_id)
 
     # If the user is an owner
-    if token in channelData['owner_members']:
+    if auth_user_id in channelData['owner_members']:
         channel_removeowner_v1(auth_user_id, channel_id)
 
     # Check if user is in the channel
-    if token not in channelData['all_members']:
+    if auth_user_id not in channelData['all_members']:
         raise AccessError
 
     # Time to remove from all_members list
@@ -255,8 +257,6 @@ def channel_join_v1(token, channel_id):
         Returns an empty list regardless of conditions :)
     '''
 
-    auth_user_id, _ = decode(token)
-
     # Find the channel in the database
     channelFound = False
     i = 0
@@ -273,6 +273,8 @@ def channel_join_v1(token, channel_id):
 
     i -= 1      # Undo extra increment
 
+    auth_user_id, _ = decode(token)
+
     # Time to find the user details
     userFound = False
     j = 0
@@ -286,7 +288,7 @@ def channel_join_v1(token, channel_id):
 
     j -= 1      # Undo extra increment
     
-    if src.data.channels[i]['is_public'] == False and src.data.users[j]['permission_id'] is False:
+    if src.data.channels[i]['is_public'] == False and src.data.users[j]['permission_id'] != 1:
         # If channel is private, AccessError
         raise AccessError
 
