@@ -1,8 +1,8 @@
 import src.data
 from src.error import AccessError, InputError
 import jwt
+from src.other import decode, get_channel, get_members, get_user, SECRET
 
-SECRET = 'MENG'
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -50,18 +50,3 @@ def userpermission_change_v1(token, u_id, permission_id):
 
 def notifications_get_v1():
     pass
-
-def check_session(auth_user_id, session_id):
-    for user in src.data.users:
-        if auth_user_id == user[uID]:
-            if session_id in user[seshID]:
-                return
-    raise AccessError
-
-
-def decode(token):
-    payload = jwt.decode(token, SECRET, algorithms = 'HS256')
-    auth_user_id, session_id = payload.get(seshID payload.get(uID))
-    check_session(auth_user_id, session_id)
-    return auth_user_id, session_id
-

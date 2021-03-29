@@ -38,7 +38,7 @@ def message_senddm_v1(token, dm_id, message):
         raise AccessError
 
     message_id = len(src.data.messages_log)
-    now = datetime.now
+    now = datetime.now()
     time_created = int(now.strftime("%s"))
     
     src.data.messages_log.append({
