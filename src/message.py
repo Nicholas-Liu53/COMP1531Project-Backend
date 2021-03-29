@@ -18,21 +18,6 @@ handle    = 'handle_string'
 dmID      = 'dm_id'
 seshID    = 'session_id'
 
-
-def check_session(auth_user_id, session_id):
-    for user in src.data.users:
-        if auth_user_id == user['u_id']:
-            if session_id in user['session_id']:
-                return
-    raise AccessError
-
-
-def decode(token):
-    payload = jwt.decode(token, SECRET, algorithms = 'HS256')
-    auth_user_id, session_id = payload.get('session_id'), payload.get('user_id')
-    check_session(auth_user_id, session_id)
-    return auth_user_id, session_id
-
 def message_send_v2(auth_user_id, channel_id, message):
     return {
         'message_id': 1,
@@ -110,3 +95,28 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
         shared_message_id
     }
 
+def check_session(auth_user_id, session_id):
+    for user in src.data.users:
+        if auth_user_id == user['u_id']:
+            if session_id in user['session_id']:
+                return
+    raise AccessError
+
+
+def decode(token):
+    payload = jwt.decode(token, SECRET, algorithms = 'HS256')
+    auth_user_id, session_id = payload.get('session_id'), payload.get('user_id')
+    check_session(auth_user_id, session_id)
+    return auth_user_id, session_id
+
+def get_members(channel_id, dm_id):
+    if dm_id == -1:
+        for chanDetails in src.data.channels:
+            if channel_id == chanDetails[cID]:
+                return chanDetails[Name], chanDetails[allMems]
+        raise InputError
+    else:
+        for dmDetails in src.data.dms:
+            if dm_id == dmDetails[dmID]:
+                return dmDetails[Name], dmDetails[allMems]
+        raise InputError

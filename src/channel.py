@@ -18,33 +18,6 @@ handle    = 'handle_string'
 dmID      = 'dm_id'
 seshID    = 'session_id'
 
-def check_session(auth_user_id, session_id):
-    for user in src.data.users:
-        if auth_user_id == user['u_id']:
-            if session_id in user['session_id']:
-                return
-    raise AccessError
-
-
-def decode(token):
-    payload = jwt.decode(token, SECRET , algorithms = 'HS256')
-    auth_user_id, session_id = payload.get('session_id'), payload.get('user_id')
-    check_session(auth_user_id, session_id)
-    return auth_user_id, session_id
-
-
-def get_user(user_id):
-    for user in src.data.users:
-        if user_id == user['user_id']:
-            return {
-                'user_id': user['user_id'],
-                'email': user['email'],
-                'name_first': user['name_first'],
-                'name_last': user['name_last'],
-                'handle_string': user['handle_string'],
-            }
-    raise InputError
-
 def channel_invite_v1(token, channel_id, u_id):
     
     '''
@@ -410,3 +383,30 @@ def channel_removeowner_v1(token, channel_id, u_id):
 
     return {
     }
+
+def check_session(auth_user_id, session_id):
+    for user in src.data.users:
+        if auth_user_id == user['u_id']:
+            if session_id in user['session_id']:
+                return
+    raise AccessError
+
+
+def decode(token):
+    payload = jwt.decode(token, SECRET , algorithms = 'HS256')
+    auth_user_id, session_id = payload.get('session_id'), payload.get('user_id')
+    check_session(auth_user_id, session_id)
+    return auth_user_id, session_id
+
+
+def get_user(user_id):
+    for user in src.data.users:
+        if user_id == user['user_id']:
+            return {
+                'user_id': user['user_id'],
+                'email': user['email'],
+                'name_first': user['name_first'],
+                'name_last': user['name_last'],
+                'handle_string': user['handle_string'],
+            }
+    raise InputError
