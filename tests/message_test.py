@@ -64,7 +64,7 @@ def test_message_share_todm():
         mID: sharedMessage[mID],
         uID: userID2[AuID],
         'message': "hello jeffrey meng",
-        'time_created': timestamp,
+        'time_created': int(timestamp),
     } in src.dm.dm_messages_v1(userID2[token],dmTest[dmID],0)['messages']
 
     # userID1 is not in dmTest, raise access error
@@ -99,7 +99,7 @@ def test_message_share_tochannel():
         mID: sharedMessage[mID],
         uID: userID0[AuID],
         'message': "hello jeffrey meng | vincent",
-        'time_created': timestamp,
+        'time_created': int(timestamp),
     } in src.channel.channel_messages_v1(userID1[token],channelTest2[cID],0)['messages']
 
     with pytest.raises(AccessError):
@@ -130,7 +130,7 @@ def test_message_share_dmtodm():
         mID: sharedMessage[mID],
         uID: userID2[AuID],
         'message': "hello jeffrey meng | wow",
-        'time_created': timestamp,
+        'time_created': int(timestamp),
     } in src.dm.dm_messages_v1(userID4[token],dmTest[dmID],0)['messages']
 
     with pytest.raises(AccessError):

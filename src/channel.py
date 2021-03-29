@@ -3,6 +3,21 @@ from src.error import AccessError, InputError
 from src.channels import channels_listall_v1, channels_list_v1
 import jwt
 
+SECRET = 'MENG'
+
+AuID      = 'auth_user_id'
+uID       = 'u_id'
+cID       = 'channel_id'
+creatorID = 'creator_id'
+allMems   = 'all_members'
+Name      = 'name'
+fName     = 'name_first'
+lName     = 'name_last'
+chans     = 'channels'
+handle    = 'handle_string'
+dmID      = 'dm_id'
+seshID    = 'session_id'
+
 def check_session(auth_user_id, session_id):
     for user in src.data.users:
         if auth_user_id == user['u_id']:
@@ -12,7 +27,7 @@ def check_session(auth_user_id, session_id):
 
 
 def decode(token):
-    payload = jwt.decode(token, "MENG", algorithms = 'HS256')
+    payload = jwt.decode(token, SECRET , algorithms = 'HS256')
     auth_user_id, session_id = payload.get('session_id'), payload.get('user_id')
     check_session(auth_user_id, session_id)
     return auth_user_id, session_id
@@ -37,7 +52,7 @@ def channel_invite_v1(token, channel_id, u_id):
     desired user to the specific channel dictionary within the list contained in "all_members".
 
     Arguments:
-        auth_user_id (int) - The integer id of a user within both the user list and channel "all_members" calling the function to invite another user
+        token (int) - The integer id of a user within both the user list and channel "all_members" calling the function to invite another user
         channel_id (int) - The integer id of the channel that we want to invite a user to. Should be present in the channels list.
         u_id (int) - The integer id of a user that the authorised user wants to invite to that specific channel.
 
@@ -94,7 +109,7 @@ def channel_details_v1(token, channel_id):
     Does not include private information such as password.
     
     Arguments:
-        auth_user_id (int) - The id of the user that is calling the channel details. Must be present within that channel's "all_members"
+        token (int) - The id of the user that is calling the channel details. Must be present within that channel's "all_members"
         channel_id (int) - The id of the desired channel which we want details of.
     
     Exceptions:
@@ -153,7 +168,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     channel_messages_v1 returns up to 50 messages within a specified channel.
     
     Arguments:
-        auth_user_id (int) - The id of the user that is calling the channel details. Must be present within that channel's "all_members".
+        token (int) - The id of the user that is calling the channel details. Must be present within that channel's "all_members".
         channel_id (int) - The id of the desired channel which we want details of.
         start(int) - The index of the message that they wish to start returning from.
     
@@ -243,7 +258,7 @@ def channel_join_v1(auth_user_id, channel_id):
     If the channel is private then the user isn't added. (See more in Exceptions)
 
     Arguments:
-        auth_user_id (int) - The id of the user that wants to join the channel
+        token (int) - The id of the user that wants to join the channel
         channel_id   (int) - The id of the channel that the user wants to join
 
     Exceptions:
