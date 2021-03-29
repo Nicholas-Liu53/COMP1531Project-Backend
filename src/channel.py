@@ -54,7 +54,6 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     }
 
 
-
 def channel_details_v1(auth_user_id, channel_id):
 
     '''
@@ -112,6 +111,7 @@ def channel_details_v1(auth_user_id, channel_id):
             filteredDetails.update(dictAllMem)
 
     return filteredDetails
+
 
 def channel_messages_v1(auth_user_id, channel_id, start):
 
@@ -297,6 +297,7 @@ def channel_join_v1(auth_user_id, channel_id):
     return {
     }
 
+
 def channel_addowner_v1(auth_user_id, channel_id, u_id):
     return {
     }
@@ -304,3 +305,10 @@ def channel_addowner_v1(auth_user_id, channel_id, u_id):
 def channel_removeowner_v1(auth_user_id, channel_id, u_id):
     return {
     }
+
+
+
+
+
+
+

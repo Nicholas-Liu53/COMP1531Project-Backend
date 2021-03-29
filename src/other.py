@@ -1,15 +1,19 @@
 import src.data
 import jwt
+from src.error import AccessError, InputError
 
-AuID    = 'auth_user_id'
-uID     = 'u_id'
-cID     = 'channel_id'
-allMems = 'all_members'
-cName   = 'name'
-fName   = 'name_first'
-lName   = 'name_last'
-chans   = 'channels'
-
+AuID      = 'auth_user_id'
+uID       = 'u_id'
+cID       = 'channel_id'
+creatorID = 'creator_id'
+allMems   = 'all_members'
+Name      = 'name'
+fName     = 'name_first'
+lName     = 'name_last'
+chans     = 'channels'
+handle    = 'handle_string'
+dmID      = 'dm_id'
+seshID    = 'session_id'
 SECRET = 'MENG'
 
 def clear_v1():

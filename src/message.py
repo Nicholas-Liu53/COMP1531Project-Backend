@@ -21,7 +21,7 @@ def message_send_v1(token, channel_id, message):
 
     # User is in the channel (which exists) & message is appropriate length
     #* Time to send a message
-    data.messages_log.append(
+    src.data.messages_log.append(
         {
             'channel_id'    : channel_id,
             'dm_id'         : -1,

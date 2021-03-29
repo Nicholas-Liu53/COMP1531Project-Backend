@@ -37,12 +37,12 @@ def channels_list_v1(auth_user_id):
             channel = {}
             channel[cID] = chanD[cID]
             channel[cName] = chanD[cName]
-            if channel[cID] != None and channel[cName] != None:
-                output.append(channel)
+            output.append(channel)
 
     return {
         'channels': output
     }
+
 
 def channels_listall_v1(auth_user_id):
     """
@@ -135,6 +135,7 @@ def channels_create_v1(token, name, is_public):
     return {
         'channel_id': newID,
     }
+
 
 # Function that checks if auth_user_id is valid
 def check_auth_user_id(auth_user_id):
