@@ -3,14 +3,27 @@ from src.error import AccessError, InputError
 from src.channels import channels_listall_v2, channels_list_v2
 from src.other import decode, get_channel, get_members, get_user
 
-def channel_invite_v1(auth_user_id, channel_id, u_id):
+AuID      = 'auth_user_id'
+uID       = 'u_id'
+cID       = 'channel_id'
+creatorID = 'creator_id'
+allMems   = 'all_members'
+Name      = 'name'
+fName     = 'name_first'
+lName     = 'name_last'
+chans     = 'channels'
+handle    = 'handle_string'
+dmID      = 'dm_id'
+seshID    = 'session_id'
+
+def channel_invite_v1(token, channel_id, u_id):
     
     '''
     channel_invite_v1 checks if a user is authorised to invite another user to a channel and then automatically adds the
     desired user to the specific channel dictionary within the list contained in "all_members".
 
     Arguments:
-        auth_user_id (int) - The integer id of a user within both the user list and channel "all_members" calling the function to invite another user
+        token (int) - The integer id of a user within both the user list and channel "all_members" calling the function to invite another user
         channel_id (int) - The integer id of the channel that we want to invite a user to. Should be present in the channels list.
         u_id (int) - The integer id of a user that the authorised user wants to invite to that specific channel.
 
@@ -23,6 +36,8 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
         Returns an empty list on passing all Exceptions, with changes being made directly to our data.py  
     '''
 
+    auth_user_id, _ = decode(token)
+
     #check if channel_id is valid
     passed = False
     for check in src.data.channels:
@@ -31,17 +46,20 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
             break
     if passed == False:
         raise InputError
+    
 
     # check if user is authorised to invite
     for chans in src.data.channels:
-        userAuth = False
         if chans["channel_id"] == channel_id:
+            userAuth = False
             for users in chans["all_members"]:
                 if users == auth_user_id:
                     userAuth = True
                     break
             if userAuth == False:
                 raise AccessError
+                    
+    # should check for auth_user_id in channel info first for owners
 
     get_user(u_id)
 
@@ -61,7 +79,7 @@ def channel_details_v1(token, channel_id):
     Does not include private information such as password.
     
     Arguments:
-        auth_user_id (int) - The id of the user that is calling the channel details. Must be present within that channel's "all_members"
+        token (int) - The id of the user that is calling the channel details. Must be present within that channel's "all_members"
         channel_id (int) - The id of the desired channel which we want details of.
     
     Exceptions:
@@ -85,8 +103,8 @@ def channel_details_v1(token, channel_id):
 
     # check if user is authorised for channel
     for chans in src.data.channels:
-        userAuth = False
         if chans["channel_id"] == channel_id:
+            userAuth = False
             for users in chans["all_members"]:
                 if users == auth_user_id:
                     userAuth = True
@@ -97,7 +115,7 @@ def channel_details_v1(token, channel_id):
         if details["channel_id"] == channel_id:
 
             # filteres the information to be displayed
-            filteredDetails = dict((item, details[item]) for item in ["name", "is_public"] if item in details)
+            filteredDetails = dict((item, details[item]) for item in ["name","is_public"] if item in details)
 
             # takes only user_id, first and last name
             ownmem = []
@@ -121,7 +139,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     channel_messages_v1 returns up to 50 messages within a specified channel.
     
     Arguments:
-        auth_user_id (int) - The id of the user that is calling the channel details. Must be present within that channel's "all_members".
+        token (int) - The id of the user that is calling the channel details. Must be present within that channel's "all_members".
         channel_id (int) - The id of the desired channel which we want details of.
         start(int) - The index of the message that they wish to start returning from.
     
@@ -137,7 +155,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     #Input error: Channel ID is not a valid channel 
     #This is the case
     channelFound = False 
-    for channel in src.channels.channels_listall_v1(auth_user_id)["channels"]:
+    for channel in src.channels.channels_listall_v2(auth_user_id)["channels"]:
         if channel_id == channel["channel_id"]:
             channelFound = True
     
@@ -151,7 +169,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     
     #Access error: When auth_user_id is not a member of channel with channel_id 
     userFound = False 
-    for channel in src.channels.channels_list_v1(auth_user_id)["channels"]:
+    for channel in src.channels.channels_list_v2(auth_user_id)["channels"]:
         if channel_id == channel["channel_id"]:
             userFound = True
     
@@ -173,7 +191,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     
     while (counter > -1 and counter > start): 
         currentMessage = src.data.messages_log[counter]
-        messagesList.insert(currentMessage)
+        messagesList.append(currentMessage)
         counter -= 1    
     
     #Now our correct messages are in list messagesList from oldest to newest order     
@@ -244,7 +262,7 @@ def channel_join_v1(token, channel_id):
     If the channel is private then the user isn't added. (See more in Exceptions)
 
     Arguments:
-        token              - The token of the user that wants to join the channel
+        token (int) - The id of the user that wants to join the channel
         channel_id   (int) - The id of the channel that the user wants to join
 
     Exceptions:
@@ -299,12 +317,103 @@ def channel_join_v1(token, channel_id):
     return {
     }
 
+def channel_addowner_v1(token, channel_id, u_id):
+    #if not a user in the channel, add it to all membs too
+    # for access error, check permission id first and if permission id isnt of the Dreams owner, check owner list of channels
+    # ALLWAYS CHECK FOR PERMISSION ID FIRST FOR DREAM OWNERS
+    # Make user with user id u_id an owner of this channel
+    # When user with user id u_id is already an owner of the channel INPUT ERROR
 
-def channel_addowner_v1(auth_user_id, channel_id, u_id):
+    auth_user_id, _ = decode(token)
+    
+    passed = False
+    for check in src.data.channels:
+        if check['channel_id'] == channel_id:
+            passed = True
+    if not passed:
+        raise InputError
+        
+    for chans in src.data.channels:
+        if chans["channel_id"] == channel_id:
+            alreadyOwner = False
+            for users in chans["owner_members"]:
+                if users == u_id:
+                    alreadyOwner = True
+            if alreadyOwner == True:
+                raise InputError
+
+    # Access error
+    dreamsOwner = False
+    userAuth = False
+    for users in src.data.users:
+        if users['u_id'] == auth_user_id:
+            if users['permission_id'] == 1:
+                dreamsOwner = True
+    for chans in src.data.channels:
+        if chans["channel_id"] == channel_id:
+            for users in chans["owner_members"]:
+                if users == auth_user_id:
+                    userAuth = True
+                    break
+    
+    if dreamsOwner == False and userAuth == False:
+        raise AccessError
+    
+    # now searches for channel_id
+    for chan in src.data.channels:
+        if chan["channel_id"] == channel_id:
+            # ensure no duplicates
+            chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
+            chan["owner_members"].append(u_id) if u_id not in chan["owner_members"] else None
+
     return {
     }
 
-def channel_removeowner_v1(auth_user_id, channel_id, u_id):
+def channel_removeowner_v1(token, channel_id, u_id):
+    # does not remove from all membs
+    auth_user_id, _ = decode(token)
+    
+    passed = False
+    for check in src.data.channels:
+        if check['channel_id'] == channel_id:
+            passed = True
+            break
+    if not passed:
+        raise InputError
+    for chans in src.data.channels:
+        if chans["channel_id"] == channel_id:
+            userisOwner = False
+            for users in chans["owner_members"]:
+                if users == u_id:
+                    userisOwner = True
+                    break
+    if not userisOwner:
+        raise InputError
+
+    # Access error
+    dreamsOwner = False
+    for users in src.data.users:
+        if users['u_id'] == auth_user_id:
+            if users['permission_id'] == 1:
+                dreamsOwner = True
+    
+    for chans in src.data.channels:
+        if chans["channel_id"] == channel_id:
+            userAuth = False
+            for users in chans["owner_members"]:
+                if users == auth_user_id:
+                    userAuth = True
+
+    if dreamsOwner == False and userAuth == False:
+        raise AccessError
+
+    for chan in src.data.channels:
+        if chan["channel_id"] == channel_id:
+            for users in chan["owner_members"]:
+                if users == u_id:
+                    chan["owner_members"].remove(users)
+
+
     return {
     }
 

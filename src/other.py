@@ -22,6 +22,10 @@ def clear_v1():
 
     src.data.channels = []
 
+    src.data.dms = []
+
+    src.data.messages_log = []
+
 def search_v1(auth_user_id, query_str):
     return {
         'messages': [
