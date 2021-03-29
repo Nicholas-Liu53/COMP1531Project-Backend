@@ -37,9 +37,10 @@ def message_senddm_v1(token, dm_id, message):
     _, dmMembers = get_members(-1, dm_id)
     if auth_user_id not in dmMembers:
         raise AccessError
-
+    if len(message) > 1000:
+        raise InputError
     message_id = len(src.data.messages_log)
-    now = datetime.now
+    now = datetime.now()
     time_created = int(now.strftime("%s"))
     
     src.data.messages_log.append({
@@ -63,8 +64,9 @@ def decode(token):
 
 def check_session(auth_user_id, session_id):
     for user in src.data.users:
+        print(user)
         if auth_user_id == user[uID]:
-            if session_id in user[session_id]:
+            if session_id in user['session_id']:
                 return
     raise AccessError
 

@@ -11,6 +11,7 @@ cID       = 'channel_id'
 creatorID = 'creator_id'
 allMems   = 'all_members'
 Name      = 'name'
+dmName    = 'dm_name'
 fName     = 'name_first'
 lName     = 'name_last'
 chans     = 'channels'
@@ -36,27 +37,26 @@ def dm_list_v1(token):
     auth_user_id, _ = decode(token)
     output = []
     for dmDetails in src.data.dms:
-        for memberD in dmDetails['all_members']:
-            if auth_user_id == memberD['u_id']:
-                dm = {}
-                dm[dmID] = dmDetails[dmID]
-                dm[Name] = dmDetails[Name]
-                output.append(dm)
+        if auth_user_id in dmDetails['all_members']:
+            dm = {}
+            dm[dmID] = dmDetails[dmID]
+            dm[Name] = dmDetails[Name]
+            output.append(dm)
     
     return {
         'dms': output
     }
     
-
 def dm_create_v1(token, u_ids):
     creator_id, _ = decode(token)
-
     if len(src.data.dms) == 0:
         dm_ID = 0
     else:
         dm_ID = src.data.dms[-1][dmID] + 1
 
-    dmUsers = u_ids.append(creator_id)
+    dmUsers = [creator_id]
+    for user_id in u_ids:
+        dmUsers.append(user_id)
     handles = []
     for user in dmUsers:
         userInfo = get_user(user)
@@ -64,7 +64,7 @@ def dm_create_v1(token, u_ids):
     handles.sort()
     dm_name = ', '.join(handles)
 
-    src.data.users.append({
+    src.data.dms.append({
         dmID: dm_ID,
         Name: dm_name,
         creatorID: creator_id,
@@ -72,7 +72,7 @@ def dm_create_v1(token, u_ids):
     })
 
     return {
-        'dm_id': dmID,
+        'dm_id': dm_ID,
         'dm_name': dm_name
     }
 
@@ -96,7 +96,7 @@ def dm_remove_v1(token, dm_id):
                 raise AccessError
 
     if input_error:
-        raise input_error
+        raise InputError
 
     #Now that errors are fixed, can remove the existing DM with dm_id
     #Loop through dm_list, once dm_id is found remove it
@@ -117,18 +117,17 @@ def dm_invite_v1(token, dm_id, u_id):
     #Raises Input Error when dm_id is not valid
     #Access error if auth user i.e token is not a member of dm
     input_error = True
-        for items in src.data.dms:
-            #Loop for input errors:
-            if dm_id == items['dm_id']:
-                input_error = False
-                if auth_user_ID not in items['all_members']:
-                    raise AccessError
-                else:
-                    items['all_members'].append(u_id)
+    for items in src.data.dms:
+        #Loop for input errors:
+        if dm_id == items['dm_id']:
+            input_error = False
+            if auth_user_ID not in items['all_members']:
+                raise AccessError
+            else:
+                items['all_members'].append(u_id)
 
-        if input_error:
-
-            raise input_error
+    if input_error:
+        raise InputError
 
     return {}
 
@@ -139,17 +138,17 @@ def dm_leave_v1(token, dm_id):
     #Raises InputError when dm_id is not valid
     # Access error if auth_user is not a member of dm with dm_id
     input_error = True
-        for items in src.data.dms:
-            #Loop for input errors:
-            if dm_id == items['dm_id']:
-                input_error = False
-                if auth_user_ID not in items['all_members']:
-                    raise AccessError
-                else:
-                    items['all_members'].remove(auth_user_ID)
+    for items in src.data.dms:
+        #Loop for input errors:
+        if dm_id == items['dm_id']:
+            input_error = False
+            if auth_user_ID not in items['all_members']:
+                raise AccessError
+            else:
+                items['all_members'].remove(auth_user_ID)
 
-        if input_error:
-            raise input_error
+    if input_error:
+        raise InputError
     return {}
 
 def dm_messages_v1(token, dm_id, start):
@@ -167,7 +166,7 @@ def dm_messages_v1(token, dm_id, start):
 
     desired_end = start + 50
     if num_of_messages < desired_end:
-    desired_end = -1
+        desired_end = -1
     messages = []
 
     #Get all dms
@@ -175,7 +174,7 @@ def dm_messages_v1(token, dm_id, start):
     for objects in src.data.messages_log:
         if dm_id == objects['dm_id'] and current_dm >= start and len(messages < 50):
             current_DM = objects.copy()
-            del current_DM[channel_id]
+            del current_DM[cID]
             del current_DM[dm_id]
             messages.append(current_DM)
             current_dm += 1
@@ -188,14 +187,14 @@ def dm_messages_v1(token, dm_id, start):
 
 def decode(token):
     payload = jwt.decode(token, SECRET, algorithms='HS256')
-    auth_user_id, session_id = payload.get('session_id'), payload.get('user_id')
+    auth_user_id, session_id = payload.get('user_id'), payload.get('session_id')
     check_session(auth_user_id, session_id)
     return auth_user_id, session_id
 
 def check_session(auth_user_id, session_id):
     for user in src.data.users:
         if auth_user_id == user[uID]:
-            if session_id in user[session_id]:
+            if session_id in user['session_id']:
                 return
     raise AccessError
 
@@ -226,12 +225,12 @@ def get_user(user_id):
 def message_count(channel_id, dm_id):
     counter = 0
     if dm_id == -1:
-        for message in src.data.messages_log:
+        for _ in src.data.messages_log:
             if channel_id == src.data.messages_log[cID]:
-            counter += 1
+                counter += 1
     else:
-        for message in src.data.messages_log:
+        for _ in src.data.messages_log:
             if dm_id == src.data.messages_log[dmID]:
-            counter += 1
+                counter += 1
     
     return counter
