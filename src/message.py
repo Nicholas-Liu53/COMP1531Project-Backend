@@ -1,6 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 import src.auth
+from src.other import decode, get_members
 from datetime import datetime
 import jwt
 
@@ -55,29 +56,3 @@ def message_senddm_v1(token, dm_id, message):
     return {
         'message_id': message_id,
     }
-
-def decode(token):
-    payload = jwt.decode(token, SECRET, algorithms='HS256')
-    auth_user_id, session_id = payload.get('session_id'), payload.get('user_id')
-    check_session(auth_user_id, session_id)
-    return auth_user_id, session_id
-
-def check_session(auth_user_id, session_id):
-    for user in src.data.users:
-        print(user)
-        if auth_user_id == user[uID]:
-            if session_id in user['session_id']:
-                return
-    raise AccessError
-
-def get_members(channel_id, dm_id):
-    if dm_id == -1:
-        for chanDetails in src.data.channels:
-            if channel_id == chanDetails[cID]:
-                return chanDetails[Name], chanDetails[allMems]
-        raise InputError
-    else:
-        for dmDetails in src.data.dms:
-            if dm_id == dmDetails[dmID]:
-                return dmDetails[Name], dmDetails[allMems]
-        raise InputError

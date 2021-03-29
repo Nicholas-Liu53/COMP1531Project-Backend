@@ -78,4 +78,15 @@ def get_channel(channel_id):
             return channel
     raise InputError
 
+def message_count(channel_id, dm_id):
+    counter = 0
+    if dm_id == -1:
+        for message in src.data.messages_log:
+            if channel_id == message[cID]:
+                counter += 1
+    else:
+        for message in src.data.messages_log:
+            if dm_id == message[dmID]:
+                counter += 1
     
+    return counter
