@@ -1,9 +1,8 @@
 import src.data
 from src.error import AccessError, InputError
 from src.channels import channels_listall_v1, channels_list_v1
-import jwt
+from src.other import decode, get_channel, get_members, get_user, SECRET
 
-SECRET = 'MENG'
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -17,7 +16,6 @@ chans     = 'channels'
 handle    = 'handle_string'
 dmID      = 'dm_id'
 seshID    = 'session_id'
-
 def channel_invite_v1(token, channel_id, u_id):
     
     '''
@@ -135,6 +133,7 @@ def channel_details_v1(token, channel_id):
 
     return filteredDetails
 
+
 def channel_messages_v1(auth_user_id, channel_id, start):
 
     '''
@@ -238,11 +237,12 @@ def channel_join_v1(auth_user_id, channel_id):
         InputError - Occurs when the channel_id inputted does not belong to any channel that exists in the database
         AccessError - Occurs when 
                             1) the channel that the user is trying to join is private
-                            2) The auth_user_id inputted does not belong to any user
+                            2) The token inputted does not belong to any user
 
     Return Value:
         Returns an empty list regardless of conditions :)
     '''
+
 
     # Find the channel in the database
     channelFound = False
@@ -260,10 +260,6 @@ def channel_join_v1(auth_user_id, channel_id):
 
     i -= 1      # Undo extra increment
 
-    if src.data.channels[i]['is_public'] == False:
-        # If channel is private, AccessError
-        raise AccessError
-
     # Time to find the user details
     userFound = False
     j = 0
@@ -276,9 +272,13 @@ def channel_join_v1(auth_user_id, channel_id):
         j += 1
 
     j -= 1      # Undo extra increment
+    
+    if src.data.channels[i]['is_public'] == False:
+        # If channel is private, AccessError
+        raise AccessError
 
     # Time to add the user into the channel
-    src.data.channels[i]['all_members'].append(src.data.users[j])
+    src.data.channels[i]['all_members'].append(src.data.users[j]['u_id'])
 
     # Done, return empty list 
     return {
@@ -384,29 +384,9 @@ def channel_removeowner_v1(token, channel_id, u_id):
     return {
     }
 
-def check_session(auth_user_id, session_id):
-    for user in src.data.users:
-        if auth_user_id == user['u_id']:
-            if session_id in user['session_id']:
-                return
-    raise AccessError
 
 
-def decode(token):
-    payload = jwt.decode(token, SECRET , algorithms = 'HS256')
-    auth_user_id, session_id = payload.get('session_id'), payload.get('user_id')
-    check_session(auth_user_id, session_id)
-    return auth_user_id, session_id
 
 
-def get_user(user_id):
-    for user in src.data.users:
-        if user_id == user['user_id']:
-            return {
-                'user_id': user['user_id'],
-                'email': user['email'],
-                'name_first': user['name_first'],
-                'name_last': user['name_last'],
-                'handle_string': user['handle_string'],
-            }
-    raise InputError
+
+

@@ -30,17 +30,16 @@ def channels_list_v1(auth_user_id):
     output = []
     # Find channels that user is part of and add them to the output list
     for chanD in src.data.channels:
-        for memberD in chanD['all_members']:
-            if auth_user_id is memberD['u_id']:
-                channel = {}
-                channel[cID] = chanD[cID]
-                channel[cName] = chanD[cName]
-                if channel[cID] != None and channel[cName] != None:
-                    output.append(channel)
+        if auth_user_id in chanD['all_members']:
+            channel = {}
+            channel[cID] = chanD[cID]
+            channel[cName] = chanD[cName]
+            output.append(channel)
 
     return {
         'channels': output
     }
+
 
 def channels_listall_v1(auth_user_id):
     """
@@ -72,12 +71,13 @@ def channels_listall_v1(auth_user_id):
         'channels': output
     }
 
+
 def channels_create_v1(auth_user_id, name, is_public):
     '''
     Creates a channel and adds the user into that channel as both an owner and member
 
     Arguments:
-        auth_user_id (int)  - The int id of the user that wants to create a channel
+        token               - The token id of the user that wants to create a channel
         name         (str)  - The name of the channel that the user wants to create, comes as one string
         is_public    (bool) - The boolean value of whether this channel is to be public or private
                                 True  --> Channel is to be public
@@ -90,7 +90,7 @@ def channels_create_v1(auth_user_id, name, is_public):
     Return Value:
         Returns a dictionary with the key being 'channel_id' and the value of the newly created channel's id
     '''
-
+    
     # Ensure an InputError when the channel name is 
     # more than 20 characters long
     if len(name) > 20:
@@ -124,8 +124,8 @@ def channels_create_v1(auth_user_id, name, is_public):
             'channel_id': newID,
             'is_public': is_public,
             'name': name,
-            'owner_members': [src.data.users[j]],
-            'all_members': [src.data.users[j]],
+            'owner_members': [src.data.users[j][uID]],
+            'all_members': [src.data.users[j][uID]],
         }
     )
 
@@ -133,6 +133,7 @@ def channels_create_v1(auth_user_id, name, is_public):
     return {
         'channel_id': newID,
     }
+
 
 # Function that checks if auth_user_id is valid
 def check_auth_user_id(auth_user_id):

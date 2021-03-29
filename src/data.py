@@ -58,7 +58,7 @@ channels = [
 dms = [
     {
         'dm_id': None,
-        'name': None, 
+        'name': None,
         'creator_id': None,
         'all_members': [],
     }
