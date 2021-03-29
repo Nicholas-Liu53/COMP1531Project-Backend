@@ -204,7 +204,7 @@ def channel_leave_v1(token, channel_id):
     Follows the rules channel_remove_owner_v1 if the user is an owner
 
     Arguments:
-        auth_user_id (int) - The id of the user that is to leave the channel
+        token              - The token of the user that is to leave the channel
         channel_id   (int) - The id of the channel that the user is to leave
 
     Exceptions:
@@ -235,7 +235,7 @@ def channel_leave_v1(token, channel_id):
     return {
     }
 
-def channel_join_v1(auth_user_id, channel_id):
+def channel_join_v1(token, channel_id):
     '''
     Takes in a user's id and a channel's id and adds that user to that given channel.
         --> Specifically adds it to the 'all_members' list in the channel dictionary 

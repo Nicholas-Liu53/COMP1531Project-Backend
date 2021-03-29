@@ -10,8 +10,7 @@ cName   = 'name'
 fName   = 'name_first'
 lName   = 'name_last'
 chans   = 'channels'
-
-SECRET = "MENG"
+token   = 'token'
 
 def channels_list_v1(auth_user_id):
     """
