@@ -31,6 +31,7 @@ def message_send_v1(token, channel_id, message):
 
     now = datetime.now()
     time_created = int(now.strftime("%s"))
+    newID = len(src.data.messages_log)
 
     # User is in the channel (which exists) & message is appropriate length
     #* Time to send a message
@@ -40,13 +41,13 @@ def message_send_v1(token, channel_id, message):
             'dm_id'         : -1,
             'u_id'          : get_user(auth_user_id)['u_id'],
             'time_created'  : time_created,
-            'message_id'    : len(src.data.messages_log),
+            'message_id'    : newID,
             'message'       : message,
         }
     )
 
     return {
-        'message_id': 1,
+        'message_id': newID,
     }
 
 def message_remove_v1(auth_user_id, message_id):
