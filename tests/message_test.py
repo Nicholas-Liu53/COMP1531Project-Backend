@@ -1,5 +1,4 @@
 # file to test functions in src/message.py
-
 import pytest
 from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_share_v1, message_senddm_v1
 from src.error import InputError, AccessError
@@ -92,14 +91,13 @@ def test_message_share_todm():
 
     timestamp = now.replace(tzinfo=timezone.utc).timestamp()
 
-    '''
+    
     assert {
         mID: sharedMessage[mID],
         uID: userID2[AuID],
         'message': "hello jeffrey meng",
         'time_created': int(timestamp),
     } in src.dm.dm_messages_v1(userID2[token],dmTest[dmID],0)['messages']
-    '''
 
     # userID1 is not in dmTest, raise access error
     with pytest.raises(AccessError):
@@ -128,15 +126,12 @@ def test_message_share_tochannel():
     sharedMessage, now = message_share_v1(userID0[token], ogMessage[mID],'vincent', channelTest2[cID], -1), datetime.now()
 
     timestamp = now.replace(tzinfo=timezone.utc).timestamp()
-
-    '''
     assert {
         mID: sharedMessage[mID],
         uID: userID0[AuID],
         'message': "hello jeffrey meng | vincent",
         'time_created': int(timestamp),
     } in src.channel.channel_messages_v1(userID1[token],channelTest2[cID],0)['messages']
-    '''
 
     with pytest.raises(AccessError):
         message_share_v1(userID2[token], ogMessage[mID], '', channelTest2[cID], -1)
