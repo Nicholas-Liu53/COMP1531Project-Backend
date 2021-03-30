@@ -1,8 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
-from src.channels import channels_listall_v1, channels_list_v1
+from src.channels import channels_listall_v2, channels_list_v2
 from src.other import decode, get_channel, get_members, get_user
-
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -16,6 +15,7 @@ chans     = 'channels'
 handle    = 'handle_string'
 dmID      = 'dm_id'
 seshID    = 'session_id'
+
 def channel_invite_v1(token, channel_id, u_id):
     
     '''
@@ -70,7 +70,6 @@ def channel_invite_v1(token, channel_id, u_id):
             chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
     return {   
     }
-
 
 
 def channel_details_v1(token, channel_id):
@@ -156,7 +155,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     #Input error: Channel ID is not a valid channel 
     #This is the case
     channelFound = False 
-    for channel in src.channels.channels_listall_v1(auth_user_id)["channels"]:
+    for channel in src.channels.channels_listall_v2(auth_user_id)["channels"]:
         if channel_id == channel["channel_id"]:
             channelFound = True
     
@@ -170,7 +169,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     
     #Access error: When auth_user_id is not a member of channel with channel_id 
     userFound = False 
-    for channel in src.channels.channels_list_v1(auth_user_id)["channels"]:
+    for channel in src.channels.channels_list_v2(auth_user_id)["channels"]:
         if channel_id == channel["channel_id"]:
             userFound = True
     
@@ -192,7 +191,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     
     while (counter > -1 and counter > start): 
         currentMessage = src.data.messages_log[counter]
-        messagesList.insert(currentMessage)
+        messagesList.append(currentMessage)
         counter -= 1    
     
     #Now our correct messages are in list messagesList from oldest to newest order     
@@ -219,11 +218,44 @@ def channel_messages_v1(auth_user_id, channel_id, start):
         'end': endValue,
     }
 
-def channel_leave_v1(auth_user_id, channel_id):
+def channel_leave_v1(token, channel_id):
+    '''
+    Takes in a user's id and a channel's id and removes that user from that given channel.
+    Follows the rules channel_remove_owner_v1 if the user is an owner
+
+    Arguments:
+        token              - The token of the user that is to leave the channel
+        channel_id   (int) - The id of the channel that the user is to leave
+
+    Exceptions:
+        InputError - Occurs when the channel_id inputted does not belong to any channel that exists in the database
+        AccessError - Occurs when 
+                            2) The auth_user_id inputted does not belong to any user that is in the channel
+
+    Return Value:
+        Returns an empty list regardless of conditions :)
+    '''
+
+    auth_user_id, _ = decode(token)
+
+    # Get the channel directory from data.py
+    channelData = get_channel(channel_id)
+
+    # If the user is an owner
+    if auth_user_id in channelData['owner_members']:
+        channel_removeowner_v1(auth_user_id, channel_id)
+
+    # Check if user is in the channel
+    if auth_user_id not in channelData['all_members']:
+        raise AccessError
+
+    # Time to remove from all_members list
+    channelData['all_members'].remove(auth_user_id)
+
     return {
     }
 
-def channel_join_v1(auth_user_id, channel_id):
+def channel_join_v1(token, channel_id):
     '''
     Takes in a user's id and a channel's id and adds that user to that given channel.
         --> Specifically adds it to the 'all_members' list in the channel dictionary 
@@ -243,7 +275,6 @@ def channel_join_v1(auth_user_id, channel_id):
         Returns an empty list regardless of conditions :)
     '''
 
-
     # Find the channel in the database
     channelFound = False
     i = 0
@@ -260,6 +291,8 @@ def channel_join_v1(auth_user_id, channel_id):
 
     i -= 1      # Undo extra increment
 
+    auth_user_id, _ = decode(token)
+
     # Time to find the user details
     userFound = False
     j = 0
@@ -273,7 +306,7 @@ def channel_join_v1(auth_user_id, channel_id):
 
     j -= 1      # Undo extra increment
     
-    if src.data.channels[i]['is_public'] == False:
+    if src.data.channels[i]['is_public'] == False and src.data.users[j]['permission_id'] != 1:
         # If channel is private, AccessError
         raise AccessError
 
@@ -290,7 +323,7 @@ def channel_addowner_v1(token, channel_id, u_id):
     # ALLWAYS CHECK FOR PERMISSION ID FIRST FOR DREAM OWNERS
     # Make user with user id u_id an owner of this channel
     # When user with user id u_id is already an owner of the channel INPUT ERROR
-      
+
     auth_user_id, _ = decode(token)
     
     passed = False
@@ -311,15 +344,15 @@ def channel_addowner_v1(token, channel_id, u_id):
 
     # Access error
     dreamsOwner = False
+    userAuth = False
     for users in src.data.users:
         if users['u_id'] == auth_user_id:
             if users['permission_id'] == 1:
                 dreamsOwner = True
     for chans in src.data.channels:
         if chans["channel_id"] == channel_id:
-            userAuth = False
             for users in chans["owner_members"]:
-                if users['u_id'] == auth_user_id:
+                if users == auth_user_id:
                     userAuth = True
                     break
     
@@ -354,8 +387,8 @@ def channel_removeowner_v1(token, channel_id, u_id):
                 if users == u_id:
                     userisOwner = True
                     break
-            if not userisOwner:
-                raise InputError
+    if not userisOwner:
+        raise InputError
 
     # Access error
     dreamsOwner = False
@@ -368,7 +401,7 @@ def channel_removeowner_v1(token, channel_id, u_id):
         if chans["channel_id"] == channel_id:
             userAuth = False
             for users in chans["owner_members"]:
-                if users['u_id'] == auth_user_id:
+                if users == auth_user_id:
                     userAuth = True
 
     if dreamsOwner == False and userAuth == False:

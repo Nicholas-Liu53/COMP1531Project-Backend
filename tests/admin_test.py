@@ -12,7 +12,7 @@ allMems = 'all_members'
 ownMems = 'owner_members'
 fName   = 'name_first'
 lName   = 'name_last'
-token = 'token'
+token   = 'token'
 
 
 def test_user_remove():
@@ -21,7 +21,6 @@ def test_user_remove():
 def test_userpermissions_change():
     #* Ensure database is empty
     #! Clearing data
-
     src.other.clear_v1()
 
     #first is always owner
