@@ -38,10 +38,10 @@ def message_send_v1(token, channel_id, message):
         {
             'channel_id'    : channel_id,
             'dm_id'         : -1,
-            'handle_string' : get_user(auth_user_id)['handle_string'],
+            'u_id'          : get_user(auth_user_id)['u_id'],
             'time_created'  : time_created,
             'message_id'    : len(src.data.messages_log),
-            'message_string': message,
+            'message'       : message,
         }
     )
 
