@@ -3,6 +3,7 @@ import src.data
 from src.dm import dm_details_v1, dm_list_v1, dm_create_v1, dm_remove_v1, dm_invite_v1, dm_leave_v1, dm_messages_v1
 from src.error import AccessError, InputError
 from src.message import message_senddm_v1
+from src.other import SECRET
 import src.auth, src.channel, src.other
 import jwt
 
@@ -10,7 +11,7 @@ AuID    = 'auth_user_id'
 uID     = 'u_id'
 cID     = 'channel_id'
 allMems = 'all_members'
-Name   = 'name'
+Name    = 'name'
 dmName  = 'dm_name'
 fName   = 'name_first'
 lName   = 'name_last'
@@ -19,33 +20,39 @@ token   = 'token'
 dmID    = 'dm_id'
 handle = 'handle_string'
 
-SECRET = 'MENG'
-
 @pytest.fixture
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
-#! Make sure to clear before every test
+@pytest.fixture
+def user1():
+    src.other.clear_v1()    
+    return src.auth.auth_register_v2("first@gmail.com", "password", "User", "1")
 
-def test_dm_details_valid():
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
+@pytest.fixture
+def user2():
+    return src.auth.auth_register_v2("second@gmail.com", "password", "User", "2")
+
+@pytest.fixture
+def user3():
+    return src.auth.auth_register_v2("third@gmail.com", "password", "User", "3")
+
+def test_dm_details_valid(user1, user2):
     dm1 = dm_create_v1(user1[token], [user2[AuID]])
     expected = {
-        Name: 'jonahfromtonga, steveirwin',
+        Name: 'user1, user2',
         'members': [{
             uID: user1[AuID], 
-            fName: "Steve",
-            lName: 'Irwin',
+            fName: "User",
+            lName: '1',
             'email': 'first@gmail.com',
-            handle: 'steveirwin',
+            handle: 'user1',
         }, {
             uID: user2[AuID], 
-            fName: "Jonah",
-            lName: 'from Tonga',
+            fName: "User",
+            lName: '2',
             'email': 'second@gmail.com',
-            handle: 'jonahfromtonga',
+            handle: 'user2',
         }
         ]
     }
@@ -53,132 +60,99 @@ def test_dm_details_valid():
     assert dm_details_v1(user1[token], dm1[dmID]) == expected
     assert dm_details_v1(user2[token], dm1[dmID]) == expected
 
-def test_dm_details_errors():
-    src.other.clear_v1()
-    invalid_dm_id = -1
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
-
-    with pytest.raises(InputError):
-        dm_details_v1(user1[token], invalid_dm_id)
-
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
-    user3 = src.auth.auth_register_v2("third@gmail.com", "password", "Rock", "Sand")
+def test_dm_details_access_error(user1, user2, user3):
     dm1 = dm_create_v1(user1[token], [user2[AuID]])
 
     with pytest.raises(AccessError):
         dm_details_v1(user3[token], dm1[dmID])
 
-def test_dm_list():
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
-    user3 = src.auth.auth_register_v2("third@gmail.com", "password", "Rock", "Sand")
+def test_dm_details_input_error(user1, user2):
+    invalid_dm_id = -1
+
+    with pytest.raises(InputError):
+        dm_details_v1(user1[token], invalid_dm_id)
+
+def test_dm_list_none(user1, user2, user3):
     dm_create_v1(user1[token], [user2[AuID]])
     
     assert dm_list_v1(user3[token]) == {'dms': []}
-    
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
+
+def test_dm_list_all(user1, user2):
     dm_create_v1(user1[token], [user2[AuID]])
     
     assert dm_list_v1(user2[token]) == {'dms': [{
         dmID: 0,
-        Name: 'jonahfromtonga, steveirwin',
+        Name: 'user1, user2',
     }]}
 
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
-    user3 = src.auth.auth_register_v2("third@gmail.com", "password", "Rock", "Sand")
+def test_dm_list_some(user1, user2, user3):
     dm_create_v1(user1[token], [user2[AuID]])
-    dm_create_v1(user1[token], [user2[AuID], user3[AuID]])
+    dm2 = dm_create_v1(user1[token], [user2[AuID], user3[AuID]])
     
     assert dm_list_v1(user3[token]) == {'dms': [{
-        dmID: 1,
-        Name: 'jonahfromtonga, rocksand, steveirwin',
+        dmID: dm2[dmID],
+        Name: 'user1, user2, user3',
     }]}
 
-def test_dm_create_valid():
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
-    
+def test_dm_create_valid(user1, user2):
     assert dm_create_v1(user1[token], [user2[AuID]]) == {
         dmID: 0,
-        'dm_name': 'jonahfromtonga, steveirwin',
+        'dm_name': 'user1, user2',
     }
 
-def test_dm_id_increasing():
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
-    
+def test_dm_id_linear_increase(user1, user2):
     assert dm_create_v1(user1[token], [user2[AuID]]) == {
         dmID: 0,
-        'dm_name': 'jonahfromtonga, steveirwin',
+        'dm_name': 'user1, user2',
     }
 
     assert dm_create_v1(user1[token], [user2[AuID]]) == {
         dmID: 1,
-        'dm_name': 'jonahfromtonga, steveirwin',
+        'dm_name': 'user1, user2',
     }
 
     assert dm_create_v1(user1[token], [user2[AuID]]) == {
         dmID: 2,
-        'dm_name': 'jonahfromtonga, steveirwin',
+        'dm_name': 'user1, user2',
     }
 
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
+def test_dm_id_delete_middle(user1, user2):
     dm_create_v1(user1[token], [user2[AuID]])
     dm2 = dm_create_v1(user1[token], [user2[AuID]])
     dm_create_v1(user1[token], [user2[AuID]])
     dm_remove_v1(user1[token], dm2[dmID])
-    
+
     assert dm_create_v1(user1[token], [user2[AuID]]) == {
         dmID: 3,
-        'dm_name': 'jonahfromtonga, steveirwin',
+        'dm_name': 'user1, user2',
     }
 
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
+def test_dm_id_delete_end(user1, user2):
     dm_create_v1(user1[token], [user2[AuID]])
     dm2 = dm_create_v1(user1[token], [user2[AuID]])
     dm_remove_v1(user1[token], dm2[dmID])
     
     assert dm_create_v1(user1[token], [user2[AuID]]) == {
         dmID: 2,
-        dmName: 'jonahfromtonga, steveirwin',
+        dmName: 'user1, user2',
     }
 
-def test_dm_name():
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
-    user3 = src.auth.auth_register_v2("third@gmail.com", "password", "Rock", "Sand")
+def test_dm_name(user1, user2, user3):
     dm1 = dm_create_v1(user1[token], [user2[AuID]])
 
-    assert dm1[dmName] == 'jonahfromtonga, steveirwin'
+    assert dm1[dmName] == 'user1, user2'
 
     dm_invite_v1(user1[token], dm1[dmID], user3[AuID])
     result1 = dm_details_v1(user1[token], dm1[dmID])
     
-    assert result1[Name] == 'jonahfromtonga, steveirwin'
+    assert result1[Name] == 'user1, user2'
 
     dm_leave_v1(user2[token], dm1[dmID])
     result2 = dm_details_v1(user1[token], dm1[dmID])
     
-    assert result2[Name] == 'jonahfromtonga, steveirwin'
+    assert result2[Name] == 'user1, user2'
 
-def test_dm_create_errors():
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Maccas", "Mckenzie")
+def test_dm_create_errors(user1):
     invalid_u_id = -1
     
     with pytest.raises(InputError):
@@ -276,11 +250,8 @@ def test_dm_messages():
                                                                  '35','36','37','38','39','40','41','42','43','44','45',
                                                                  '46','47','48','49','50'], 0, 50}
 
-def test_dm_unauthorised_user(invalid_token):
+def test_dm_unauthorised_user(user1, user2, invalid_token):
     #* Test for unauthorised users for all dm functions  
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Hotel?", "Trivago")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Hotel?", "Trivago")
     dm1 = dm_create_v1(user1[token], [user2[AuID]])
 
     with pytest.raises(AccessError):
@@ -290,3 +261,4 @@ def test_dm_unauthorised_user(invalid_token):
         dm_remove_v1(invalid_token, dm1[dmID])
         dm_invite_v1(invalid_token, dm1[dmID], user2[AuID])
         dm_leave_v1(invalid_token, dm1[dmID])
+        dm_messages_v1(invalid_token, dm1[dmID], 0)
