@@ -20,52 +20,52 @@ dmID    = 'dm_id'
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
+@pytest.fixture
+def user1():
+    src.other.clear_v1()    
+    return src.auth.auth_register_v2("first@gmail.com", "password", "User", "1")
+
+@pytest.fixture
+def user2():
+    return src.auth.auth_register_v2("second@gmail.com", "password", "User", "2")
+
+@pytest.fixture
+def user3():
+    return src.auth.auth_register_v2("third@gmail.com", "password", "User", "3")
+
 #* Test send functions together with message/send/v2
 #? Test if message_id increases correctly
 
-def test_senddm_errors():
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
-    user3 = src.auth.auth_register_v2("third@gmail.com", "password", "Rock", "Sand")
+def test_senddm_access_error(user1, user2, user3):
     dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
     
     with pytest.raises(AccessError):
         message_senddm_v1(user3[token], dm1[dmID], '')
 
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
+def test_senddm_long(user1, user2):
+    message = ''
+    for _ in range(1500):
+        message += 'a'
+    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    
+    with pytest.raises(InputError):
+        message_senddm_v1(user1[token], dm1[dmID], message)
+
+def test_senddm_invalid_dm(user1):
     invalid_dm_id = -1
 
     with pytest.raises(InputError):
         message_senddm_v1(user1[token], invalid_dm_id, '')
 
-    src.other.clear_v1()
-    message = ''
-    for _ in range(1500):
-        message += 'a'
-
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
-    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
-    with pytest.raises(InputError):
-        message_senddm_v1(user1[token], dm1[dmID], message)
-
-def test_senddm_multiple():
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
+def test_senddm_multiple(user1, user2):
     dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
     assert message_senddm_v1(user1[token], dm1[dmID], '') == {'message_id': 0}
-    assert message_senddm_v1(user1[token], dm1[dmID], '') == {'message_id': 1}
-    assert message_senddm_v1(user1[token], dm1[dmID], '') == {'message_id': 2}
+    assert message_senddm_v1(user2[token], dm1[dmID], '') == {'message_id': 1}
+    assert message_senddm_v1(user2[token], dm1[dmID], '') == {'message_id': 2}
     assert message_senddm_v1(user1[token], dm1[dmID], '') == {'message_id': 3}
 
-def test_dm_unauthorised_user(invalid_token):
+def test_dm_unauthorised_user(user1, user2, invalid_token):
     #* All unauthorised user tests
-    src.other.clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
     dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
     
     with pytest.raises(AccessError):

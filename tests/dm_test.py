@@ -18,7 +18,7 @@ lName   = 'name_last'
 chans   = 'channels'
 token   = 'token'
 dmID    = 'dm_id'
-handle = 'handle_string'
+handle  = 'handle_string'
 
 @pytest.fixture
 def invalid_token():
