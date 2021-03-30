@@ -70,7 +70,7 @@ def test_message_send():
     # Test if a user who has joined no channels can see any messages
 
 
-"""
+
 def test_message_share_todm():
     #* Ensure database is empty
     #! Clearing data
@@ -155,21 +155,20 @@ def test_message_share_dmtodm():
     
     dmTest = src.dm.dm_create_v1(userID2[token],[userID4[AuID],userID3[AuID]])
     dmTest2 = src.dm.dm_create_v1(userID1[token],[userID2[AuID]])
-
+    
     ogMessage = message_senddm_v1(userID1[token], dmTest2[dmID], 'hello meng')
 
     sharedMessage, now = message_share_v1(userID2[token], ogMessage[mID],'wow', -1, dmTest[dmID]), datetime.now()
 
     timestamp = now.replace(tzinfo=timezone.utc).timestamp()
-    '''
+
     assert {
         mID: sharedMessage[mID],
         uID: userID2[AuID],
         'message': "hello jeffrey meng | wow",
         'time_created': int(timestamp),
     } in src.dm.dm_messages_v1(userID4[token],dmTest[dmID],0)['messages']
-    '''
+
 
     with pytest.raises(AccessError):
         message_share_v1(userID1[token], ogMessage[mID], '', -1, dmTest[dmID])
-"""

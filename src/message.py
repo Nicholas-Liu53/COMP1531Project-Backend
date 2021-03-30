@@ -3,6 +3,18 @@ from src.error import AccessError, InputError
 from src.other import decode, get_channel, get_members, get_user
 from datetime import timezone, datetime
 import jwt
+AuID      = 'auth_user_id'
+uID       = 'u_id'
+cID       = 'channel_id'
+creatorID = 'creator_id'
+allMems   = 'all_members'
+Name      = 'name'
+fName     = 'name_first'
+lName     = 'name_last'
+chans     = 'channels'
+handle    = 'handle_string'
+dmID      = 'dm_id'
+seshID    = 'session_id'
 
 def message_send_v1(token, channel_id, message):
     
