@@ -255,7 +255,7 @@ def test_message_share_dmtodm():
     assert {
         mID: sharedMessage[mID],
         uID: userID2[AuID],
-        'message': "hello jeffrey meng | wow",
+        'message': "hello meng | wow",
         'time_created': int(timestamp),
     } in src.dm.dm_messages_v1(userID4[token],dmTest[dmID],0)['messages']
 

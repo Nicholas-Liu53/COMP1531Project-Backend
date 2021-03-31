@@ -121,19 +121,19 @@ def test_channel_messages():
     with pytest.raises(InputError):
         #* Test 1: returns input error when start is greater than total number of 
         #* messages in channel
-        channel_messages_v1(userID1[AuID], firstChannel[cID], 4)
+        channel_messages_v1(userID1[token], firstChannel[cID], 4)
         
         #* Test 2: Raises input error when channel_id is invalid 
-        channel_messages_v1(userID1[AuID], -1, 0) 
+        channel_messages_v1(userID1[token], -1, 0) 
         
     with pytest.raises(AccessError):
         #* Test 3: returns access error when authorised user not a member of channel
-        channel_messages_v1(userID2[AuID], firstChannel[cID], 0)
+        channel_messages_v1(userID2[token], firstChannel[cID], 0)
 
         
     with pytest.raises(AccessError):
         #Test 3: returns access error when authorised user not a member of channel
-        channel_messages_v1(2, "Yggdrasil", 0)
+        channel_messages_v1(userID2[token], firstChannel[cID], 0)
 
         
     #Test 4: if there are less than 50 messages, returns -1 in "end"

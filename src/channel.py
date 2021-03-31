@@ -133,13 +133,13 @@ def channel_details_v1(token, channel_id):
     return filteredDetails
 
 
-def channel_messages_v1(auth_user_id, channel_id, start):
+def channel_messages_v1(token, channel_id, start):
 
     '''
     channel_messages_v1 returns up to 50 messages within a specified channel.
     
     Arguments:
-        token (int) - The id of the user that is calling the channel details. Must be present within that channel's "all_members".
+        token - The token of the user that is calling the channel details. Must be present within that channel's "all_members".
         channel_id (int) - The id of the desired channel which we want details of.
         start(int) - The index of the message that they wish to start returning from.
     
@@ -151,11 +151,17 @@ def channel_messages_v1(auth_user_id, channel_id, start):
         Returns up to 50 messages alongside a start and and end value.
     '''
     
+    # print(auth_user_id)
+
+    print(token)
+
+    decode(token)
+
     #Handling of input and access errors 
     #Input error: Channel ID is not a valid channel 
     #This is the case
     channelFound = False 
-    for channel in src.channels.channels_listall_v2(auth_user_id)["channels"]:
+    for channel in src.channels.channels_listall_v2(token)["channels"]:
         if channel_id == channel["channel_id"]:
             channelFound = True
     
@@ -169,7 +175,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     
     #Access error: When auth_user_id is not a member of channel with channel_id 
     userFound = False 
-    for channel in src.channels.channels_list_v2(auth_user_id)["channels"]:
+    for channel in src.channels.channels_list_v2(token)["channels"]:
         if channel_id == channel["channel_id"]:
             userFound = True
     
@@ -233,7 +239,7 @@ def channel_leave_v1(token, channel_id):
 
     # If the user is an owner
     if auth_user_id in channelData['owner_members']:
-        channel_removeowner_v1(auth_user_id, channel_id)
+        channel_removeowner_v1(token, channel_id, auth_user_id)
 
     # Check if user is in the channel
     if auth_user_id not in channelData['all_members']:

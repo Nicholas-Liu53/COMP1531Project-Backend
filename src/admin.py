@@ -41,7 +41,7 @@ def userpermission_change_v1(token, u_id, permission_id):
     if permission_id != 1 or permission_id != 2:
         raise InputError
 
-    for user in src.data.user:
+    for user in src.data.users:
         if user[uID] == u_id:
             user['permission_id'] = permission_id
 
