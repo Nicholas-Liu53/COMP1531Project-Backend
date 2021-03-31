@@ -164,15 +164,14 @@ def test_dm_remove():
     userID1 = src.auth.auth_register_v2("1531@gmail.com", "123456", "Tom", "Zhang")
     userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
     dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
-    dm_1 = dm_create_v1(userID1[token], [userID2[AuID]])
     invalid_dm_id = -1
     with pytest.raises(InputError):
         dm_remove_v1(userID1[token], invalid_dm_id)
     with pytest.raises(AccessError):
         dm_remove_v1(userID2[token], dm_0['dm_id'])
     dm_remove_v1(userID1[token],dm_0['dm_id'])
-    assert dm_list_v1(userID1[token]) == {'dms': [dm_1['dm_id']]}
-    assert dm_list_v1(userID2[token]) == {'dms': [dm_1['dm_id']]}
+    assert dm_list_v1(userID1[token]) == {'dms': []}
+    assert dm_list_v1(userID2[token]) == {'dms': []}
 
 def test_dm_invite():
     src.other.clear_v1()
