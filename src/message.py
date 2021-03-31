@@ -100,9 +100,9 @@ def message_edit_v1(token, message_id, newMessage):
     if auth_user_id is not messageDict['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
         raise AccessError
 
-    if newMessage == '':
-        message['message'] = '### Message Removed ###'
-    else:
+    if newMessage == '':    #* If new message is empty string --> remove message
+        message_remove_v1(token, message_id)
+    else:                   # Else 
         message['message'] = newMessage
 
     return {
