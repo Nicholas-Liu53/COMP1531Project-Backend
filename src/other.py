@@ -14,13 +14,17 @@ chans     = 'channels'
 handle    = 'handle_string'
 dmID      = 'dm_id'
 seshID    = 'session_id'
-SECRET = 'MENG'
+SECRET    = 'MENG'
 
 def clear_v1():
 
     src.data.users = []
     src.data.channels = []
     src.data.dms = []
+    src.data.messages_log = []
+
+    src.data.dms = []
+
     src.data.messages_log = []
 
 def search_v1(auth_user_id, query_str):
@@ -48,17 +52,11 @@ def check_session(auth_user_id, session_id):
                 return
     raise AccessError
 
-def get_members(channel_id, dm_id):
-    if dm_id == -1:
-        for chanDetails in src.data.channels:
-            if channel_id == chanDetails[cID]:
-                return chanDetails[Name], chanDetails[allMems]
-        raise InputError
-    else:
-        for dmDetails in src.data.dms:
-            if dm_id == dmDetails[dmID]:
-                return dmDetails[Name], dmDetails[allMems]
-        raise InputError
+def get_channel(channel_id):
+    for channel in src.data.channels:
+        if channel_id == channel['channel_id']:
+            return channel
+    raise InputError
 
 def get_user(user_id):
     for user in src.data.users:
@@ -72,11 +70,17 @@ def get_user(user_id):
             }
     raise InputError
 
-def get_channel(channel_id):
-    for channel in src.data.channels:
-        if channel_id == channel['channel_id']:
-            return channel
-    raise InputError
+def get_members(channel_id, dm_id):
+    if dm_id == -1:
+        for chanDetails in src.data.channels:
+            if channel_id == chanDetails[cID]:
+                return chanDetails[Name], chanDetails[allMems]
+        raise InputError
+    else:
+        for dmDetails in src.data.dms:
+            if dm_id == dmDetails[dmID]:
+                return dmDetails[Name], dmDetails[allMems]
+        raise InputError
 
 def message_count(channel_id, dm_id):
     counter = 0
@@ -90,3 +94,9 @@ def message_count(channel_id, dm_id):
                 counter += 1
     
     return counter
+
+def get_user_permissions(user_id):
+    for user in src.data.users:
+        if user_id == user[uID]:
+            return user['permission_id']
+    raise InputError

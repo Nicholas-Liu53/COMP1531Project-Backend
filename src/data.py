@@ -31,44 +31,44 @@ messages (list):
     time_created
 '''
 users = [
-    {
-        'u_id': None,
-        'name_first': None,
-        'name_last': None,
-        'email': None,
-        'password': None,
-        'handle_string': None,
-        'permission_id': None,
-        'session_id': [],
-    }
+#   {
+#       'u_id': None,
+#       'name_first': None,
+#       'name_last': None,
+#       'email': None,
+#       'password': None,
+#       'handle_string': None,
+#       'permission_id': None,
+#       'session_id': [],
+#   }
 ]
 
 channels = [
-    {
-        'channel_id': None,
-        'is_public': None,
-        'name': None,
-        'owner_members': [],
-        'all_members': [],
-    }
+#   {
+#       'channel_id': None,
+#       'is_public': None,
+#       'name': None,
+#       'owner_members': [],
+#       'all_members': [],
+#   }
 ]
 
 dms = [
-    {
-        'dm_id': None,
-        'name': None,
-        'creator_id': None,
-        'all_members': [],
-    }
+#   {
+#       'dm_id': None,
+#       'name': None,
+#       'creator_id': None,
+#       'all_members': [],
+#   }
 ]
 
 messages_log = [
-    {
-        'channel_id': None,
-        'dm_id': None,
-        'message_id': None,
-        'u_id': None,
-        'message': None, 
-        'time_created': None,
-    },
+#   {
+#       'channel_id': None,
+#       'dm_id': None,
+#       'u_id': None,
+#       'time_created': None,
+#       'message_id': None,
+#       'message': None,     # For message/share/v1, the optional message will be stored in message string
+#   },
 ]
