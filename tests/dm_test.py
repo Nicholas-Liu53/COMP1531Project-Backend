@@ -226,16 +226,20 @@ def test_dm_messages():
 
     assert dm_messages_v1(userID1[token], dm_0['dm_id'], 0) == {
         'messages': [],
-        'start':0,
+        'start': 0,
         'end': -1,
     }
-    #Add certain number of DM's to dm_0 e.g. 10
+    #Add certain number of DMs to dm_0 e.g. 10
     message_counter = 0
     while message_counter < 10:
         
         message_counter += 1
 
-    assert dm_messages_v1(userID1[token], dm_0['dm_id'],0) == {['0','1','2','3','4','5','6','7','8','9','10'], 0, -1}
+    assert dm_messages_v1(userID1[token], dm_0['dm_id'],0) == {
+        'messages': ['0','1','2','3','4','5','6','7','8','9','10'],
+        'start': 0,
+        'end': -1,
+    }
 
     #add so that there are 51 messages in DM
     while message_counter < 51:
@@ -243,11 +247,11 @@ def test_dm_messages():
         message_senddm_v1(userID1[token], dm_0[dmID], '')
         message_counter += 1
 
-    assert dm_messages_v1(userID1[token], dm_0['dm_id'], 0) == {['0','1','2','3','4','5','6','7','8','9','10','11','12',
-                                                                 '13','14','15','16','17','18','19','20','21','22','23',
-                                                                 '24','25','26','27','28','29','30','31','32','33','34',
-                                                                 '35','36','37','38','39','40','41','42','43','44','45',
-                                                                 '46','47','48','49','50'], 0, 50}
+    assert dm_messages_v1(userID1[token], dm_0['dm_id'], 0) == {
+        'messages: ['0','1','2','3','4','5','6','7','8','9','10','11','12', '13','14','15','16','17','18','19','20','21','22','23', '24','25','26','27','28','29','30','31','32','33','34', '35','36','37','38','39','40','41','42','43','44','45','46','47','48','49','50'],
+        'start': 0,
+        'end': 50,
+    }
 
 def test_dm_unauthorised_user(user1, user2, invalid_token):
     #* Test for unauthorised users for all dm functions  
