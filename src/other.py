@@ -100,3 +100,15 @@ def get_user_permissions(user_id):
         if user_id == user[uID]:
             return user['permission_id']
     raise InputError
+
+def get_user_from_handlestring(handlestring):
+    for user in src.data.users:
+        if handlestring == user['handle_string']:
+            return {
+                uID: user[uID],
+                'email': user['email'],
+                'name_first': user['name_first'],
+                'name_last': user['name_last'],
+                'handle_string': user['handle_string'],
+            }
+    raise InputError
