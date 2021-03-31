@@ -33,12 +33,12 @@ def userpermission_change_v1(token, u_id, permission_id):
         if user[uID] == auth_user_id:
             if user['permission_id'] == 1:
                 validOwner = True
-    if not validUser:
-        raise InputError
     if not validOwner:
         raise AccessError
+    if not validUser:
+        raise InputError
     
-    if permission_id != 1 or permission_id != 2:
+    if permission_id != 1 and permission_id != 2:
         raise InputError
 
     for user in src.data.users:

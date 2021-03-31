@@ -186,14 +186,15 @@ def test_message_share_todm():
 
     timestamp = now.replace(tzinfo=timezone.utc).timestamp()
 
-    
-    assert {
-        mID: sharedMessage[mID],
-        uID: userID2[AuID],
-        'message': "hello jeffrey meng",
-        'time_created': int(timestamp),
-    } in src.dm.dm_messages_v1(userID2[token],dmTest[dmID],0)['messages']
+    sharedMessage = message_share_v1(userID2[token], ogMessage[mID],'', -1, dmTest[dmID])
 
+    messageFound = False
+    for messageDict in src.dm.dm_messages_v1(userID2[token],dmTest[dmID],0)['messages']:
+        if sharedMessage['message_id'] == messageDict['message_id']:
+            messageFound = True
+            break
+    assert messageFound is True 
+    
     # userID1 is not in dmTest, raise access error
     with pytest.raises(AccessError):
         message_share_v1(userID1[token], ogMessage[mID], '', -1, dmTest[dmID])
@@ -218,16 +219,15 @@ def test_message_share_tochannel():
 
     ogMessage = message_send_v1(userID0[token],channelTest[cID], "hello jeffrey meng") 
 
-    sharedMessage, now = message_share_v1(userID0[token], ogMessage[mID],'vincent', channelTest2[cID], -1), datetime.now()
+    sharedMessage = message_share_v1(userID0[token], ogMessage[mID],'vincent', channelTest2[cID], -1)
 
-    timestamp = now.replace(tzinfo=timezone.utc).timestamp()
-    assert {
-        mID: sharedMessage[mID],
-        uID: userID0[AuID],
-        'message': "hello jeffrey meng | vincent",
-        'time_created': int(timestamp),
-    } in src.channel.channel_messages_v1(userID1[token],channelTest2[cID],0)['messages']
-
+    messageFound = False
+    for messageDict in src.channel.channel_messages_v1(userID1[token],channelTest2[cID],0)['messages']:
+        if sharedMessage['message_id'] == messageDict['message_id']:
+            messageFound = True
+            break
+    assert messageFound is True 
+ 
     with pytest.raises(AccessError):
         message_share_v1(userID2[token], ogMessage[mID], '', channelTest2[cID], -1)
 
@@ -248,17 +248,13 @@ def test_message_share_dmtodm():
     
     ogMessage = message_senddm_v1(userID1[token], dmTest2[dmID], 'hello meng')
 
-    sharedMessage, now = message_share_v1(userID2[token], ogMessage[mID],'wow', -1, dmTest[dmID]), datetime.now()
-
-    timestamp = now.replace(tzinfo=timezone.utc).timestamp()
-
-    assert {
-        mID: sharedMessage[mID],
-        uID: userID2[AuID],
-        'message': "hello meng | wow",
-        'time_created': int(timestamp),
-    } in src.dm.dm_messages_v1(userID4[token],dmTest[dmID],0)['messages']
-
+    sharedMessage = message_share_v1(userID2[token], ogMessage[mID],'wow', -1, dmTest[dmID])
+    messageFound = False
+    for messageDict in src.dm.dm_messages_v1(userID4[token],dmTest[dmID],0)['messages']:
+        if sharedMessage['message_id'] == messageDict['message_id']:
+            messageFound = True
+            break
+    assert messageFound is True 
 
     with pytest.raises(AccessError):
         message_share_v1(userID1[token], ogMessage[mID], '', -1, dmTest[dmID])

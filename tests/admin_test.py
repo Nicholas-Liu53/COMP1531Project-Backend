@@ -35,43 +35,43 @@ def test_userpermissions_change():
 
     channelTest = src.channels.channels_create_v1(userID2[token], 'Channel', False)
 
-    src.channel.channel_join_v1(userID1[AuID], channelTest[cID])
+    src.channel.channel_join_v1(userID1[token], channelTest[cID])
 
     assert {
         uID: userID1[AuID],        
-        fName: 'Meng',
-        lName: 'Jeffrey',
+        fName: 'Jeffrey',
+        lName: 'Meng',
         'email': 'testing4@gmail.com',
-        'handle_string': 'mengjeffrey',
-    } in channel_details_v1(userID1[token], channelTest[cID])[allMems]
+        'handle_string': 'jeffreymeng',
+    } in src.channel.channel_details_v1(userID1[token], channelTest[cID])[allMems]
 
     src.channel.channel_addowner_v1(userID1[token], channelTest[cID], userID1[AuID])
 
     assert {
         uID: userID1[AuID],        
-        fName: 'Meng',
-        lName: 'Jeffrey',
+        fName: 'Jeffrey',
+        lName: 'Meng',
         'email': 'testing4@gmail.com',
-        'handle_string': 'mengjeffrey',
-    } in channel_details_v1(userID1[token], channelTest[cID])[ownMems]
+        'handle_string': 'jeffreymeng',
+    } in src.channel.channel_details_v1(userID1[token], channelTest[cID])[ownMems]
 
     src.channel.channel_removeowner_v1(userID1[token], channelTest[cID], userID2[AuID])
 
     assert {
         uID: userID1[AuID],        
-        fName: 'Not',
-        lName: 'Owner',
+        fName: 'Owner',
+        lName: 'Not',
         'email': 'peasantnotOwner@gmail.com',
-        'handle_string': 'notowner',
-    } not in channel_details_v1(userID1[token], channelTest[cID])[ownMems]
+        'handle_string': 'ownernot',
+    } not in src.channel.channel_details_v1(userID1[token], channelTest[cID])[ownMems]
 
     assert {
-        uID: userID1[AuID],        
-        fName: 'Not',
-        lName: 'Owner',
+        uID: userID2[AuID],        
+        fName: 'Owner',
+        lName: 'Not',
         'email': 'peasantnotOwner@gmail.com',
-        'handle_string': 'notowner',
-    } in channel_details_v1(userID1[token], channelTest[cID])[allMems]
+        'handle_string': 'ownernot',
+    } in src.channel.channel_details_v1(userID1[token], channelTest[cID])[allMems]
 
     with pytest.raises(InputError):
         userpermission_change_v1(userID0[token], userID1[AuID], -1)
@@ -80,7 +80,7 @@ def test_userpermissions_change():
         userpermission_change_v1(userID0[token], 9999, 0)
 
     with pytest.raises(AccessError):
-        userpermission_change_v1(userID2[token], 9999, 0)
+        userpermission_change_v1(userID2[token], userID2[token], 2)
 
 def test_notifications_get():
     pass

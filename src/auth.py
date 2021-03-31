@@ -121,6 +121,10 @@ def auth_register_v1(email, password, name_first, name_last):
 
     user_id = len(src.data.users)
 
+    permissionID = 2
+    if len(src.data.users) == 0:
+        permissionID = 1
+
     src.data.users.append({
         'email' : email,
         'password' : password,
@@ -128,7 +132,7 @@ def auth_register_v1(email, password, name_first, name_last):
         'name_last' : nameL,
         'u_id' : user_id,
         'handle_string' : handle_string,
-        'permission_id': 0,
+        'permission_id': permissionID,
         'session_id': [0],
     })
     return {
@@ -154,10 +158,6 @@ def auth_login_v2(email, password):
             }
     raise InputError    
 
-
-
-
-
 def auth_register_v2(email, password, name_first, name_last):
     data_structure = auth_register_v1(email, password, name_first, name_last)
     auth_user_id = data_structure['auth_user_id']
@@ -166,6 +166,3 @@ def auth_register_v2(email, password, name_first, name_last):
         'token': token,
         'auth_user_id': auth_user_id
     }
-
-  
-    
