@@ -243,14 +243,13 @@ def test_dm_messages():
 
     #add so that there are 51 messages in DM
     while message_counter < 51:
-        message_senddm_v1()
-        message_senddm_v1(userID1[token], dm_0[dmID], '')
+        message_senddm_v1(userID1[token], dm_0[dmID], f"{message_counter}")
         message_counter += 1
 
     return_dict2 = dm_messages_v1(userID1[token], dm_0['dm_id'], 0) 
-    assert len(return_dict['messages']) == 50
-    assert return_dict['start'] == 0
-    assert return_dict['end'] == 49
+    assert len(return_dict2['messages']) == 50
+    assert return_dict2['start'] == 0
+    assert return_dict2['end'] == 50
 
 
 def test_dm_unauthorised_user(user1, user2, invalid_token):

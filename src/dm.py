@@ -170,16 +170,24 @@ def dm_messages_v1(token, dm_id, start):
         desired_end = -1
     messages = []
 
-    #Get all dms
-    current_dm = 0
     for objects in src.data.messages_log:
-        if dm_id == objects['dm_id'] and current_dm >= start and len(messages) < 50:
+        if dm_id == objects['dm_id']:
             current_DM = objects.copy()
             del current_DM[cID]
             del current_DM['dm_id']
-            messages.append(current_DM)
-            current_dm += 1
+            messages.insert(0,current_DM)
 
+    #Reverse list such that the we have the newest messages at the start and oldest at the end 
+    reversed(messages)        
+
+    #Take 50 messages from our start value
+    #Chop off all the messages before our start value 
+    for _ in range(start):
+        messages.pop(0)
+    
+    while len(messages) > 50:
+        messages.pop(-1)
+    
     return {
         'messages': messages,
         'start': start,
