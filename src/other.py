@@ -19,8 +19,9 @@ SECRET    = 'MENG'
 def clear_v1():
 
     src.data.users = []
-
     src.data.channels = []
+    src.data.dms = []
+    src.data.messages_log = []
 
     src.data.dms = []
 
@@ -85,12 +86,13 @@ def message_count(channel_id, dm_id):
     counter = 0
     if dm_id == -1:
         for message in src.data.messages_log:
-            if channel_id == src.data.messages_log[cID]:
+            if channel_id == message[cID]:
                 counter += 1
     else:
         for message in src.data.messages_log:
-            if dm_id == src.data.messages_log[dmID]:
+            if dm_id == message[dmID]:
                 counter += 1
+    
     return counter
 
 def get_user_permissions(user_id):

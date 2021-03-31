@@ -67,7 +67,6 @@ dms = [
 messages_log = [
 
     {
-        # If message is in channel, dm_id is None (not -1), in other words, don't store a value
         'channel_id': None,
         'dm_id': None,
         'u_id': None,

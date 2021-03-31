@@ -1,5 +1,6 @@
 import src.data
 from src.error import AccessError, InputError
+import src.auth
 from src.other import decode, get_channel, get_members, get_user, get_user_permissions
 from datetime import timezone, datetime
 import jwt
@@ -86,7 +87,8 @@ def message_senddm_v1(token, dm_id, message):
     _, dmMembers = get_members(-1, dm_id)
     if auth_user_id not in dmMembers:
         raise AccessError
-
+    if len(message) > 1000:
+        raise InputError
     message_id = len(src.data.messages_log)
     now = datetime.now()
     time_created = int(now.strftime("%s"))

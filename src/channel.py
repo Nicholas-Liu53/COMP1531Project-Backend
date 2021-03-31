@@ -1,7 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 from src.channels import channels_listall_v2, channels_list_v2
-from src.other import decode, get_channel, get_members, get_user
+from src.other import decode, get_channel, get_members, get_user, message_count
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -177,47 +177,37 @@ def channel_messages_v1(auth_user_id, channel_id, start):
         raise AccessError
 
     
-    #First, find how many messages there are in channel after start 
-    #Create new list for this so that index 0 is oldest message and 50 will be start index 
-    messagesList = []
-    
-    #For each message after start, insert it into list such that in messagesList index 0 is oldest message 
-    #and index 50 will be the message at 'start'
-    #want to count back from 50 to message with index 'start-49' or until 50 messages have been counted out
-    counter = start + 50
+    desired_end = start + 50
+    num_of_messages = message_count(channel_id, -1)
+        
+    if num_of_messages < desired_end:
+        desired_end = -1
+    messages = []
 
-    if len(src.data.messages_log) < counter: 
-        counter = len(src.data.messages_log) - 1 
-    
-    while (counter > -1 and counter > start): 
-        currentMessage = src.data.messages_log[counter]
-        messagesList.append(currentMessage)
-        counter -= 1    
-    
-    #Now our correct messages are in list messagesList from oldest to newest order     
-    #Case 1: Less than 50 messages 
-    #Returns -1 as end
-    
-    #In terms of returning messages, return it as a list
-    if len(messagesList) < 50:
-        return {
-            'messages': messagesList,
-            #start should be returned as start
-            'start': start,
-            'end': -1,
-        }
-    
-    else: 
-        #Case 2: More than 50 messages     
-        #Returns end which is 'start + 50'
-        endValue = start + 50
+    for objects in src.data.messages_log:
+        if channel_id == objects['channel_id']:
+            current_DM = objects.copy()
+            del current_DM['channel_id']
+            del current_DM['dm_id']
+            messages.insert(0,current_DM)
 
+    #Reverse list such that the we have the newest messages at the start and oldest at the end 
+    reversed(messages)        
+
+    #Take 50 messages from our start value
+    #Chop off all the messages before our start value 
+    for _ in range(start):
+        messages.pop(0)
+    
+    while len(messages) > 50:
+        messages.pop(-1)
+    
     return {
-        'messages': messagesList,
-        'start' : start,
-        'end': endValue,
+        'messages': messages,
+        'start': start,
+        'end': desired_end,
     }
-
+    
 def channel_leave_v1(token, channel_id):
     '''
     Takes in a user's id and a channel's id and removes that user from that given channel.
@@ -251,7 +241,6 @@ def channel_leave_v1(token, channel_id):
 
     # Time to remove from all_members list
     channelData['all_members'].remove(auth_user_id)
-
     return {
     }
 
