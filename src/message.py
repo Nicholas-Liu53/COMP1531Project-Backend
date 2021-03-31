@@ -78,7 +78,33 @@ def message_remove_v1(token, message_id):
     return {
     }
 
-def message_edit_v1(auth_user_id, message_id, message):
+def message_edit_v1(token, message_id, newMessage):
+    
+    #* Decode the token
+    auth_user_id, _ = decode(token)
+
+    #* Get message dictionary in data
+    messageFound = False
+    messageDict = {}
+    for message in src.data.messages_log:
+        if message['message_id'] == message_id:
+            messageDict = message
+            messageFound = True
+            break
+    if not messageFound:
+        raise InputError
+
+    #* Check if the user is the writer, channel owner or owner of Dreams
+    # Get the channel the message belongs to
+    channel = get_channel(messageDict['channel_id'])
+    if auth_user_id is not messageDict['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
+        raise AccessError
+
+    if newMessage == '':
+        message['message'] = '### Message Removed ###'
+    else:
+        message['message'] = newMessage
+
     return {
     }
 
