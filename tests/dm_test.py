@@ -20,23 +20,28 @@ token   = 'token'
 dmID    = 'dm_id'
 handle  = 'handle_string'
 
+#* Fixture that returns a JWT with invalid u_id and session_id
 @pytest.fixture
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
+#* Fixture that clears and registers the first user
 @pytest.fixture
 def user1():
     src.other.clear_v1()    
     return src.auth.auth_register_v2("first@gmail.com", "password", "User", "1")
 
+#* Fixture that registers a second user
 @pytest.fixture
 def user2():
     return src.auth.auth_register_v2("second@gmail.com", "password", "User", "2")
 
+#* Fixture that registers a third user
 @pytest.fixture
 def user3():
     return src.auth.auth_register_v2("third@gmail.com", "password", "User", "3")
 
+#* Test that dm_details returns the correct values for valid inputs
 def test_dm_details_valid(user1, user2):
     dm1 = dm_create_v1(user1[token], [user2[AuID]])
     expected = {
@@ -60,23 +65,27 @@ def test_dm_details_valid(user1, user2):
     assert dm_details_v1(user1[token], dm1[dmID]) == expected
     assert dm_details_v1(user2[token], dm1[dmID]) == expected
 
+#* Test that an InputError is raised when a user calls dm_details for a DM they are not in
 def test_dm_details_access_error(user1, user2, user3):
     dm1 = dm_create_v1(user1[token], [user2[AuID]])
 
     with pytest.raises(AccessError):
         dm_details_v1(user3[token], dm1[dmID])
 
-def test_dm_details_input_error(user1, user2):
+#* Test that an InputError is raised when an invalid dm_id is given
+def test_dm_details_input_error(user1):
     invalid_dm_id = -1
 
     with pytest.raises(InputError):
         dm_details_v1(user1[token], invalid_dm_id)
 
+#* Test when function is called when they are not in any DM
 def test_dm_list_none(user1, user2, user3):
     dm_create_v1(user1[token], [user2[AuID]])
     
     assert dm_list_v1(user3[token]) == {'dms': []}
 
+#* Test when function is called when they are in all DMs
 def test_dm_list_all(user1, user2):
     dm_create_v1(user1[token], [user2[AuID]])
     
@@ -85,6 +94,7 @@ def test_dm_list_all(user1, user2):
         Name: 'user1, user2',
     }]}
 
+#* Test when function is called when they are in some DMs
 def test_dm_list_some(user1, user2, user3):
     dm_create_v1(user1[token], [user2[AuID]])
     dm2 = dm_create_v1(user1[token], [user2[AuID], user3[AuID]])
@@ -94,12 +104,14 @@ def test_dm_list_some(user1, user2, user3):
         Name: 'user1, user2, user3',
     }]}
 
+#* Test that dm_create returns the correct values for valid inputs
 def test_dm_create_valid(user1, user2):
     assert dm_create_v1(user1[token], [user2[AuID]]) == {
         dmID: 0,
         'dm_name': 'user1, user2',
     }
 
+#* Test that dm_id increases correctly
 def test_dm_id_linear_increase(user1, user2):
     assert dm_create_v1(user1[token], [user2[AuID]]) == {
         dmID: 0,
@@ -116,27 +128,7 @@ def test_dm_id_linear_increase(user1, user2):
         'dm_name': 'user1, user2',
     }
 
-def test_dm_id_delete_middle(user1, user2):
-    dm_create_v1(user1[token], [user2[AuID]])
-    dm2 = dm_create_v1(user1[token], [user2[AuID]])
-    dm_create_v1(user1[token], [user2[AuID]])
-    dm_remove_v1(user1[token], dm2[dmID])
-
-    assert dm_create_v1(user1[token], [user2[AuID]]) == {
-        dmID: 3,
-        'dm_name': 'user1, user2',
-    }
-
-def test_dm_id_delete_end(user1, user2):
-    dm_create_v1(user1[token], [user2[AuID]])
-    dm2 = dm_create_v1(user1[token], [user2[AuID]])
-    dm_remove_v1(user1[token], dm2[dmID])
-    
-    assert dm_create_v1(user1[token], [user2[AuID]]) == {
-        dmID: 1,
-        dmName: 'user1, user2',
-    }
-
+#* Test that a DMs name doesn't change after users join/leave the DM
 def test_dm_name(user1, user2, user3):
     dm1 = dm_create_v1(user1[token], [user2[AuID]])
 
@@ -251,9 +243,8 @@ def test_dm_messages():
     assert return_dict2['start'] == 0
     assert return_dict2['end'] == 50
 
-
+#* Test for unauthorised users for all dm functions
 def test_dm_unauthorised_user(user1, user2, invalid_token):
-    #* Test for unauthorised users for all dm functions  
     dm1 = dm_create_v1(user1[token], [user2[AuID]])
 
     with pytest.raises(AccessError):
