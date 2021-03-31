@@ -1,6 +1,6 @@
 import src.data
 from src.error import AccessError, InputError
-from src.other import decode, get_channel, get_members, get_user
+from src.other import decode, get_channel, get_members, get_user, get_user_permissions
 from datetime import timezone, datetime
 import jwt
 AuID      = 'auth_user_id'
@@ -50,7 +50,30 @@ def message_send_v1(token, channel_id, message):
         'message_id': newID,
     }
 
-def message_remove_v1(auth_user_id, message_id):
+def message_remove_v1(token, message_id):
+    
+    #* Decode the token
+    auth_user_id, _ = decode(token)
+
+    #* Get message dictionary in data
+    messageFound = False
+    messageDict = {}
+    for message in src.data.messages_log:
+        if message['message_id'] == message_id:
+            messageDict = message
+            messageFound = True
+            break
+    if not messageFound:
+        raise InputError
+
+    #* Check if the user is the writer, channel owner or owner of Dreams
+    # Get the channel the message belongs to
+    channel = get_channel(messageDict['channel_id'])
+    if auth_user_id is not messageDict['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
+        raise AccessError
+
+    message['message'] = '### Message Removed ###'
+
     return {
     }
 
@@ -94,6 +117,7 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
                 newMessage = msg["message"] + " | " + message
             else:
                 newMessage = msg["message"] 
+
     if dm_id == -1:
         for chans in src.data.channels:
             if chans["channel_id"] == channel_id:

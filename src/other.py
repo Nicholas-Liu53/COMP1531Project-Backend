@@ -92,3 +92,9 @@ def message_count(channel_id, dm_id):
             if dm_id == src.data.messages_log[dmID]:
                 counter += 1
     return counter
+
+def get_user_permissions(user_id):
+    for user in src.data.users:
+        if user_id == user[uID]:
+            return user['permission_id']
+    raise InputError
