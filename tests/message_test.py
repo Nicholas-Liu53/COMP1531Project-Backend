@@ -3,7 +3,7 @@ import pytest
 from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_share_v1, message_senddm_v1
 from src.error import InputError, AccessError
 import src.channel, src.channels, src.auth
-from src.other import clear_v1
+from src.other import clear_v1, SECRET
 from datetime import timezone, datetime
 import jwt
 
@@ -53,7 +53,6 @@ def test_message_send():
     with pytest.raises(AccessError):
         message_send_v1(userID4[token], firstChannel[cID], '?')
 
-    ''' ## Waiting for Ethan to implement channel_messages ##
     #* Test a message is successfully sent 
     sendOutput = message_send_v1(userID1[token], firstChannel[cID], "Hi")
     messageFound = False
@@ -71,7 +70,6 @@ def test_message_send():
             messageFound = True
             break
     assert messageFound is True 
-    '''
 
     #! Clearing data
     src.other.clear_v1()
@@ -116,7 +114,6 @@ def test_message_remove():
     message3 = message_send_v1(userID3[token], firstChannel[cID], "John Cena")
     message4 = message_send_v1(userID3[token], firstChannel[cID], "Ricegum")
 
-    ''' ## Waiting for Meng to implement his code ##
     #* Test if userID1 can remove the message
     message_remove_v1(userID1[token], message1['message_id'])
     messageFound = False
@@ -128,7 +125,7 @@ def test_message_remove():
             break
     assert messageFound is True 
     assert removedMessage['message'] == '### Message Removed ###'
-    '''
+    
 
     #* Test if userID2 can remove the message
     message_remove_v1(userID2[token], message2['message_id'])
@@ -181,10 +178,6 @@ def test_message_share_todm():
     dmTest = src.dm.dm_create_v1(userID2[token],[userID4[AuID],userID3[AuID]])
     
     ogMessage = message_send_v1(userID1[token],channelTest[cID], "hello jeffrey meng") 
-
-    sharedMessage, now = message_share_v1(userID2[token], ogMessage[mID],'', -1, dmTest[dmID]), datetime.now()
-
-    timestamp = now.replace(tzinfo=timezone.utc).timestamp()
 
     sharedMessage = message_share_v1(userID2[token], ogMessage[mID],'', -1, dmTest[dmID])
 
