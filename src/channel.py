@@ -1,7 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 from src.channels import channels_listall_v1, channels_list_v1
-from src.other import decode, get_channel, get_members, get_user
+from src.other import decode, get_channel, get_members, get_user, message_count
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
     
@@ -157,47 +157,37 @@ def channel_messages_v1(auth_user_id, channel_id, start):
         raise AccessError
 
     
-    #First, find how many messages there are in channel after start 
-    #Create new list for this so that index 0 is oldest message and 50 will be start index 
-    messagesList = []
-    
-    #For each message after start, insert it into list such that in messagesList index 0 is oldest message 
-    #and index 50 will be the message at 'start'
-    #want to count back from 50 to message with index 'start-49' or until 50 messages have been counted out
-    counter = start + 50
+    desired_end = start + 50
+    num_of_messages = message_count(channel_id, -1)
+        
+    if num_of_messages < desired_end:
+        desired_end = -1
+    messages = []
 
-    if len(src.data.messages_log) < counter: 
-        counter = len(src.data.messages_log) - 1 
+    for objects in src.data.messages_log:
+        if dm_id == objects['dm_id']:
+            current_DM = objects.copy()
+            del current_DM[cID]
+            del current_DM['dm_id']
+            messages.insert(0,current_DM)
+
+    #Reverse list such that the we have the newest messages at the start and oldest at the end 
+    reversed(messages)        
+
+    #Take 50 messages from our start value
+    #Chop off all the messages before our start value 
+    for _ in range(start):
+        messages.pop(0)
     
-    while (counter > -1 and counter > start): 
-        currentMessage = src.data.messages_log[counter]
-        messagesList.insert(currentMessage)
-        counter -= 1    
+    while len(messages) > 50:
+        messages.pop(-1)
     
-    #Now our correct messages are in list messagesList from oldest to newest order     
-    #Case 1: Less than 50 messages 
-    #Returns -1 as end
-    
-    #In terms of returning messages, return it as a list
-    if len(messagesList) < 50:
-            return {
-        'messages': messagesList,
-        #start should be returned as start
+    return {
+        'messages': messages,
         'start': start,
-        'end': -1,
+        'end': desired_end,
     }
     
-    else: 
-        #Case 2: More than 50 messages     
-        #Returns end which is 'start + 50'
-        endValue = start + 50
-
-        return {
-        'messages': messagesList,
-        'start' : start,
-        'end': endValue,
-    }
-
 def channel_leave_v1(auth_user_id, channel_id):
     return {
     }
