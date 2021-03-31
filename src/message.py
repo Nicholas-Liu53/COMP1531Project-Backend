@@ -50,7 +50,29 @@ def message_send_v1(token, channel_id, message):
         'message_id': newID,
     }
 
-def message_remove_v1(auth_user_id, message_id):
+def message_remove_v1(token, message_id):
+    
+    #* Decode the token
+    auth_user_id, _ = decode(token)
+    
+    #* Check if the user is the writer, channel owner or owner of Dreams
+    # Get the channel the message belongs to
+    channel = get_channel(message['channel_id'])
+    if auth_user_id is not message['u_id'] and auth_user_id not in channel['owner_members'] and get_user(auth_user_id)['permission_id'] != 1:
+        raise AccessError
+
+    #* Get message dictionary in data
+    messageFound = False
+    messageDict = {}
+    for message in src.data.messages_log:
+        if message['message_id'] == message_id:
+            messageDict = message
+            break
+    if not messageFound:
+        raise InputError
+
+    message['message'] = '### Message Removed ###'
+
     return {
     }
 

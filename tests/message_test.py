@@ -51,6 +51,24 @@ def test_message_send():
     with pytest.raises(AccessError):
         message_send_v1(userID4[token], firstChannel[cID], '?')
 
+    #* Test a message is successfully sent 
+    sendOutput = message_send_v1(userID1[token], firstChannel[cID], "Hi")
+    messageFound = False
+    for messageDict in src.channel.channel_messages_v1(userID1[token], firstChannel[cID], 0)['messages']:
+        if sendOutput['message_id'] == messageDict['message_id']:
+            messageFound = True
+            break
+    assert messageFound is True 
+
+    #* Test another messsage is successfully sent
+    sendOutput = message_send_v1(userID3[token], firstChannel[cID], "Sup")
+    messageFound = False
+    for messageDict in src.channel.channel_messages_v1(userID1[token], firstChannel[cID], 0)['messages']:
+        if sendOutput['message_id'] == messageDict['message_id']:
+            messageFound = True
+            break
+    assert messageFound is True 
+
     #! Clearing data
     src.other.clear_v1()
 
@@ -62,6 +80,77 @@ def test_message_send():
     # Owner of channels should be able to edit anything in channels they own
     # Non-owner of channels should only be able to edit their own messages
 # Test if a message has been edited successfully?
+
+# message_remove_v1
+# User must be:
+    # The user that wrote the message, or
+    # The user that owns the channel, or
+    # The owner of *Dreams*
+# Test if the message is removed??
+def test_message_remove()
+    #* Ensure database is empty
+    #! Clearing data
+    src.other.clear_v1()
+
+    #* Setup users and channels and create shorthand for strings for testing code
+    userID1 = src.auth.auth_register_v2("ayelmao@gmail.com", "Bl00dO4th", "C", "L")
+    userID2 = src.auth.auth_register_v2("lolrofl@gmail.com", "pr3ttynAme", "S", "S")
+    userID3 = src.auth.auth_register_v2("zodiac@gmail.com", "T3dCruz", "T", "C")
+    userID4 = src.auth.auth_register_v2("ocasio@gmail.com", "Alex4ndr1a", "A", "O")
+
+    # userID2 made public channel 'TrumpPence'
+    firstChannel = src.channels.channels_create_v1(userID2[token], 'TrumpPence', True)
+
+    #* userID2 and userID3 join public channel 'TrumpPence'
+    src.channel.channel_join_v1(userID1[token], firstChannel[cID])
+    src.channel.channel_join_v1(userID3[token], firstChannel[cID])
+    src.channel.channel_join_v1(userID4[token], firstChannel[cID])
+
+    #* userID3 sends 4 messages
+    message1 = message_send_v1(userID3[token], firstChannel[cID], "Yo yo waz poppin'?")
+    message2 = message_send_v1(userID3[token], firstChannel[cID], "Huh?")
+    message3 = message_send_v1(userID3[token], firstChannel[cID], "John Cena")
+    message4 = message_send_v1(userID3[token], firstChannel[cID], "Ricegum")
+
+    #* Test if userID1 can remove the message
+    message_remove_v1(userID1[token], message1['message_id'])
+    messageFound = False
+    removedMessage = {}
+    for messageDict in src.channel.channel_messages_v1(userID1[token], firstChannel[cID], 0)['messages']:
+        if sendOutput['message_id'] == messageDict['message_id']:
+            removedMessage = messageDict
+            messageFound = True
+            break
+    assert messageFound is True 
+    assert removedMessage['message'] == '### Message Removed ###'
+
+    #* Test if userID2 can remove the message
+    message_remove_v1(userID2[token], message2['message_id'])
+    messageFound = False
+    removedMessage = {}
+    for messageDict in src.channel.channel_messages_v1(userID2[token], firstChannel[cID], 0)['messages']:
+        if sendOutput['message_id'] == messageDict['message_id']:
+            removedMessage = messageDict
+            messageFound = True
+            break
+    assert messageFound is True 
+    assert removedMessage['message'] == '### Message Removed ###'
+
+    #* Test if userID3 can remove the message
+    message_remove_v1(userID3[token], message3['message_id'])
+    messageFound = False
+    removedMessage = {}
+    for messageDict in src.channel.channel_messages_v1(userID3[token], firstChannel[cID], 0)['messages']:
+        if sendOutput['message_id'] == messageDict['message_id']:
+            removedMessage = messageDict
+            messageFound = True
+            break
+    assert messageFound is True 
+    assert removedMessage['message'] == '### Message Removed ###'
+
+    #* Test if userID4 cannot remove the message
+    with pytest.raises(AccessError):
+        message_remove_v1(userID4[token], message4['message_id'])
 
 # search_v1
 # When query_str is >1000 characters, InputError is raised

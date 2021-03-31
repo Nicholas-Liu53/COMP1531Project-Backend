@@ -66,6 +66,7 @@ def get_user(user_id):
                 'name_first': user['name_first'],
                 'name_last': user['name_last'],
                 'handle_string': user['handle_string'],
+                'permission_id': user['permission_id']
             }
     raise InputError
 

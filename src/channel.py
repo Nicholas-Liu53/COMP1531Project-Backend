@@ -200,19 +200,19 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     
     #In terms of returning messages, return it as a list
     if len(messagesList) < 50:
-            return {
-        'messages': messagesList,
-        #start should be returned as start
-        'start': start,
-        'end': -1,
-    }
+        return {
+            'messages': messagesList,
+            #start should be returned as start
+            'start': start,
+            'end': -1,
+        }
     
     else: 
         #Case 2: More than 50 messages     
         #Returns end which is 'start + 50'
         endValue = start + 50
 
-        return {
+    return {
         'messages': messagesList,
         'start' : start,
         'end': endValue,
