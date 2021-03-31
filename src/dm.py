@@ -103,7 +103,7 @@ def dm_remove_v1(token, dm_id):
     #Loop through dm_list, once dm_id is found remove it
     for objects in src.data.dms:
         if objects['dm_id'] == dm_id:
-            del objects
+            src.data.dms.remove(objects)
 
     return {}
 
@@ -173,10 +173,10 @@ def dm_messages_v1(token, dm_id, start):
     #Get all dms
     current_dm = 0
     for objects in src.data.messages_log:
-        if dm_id == objects['dm_id'] and current_dm >= start and len(messages < 50):
+        if dm_id == objects['dm_id'] and current_dm >= start and len(messages) < 50:
             current_DM = objects.copy()
             del current_DM[cID]
-            del current_DM[dm_id]
+            del current_DM['dm_id']
             messages.append(current_DM)
             current_dm += 1
 
