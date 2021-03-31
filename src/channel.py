@@ -165,9 +165,9 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     messages = []
 
     for objects in src.data.messages_log:
-        if dm_id == objects['dm_id']:
+        if channel_id == objects['channel_id']:
             current_DM = objects.copy()
-            del current_DM[cID]
+            del current_DM['channel_id']
             del current_DM['dm_id']
             messages.insert(0,current_DM)
 
