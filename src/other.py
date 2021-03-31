@@ -66,7 +66,6 @@ def get_user(user_id):
                 'name_first': user['name_first'],
                 'name_last': user['name_last'],
                 'handle_string': user['handle_string'],
-                'permission_id': user['permission_id']
             }
     raise InputError
 
@@ -93,3 +92,9 @@ def message_count(channel_id, dm_id):
             if dm_id == src.data.messages_log[dmID]:
                 counter += 1
     return counter
+
+def get_user_permissions(user_id):
+    for user in src.data.users:
+        if user_id == user[uID]:
+            return user['permission_id']
+    raise InputError
