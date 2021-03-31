@@ -1,7 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 import src.auth
-from src.other import decode, get_channel, get_members, get_user, get_user_permissions
+from src.other import decode, get_channel, get_members, get_user, get_user_permissions, get_user_from_handlestring
 from datetime import timezone, datetime
 import jwt
 AuID      = 'auth_user_id'
@@ -100,9 +100,9 @@ def message_edit_v1(token, message_id, newMessage):
     if auth_user_id is not messageDict['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
         raise AccessError
 
-    if newMessage == '':
-        message['message'] = '### Message Removed ###'
-    else:
+    if newMessage == '':    #* If new message is empty string --> remove message
+        message_remove_v1(token, message_id)
+    else:                   # Else 
         message['message'] = newMessage
 
     return {
