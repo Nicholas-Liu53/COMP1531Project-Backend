@@ -109,6 +109,11 @@ def message_edit_v1(token, message_id, newMessage):
     else:                   # Else 
         message['message'] = newMessage
 
+    if message['channel_id'] != -1:     #* If message is in a channel
+        push_tagged_notifications(auth_user_id, message['channel_id'], -1, newMessage)
+    else:
+        push_tagged_notifications(auth_user_id, -1, message['dm_id'], newMessage)
+
     return {
     }
 
