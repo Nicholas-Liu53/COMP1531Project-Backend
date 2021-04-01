@@ -1,7 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 import src.auth
-from src.other import decode, get_channel, get_members, get_user, get_user_permissions, get_user_from_handlestring
+from src.other import decode, get_channel, get_members, get_user, get_user_permissions, push_tagged_notifications
 from datetime import timezone, datetime
 import jwt
 AuID      = 'auth_user_id'
@@ -47,6 +47,9 @@ def message_send_v1(token, channel_id, message):
         }
     )
 
+    #* Push notifications if anyone is tagged
+    push_tagged_notifications(auth_user_id, channel_id, -1, message)
+
     return {
         'message_id': newID,
     }
@@ -73,6 +76,7 @@ def message_remove_v1(token, message_id):
     if auth_user_id is not messageDict['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
         raise AccessError
 
+    #* Remove the message
     message['message'] = '### Message Removed ###'
 
     return {
