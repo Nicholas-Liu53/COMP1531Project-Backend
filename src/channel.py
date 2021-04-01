@@ -220,7 +220,7 @@ def channel_leave_v1(token, channel_id):
     Follows the rules channel_remove_owner_v1 if the user is an owner
 
     Arguments:
-        token              - The token of the user that is to leave the channel
+        token        (str) - The JWT containing user_id and session_id of the user that is to leave the channel
         channel_id   (int) - The id of the channel that the user is to leave
 
     Exceptions:
@@ -257,7 +257,7 @@ def channel_join_v1(token, channel_id):
     If the channel is private then the user isn't added. (See more in Exceptions)
 
     Arguments:
-        token (int) - The id of the user that wants to join the channel
+        token        (str) - The JWT containing user_id and session_id of the user that is to leave the channel
         channel_id   (int) - The id of the channel that the user wants to join
 
     Exceptions:

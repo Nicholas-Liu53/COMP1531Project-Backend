@@ -18,7 +18,28 @@ dmID      = 'dm_id'
 seshID    = 'session_id'
 
 def message_send_v1(token, channel_id, message):
+    '''
+    Takes in a user's token, a channel's id and a string and sends a message 
+    from that user into the channel.
+    --> Note: Messages cannot be more 1000 chars
+
+    Arguments:
+        token        (str) - The JWT containing user_id and session_id of the user that is to leave the channel
+        channel_id   (int) - The id of the channel that the message is being sent to
+        message      (str) - The string of the message being sent
     
+    Exceptions:
+        InputError - Occurs when:
+                            1) When the user id doesn't belong to any user
+                            2) The channel_id doesn't belong to any channel
+                            3) The message is too long (exceeds 1000 chars)
+        AccessError - Occurs when:
+                            1) When the user's token contains wrong session id
+                            2) The token doesn't belong to a member of the channel
+    
+    Return Value:
+        Returns a dictionary with key 'message_id' to the new message's message_id
+    '''
     # Decode the token
     auth_user_id, _ = decode(token)
 
@@ -55,7 +76,28 @@ def message_send_v1(token, channel_id, message):
     }
 
 def message_remove_v1(token, message_id):
-    
+    '''
+    Takes in a user's token and a message's id and removes that message.
+        --> Note: The message dictionary isn't removed, but rather the message is 
+                    replaced with "### Message Removed ###"
+
+    Arguments:
+        token        (str) - The JWT containing user_id and session_id of the user that is to leave the channel
+        message_id   (int) - The id of the message that is to be removed
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When the user id doesn't belong to any user
+                            2) The message_id doesn't belong to any message
+        AccessError - Occurs when:
+                            1) When the user's token contains wrong session id
+                            2) The token doesn't belong to a member of the channel
+                            3) The token doesn't belong to an owner of the channel
+                            4) The token doesn't belong to an owner of *Dreams*
+
+    Return Value:
+        Returns an empty dictionary
+    '''
     #* Decode the token
     auth_user_id, _ = decode(token)
 
@@ -83,7 +125,29 @@ def message_remove_v1(token, message_id):
     }
 
 def message_edit_v1(token, message_id, newMessage):
-    
+    '''
+    Takes in a user's token, a message's id and newMessage string 
+    and replaces the message with the newMessage string.
+        --> Note: When the newMessage is an empty string, the message is removed
+
+    Arguments:
+        token        (str) - The JWT containing user_id and session_id of the user that is to leave the channel
+        message_id   (int) - The id of the message that is to be removed
+        newMessage   (str) - The string for the message that will replace the old message
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When the user id doesn't belong to any user
+                            2) The message_id doesn't belong to any message
+        AccessError - Occurs when:
+                            1) When the user's token contains wrong session id
+                            2) The token doesn't belong to a member of the channel
+                            3) The token doesn't belong to an owner of the channel
+                            4) The token doesn't belong to an owner of *Dreams*
+
+    Return Value:
+        Returns an empty dictionary
+    '''
     #* Decode the token
     auth_user_id, _ = decode(token)
 
@@ -104,9 +168,11 @@ def message_edit_v1(token, message_id, newMessage):
     if auth_user_id is not messageDict['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
         raise AccessError
 
-    if newMessage == '':    #* If new message is empty string --> remove message
+    if len(newMessage) > 1000:  # If the message is too long, raise InputError
+        raise InputError
+    elif newMessage == '':      #* If new message is empty string --> remove message
         message_remove_v1(token, message_id)
-    else:                   # Else 
+    else:                       # Else 
         message['message'] = newMessage
 
     if message['channel_id'] != -1:     #* If message is in a channel
