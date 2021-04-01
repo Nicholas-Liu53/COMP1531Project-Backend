@@ -1,7 +1,7 @@
 import src.data
-from src.error import AccessError, InputError
+from src.error import AccessError, InputError 
 from src.channels import channels_listall_v2, channels_list_v2
-from src.other import decode, get_channel, get_members, get_user, message_count
+from src.other import decode, get_channel, get_members, get_user, message_count, push_added_notifications
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -68,6 +68,7 @@ def channel_invite_v1(token, channel_id, u_id):
         if chan["channel_id"] == channel_id:
             # ensure no duplicates
             chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
+    push_added_notifications(auth_user_id, u_id, channel_id,-1) 
     return {   
     }
 
@@ -360,6 +361,7 @@ def channel_addowner_v1(token, channel_id, u_id):
             # ensure no duplicates
             chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
             chan["owner_members"].append(u_id) if u_id not in chan["owner_members"] else None
+    push_added_notifications(auth_user_id, u_id, channel_id,-1)
 
     return {
     }
