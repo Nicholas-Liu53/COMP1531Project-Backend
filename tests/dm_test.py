@@ -74,7 +74,7 @@ def test_dm_details_access_error(user1, user2, user3):
 
 #* Test that an InputError is raised when an invalid dm_id is given
 def test_dm_details_input_error(user1):
-    invalid_dm_id = -1
+    invalid_dm_id = -2
 
     with pytest.raises(InputError):
         dm_details_v1(user1[token], invalid_dm_id)
@@ -156,7 +156,7 @@ def test_dm_remove():
     userID1 = src.auth.auth_register_v2("1531@gmail.com", "123456", "Tom", "Zhang")
     userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
     dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
-    invalid_dm_id = -1
+    invalid_dm_id = -2
     with pytest.raises(InputError):
         dm_remove_v1(userID1[token], invalid_dm_id)
     with pytest.raises(AccessError):
@@ -171,7 +171,7 @@ def test_dm_invite():
     userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
     userID3 = src.auth.auth_register_v2("hello@gmail.com", "xyztfvtf", "Paul", "J")
     dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
-    invalid_dm_id = -1
+    invalid_dm_id = -2
     with pytest.raises(InputError):
         dm_invite_v1(userID1[token], invalid_dm_id, userID3[AuID])
     with pytest.raises(AccessError):
@@ -188,7 +188,7 @@ def test_dm_leave():
     userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
     userID3 = src.auth.auth_register_v2("hello@gmail.com", "xyzxyz", "Paul", "J")
     dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
-    invalid_dm_id = -1
+    invalid_dm_id = -2
     with pytest.raises(InputError):
         dm_leave_v1(userID1[token], invalid_dm_id)
     with pytest.raises(AccessError):
@@ -204,7 +204,7 @@ def test_dm_messages():
     userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
     userID3 = src.auth.auth_register_v2("hello@gmail.com", "135769", "Harry", "J")
     dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
-    invalid_dm_id = -1
+    invalid_dm_id = -2
 
     #Input error when DM ID not valid or start is greater than # of messages in DM
     with pytest.raises(InputError):
