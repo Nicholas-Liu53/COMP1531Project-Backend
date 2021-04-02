@@ -6,6 +6,7 @@ from src.other import decode, get_user, get_channel, clear_v1, SECRET
 from datetime import timezone, datetime
 from src.notifications import notifications_get_v1
 import jwt
+from src.dm import dm_create_v1, dm_invite_v1
 
 cID    = 'channel_id'
 token  = 'token'
