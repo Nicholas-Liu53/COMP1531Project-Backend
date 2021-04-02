@@ -68,7 +68,7 @@ def channel_invite_v1(token, channel_id, u_id):
         if chan["channel_id"] == channel_id:
             # ensure no duplicates
             chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
-    push_added_notifications(auth_user_id, u_id, channel_id,-1) 
+    push_added_notifications(auth_user_id, u_id, channel_id, -1) 
     return {   
     }
 

@@ -50,45 +50,45 @@ def test_notifications_get_in_channels(user1, user2, user3):
     } in notifications_get_v1(user3[token])[notifs]
 
     #* Test 2: Test if mentions comes up
-    message_send_v1(user2[token], channel1[cID], "Hello @User1 @User3")
+    message_send_v1(user2[token], channel1[cID], f"Hello @{get_user(user1ID)['handle_string']} @{get_user(user3ID)['handle_string']}")
     assert {
         cID    : channel1[cID],
         'dm_id': -1,
-        nMess  : f"{get_user(user2ID)['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Hello @User1 @User3",
+        nMess  : f"{get_user(user2ID)['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Hello @{get_user(user1ID)['handle_string']} @{get_user(user3ID)['handle_string']}",
     } in notifications_get_v1(user1[token])[notifs]
     assert {
         cID    : channel1[cID],
         'dm_id': -1,
-        nMess  : f"{get_user(user2ID)['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Hello @User1 @User3",
+        nMess  : f"{get_user(user2ID)['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Hello @{get_user(user1ID)['handle_string']} @{get_user(user3ID)['handle_string']}",
     } in notifications_get_v1(user3[token])[notifs]
 
     #* Test 3: Only recent 20 notifs come up
     i = 0
     while i < 22:
-        message_send_v1(user1[token], channel1[cID], "Hi @User2 @User3")
+        message_send_v1(user1[token], channel1[cID], f"Hi @{get_user(user2ID)['handle_string']} @{get_user(user3ID)['handle_string']}")
         i += 1
     assert {
         cID    : channel1[cID],
         'dm_id': -1,
         nMess  : f"{get_user(user1ID)['handle_string']} added you to {get_channel(channel1[cID])['name']}",
-    } not in notifications_get_v1(user3[token])
+    } not in notifications_get_v1(user3[token])[notifs]
     assert {
         cID    : channel1[cID],
         'dm_id': -1,
-        nMess  : f"{get_user(user2ID)['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Hello @User1 @User3",
-    } in notifications_get_v1(user3[token])[notifs]
+        nMess  : f"{get_user(user2ID)['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Hello @{get_user(user1ID)['handle_string']} @{get_user(user3ID)['handle_string']}",
+    } not in notifications_get_v1(user3[token])[notifs]
 
     i = 0
     while i < 21:
         if i == 0:
-            message_send_v1(user3[token], channel1[cID], "Baby shark @User2")
+            message_send_v1(user3[token], channel1[cID], f"Baby shark @{get_user(user2ID)['handle_string']}")
         else:
-            message_send_v1(user3[token], channel1[cID], "Dooo dooo dooo dooo @User2")
+            message_send_v1(user3[token], channel1[cID], f"Dooo dooo dooo dooo @{get_user(user2ID)['handle_string']}")
         i += 1
     assert {
         cID    : channel1[cID],
         'dm_id': -1,
-        nMess  : f"{get_user(user3ID)['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Baby shark @User2",
+        nMess  : f"{get_user(user3ID)['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Baby shark @{get_user(user2ID)['handle_string']}",
     } not in notifications_get_v1(user2[token])[notifs]
 
     #* Test 4: Only first 20 characters
