@@ -131,7 +131,6 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
     for word in messageWords:
         if word.startswith('@') and word != '@':
             atHandlesList.append(word[1:])
-    print(atHandlesList)
     taggedUsersList = []
     for atHandle in atHandlesList:
         try:
@@ -143,13 +142,11 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
         'dm_id': dm_id,
         'notification_message': f"{taggerHandle} tagged you in {channelDMname}: {message[0:20]}"
     }
-    print(taggedUsersList)
     for taggedUser in taggedUsersList:
         try:
             src.data.notifs[taggedUser].insert(notification, 0)
         except:
             src.data.notifs[taggedUser] = [notification]
-            print("lol")
 
 def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
     if channel_id == -1 and dm_id == -1:

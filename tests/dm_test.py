@@ -194,7 +194,6 @@ def test_dm_leave():
     with pytest.raises(AccessError):
         dm_leave_v1(userID3[token], dm_0['dm_id'])
     dm_leave_v1(userID2[token], dm_0['dm_id'])
-    print(dm_list_v1(userID1[token]))
     assert {dmID: dm_0[dmID], Name: 'jackp, tomzhang'} in dm_list_v1(userID1[token])['dms']
     assert dm_list_v1(userID2[token]) == {'dms': []}
 
@@ -255,3 +254,10 @@ def test_dm_unauthorised_user(user1, user2, invalid_token):
         dm_invite_v1(invalid_token, dm1[dmID], user2[AuID])
         dm_leave_v1(invalid_token, dm1[dmID])
         dm_messages_v1(invalid_token, dm1[dmID], 0)
+
+#* Test when the user has no notifications
+#* Test when multiple users have multiple notifications
+#* Test when user has more than 20 notifications
+#* Test for only getting added to DMs
+#* Test for only getting tagged in DMS
+#* Test when token passed in is invalid
