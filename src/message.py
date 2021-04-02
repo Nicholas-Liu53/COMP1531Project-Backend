@@ -3,7 +3,7 @@ from src.error import AccessError, InputError
 import src.auth
 from src.other import decode, get_channel, get_members, get_user, get_user_permissions, push_tagged_notifications
 from datetime import timezone, datetime
-import jwt
+
 AuID      = 'auth_user_id'
 uID       = 'u_id'
 cID       = 'channel_id'
@@ -27,7 +27,7 @@ def message_send_v1(token, channel_id, message):
         token        (str) - The JWT containing user_id and session_id of the user that is to leave the channel
         channel_id   (int) - The id of the channel that the message is being sent to
         message      (str) - The string of the message being sent
-    
+
     Exceptions:
         InputError - Occurs when:
                             1) When the user id doesn't belong to any user
@@ -36,7 +36,7 @@ def message_send_v1(token, channel_id, message):
         AccessError - Occurs when:
                             1) When the user's token contains wrong session id
                             2) The token doesn't belong to a member of the channel
-    
+
     Return Value:
         Returns a dictionary with key 'message_id' to the new message's message_id
     '''
