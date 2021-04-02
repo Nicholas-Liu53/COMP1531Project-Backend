@@ -100,3 +100,32 @@ def test_notifications_get_in_channels(user1, user2, user3):
 
 
 
+#* DM tagged tests
+    #* When tagged, correct amount of tags come up
+    '''
+    < Register 2 users >
+    < Create DM >
+    < Tag once >
+    < Assert tagged once >
+    '''
+    #* Only first 20 characters of the message come up
+    '''
+    < Register 2 users >
+    < Create DM >
+    < Tag with long ass message >
+    < Assert message is 20 characters >
+    '''
+    #* Test that users that are not in the DM cannot be tagged
+    '''
+    < Register 3 users >
+    < Create DM with first 2 >
+    < Try tag the third >
+    < Assert that he was no tagged >
+    '''
+    #* When tagged >20 times, only 20 tags come up (and oldest ones dont show up)
+    '''
+    < Register 2 users >
+    < Create DM >
+    < Tag 21 >
+    < Assert that 20 notifs are displayed >
+    '''
