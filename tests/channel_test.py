@@ -116,7 +116,7 @@ def test_channel_messages():
     firstChannel = channels_create_v1(userID1[token], 'Yggdrasil', True)
     
     #Send one message in channel 
-    message_send_v1(1, firstChannel[cID], "First Message")
+    message_send_v1(userID1[token], firstChannel[cID], "First Message")
 
     with pytest.raises(InputError):
         #* Test 1: returns input error when start is greater than total number of 
@@ -143,13 +143,13 @@ def test_channel_messages():
     #first need to write 50 messages in channel 
     counter = 0
     while counter < 51:
-        message_send_v1(1, "Yggdrasil", "Spam :)")
+        message_send_v1(userID1[token], firstChannel[cID], "Spam :)")
         counter += 1  
     
     #Now there should be 52 messages in our channel (1 from start + 51 from while loop)
-    assert channel_messages_v1(1, "Yggdrasil", 1) == 51
-    
-    pass
+    assert channel_messages_v1(userID1[token], firstChannel[cID], 1)['end'] == 51
+    assert channel_messages_v1(userID1[token], firstChannel[cID], 1)['start'] == 1
+    assert len(channel_messages_v1(userID1[token], firstChannel[cID], 1)['messages']) == 50
 
 def test_channel_leave():
     #* Ensure database is empty
