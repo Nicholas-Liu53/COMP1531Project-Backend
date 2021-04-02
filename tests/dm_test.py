@@ -210,10 +210,12 @@ def test_dm_messages():
 
     #Input error when DM ID not valid or start is greater than # of messages in DM
     with pytest.raises(InputError):
-        #DM ID not valid
-        dm_messages_v1(userID1[token], invalid_dm_id, 0)
         #Start greater than # of messages in DM
         dm_messages_v1(userID1[token], dm_0['dm_id'], 1)
+    with pytest.raises(InputError):
+        #DM ID not valid
+        dm_messages_v1(userID1[token], invalid_dm_id, 0)
+        
 
     #Access error when Authorised user is not a member of DM with dm_id
     with pytest.raises(AccessError):
@@ -253,7 +255,7 @@ def test_dm_messages():
     #Case when start is not equal to 0 but there are 51 messages in DM
     #If start is 20, there should be 32 messages in dictionary
     return_dict3 = dm_messages_v1(userID1[token], dm_0['dm_id'], 20)
-    assert len(return_dict3['messages']) == 32
+    assert len(return_dict3['messages']) == 31
     assert return_dict3['start'] == 20
     assert return_dict3['end'] == -1
 
