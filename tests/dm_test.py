@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 import src.data
 from src.dm import dm_details_v1, dm_list_v1, dm_create_v1, dm_remove_v1, dm_invite_v1, dm_leave_v1, dm_messages_v1
@@ -204,6 +206,7 @@ def test_dm_messages():
     userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
     userID3 = src.auth.auth_register_v2("hello@gmail.com", "135769", "Harry", "J")
     dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
+    dm_1 = dm_create_v1(userID2[token], [userID3[AuID]])
     invalid_dm_id = -2
 
     #Input error when DM ID not valid or start is greater than # of messages in DM
@@ -222,11 +225,16 @@ def test_dm_messages():
         'start': 0,
         'end': -1,
     }
+
+    #Send DM to dm_1 to make sure that it is sending to the correct dm
+    message_senddm_v1(userID2[token], dm_1['dm_id'], "Lawl")
+
     #Add certain number of DMs to dm_0 e.g. 10
     message_counter = 0
     while message_counter < 10:
         message_senddm_v1(userID1[token], dm_0['dm_id'], f"{message_counter}")
         message_counter += 1
+
 
     return_dict = dm_messages_v1(userID1[token], dm_0['dm_id'],0)
     assert len(return_dict['messages']) == 10
@@ -242,6 +250,13 @@ def test_dm_messages():
     assert len(return_dict2['messages']) == 50
     assert return_dict2['start'] == 0
     assert return_dict2['end'] == 50
+
+    #Case when start is not equal to 0 but there are 51 messages in DM
+    #If start is 20, there should be 32 messages in dictionary
+    return_dict3 = dm_messages_v1(userID1[token], dm_0['dm_id'], 20)
+    assert len(return_dict3['messages']) == 32
+    assert return_dict3['start'] == 20
+    assert return_dict3['end'] == -1
 
 #* Test for unauthorised users for all dm functions
 def test_dm_unauthorised_user(user1, user2, invalid_token):
