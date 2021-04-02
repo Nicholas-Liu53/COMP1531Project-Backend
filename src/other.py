@@ -22,10 +22,7 @@ def clear_v1():
     src.data.channels = []
     src.data.dms = []
     src.data.messages_log = []
-
-    src.data.dms = []
-
-    src.data.messages_log = []
+    src.data.notifs = {}
 
 def search_v1(auth_user_id, query_str):
     return {
@@ -112,3 +109,65 @@ def get_user_from_handlestring(handlestring):
                 'handle_string': user['handle_string'],
             }
     raise InputError
+
+def get_dm(dm_id):
+    for dm in src.data.dms:
+        if dm_id == dm['dm_id']:
+            return dm
+    raise InputError
+
+def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
+    if channel_id == -1 and dm_id == -1:
+        raise InputError
+    elif channel_id != -1 and dm_id != -1:
+        raise InputError
+    taggerHandle = get_user(auth_user_id)['handle_string']
+    if channel_id != -1:
+        channelDMname = get_channel(channel_id)['name']
+    else:
+        channelDMname = get_dm(dm_id)['name']
+    messageWords = message.split()
+    atHandlesList = []
+    for word in messageWords:
+        if word.startswith('@') and word != '@':
+            atHandlesList.append(word[1:])
+    print(atHandlesList)
+    taggedUsersList = []
+    for atHandle in atHandlesList:
+        try:
+            taggedUsersList.append(get_user_from_handlestring(atHandle)[uID])
+        except:
+            pass
+    notification = {
+        'channel_id': channel_id,
+        'dm_id': dm_id,
+        'notification_message': f"{taggerHandle} tagged you in {channelDMname}: {message[0:20]}"
+    }
+    print(taggedUsersList)
+    for taggedUser in taggedUsersList:
+        try:
+            src.data.notifs[taggedUser].insert(notification, 0)
+        except:
+            src.data.notifs[taggedUser] = [notification]
+            print("lol")
+
+def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
+    if channel_id == -1 and dm_id == -1:
+        raise InputError
+    elif channel_id != -1 and dm_id != -1:
+        raise InputError
+    taggerHandle = get_user(auth_user_id)['handle_string']
+    if channel_id != -1:
+        channelDMname = get_channel(channel_id)['name']
+    else:
+        channelDMname = get_dm(dm_id)['name']
+    get_user(user_id)       # Checking if user_id is valid
+    notification = {
+        'channel_id': channel_id,
+        'dm_id': dm_id,
+        'notification_message': f"{taggerHandle} added you to {channelDMname}"
+    }
+    try:
+        src.data.notifs[user_id].insert(notification, 0)
+    except:
+        src.data.notifs[user_id] = [notification]
