@@ -240,7 +240,7 @@ def test_dm_messages():
         'start': 0,
         'end': -1,
     }
-
+covera
     #add so that there are 51 messages in DM
     while message_counter < 51:
         message_senddm_v1()
