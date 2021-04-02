@@ -98,5 +98,34 @@ def test_notifications_get_in_channels(user1, user2, user3):
         nMess  : f"{get_user(user3ID)['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Dooo dooo dooo dooo ",
     } in notifications_get_v1(user2[token])[notifs]
 
+def test_notifications_dms_added(user1, user2, user3):
+    #Test that a notif is sent to user when they are added to dm with channel id = -1
+    #Ordered from most to least recent
 
+    dm_0 = dm_create_v1(user1[token], [user2[AuID]])
+    dm_1 = dm_create_v1(user1[token], [user3[AuID]])
 
+    #Test 1: for initial creation of DM
+    assert {
+        cID : -1,
+        'dm_id': 0,
+        nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm_0['dm_id'])['name']}",
+    } in notifications_get_v1(user2[token])[notifs]
+
+    #Test 2: For DM_invite inviting another person
+    dm_invite_v1(user1[token], dm_0['dm_id'], user3['u_id'])
+
+    assert {
+        cID : -1,
+        'dm_id': 0,
+        nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm_0['dm_id'])['name']}",
+    } in notifications_get_v1(user3[token])[notifs]
+
+    #Test 3: being added to multiple dms
+    assert {
+        cID : -1,
+        'dm_id': 1,
+        nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm_1['dm_id'])['name']}",
+    } in notifications_get_v1(user3[token])[notifs]
+
+    #Test 4: Make sure ordered from most to least recent
