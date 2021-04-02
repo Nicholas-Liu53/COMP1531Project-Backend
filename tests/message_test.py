@@ -20,6 +20,8 @@ mID     = 'message_id'
 dmID    = 'dm_id'
 Name    = 'name'
 
+
+
 # message_send_v1
 # When message is >1000 characters, InputError is raised
 # When authorised user is not part of the channel that they are trying to post in, AccessError is raised
@@ -247,96 +249,6 @@ def test_message_remove():
 
 
 
-def test_message_share_todm():
-    #* Ensure database is empty
-    #! Clearing data
-
-    src.other.clear_v1()
-
-    userID1 = src.auth.auth_register_v2("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
-    userID2 = src.auth.auth_register_v2("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
-    userID3 = src.auth.auth_register_v2("zodiac@gmail.com", "T3dCruz", "T", "C")
-    userID4 = src.auth.auth_register_v2("gmailgmail@gmail.com", "hiiiiii12345", "M", "C")
-    
-    channelTest = src.channels.channels_create_v1(userID1[token], 'Channel', True)
-    src.channel.channel_invite_v1(userID1[token], channelTest[cID], userID2[AuID])
-    dmTest = src.dm.dm_create_v1(userID2[token],[userID4[AuID],userID3[AuID]])
-    
-    ogMessage = message_send_v1(userID1[token],channelTest[cID], "hello jeffrey meng") 
-
-    sharedMessage = message_share_v1(userID2[token], ogMessage[mID],'', -1, dmTest[dmID])
-
-    messageFound = False
-    for messageDict in src.dm.dm_messages_v1(userID2[token],dmTest[dmID],0)['messages']:
-        if sharedMessage['message_id'] == messageDict['message_id']:
-            messageFound = True
-            break
-    assert messageFound is True 
-    
-    # userID1 is not in dmTest, raise access error
-    with pytest.raises(AccessError):
-        message_share_v1(userID1[token], ogMessage[mID], '', -1, dmTest[dmID])
-
-
-
-def test_message_share_tochannel():
-    #* Ensure database is empty
-    #! Clearing data
-
-    src.other.clear_v1()
-
-    userID0 = src.auth.auth_register_v2("ownerDreams@gmail.com", "GodOwner123", "Owner", "Owner")
-    userID1 = src.auth.auth_register_v2("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
-    userID2 = src.auth.auth_register_v2("zodiac@gmail.com", "T3dCruz", "T", "C")
-
-    channelTest = src.channels.channels_create_v1(userID0[token], 'Channel', True)
-    channelTest2 = src.channels.channels_create_v1(userID1[token], 'Channel', True)
-
-    src.channel.channel_invite_v1(userID1[token], channelTest2[cID], userID0[AuID])
-    src.channel.channel_invite_v1(userID0[token], channelTest[cID], userID2[AuID])
-
-    ogMessage = message_send_v1(userID0[token],channelTest[cID], "hello jeffrey meng") 
-
-    sharedMessage = message_share_v1(userID0[token], ogMessage[mID],'vincent', channelTest2[cID], -1)
-
-    messageFound = False
-    for messageDict in src.channel.channel_messages_v1(userID1[token],channelTest2[cID],0)['messages']:
-        if sharedMessage['message_id'] == messageDict['message_id']:
-            messageFound = True
-            break
-    assert messageFound is True 
- 
-    with pytest.raises(AccessError):
-        message_share_v1(userID2[token], ogMessage[mID], '', channelTest2[cID], -1)
-
-def test_message_share_dmtodm():
-    
-    #* Ensure database is empty
-    #! Clearing data
-
-    src.other.clear_v1()
-
-    userID1 = src.auth.auth_register_v2("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
-    userID2 = src.auth.auth_register_v2("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
-    userID3 = src.auth.auth_register_v2("zodiac@gmail.com", "T3dCruz", "T", "C")
-    userID4 = src.auth.auth_register_v2("gmailgmail@gmail.com", "hiiiiii12345", "M", "C")
-    
-    dmTest = src.dm.dm_create_v1(userID2[token],[userID4[AuID],userID3[AuID]])
-    dmTest2 = src.dm.dm_create_v1(userID1[token],[userID2[AuID]])
-    
-    ogMessage = message_senddm_v1(userID1[token], dmTest2[dmID], 'hello meng')
-
-    sharedMessage = message_share_v1(userID2[token], ogMessage[mID],'wow', -1, dmTest[dmID])
-    messageFound = False
-    for messageDict in src.dm.dm_messages_v1(userID4[token],dmTest[dmID],0)['messages']:
-        if sharedMessage['message_id'] == messageDict['message_id']:
-            messageFound = True
-            break
-    assert messageFound is True 
-
-    with pytest.raises(AccessError):
-        message_share_v1(userID1[token], ogMessage[mID], '', -1, dmTest[dmID])
-
 @pytest.fixture
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
@@ -353,6 +265,88 @@ def user2():
 @pytest.fixture
 def user3():
     return src.auth.auth_register_v2("third@gmail.com", "password", "User", "3")
+
+@pytest.fixture
+def user4():
+    return src.auth.auth_register_v2("fourth@gmail.com", "password", "User", "4")
+
+@pytest.fixture
+def user5():
+    return src.auth.auth_register_v2("fifth@gmail.com", "password", "User", "5")
+
+def test_message_share_todm(user1, user2, user3, user4):
+    #* Ensure database is empty
+    #! Clearing data
+
+
+    channelTest = src.channels.channels_create_v1(user1[token], 'Channel', True)
+    src.channel.channel_invite_v1(user1[token], channelTest[cID], user2[AuID])
+    dmTest = src.dm.dm_create_v1(user2[token],[user4[AuID],user3[AuID]])
+    
+    ogMessage = message_send_v1(user1[token],channelTest[cID], "hello jeffrey meng") 
+
+    sharedMessage = message_share_v1(user2[token], ogMessage[mID],'', -1, dmTest[dmID])
+
+    messageFound = False
+    for messageDict in src.dm.dm_messages_v1(user2[token],dmTest[dmID],0)['messages']:
+        if sharedMessage['message_id'] == messageDict['message_id']:
+            messageFound = True
+            break
+    assert messageFound is True 
+    
+    # user1 is not in dmTest, raise access error
+    with pytest.raises(AccessError):
+        message_share_v1(user1[token], ogMessage[mID], '', -1, dmTest[dmID])
+
+
+
+def test_message_share_tochannel(user1, user2, user3):
+    #* Ensure database is empty
+    #! Clearing data
+
+
+    channelTest = src.channels.channels_create_v1(user1[token], 'Channel', True)
+    channelTest2 = src.channels.channels_create_v1(user2[token], 'Channel', True)
+
+    src.channel.channel_invite_v1(user2[token], channelTest2[cID], user1[AuID])
+    src.channel.channel_invite_v1(user1[token], channelTest[cID], user3[AuID])
+
+    ogMessage = message_send_v1(user1[token],channelTest[cID], "hello jeffrey meng") 
+
+    sharedMessage = message_share_v1(user1[token], ogMessage[mID],'vincent', channelTest2[cID], -1)
+
+    messageFound = False
+    for messageDict in src.channel.channel_messages_v1(user2[token],channelTest2[cID],0)['messages']:
+        if sharedMessage['message_id'] == messageDict['message_id']:
+            messageFound = True
+            break
+    assert messageFound is True 
+ 
+    with pytest.raises(AccessError):
+        message_share_v1(user3[token], ogMessage[mID], '', channelTest2[cID], -1)
+
+def test_message_share_dmtodm(user1,user2,user3,user4):
+    
+    #* Ensure database is empty
+    #! Clearing data
+    
+    dmTest = src.dm.dm_create_v1(user2[token],[user4[AuID],user3[AuID]])
+    dmTest2 = src.dm.dm_create_v1(user1[token],[user2[AuID]])
+    
+    ogMessage = message_senddm_v1(user1[token], dmTest2[dmID], 'hello meng')
+
+    sharedMessage = message_share_v1(user2[token], ogMessage[mID],'wow', -1, dmTest[dmID])
+    messageFound = False
+    for messageDict in src.dm.dm_messages_v1(user4[token],dmTest[dmID],0)['messages']:
+        if sharedMessage['message_id'] == messageDict['message_id']:
+            messageFound = True
+            break
+    assert messageFound is True 
+
+    with pytest.raises(AccessError):
+        message_share_v1(user1[token], ogMessage[mID], '', -1, dmTest[dmID])
+
+
 
 #* Test send functions together with message/send/v2
 #? Test if message_id increases correctly
