@@ -158,7 +158,7 @@ def test_dm_remove():
     userID1 = src.auth.auth_register_v2("1531@gmail.com", "123456", "Tom", "Zhang")
     userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
     dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
-    dm_1 = dm_create_v1(userID1[token], [userID2[AuID]])
+    dm_create_v1(userID1[token], [userID2[AuID]])
     invalid_dm_id = -2
     with pytest.raises(InputError):
         dm_remove_v1(userID1[token], invalid_dm_id)
@@ -274,9 +274,21 @@ def test_dm_unauthorised_user(user1, user2, invalid_token):
 
     with pytest.raises(AccessError):
         dm_details_v1(invalid_token, dm1[dmID])
+    
+    with pytest.raises(AccessError):
         dm_list_v1(invalid_token)
+
+    with pytest.raises(AccessError):
         dm_create_v1(invalid_token, [user1[AuID]])
+
+    with pytest.raises(AccessError):
         dm_remove_v1(invalid_token, dm1[dmID])
+
+    with pytest.raises(AccessError):
         dm_invite_v1(invalid_token, dm1[dmID], user2[AuID])
+
+    with pytest.raises(AccessError):
         dm_leave_v1(invalid_token, dm1[dmID])
+
+    with pytest.raises(AccessError):
         dm_messages_v1(invalid_token, dm1[dmID], 0)
