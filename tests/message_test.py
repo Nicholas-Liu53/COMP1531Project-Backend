@@ -275,9 +275,6 @@ def user5():
     return src.auth.auth_register_v2("fifth@gmail.com", "password", "User", "5")
 
 def test_message_share_todm(user1, user2, user3, user4):
-    #* Ensure database is empty
-    #! Clearing data
-
 
     channelTest = src.channels.channels_create_v1(user1[token], 'Channel', True)
     src.channel.channel_invite_v1(user1[token], channelTest[cID], user2[AuID])
@@ -301,9 +298,6 @@ def test_message_share_todm(user1, user2, user3, user4):
 
 
 def test_message_share_tochannel(user1, user2, user3):
-    #* Ensure database is empty
-    #! Clearing data
-
 
     channelTest = src.channels.channels_create_v1(user1[token], 'Channel', True)
     channelTest2 = src.channels.channels_create_v1(user2[token], 'Channel', True)
@@ -321,14 +315,11 @@ def test_message_share_tochannel(user1, user2, user3):
             messageFound = True
             break
     assert messageFound is True 
- 
+
     with pytest.raises(AccessError):
         message_share_v1(user3[token], ogMessage[mID], '', channelTest2[cID], -1)
 
 def test_message_share_dmtodm(user1,user2,user3,user4):
-    
-    #* Ensure database is empty
-    #! Clearing data
     
     dmTest = src.dm.dm_create_v1(user2[token],[user4[AuID],user3[AuID]])
     dmTest2 = src.dm.dm_create_v1(user1[token],[user2[AuID]])
