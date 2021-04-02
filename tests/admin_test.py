@@ -5,6 +5,7 @@ from src.error import AccessError, InputError
 import src.channel, src.channels, src.auth, src.dm, src.message, src.other
 import jwt
 import json
+from src.other import SECRET
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
