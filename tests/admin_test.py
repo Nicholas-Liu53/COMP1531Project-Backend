@@ -98,6 +98,3 @@ def test_userpermissions_change(user1, user2, user3):
     # Test 7: Raise Access Error when a non- Dreams owner is changing permissions
     with pytest.raises(AccessError):
         userpermission_change_v1(user3[token], user3[token], 2)
-
-def test_notifications_get():
-    pass

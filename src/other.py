@@ -24,22 +24,50 @@ def clear_v1():
     src.data.messages_log = []
     src.data.notifs = {}
 
-# search_v1
-# When query_str is >1000 characters, InputError is raised
-# Test that users can only see messages in channels that they have joined
-    # Test if a user who has joined no channels can see any messages
+def search_v1(token, query_str):
+    
+    #* Decode the token
+    auth_user_id, _ = decode(token)
 
-def search_v1(auth_user_id, query_str):
+    # When query_str is >1000 characters, InputError is raised
+    if len(query_str) > 1000:
+        raise InputError
+
+    channelList = []
+    #* Check which channels the user is in
+    for channel in src.data.channels:
+        if auth_user_id in channel[allMems]:
+            channelList.append(channel[cID])
+    
+    DMList = []
+    #* Check which DMs the user is in
+    for dm in src.data.dms:
+        if auth_user_id in dm[allMems]:
+            DMList.append(dm['dm_id'])
+
+    messages = []
+
+    #* Add in every message in the channel/DM that contains query_str
+    for message in src.data.messages_log:
+        if (message[cID] in channelList or message['dm_id'] in DMList) and query_str in message['message']:
+            messages.append(
+                {
+                    'message_id': message['message_id'],
+                    uID: message[uID],
+                    'message': message['message'],
+                    'time_created': message['time_created'],
+                }
+            )
+
     return {
-        'messages': [
-            {
-                'message_id': 1,
-                'u_id': 1,
-                'message': 'Hello world',
-                'time_created': 1582426789,
-            }
-        ],
+        'messages': messages,
     }
+
+########################################################################################
+###                                                                                  ###
+###                              Helper Functions below                              ###
+###                                                                                  ###
+########################################################################################
 
 def decode(token):
     payload = jwt.decode(token, SECRET, algorithms='HS256')
@@ -113,6 +141,12 @@ def get_user_from_handlestring(handlestring):
                 'name_last': user['name_last'],
                 'handle_string': user['handle_string'],
             }
+    raise InputError
+
+def get_message(message_id):
+    for message in src.data.messages_log:
+        if message_id == message['message_id']:
+            return message
     raise InputError
 
 def get_dm(dm_id):
