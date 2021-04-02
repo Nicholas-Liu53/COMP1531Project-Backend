@@ -103,8 +103,6 @@ def test_channel_details(user1, user2):
         channel_details_v1(user2[token], realChannel[cID])
     
 
-
-'''
 def test_channel_messages():
     #* Ensure database is empty
     #! Clearing data
@@ -271,7 +269,7 @@ def test_channel_join():
     #* Finished testing for this function
     #! Clearing data
     #   src.other.clear_v1()
-'''
+
 def test_channel_addowner(user1, user2,user3,user4, user5):
 
     channelTest = src.channels.channels_create_v1(user2[token], 'Channel', False)
