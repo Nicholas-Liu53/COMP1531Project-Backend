@@ -107,6 +107,7 @@ def test_notifications_dms_added(user1, user2, user3):
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     dm_1 = dm_create_v1(user1[token], [user3[AuID]])
 
+
     #Test 1: for initial creation of DM
     assert {
         cID : -1,
@@ -131,3 +132,33 @@ def test_notifications_dms_added(user1, user2, user3):
     } in notifications_get_v1(user3[token])[notifs]
 
     #Test 4: Make sure ordered from most to least recent
+
+#* DM tagged tests
+    #* When tagged, correct amount of tags come up
+    '''
+    < Register 2 users >
+    < Create DM >
+    < Tag once >
+    < Assert tagged once >
+    '''
+    #* Only first 20 characters of the message come up
+    '''
+    < Register 2 users >
+    < Create DM >
+    < Tag with long ass message >
+    < Assert message is 20 characters >
+    '''
+    #* Test that users that are not in the DM cannot be tagged
+    '''
+    < Register 3 users >
+    < Create DM with first 2 >
+    < Try tag the third >
+    < Assert that he was no tagged >
+    '''
+    #* When tagged >20 times, only 20 tags come up (and oldest ones dont show up)
+    '''
+    < Register 2 users >
+    < Create DM >
+    < Tag 21 >
+    < Assert that 20 notifs are displayed >
+    '''
