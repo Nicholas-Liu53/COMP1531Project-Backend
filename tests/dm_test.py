@@ -158,7 +158,6 @@ def test_dm_remove():
     userID1 = src.auth.auth_register_v2("1531@gmail.com", "123456", "Tom", "Zhang")
     userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
     dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
-    dm_1 = dm_create_v1(userID1[token], [userID2[AuID]])
     invalid_dm_id = -2
     with pytest.raises(InputError):
         dm_remove_v1(userID1[token], invalid_dm_id)
