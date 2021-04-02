@@ -244,7 +244,7 @@ def test_dm_messages():
     assert return_dict['end'] == -1
 
     #Check dm_1 is unaffected
-    return_dict_dm_1 = dm_messages_v1(userID1[token], dm_0['dm_id'],0)
+    return_dict_dm_1 = dm_messages_v1(userID2[token], dm_1['dm_id'],0)
     assert len(return_dict_dm_1['messages']) == 1
     assert return_dict_dm_1['start'] == 0
     assert return_dict_dm_1['end'] == -1
