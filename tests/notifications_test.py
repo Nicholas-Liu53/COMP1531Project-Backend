@@ -7,9 +7,10 @@ from datetime import timezone, datetime
 from src.notifications import notifications_get_v1
 import jwt
 
-cID   = 'channel_id'
-token = 'token'
-nMess = 'notification_message'
+cID    = 'channel_id'
+token  = 'token'
+nMess  = 'notification_message'
+notifs = 'notifications'
 
 @pytest.fixture
 def user1():
@@ -40,13 +41,13 @@ def test_notifications_get_in_channels(user1, user2, user3):
         cID    : channel1[cID],
         'dm_id': -1,
         nMess  : f"{get_user(user1ID)['handle_string']} added you to {get_channel(channel1[cID])['name']}",
-    } in notifications_get_v1(user2[token])
+    } in notifications_get_v1(user2[token])[notifs]
     src.channel.channel_invite_v1(user1[token], channel1[cID], user3ID)
     assert {
         cID    : channel1[cID],
         'dm_id': -1,
         nMess  : f"{get_user(user1ID)['handle_string']} added you to {get_channel(channel1[cID])['name']}",
-    } in notifications_get_v1(user3[token])
+    } in notifications_get_v1(user3[token])[notifs]
 
     #* Test 2: Test if mentions comes up
     message_send_v1(user2[token], channel1[cID], "Hello @User1 @User3")
@@ -54,12 +55,12 @@ def test_notifications_get_in_channels(user1, user2, user3):
         cID    : channel1[cID],
         'dm_id': -1,
         nMess  : f"{get_user(user2ID)['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Hello @User1 @User3",
-    } in notifications_get_v1(user1[token])
+    } in notifications_get_v1(user1[token])[notifs]
     assert {
         cID    : channel1[cID],
         'dm_id': -1,
         nMess  : f"{get_user(user2ID)['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Hello @User1 @User3",
-    } in notifications_get_v1(user3[token])
+    } in notifications_get_v1(user3[token])[notifs]
 
     #* Test 3: Only recent 20 notifs come up
     i = 0
@@ -75,7 +76,7 @@ def test_notifications_get_in_channels(user1, user2, user3):
         cID    : channel1[cID],
         'dm_id': -1,
         nMess  : f"{get_user(user2ID)['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Hello @User1 @User3",
-    } in notifications_get_v1(user3[token])
+    } in notifications_get_v1(user3[token])[notifs]
 
     i = 0
     while i < 21:
@@ -88,14 +89,14 @@ def test_notifications_get_in_channels(user1, user2, user3):
         cID    : channel1[cID],
         'dm_id': -1,
         nMess  : f"{get_user(user3ID)['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Baby shark @User2",
-    } not in notifications_get_v1(user2[token])
+    } not in notifications_get_v1(user2[token])[notifs]
 
     #* Test 4: Only first 20 characters
     assert {
         cID    : channel1[cID],
         'dm_id': -1,
         nMess  : f"{get_user(user3ID)['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Dooo dooo dooo dooo ",
-    } in notifications_get_v1(user2[token])
+    } in notifications_get_v1(user2[token])[notifs]
 
 
 
