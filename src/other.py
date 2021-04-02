@@ -24,6 +24,11 @@ def clear_v1():
     src.data.messages_log = []
     src.data.notifs = {}
 
+# search_v1
+# When query_str is >1000 characters, InputError is raised
+# Test that users can only see messages in channels that they have joined
+    # Test if a user who has joined no channels can see any messages
+
 def search_v1(auth_user_id, query_str):
     return {
         'messages': [

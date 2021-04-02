@@ -147,6 +147,10 @@ def test_channel_messages():
     assert channel_messages_v1(userID1[token], firstChannel[cID], 1)['start'] == 1
     assert len(channel_messages_v1(userID1[token], firstChannel[cID], 1)['messages']) == 50
 
+    #* Finished testing for this function
+    #! Clearing data
+    src.other.clear_v1()
+
 def test_channel_leave(user1, user2, user3, user4):
 
     #* user1 made public channel 'TrumpPence'
