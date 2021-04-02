@@ -48,6 +48,9 @@ def test_search(user1, user2, user3, user4, user5, channel1, channel2):
     #   Note: This test has white-box testing involved  #
     # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+    #* Test if a user who has joined no channels can see any messages
+    assert search_v1(user5[token], "om")['messages'] == []
+
     #* user3 will join channel1, user4 will be invited into channel2, user5 will be invited into both
     src.channel.channel_join_v1(user3[token], channel1[cID])
     src.channel.channel_invite_v1(user2[token], channel2[cID], user4[AuID])
@@ -93,9 +96,24 @@ def test_search(user1, user2, user3, user4, user5, channel1, channel2):
     assert {
         mID: message5[mID],
         uID: user5[AuID],
-        'message': "Nomnom",
+        'message': "Bruh haha",
         'time_created': get_message(message5[mID])['time_created'],
     } not in search_v1(user5[token], "om")['messages']
+
+    #* Test if InputError is raised when query_str is >1000
+    tooLongMessage = ""
+    for i in range(1002):
+        tooLongMessage += "@"
+    with pytest.raises(InputError):
+        search_v1(user5[token], tooLongMessage)
+
+    #* Test if a user can't view messages from channels it isn't in
+    assert {
+        mID: message3[mID],
+        uID: user3[AuID],
+        'message': "omg",
+        'time_created': get_message(message5[mID])['time_created'],
+    } not in search_v1(user2[token], "om")['messages']
 
     #* Finished testing for this function
     #! Clearing data
