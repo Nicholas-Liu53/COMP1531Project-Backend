@@ -12,6 +12,7 @@ cID    = 'channel_id'
 token  = 'token'
 nMess  = 'notification_message'
 notifs = 'notifications'
+AuID = 'auth_user_id'
 
 @pytest.fixture
 def user1():
