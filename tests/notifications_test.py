@@ -2,7 +2,7 @@ import pytest
 from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_share_v1, message_senddm_v1
 from src.error import InputError, AccessError
 import src.channel, src.channels, src.auth
-from src.other import decode, get_user, get_channel, clear_v1, SECRET
+from src.other import decode, get_user, get_channel, get_dm, clear_v1, SECRET
 from datetime import timezone, datetime
 from src.notifications import notifications_get_v1
 import jwt
