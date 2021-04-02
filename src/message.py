@@ -208,7 +208,22 @@ def message_senddm_v1(token, dm_id, message):
     }
 
 def message_share_v1(token, og_message_id, message, channel_id, dm_id):
-
+    '''
+    message_share_v1 searches for an existing message id to be forwarded or shared to either
+    a channel or a DM. There is also an option to append a extra message when the message is shared.
+    
+    Arguments:
+        token (str)- JWT containing { u_id, session_id }
+        og_message_id (int) - The id of the desired message in message log
+        message (str) - An optional message to be sent when message is shared, it is '' if empty.
+        channel_id (int) - The id of the desired channel for message to be shared, it is -1 if message is shared to a DM instead
+        dm_id (int) - The id of the desired DM for message to be shared, it is -1 if message is shared to a channel instead
+    Exceptions:
+        AccessError - Raised when the token does not belong to a user who is authorised, eg. the user has not joined the channel or DM they are sharing to.
+    
+    Return Value:
+        Dictionary with a shared_message_id : (int)
+    '''
     # the authorised user has not joined the channel or DM they are trying to share the message to
     auth_user_id, _ = decode(token)
 
@@ -246,6 +261,6 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
         push_tagged_notifications(auth_user_id, -1, dm_id, newMessage)
     else:
         # not an error in the spec sheet but if neither channel_id nor dm_id is not -1 or is both -1 probably raise inputerror
-        pass #maybe return None
+        pass 
     
     return shared_message_id

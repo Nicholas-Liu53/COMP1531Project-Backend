@@ -23,7 +23,7 @@ def channel_invite_v1(token, channel_id, u_id):
     desired user to the specific channel dictionary within the list contained in "all_members".
 
     Arguments:
-        token (int) - The integer id of a user within both the user list and channel "all_members" calling the function to invite another user
+        token (str): JWT containing { u_id, session_id }
         channel_id (int) - The integer id of the channel that we want to invite a user to. Should be present in the channels list.
         u_id (int) - The integer id of a user that the authorised user wants to invite to that specific channel.
 
@@ -80,7 +80,7 @@ def channel_details_v1(token, channel_id):
     Does not include private information such as password.
     
     Arguments:
-        token (int) - The id of the user that is calling the channel details. Must be present within that channel's "all_members"
+        token (str): JWT containing { u_id, session_id }
         channel_id (int) - The id of the desired channel which we want details of.
     
     Exceptions:
@@ -314,11 +314,22 @@ def channel_join_v1(token, channel_id):
     }
 
 def channel_addowner_v1(token, channel_id, u_id):
-    #if not a user in the channel, add it to all membs too
-    # for access error, check permission id first and if permission id isnt of the Dreams owner, check owner list of channels
-    # ALLWAYS CHECK FOR PERMISSION ID FIRST FOR DREAM OWNERS
-    # Make user with user id u_id an owner of this channel
-    # When user with user id u_id is already an owner of the channel INPUT ERROR
+    '''
+    channel_addowner_v1 adds user with the u_id parameter to the associated channel's owner members, granting them
+    owner permissions
+    
+    Arguments:
+        token (str) - JWT containing { u_id, session_id }
+        channel_id (int) - The id of the desired channel.
+        u_id (int) - The id of desired user we want to add to owners
+    Exceptions:
+        InputError - Occurs when the channel_id used as a parameter does not already exist in the channels list.
+        InputError - Occurs when the user with associated u_id is already an owner of the channel
+        AccessError - Occurs when the user calling the function is not an authorised user.
+    
+    Return Value:
+        Empty Dictionary
+    '''
 
     auth_user_id, _ = decode(token)
     
@@ -367,7 +378,23 @@ def channel_addowner_v1(token, channel_id, u_id):
     }
 
 def channel_removeowner_v1(token, channel_id, u_id):
-    # does not remove from all membs
+    '''
+    channel_removeowner_v1 removes user with the u_id parameter to the associated channel's owner members, revoking their
+    owner permissions.
+    
+    Arguments:
+        token (str) - JWT containing { u_id, session_id }
+        channel_id (int) - The id of the desired channel.
+        u_id (int) - The id of desired user we want to remove from the channel's owners.
+    Exceptions:
+        InputError - Occurs when the channel_id used as a parameter does not already exist in the channels list.
+        InputError - Occurs when the user with associated u_id is not an owner of the channel
+        AccessError - Occurs when the user calling the function is not an authorised user.
+    
+    Return Value:
+        Empty Dictionary
+    '''
+
     auth_user_id, _ = decode(token)
     
     passed = False
