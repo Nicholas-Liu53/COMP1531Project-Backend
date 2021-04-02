@@ -4,6 +4,7 @@ from src.admin import user_remove_v1, userpermission_change_v1, notifications_ge
 from src.error import AccessError, InputError
 import src.channel, src.channels, src.auth, src.dm, src.message, src.other
 
+
 AuID    = 'auth_user_id'
 uID     = 'u_id'
 cID     = 'channel_id'
@@ -13,10 +14,6 @@ ownMems = 'owner_members'
 fName   = 'name_first'
 lName   = 'name_last'
 token   = 'token'
-
-@pytest.fixture
-def invalid_token():
-    return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
 @pytest.fixture
 def user1():

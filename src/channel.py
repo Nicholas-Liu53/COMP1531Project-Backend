@@ -151,10 +151,6 @@ def channel_messages_v1(token, channel_id, start):
     Return Value:
         Returns up to 50 messages alongside a start and and end value.
     '''
-    
-    # print(auth_user_id)
-
-    print(token)
 
     decode(token)
 
