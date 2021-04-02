@@ -102,7 +102,7 @@ def test_search(user1, user2, user3, user4, user5, channel1, channel2):
 
     #* Test if InputError is raised when query_str is >1000
     tooLongMessage = ""
-    for i in range(1002):
+    for _ in range(1002):
         tooLongMessage += "@"
     with pytest.raises(InputError):
         search_v1(user5[token], tooLongMessage)
