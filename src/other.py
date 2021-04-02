@@ -149,7 +149,6 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
             src.data.notifs[taggedUser].insert(notification, 0)
         except:
             src.data.notifs[taggedUser] = [notification]
-            print("lol")
 
 def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
     if channel_id == -1 and dm_id == -1:
