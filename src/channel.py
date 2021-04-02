@@ -2,6 +2,8 @@ import src.data
 from src.error import AccessError, InputError 
 from src.channels import channels_listall_v2, channels_list_v2
 from src.other import decode, get_channel, get_members, get_user, message_count, push_added_notifications
+import jwt
+import JSON
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'

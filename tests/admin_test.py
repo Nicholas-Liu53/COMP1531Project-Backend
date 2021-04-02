@@ -2,7 +2,9 @@
 import pytest
 from src.admin import user_remove_v1, userpermission_change_v1, notifications_get_v1
 from src.error import AccessError, InputError
-import src.channel, src.channels, src.auth, src.dm, src.message, src.other
+import src.channel, src.channels, src.auth, src.dm, src.message, src.
+import jwt
+import JSON
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
