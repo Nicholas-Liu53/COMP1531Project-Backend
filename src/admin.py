@@ -52,7 +52,7 @@ def userpermission_change_v1(token, u_id, permission_id):
         raise AccessError
     if not validUser:
         raise InputError
-    
+
     if permission_id != 1 and permission_id != 2:
         raise InputError
 
