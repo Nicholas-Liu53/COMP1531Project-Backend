@@ -237,11 +237,17 @@ def test_dm_messages():
         message_senddm_v1(userID1[token], dm_0['dm_id'], f"{message_counter}")
         message_counter += 1
 
-
+    #Check dm_0 is correct
     return_dict = dm_messages_v1(userID1[token], dm_0['dm_id'],0)
     assert len(return_dict['messages']) == 10
     assert return_dict['start'] == 0
     assert return_dict['end'] == -1
+
+    #Check dm_1 is unaffected
+    return_dict_dm_1 = dm_messages_v1(userID1[token], dm_0['dm_id'],0)
+    assert len(return_dict_dm_1['messages']) == 1
+    assert return_dict_dm_1['start'] == 0
+    assert return_dict_dm_1['end'] == -1
 
     #add so that there are 51 messages in DM
     while message_counter < 51:
