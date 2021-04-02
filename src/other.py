@@ -17,7 +17,18 @@ seshID    = 'session_id'
 SECRET    = 'MENG'
 
 def clear_v1():
+    '''
+    Clears the entire database
 
+    Arguments: 
+        None
+    
+    Exceptions:
+        None
+
+    Return value:
+        None
+    '''
     src.data.users = []
     src.data.channels = []
     src.data.dms = []
@@ -25,7 +36,24 @@ def clear_v1():
     src.data.notifs = {}
 
 def search_v1(token, query_str):
+    '''
+    Takes in a user's token and query string to return a list of messages that contains details about the message
+
+    Arguments: 
+        token      (str) - The JWT containing user_id and session_id of the user that is to view their notifs
+        querty_str (str) - The string which the user inputted to find messages
     
+    Exceptions:
+        InputError - Occurs when the query_str is greater than 1000 characters
+
+    Return value:
+        Returns a dictionary containing a list of notifications with key 'messages'
+            Contains:
+                message_id,
+                user_id,
+                message string, and
+                time_created.
+    '''
     #* Decode the token
     auth_user_id, _ = decode(token)
 
