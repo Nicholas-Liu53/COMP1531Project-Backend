@@ -11,7 +11,7 @@ def user_profile_v2(token, u_id):
     }
 
 def user_setname_v2(token, name_first, name_last):
-    auth_user_id = decode(token)
+    auth_user_id, _ = decode(token)
     
     if len(name_first) > 50 or len(name_first) < 1:
         raise InputError
@@ -26,7 +26,7 @@ def user_setname_v2(token, name_first, name_last):
     }
 
 def user_setemail_v2(token, email):
-    auth_user_id = decode(token)
+    auth_user_id, _ = decode(token)
     
     if not re.search('^[a-zA-Z0-9]+[\\._]?[a-zA-Z0-9]+[@]\\w+[.]\\w{2,3}$', email):
         raise InputError
@@ -43,7 +43,7 @@ def user_setemail_v2(token, email):
     }
 
 def user_sethandle_v2(token, handle_str):
-    auth_user_id = decode(token)
+    auth_user_id, _ = decode(token)
     
     if len(handle_str) < 3 or len(handle_str) > 20:
         raise InputError
