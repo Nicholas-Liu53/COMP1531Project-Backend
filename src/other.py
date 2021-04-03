@@ -1,5 +1,6 @@
 import src.data
 import jwt
+import json
 from src.error import AccessError, InputError
 
 AuID      = 'auth_user_id'
@@ -29,6 +30,15 @@ def clear_v1():
     Return value:
         None
     '''
+    with open('data.json', 'w') as FILE:
+        json.dump({
+            'users': [],
+            'channels': [],
+            'dms': [],
+            'messages_log': [],
+            'notifs': {}
+        }, FILE)
+
     src.data.users = []
     src.data.channels = []
     src.data.dms = []
