@@ -355,8 +355,4 @@ def test_channel_removeowner(user1, user2, user3, user4):
     # Test 5: Non-owner trying to remove, raising access Error
     channel_addowner_v1(user3[token], channelTest2[cID], user4[AuID])
     with pytest.raises(AccessError):
-<<<<<<< HEAD
         channel_removeowner_v1(user2[token], channelTest2[cID], user3[AuID])
-=======
-        channel_removeowner_v1(user4[token], channelTest[cID], user3[AuID])
->>>>>>> dms
