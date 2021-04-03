@@ -13,6 +13,8 @@ token  = 'token'
 nMess  = 'notification_message'
 notifs = 'notifications'
 AuID = 'auth_user_id'
+dmID = 'dm_id'
+handle = 'handle_string'
 
 @pytest.fixture
 def user1():
@@ -134,31 +136,43 @@ def test_notifications_dms_added(user1, user2, user3):
     #Test 4: Make sure ordered from most to least recent
 
 #* DM tagged tests
-    #* When tagged, correct amount of tags come up
-    '''
-    < Register 2 users >
-    < Create DM >
-    < Tag once >
-    < Assert tagged once >
-    '''
-    #* Only first 20 characters of the message come up
-    '''
-    < Register 2 users >
-    < Create DM >
-    < Tag with long ass message >
-    < Assert message is 20 characters >
-    '''
-    #* Test that users that are not in the DM cannot be tagged
-    '''
-    < Register 3 users >
-    < Create DM with first 2 >
-    < Try tag the third >
-    < Assert that he was no tagged >
-    '''
-    #* When tagged >20 times, only 20 tags come up (and oldest ones dont show up)
-    '''
-    < Register 2 users >
-    < Create DM >
-    < Tag 21 >
-    < Assert that 20 notifs are displayed >
-    '''
+#* When tagged, correct amount of tags come up
+def test_valid_dm_tag(user1, user2):
+    dm1= dm_create_v1(user1[token], [user2[AuID]])
+    message_senddm_v1(user1[token], dm1[dmID], f"Hi @{get_user(user2[AuID])[handle]}")
+    message_senddm_v1(user2[token], dm1[dmID], f"Hi @{get_user(user1[AuID])[handle]}")
+    assert len(notifications_get_v1(user1[token])[notifs]) == 1
+    assert len(notifications_get_v1(user2[token])[notifs]) == 2
+
+#* Only first 20 characters of the message come up
+def test_valid_dm_20_chars(user1, user2):
+    dm1= dm_create_v1(user1[token], [user2[AuID]])
+    tagMessage = f"@{get_user(user2[AuID])[handle]}"
+    message = tagMessage + ' ' + f"{'a'*25}"
+    message_senddm_v1(user1[token], dm1[dmID], message)
+
+    assert {
+        cID : -1,
+        dmID: dm1[dmID],
+        nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm1['dm_id'])['name']}: {message[0:20]}",
+    } in notifications_get_v1(user2[token])[notifs]
+
+#* Test that users that are not in the DM cannot be tagged
+def test_dm_no_tag(user1, user2, user3):
+    dm1= dm_create_v1(user1[token], [user2[AuID]])
+    message_senddm_v1(user1[token], dm1[dmID], f"Hi @{get_user(user3[AuID])[handle]}")
+    assert notifications_get_v1(user1[token])[notifs] == []
+
+#* When tagged >20 times, only 20 tags come up (and oldest ones dont show up)
+def test_dm_20_notifs(user1, user2):
+    dm1= dm_create_v1(user1[token], [user2[AuID]])
+    tagMessage = f"@{get_user(user2[AuID])[handle]}"
+    for nNum in range(21):
+        message = str(nNum) + ' ' + tagMessage
+        message_senddm_v1(user1[token], dm1[dmID], message)
+    assert len(notifications_get_v1(user1[token])[notifs]) == 20
+    assert {
+        cID : -1,
+        dmID: dm1[dmID],
+        nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm1['dm_id'])['name']}: 0 {tagMessage}",
+    } not in notifications_get_v1(user2[token])[notifs]
