@@ -185,17 +185,18 @@ def message_edit_v1(token, message_id, newMessage):
     }
 
 def message_senddm_v1(token, dm_id, message):
+    data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
     _, dmMembers = get_members(-1, dm_id)
     if auth_user_id not in dmMembers:
         raise AccessError
     if len(message) > 1000:
         raise InputError
-    message_id = len(src.data.messages_log)
+    message_id = len(data['messages_log'])
     now = datetime.now()
     time_created = int(now.strftime("%s"))
     
-    src.data.messages_log.append({
+    data['messages_log'].append({
         cID: -1,
         dmID: dm_id,
         'message_id': message_id,
@@ -203,6 +204,9 @@ def message_senddm_v1(token, dm_id, message):
         'message': message, 
         'time_created': time_created,
     })
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     push_tagged_notifications(auth_user_id, -1, dm_id, message)
     return {
