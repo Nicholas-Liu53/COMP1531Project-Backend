@@ -163,8 +163,7 @@ def test_dm_create_errors(user1):
 
 
 
-def test_dm_remove():
-    src.other.clear_v1()
+def test_dm_remove(user1, user2, invalid_dm):
     #Create two dm's: one which we will remove and one we will keep
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     #This second dm will have dm_id 1 
@@ -180,8 +179,7 @@ def test_dm_remove():
     return_dict = dm_list_v1(user1[token])
     assert len(return_dict['dms']) == 1
 
-def test_dm_invite():
-    src.other.clear_v1()
+def test_dm_invite(user1, user2, user3 invalid_dm):
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     #Test for input error, when dm input is invalid 
     with pytest.raises(InputError):
@@ -196,8 +194,7 @@ def test_dm_invite():
         'name': 'user1, user2',
     }]}
 
-def test_dm_leave():
-    src.other.clear_v1()
+def test_dm_leave(user1, user2, invalid_dm):
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     #InputError when dm input is not a valid dm 
     with pytest.raises(InputError):
@@ -212,10 +209,9 @@ def test_dm_leave():
     #User 2 has no more dms
     assert dm_list_v1(user2[token]) == {'dms': []}
 
-def test_dm_messages():
-    src.other.clear_v1()
-    dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
-    dm_1 = dm_create_v1(userID2[token], [userID3[AuID]])
+def test_dm_messages(user1, user2, user3, invalid_dm):
+    dm_0 = dm_create_v1(user1[token], [user2[AuID]])
+    dm_1 = dm_create_v1(user2[token], [user3[AuID]])
     #Input error when DM ID not valid or start is greater than # of messages in DM
     with pytest.raises(InputError):
         #Start greater than # of messages in DM
