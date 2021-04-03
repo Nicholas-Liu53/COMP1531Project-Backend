@@ -129,16 +129,26 @@ def dm_create_v1(token, u_ids):
         'dm_name': dm_name
     }
 
-#Ethan
-def dm_remove_v1(token, dm_id):
-#Remove an existing DM, can only be done by original creator of dm
-#ASSUMPTION: Rest of dms retain same dm_ids when a dm is removed
 
+def dm_remove_v1(token, dm_id):
+    '''
+    Removes a DM created by user 
+
+    Arguments:
+        token (str): JWT containing { u_id, session_id }
+        dm_id (int): dm_id of the DM that the authorised user is trying to access the DM's details
+
+    Exceptions:
+        Input Error
+            - Raise when dm_id does not refer to a valid DM
+        AccessError
+            - Raised when the user is not original DM creator 
+
+    Return Value:
+        {}
+    '''
+    #ASSUMPTION: Rest of dms retain same dm_ids when a dm is removed
     auth_user_ID, _ = decode(token)
-    #First omit errors
-    #Raise input error if dm_id is not valid DM number
-    #If dm_id not contained in list
-    #AccessError when the user is not original DM creator
     input_error = True
 
     for items in src.data.dms:
@@ -159,16 +169,27 @@ def dm_remove_v1(token, dm_id):
 
     return {}
 
-#Ethan
 def dm_invite_v1(token, dm_id, u_id):
-#ASSUME: Do not need to add new user into dm_name
-#Invites a user to an existing dm
+    '''
+    Invites a user to join an existing dm
+    Arguments:
+        token (str): JWT containing { u_id, session_id }
+        dm_id (int): dm_id of the DM that the authorised user is trying to access the DM's details
+        u_id (int): user ID of the user that is being added to the DM
 
-    #Check u_id
+    Exceptions:
+        Input Error
+            - Raise when dm_id does not refer to a valid DM
+            - Raise when u_id does not refer to existing user 
+        AccessError
+            - Raised when the authorised user is not a member of DM
+
+    Return Value:
+        {}
+    '''
+    #ASSUME: Do not need to add new user into dm_name
     get_user(u_id)
     auth_user_ID, _ = decode(token)
-    #Raises Input Error when dm_id is not valid
-    #Access error if auth user i.e token is not a member of dm
     input_error = True
     for items in src.data.dms:
         #Loop for input errors:
@@ -177,6 +198,7 @@ def dm_invite_v1(token, dm_id, u_id):
             if auth_user_ID not in items['all_members']:
                 raise AccessError
             else:
+                #If no errors found can add dm to list
                 items['all_members'].append(u_id)
                 push_added_notifications(auth_user_ID, u_id, -1, dm_id)
 
@@ -187,10 +209,23 @@ def dm_invite_v1(token, dm_id, u_id):
 
 
 def dm_leave_v1(token, dm_id):
-#Given a DM ID, user is removed as a member of this DM
+    '''
+    Current user to leave DM with dm_id 
+    Arguments:
+        token (str): JWT containing { u_id, session_id }
+        dm_id (int): dm_id of the DM that the authorised user is trying to access the DM's details
+
+    Exceptions:
+        Input Error
+            - Raise when dm_id does not refer to a valid DM
+        AccessError
+            - Raised when the authorised user is not a member of DM
+
+    Return Value:
+        {}
+    '''
+
     auth_user_ID, _ = decode(token)
-    #Raises InputError when dm_id is not valid
-    # Access error if auth_user is not a member of dm with dm_id
     input_error = True
     for items in src.data.dms:
         #Loop for input errors:
@@ -199,6 +234,7 @@ def dm_leave_v1(token, dm_id):
             if auth_user_ID not in items['all_members']:
                 raise AccessError
             else:
+                #If error not found remove dm from list 
                 items['all_members'].remove(auth_user_ID)
 
     if input_error:
