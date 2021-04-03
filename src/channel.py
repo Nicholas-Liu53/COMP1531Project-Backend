@@ -20,7 +20,6 @@ dmID      = 'dm_id'
 seshID    = 'session_id'
 
 def channel_invite_v1(token, channel_id, u_id):
-
     '''
     channel_invite_v1 checks if a user is authorised to invite another user to a channel and then automatically adds the
     desired user to the specific channel dictionary within the list contained in "all_members".
@@ -38,12 +37,13 @@ def channel_invite_v1(token, channel_id, u_id):
     Return Value:
         Returns an empty list on passing all Exceptions, with changes being made directly to our data.py  
     '''
+    data = json.load(open('data.json', 'r'))
 
     auth_user_id, _ = decode(token)
 
     #check if channel_id is valid
     passed = False
-    for check in src.data.channels:
+    for check in data['channels']:
         if check['channel_id'] == channel_id:
             passed = True
             break
@@ -52,7 +52,7 @@ def channel_invite_v1(token, channel_id, u_id):
     
 
     # check if user is authorised to invite
-    for chans in src.data.channels:
+    for chans in data['channels']:
         if chans["channel_id"] == channel_id:
             userAuth = False
             for users in chans["all_members"]:
@@ -67,17 +67,20 @@ def channel_invite_v1(token, channel_id, u_id):
     get_user(u_id)
 
     # now searches for channel_id
-    for chan in src.data.channels:
+    for chan in data['channels']:
         if chan["channel_id"] == channel_id:
             # ensure no duplicates
             chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
     push_added_notifications(auth_user_id, u_id, channel_id, -1) 
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+
     return {   
     }
 
 
 def channel_details_v1(token, channel_id):
-
     '''
     channel_details_v1 calls upon a new copy of the desired channel dictionary that only contains filtered keys and values that is public.
     Does not include private information such as password.
@@ -93,12 +96,13 @@ def channel_details_v1(token, channel_id):
     Return Value:
         Returns filteredDetails on succesfully creating a copy of the channel we want, with only the filtered information. The return is a dictionary.
     '''
+    data = json.load(open('data.json', 'r'))
 
     auth_user_id, _ = decode(token)
 
     # check for valid channel
     passed = False
-    for check in src.data.channels:
+    for check in data['channels']:
         if check["channel_id"] == channel_id:
             passed = True
             break
@@ -106,7 +110,7 @@ def channel_details_v1(token, channel_id):
         raise InputError
 
     # check if user is authorised for channel
-    for chans in src.data.channels:
+    for chans in data['channels']:
         if chans["channel_id"] == channel_id:
             userAuth = False
             for users in chans["all_members"]:
@@ -115,7 +119,7 @@ def channel_details_v1(token, channel_id):
                     break
             if userAuth == False:
                 raise AccessError
-    for details in src.data.channels:
+    for details in data['channels']:
         if details["channel_id"] == channel_id:
 
             # filteres the information to be displayed
@@ -134,6 +138,9 @@ def channel_details_v1(token, channel_id):
             dictAllMem = {"all_members" : allmem}
             filteredDetails.update(dictAllMem)
 
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+        
     return filteredDetails
 
 
@@ -325,17 +332,18 @@ def channel_addowner_v1(token, channel_id, u_id):
     Return Value:
         Empty Dictionary
     '''
+    data = json.load(open('data.json', 'r'))
 
     auth_user_id, _ = decode(token)
     
     passed = False
-    for check in src.data.channels:
+    for check in data['channels']:
         if check['channel_id'] == channel_id:
             passed = True
     if not passed:
         raise InputError
         
-    for chans in src.data.channels:
+    for chans in data['channels']:
         if chans["channel_id"] == channel_id:
             alreadyOwner = False
             for users in chans["owner_members"]:
@@ -351,7 +359,7 @@ def channel_addowner_v1(token, channel_id, u_id):
         if users['u_id'] == auth_user_id:
             if users['permission_id'] == 1:
                 dreamsOwner = True
-    for chans in src.data.channels:
+    for chans in data['channels']:
         if chans["channel_id"] == channel_id:
             for users in chans["owner_members"]:
                 if users == auth_user_id:
@@ -362,12 +370,15 @@ def channel_addowner_v1(token, channel_id, u_id):
         raise AccessError
     
     # now searches for channel_id
-    for chan in src.data.channels:
+    for chan in data['channels']:
         if chan["channel_id"] == channel_id:
             # ensure no duplicates
             chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
             chan["owner_members"].append(u_id) if u_id not in chan["owner_members"] else None
     push_added_notifications(auth_user_id, u_id, channel_id,-1)
+    
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     return {
     }
@@ -390,16 +401,17 @@ def channel_removeowner_v1(token, channel_id, u_id):
     Return Value:
         Empty Dictionary
     '''
+    data = json.load(open('data.json', 'r'))
 
     auth_user_id, _ = decode(token)
     
     passed = False
-    for check in src.data.channels:
+    for check in data['channels']:
         if check['channel_id'] == channel_id:
             passed = True
     if not passed:
         raise InputError
-    for chans in src.data.channels:
+    for chans in data['channels']:
         if chans["channel_id"] == channel_id:
             userisOwner = False
             for users in chans["owner_members"]:
@@ -416,7 +428,7 @@ def channel_removeowner_v1(token, channel_id, u_id):
             if users['permission_id'] == 1:
                 dreamsOwner = True
     
-    for chans in src.data.channels:
+    for chans in data['channels']:
         if chans["channel_id"] == channel_id:
             userAuth = False
             for users in chans["owner_members"]:
@@ -426,12 +438,14 @@ def channel_removeowner_v1(token, channel_id, u_id):
     if dreamsOwner == False and userAuth == False:
         raise AccessError
 
-    for chan in src.data.channels:
+    for chan in data['channels']:
         if chan["channel_id"] == channel_id:
             for users in chan["owner_members"]:
                 if users == u_id:
                     chan["owner_members"].remove(users)
 
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     return {
     }
