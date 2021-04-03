@@ -4,6 +4,8 @@ from flask import Flask, request
 from flask_cors import CORS
 from src.error import InputError
 from src import config
+import src.data
+import src.dm
 
 def defaultHandler(err):
     response = err.get_response()
@@ -31,6 +33,38 @@ def echo():
     return dumps({
         'data': data
     })
+
+@APP.route("/dm/details/v1", methods=['GET'])
+def dm_details():
+    token, dm_id = request.args.get('token'), request.args.get('dm_id')
+    return dumps(src.dm.dm_details_v1(token, dm_id))
+
+@APP.route("/dm/list/v1", methods=['GET'])
+def dm_list():
+    token = request.args.get('token')
+    return dumps(src.dm.dm_list_v1(token))
+
+@APP.route("/dm/create/v1", methods=['POST'])
+def dm_create():
+    payload = request.get_json()
+    print(src.data.users)
+    return dumps(src.dm.dm_create_v1(payload.get('token'), payload.get('u_ids')))
+
+@APP.route("/dm/remove/v1", methods=['DELETE'])
+def dm_remove():
+    pass
+
+@APP.route("/dm/invite/v1", methods=['POST'])
+def dm_invite():
+    pass
+
+@APP.route("/dm/leave/v1", methods=['POST'])
+def dm_leave():
+    pass
+
+@APP.route("/dm/messages/v1", methods=['GET'])
+def dm_messages():
+    pass
 
 if __name__ == "__main__":
     APP.run(port=config.port) # Do not edit this port
