@@ -286,14 +286,18 @@ def channel_join_v1(token, channel_id):
     auth_user_id, _ = decode(token)
 
     # Time to find the user details
-    try:
-        get_user(auth_user_id)
-    except:
-        raise AccessError
+    userFound = False
     j = 0
-    while src.data.users[j]['u_id'] != auth_user_id:
+    while not userFound:
+        if j >= len(src.data.users):
+            # If user doesn't exist in database, AccessError
+            raise AccessError
+        elif src.data.users[j]['u_id'] == auth_user_id:
+            userFound = True
         j += 1
 
+    j -= 1      # Undo extra increment
+    
     if src.data.channels[i]['is_public'] == False and src.data.users[j]['permission_id'] != 1:
         # If channel is private, AccessError
         raise AccessError
