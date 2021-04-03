@@ -289,10 +289,7 @@ def channel_join_v1(token, channel_id):
     userFound = False
     j = 0
     while not userFound:
-        if j >= len(src.data.users):
-            # If user doesn't exist in database, AccessError
-            raise AccessError
-        elif src.data.users[j]['u_id'] == auth_user_id:
+        if src.data.users[j]['u_id'] == auth_user_id:
             userFound = True
         j += 1
 
