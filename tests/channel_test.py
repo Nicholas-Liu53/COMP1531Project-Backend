@@ -308,12 +308,13 @@ def test_channel_addowner(user1, user2,user3,user4, user5):
 
 def test_channel_removeowner(user1, user2, user3, user4):
 
-    channelTest = src.channels.channels_create_v1(user2[token], 'Channel', True)
-
+    channelTest = src.channels.channels_create_v1(user2[token], 'Channel5', True)
+    channelTest2 = src.channels.channels_create_v1(user3[token], 'Channel6', True)
+    
     # Test 1: adding a owner into channel and testing if they are successfully removed
     channel_addowner_v1(user2[token], channelTest[cID], user3[AuID])
-
-    channel_removeowner_v1(user3[token], channelTest[cID], user2[AuID])
+    channel_addowner_v1(user2[token], channelTest[cID], user4[AuID])
+    channel_removeowner_v1(user3[token], channelTest[cID], user4[AuID])
     # check to see if user2 has been removed from owners, but remains in all members
     assert {
         uID: user3[AuID],
@@ -330,11 +331,11 @@ def test_channel_removeowner(user1, user2, user3, user4):
         'handle_string': 'user3',
     } in channel_details_v1(user2[token], channelTest[cID])[allMems]
     assert{
-        uID: user2[AuID],
+        uID: user4[AuID],
         fName: 'User',
-        lName: '2',
-        'email': 'second@gmail.com',
-        'handle_string': 'user2',
+        lName: '4',
+        'email': 'fourth@gmail.com',
+        'handle_string': 'user4',
     } in channel_details_v1(user2[token], channelTest[cID])[allMems]
 
     # Test 2: with an invalid Channel ID, tests for Input Error being raised
@@ -347,8 +348,9 @@ def test_channel_removeowner(user1, user2, user3, user4):
     
     # Test 4: With only one member in owner left, does not remove them, raising input error
     with pytest.raises(InputError):
-        channel_removeowner_v1(user1[token], channelTest[cID], user2[AuID])
+        channel_removeowner_v1(user1[token], channelTest2[cID], user3[AuID])
 
     # Test 5: Non-owner trying to remove, raising access Error
+    channel_addowner_v1(user3[token], channelTest2[cID], user4[AuID])
     with pytest.raises(AccessError):
-        channel_removeowner_v1(user4[token], channelTest[cID], user3[AuID])
+        channel_removeowner_v1(user2[token], channelTest2[cID], user3[AuID])

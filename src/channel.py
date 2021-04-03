@@ -381,6 +381,7 @@ def channel_removeowner_v1(token, channel_id, u_id):
         u_id (int) - The id of desired user we want to remove from the channel's owners.
     Exceptions:
         InputError - Occurs when the channel_id used as a parameter does not already exist in the channels list.
+        InputError - Occurs when the user is currently the only owner.
         InputError - Occurs when the user with associated u_id is not an owner of the channel
         AccessError - Occurs when the user calling the function is not an authorised user.
     
@@ -394,7 +395,6 @@ def channel_removeowner_v1(token, channel_id, u_id):
     for check in src.data.channels:
         if check['channel_id'] == channel_id:
             passed = True
-            break
     if not passed:
         raise InputError
     for chans in src.data.channels:
@@ -402,12 +402,12 @@ def channel_removeowner_v1(token, channel_id, u_id):
             userisOwner = False
             for users in chans["owner_members"]:
                 if users == u_id:
-                    userisOwner = True
-                    break
+                    if len(chans["owner_members"]) == 1:
+                        raise InputError
+                    userisOwner = True             
     if not userisOwner:
         raise InputError
-
-    # Access error
+        
     dreamsOwner = False
     for users in src.data.users:
         if users['u_id'] == auth_user_id:
