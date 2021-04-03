@@ -203,6 +203,8 @@ def message_senddm_v1(token, dm_id, message):
         'time_created': time_created,
     })
 
+    push_tagged_notifications(auth_user_id, -1, dm_id, message)
+
     return {
         'message_id': message_id,
     }

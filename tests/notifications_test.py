@@ -135,7 +135,6 @@ def test_notifications_dms_added(user1, user2, user3):
 
     #Test 4: Make sure ordered from most to least recent
 
-#* DM tagged tests
 #* When tagged, correct amount of tags come up
 def test_valid_dm_tag(user1, user2):
     dm1= dm_create_v1(user1[token], [user2[AuID]])

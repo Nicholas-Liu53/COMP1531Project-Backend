@@ -1,6 +1,6 @@
 import src.data
 from src.error import AccessError, InputError
-from src.other import decode, get_members, get_user, message_count, get_user_from_handlestring
+from src.other import decode, get_members, get_user, message_count, get_user_from_handlestring, push_added_notifications
 import src.auth
 import jwt
 
@@ -108,6 +108,7 @@ def dm_create_v1(token, u_ids):
         dmUsers.append(user_id)
     handles = []
     for user in dmUsers:
+        
         userInfo = get_user(user)
         handles.append(userInfo[handle])
     handles.sort()
@@ -119,6 +120,9 @@ def dm_create_v1(token, u_ids):
         creatorID: creator_id,
         'all_members': dmUsers,
     })
+
+    for user in u_ids:
+        push_added_notifications(creator_id, user, -1, dm_ID)
 
     return {
         'dm_id': dm_ID,
@@ -174,6 +178,7 @@ def dm_invite_v1(token, dm_id, u_id):
                 raise AccessError
             else:
                 items['all_members'].append(u_id)
+                push_added_notifications(auth_user_ID, u_id, -1, dm_id)
 
     if input_error:
         raise InputError
