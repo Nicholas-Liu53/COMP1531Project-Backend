@@ -17,24 +17,86 @@ seshID    = 'session_id'
 SECRET    = 'MENG'
 
 def clear_v1():
+    '''
+    Clears the entire database
 
+    Arguments: 
+        None
+    
+    Exceptions:
+        None
+
+    Return value:
+        None
+    '''
     src.data.users = []
     src.data.channels = []
     src.data.dms = []
     src.data.messages_log = []
     src.data.notifs = {}
 
-def search_v1(auth_user_id, query_str):
+def search_v1(token, query_str):
+    '''
+    Takes in a user's token and query string to return a list of messages that contains details about the message
+    The search is not case-sensitive
+
+    Arguments: 
+        token      (str) - The JWT containing user_id and session_id of the user that is to view their notifs
+        querty_str (str) - The string which the user inputted to find messages
+    
+    Exceptions:
+        InputError - Occurs when the query_str is greater than 1000 characters
+
+    Return value:
+        Returns a dictionary containing a list of notifications with key 'messages'
+            Contains:
+                message_id,
+                user_id,
+                message string, and
+                time_created.
+    '''
+    #* Decode the token
+    auth_user_id, _ = decode(token)
+
+    # When query_str is >1000 characters, InputError is raised
+    if len(query_str) > 1000:
+        raise InputError
+
+    channelList = []
+    #* Check which channels the user is in
+    for channel in src.data.channels:
+        if auth_user_id in channel[allMems]:
+            channelList.append(channel[cID])
+    
+    DMList = []
+    #* Check which DMs the user is in
+    for dm in src.data.dms:
+        if auth_user_id in dm[allMems]:
+            DMList.append(dm['dm_id'])
+
+    messages = []
+
+    #* Add in every message in the channel/DM that contains query_str
+    for message in src.data.messages_log:
+        if (message[cID] in channelList or message['dm_id'] in DMList) and query_str.lower() in message['message'].lower():
+            messages.append(
+                {
+                    'message_id': message['message_id'],
+                    uID: message[uID],
+                    'message': message['message'],
+                    'time_created': message['time_created'],
+                }
+            )
+
     return {
-        'messages': [
-            {
-                'message_id': 1,
-                'u_id': 1,
-                'message': 'Hello world',
-                'time_created': 1582426789,
-            }
-        ],
+        'messages': messages,
     }
+
+########################################################################################
+###                                                                                  ###
+###                              Helper Functions below                              ###
+###                                                                                  ###
+########################################################################################
 
 def decode(token):
     payload = jwt.decode(token, SECRET, algorithms='HS256')
@@ -110,6 +172,12 @@ def get_user_from_handlestring(handlestring):
             }
     raise InputError
 
+def get_message(message_id):
+    for message in src.data.messages_log:
+        if message_id == message['message_id']:
+            return message
+    raise InputError
+
 def get_dm(dm_id):
     for dm in src.data.dms:
         if dm_id == dm['dm_id']:
@@ -144,10 +212,15 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
     }
     for taggedUser in taggedUsersList:
         try:
-            src.data.notifs[taggedUser].insert(notification, 0)
+            src.data.notifs[taggedUser].insert(0, notification)
         except:
+<<<<<<< HEAD
             
             src.data.notifs[taggedUser] = [notification]
+=======
+            src.data.notifs[taggedUser] = []
+            src.data.notifs[taggedUser].append(notification)
+>>>>>>> meltingPot
 
 def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
     if channel_id == -1 and dm_id == -1:
@@ -166,6 +239,7 @@ def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
         'notification_message': f"{taggerHandle} added you to {channelDMname}"
     }
     try:
-        src.data.notifs[user_id].insert(notification, 0)
+        src.data.notifs[user_id].insert(0, notification)
     except:
-        src.data.notifs[user_id] = [notification]
+        src.data.notifs[user_id] = []
+        src.data.notifs[user_id].append(notification)

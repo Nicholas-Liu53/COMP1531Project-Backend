@@ -7,6 +7,7 @@ import src.channel, src.channels, src.auth, src.dm, src.message, src.other
 import jwt
 import json
 
+
 AuID    = 'auth_user_id'
 uID     = 'u_id'
 cID     = 'channel_id'
@@ -16,10 +17,6 @@ ownMems = 'owner_members'
 fName   = 'name_first'
 lName   = 'name_last'
 token   = 'token'
-
-@pytest.fixture
-def invalid_token():
-    return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
 @pytest.fixture
 def user1():
@@ -104,6 +101,3 @@ def test_userpermissions_change(user1, user2, user3):
     # Test 7: Raise Access Error when a non- Dreams owner is changing permissions
     with pytest.raises(AccessError):
         userpermission_change_v1(user3[token], user3[token], 2)
-
-def test_notifications_get():
-    pass

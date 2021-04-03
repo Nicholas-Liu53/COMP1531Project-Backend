@@ -249,7 +249,7 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
                     raise AccessError
         shared_message_id = message_send_v1(token, channel_id, newMessage)
         push_tagged_notifications(auth_user_id, channel_id, -1, newMessage)
-   
+
     elif channel_id == -1:
         for dm in src.data.dms:
             if dm['dm_id'] == dm_id:
