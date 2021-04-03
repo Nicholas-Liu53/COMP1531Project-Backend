@@ -2,6 +2,7 @@ import src.data
 from src.error import AccessError, InputError
 from src.other import decode, get_members, get_user, message_count, get_user_from_handlestring, push_added_notifications
 import src.auth
+import json
 import jwt
 
 AuID      = 'auth_user_id'
@@ -65,9 +66,10 @@ def dm_list_v1(token):
         Returns a dictionary with key 'dms' mapping to a list of DMs that the user is a member of
         Each DM is represented by a dictionary containing types { dm_id, name }
     '''
+    data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
     output = []
-    for dmDetails in src.data.dms:
+    for dmDetails in data['dms']:
         if auth_user_id in dmDetails['all_members']:
             dm = {}
             dm[dmID] = dmDetails[dmID]
@@ -97,8 +99,9 @@ def dm_create_v1(token, u_ids):
     Return Value:
         Returns a dictionary with key 'dm_id' and 'dm_name' when sucessful
     '''
+    data = json.load(open('data.json', 'r'))
     creator_id, _ = decode(token)
-    if len(src.data.dms) == 0:
+    if len(data['dms']) == 0:
         dm_ID = 0
     else:
         dm_ID = src.data.dms[-1][dmID] + 1
@@ -114,7 +117,7 @@ def dm_create_v1(token, u_ids):
     handles.sort()
     dm_name = ', '.join(handles)
 
-    src.data.dms.append({
+    data['dms'].append({
         dmID: dm_ID,
         Name: dm_name,
         creatorID: creator_id,
@@ -123,6 +126,9 @@ def dm_create_v1(token, u_ids):
 
     for user in u_ids:
         push_added_notifications(creator_id, user, -1, dm_ID)
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     return {
         'dm_id': dm_ID,

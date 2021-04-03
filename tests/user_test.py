@@ -1,7 +1,7 @@
 # File to test functions in src/user.py
 from src.error import AccessError, InputError
 import pytest
-from src.auth import auth_login_v1, auth_register_v1
+from src.auth import auth_login_v2, auth_register_v2
 import src.channel, src.channels
 from src.other import clear_v1
 from jwt import encode
