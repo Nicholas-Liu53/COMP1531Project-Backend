@@ -6,6 +6,8 @@ import src.auth, src.channels, src.other
 from src.error import InputError, AccessError
 from src.channels import channels_create_v1, channels_list_v2
 from src.message import message_send_v1
+import jwt
+from src.other import SECRET
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
@@ -353,4 +355,8 @@ def test_channel_removeowner(user1, user2, user3, user4):
     # Test 5: Non-owner trying to remove, raising access Error
     channel_addowner_v1(user3[token], channelTest2[cID], user4[AuID])
     with pytest.raises(AccessError):
+<<<<<<< HEAD
         channel_removeowner_v1(user2[token], channelTest2[cID], user3[AuID])
+=======
+        channel_removeowner_v1(user4[token], channelTest[cID], user3[AuID])
+>>>>>>> dms

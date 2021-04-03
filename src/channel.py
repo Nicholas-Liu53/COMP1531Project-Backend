@@ -2,6 +2,9 @@ import src.data
 from src.error import AccessError, InputError 
 from src.channels import channels_listall_v2, channels_list_v2
 from src.other import decode, get_channel, get_members, get_user, message_count, push_added_notifications
+import jwt
+import json
+from src.other import SECRET
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -151,7 +154,10 @@ def channel_messages_v1(token, channel_id, start):
     Return Value:
         Returns up to 50 messages alongside a start and and end value.
     '''
+<<<<<<< HEAD
 
+=======
+>>>>>>> dms
     decode(token)
 
     #Handling of input and access errors 
