@@ -38,6 +38,7 @@ def clear_v1():
 def search_v1(token, query_str):
     '''
     Takes in a user's token and query string to return a list of messages that contains details about the message
+    The search is not case-sensitive
 
     Arguments: 
         token      (str) - The JWT containing user_id and session_id of the user that is to view their notifs
@@ -77,7 +78,7 @@ def search_v1(token, query_str):
 
     #* Add in every message in the channel/DM that contains query_str
     for message in src.data.messages_log:
-        if (message[cID] in channelList or message['dm_id'] in DMList) and query_str in message['message']:
+        if (message[cID] in channelList or message['dm_id'] in DMList) and query_str.lower() in message['message'].lower():
             messages.append(
                 {
                     'message_id': message['message_id'],

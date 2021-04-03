@@ -115,6 +115,15 @@ def test_search(user1, user2, user3, user4, user5, channel1, channel2):
         'time_created': get_message(message5[mID])['time_created'],
     } not in search_v1(user2[token], "om")['messages']
 
+    #* Test if the search is not case sentitive
+    message6 = src.message.message_send_v1(user4[token], channel2[cID], "Joe Biden")
+    assert {
+        mID: message6[mID],
+        uID: user4[AuID],
+        'message': "Joe Biden",
+        'time_created': get_message(message6[mID])['time_created'],
+    } in search_v1(user2[token], "jOE bIDEN")['messages']
+
     #* Finished testing for this function
     #! Clearing data
     clear_v1()
