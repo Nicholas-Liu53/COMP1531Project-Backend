@@ -185,10 +185,6 @@ def get_dm(dm_id):
     raise InputError
 
 def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
-    if channel_id == -1 and dm_id == -1:
-        raise InputError
-    elif channel_id != -1 and dm_id != -1:
-        raise InputError
     taggerHandle = get_user(auth_user_id)['handle_string']
     if channel_id != -1:
         channelDMname = get_channel(channel_id)['name']
@@ -218,10 +214,6 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
             src.data.notifs[taggedUser].append(notification)
 
 def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
-    if channel_id == -1 and dm_id == -1:
-        raise InputError
-    elif channel_id != -1 and dm_id != -1:
-        raise InputError
     taggerHandle = get_user(auth_user_id)['handle_string']
     if channel_id != -1:
         channelDMname = get_channel(channel_id)['name']

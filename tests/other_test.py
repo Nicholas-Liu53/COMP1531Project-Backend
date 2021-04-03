@@ -1,5 +1,5 @@
 import pytest
-import src.data, src.channel, src.channels, src.message
+import src.data, src.channel, src.channels, src.message, src.dm
 import jwt
 from src.other import clear_v1, search_v1, get_channel, get_user, get_message
 from src.error import AccessError, InputError
@@ -43,7 +43,7 @@ def channel2(user2):
 # When query_str is >1000 characters, InputError is raised
 # Test that users can only see messages in channels that they have joined
     # Test if a user who has joined no channels can see any messages
-def test_search(user1, user2, user3, user4, user5, channel1, channel2):
+def test_search_channels(user1, user2, user3, user4, user5, channel1, channel2):
     # # # # # # # # # # # # # # # # # # # # # # # # # # #
     #   Note: This test has white-box testing involved  #
     # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -127,3 +127,22 @@ def test_search(user1, user2, user3, user4, user5, channel1, channel2):
     #* Finished testing for this function
     #! Clearing data
     clear_v1()
+
+def test_search_dms(user1, user2, user3):
+    # Create dm
+    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    #* Test if search comes up in dms for user2 (who is in dm)
+    dmMessage = src.message.message_senddm_v1(user1[token], dm1['dm_id'], "Biden Harris 2020")
+    assert {
+        mID: dmMessage[mID],
+        uID: user1[AuID],
+        'message': "Biden Harris 2020",
+        'time_created': get_message(dmMessage[mID])['time_created'],
+    } in search_v1(user2[token], "bIDEN h")['messages']
+    #* Test if search doesn't comes up in dms for user3 (who is not in dm)
+    assert {
+        mID: dmMessage[mID],
+        uID: user1[AuID],
+        'message': "Biden Harris 2020",
+        'time_created': get_message(dmMessage[mID])['time_created'],
+    } not in search_v1(user3[token], "bIDEN h")['messages']
