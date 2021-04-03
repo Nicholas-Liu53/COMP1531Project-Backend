@@ -212,9 +212,10 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
     }
     for taggedUser in taggedUsersList:
         try:
-            src.data.notifs[taggedUser].insert(notification, 0)
+            src.data.notifs[taggedUser].insert(0, notification)
         except:
-            src.data.notifs[taggedUser] = [notification]
+            src.data.notifs[taggedUser] = []
+            src.data.notifs[taggedUser].append(notification)
 
 def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
     if channel_id == -1 and dm_id == -1:
@@ -233,6 +234,7 @@ def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
         'notification_message': f"{taggerHandle} added you to {channelDMname}"
     }
     try:
-        src.data.notifs[user_id].insert(notification, 0)
+        src.data.notifs[user_id].insert(0, notification)
     except:
-        src.data.notifs[user_id] = [notification]
+        src.data.notifs[user_id] = []
+        src.data.notifs[user_id].append(notification)

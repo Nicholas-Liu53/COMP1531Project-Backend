@@ -47,7 +47,7 @@ def test_notifications_get_in_channels(user1, user2, user3):
         nMess  : f"{get_user(user1[AuID])['handle_string']} added you to {get_channel(channel1[cID])['name']}",
     } in notifications_get_v1(user3[token])[notifs]
 
-    #* Test 2: Test if mentions comes up
+    #* Test 2: Test if mentions and preview notif comes up
     message_send_v1(user2[token], channel1[cID], f"Hello @{get_user(user1[AuID])['handle_string']} @{get_user(user3[AuID])['handle_string']}")
     assert {
         cID    : channel1[cID],
@@ -58,6 +58,11 @@ def test_notifications_get_in_channels(user1, user2, user3):
         cID    : channel1[cID],
         'dm_id': -1,
         nMess  : f"{get_user(user2[AuID])['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Hello @{get_user(user1[AuID])['handle_string']} @{get_user(user3[AuID])['handle_string']}",
+    } in notifications_get_v1(user3[token])[notifs]
+    assert {
+        cID    : channel1[cID],
+        'dm_id': -1,
+        nMess  : f"{get_user(user1[AuID])['handle_string']} added you to {get_channel(channel1[cID])['name']}",
     } in notifications_get_v1(user3[token])[notifs]
 
     #* Test 3: Only recent 20 notifs come up
