@@ -20,7 +20,7 @@ dmID      = 'dm_id'
 seshID    = 'session_id'
 
 def channel_invite_v1(token, channel_id, u_id):
-    
+
     '''
     channel_invite_v1 checks if a user is authorised to invite another user to a channel and then automatically adds the
     desired user to the specific channel dictionary within the list contained in "all_members".
