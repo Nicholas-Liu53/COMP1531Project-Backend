@@ -69,22 +69,22 @@ def test_dm_details_invalid_dm_id(user1):
 def test_dm_details_not_in_dm(user1, user2, user3):
     dm1 = dm_create_v1(user1[token], [user2[AuID]])
     response = requests.get(f"{config.url}dm/details/v1", params = {'token': user3[token], 'dm_id': dm1[dmID]})
-    assert response.status_code == 404
+    assert response.status_code == 403
 
 def test_dm_list():
     pass
 
 def test_dm_create(user1, user2):
-    # dmResponse = requests.post(f"{config.url}dm/create/v1", json={
-    #     'token': user1[token],
-    #     'u_ids': [user2[AuID]]
-    # })
+    dmResponse = requests.post(f"{config.url}dm/create/v1", json={
+        'token': user1[token],
+        'u_ids': [user2[AuID]]
+    })
 
-    # assert dmResponse.json() == {
-    #     dmID: 0,
-    #     'dm_name': 'user1, user2',
-    # }
-
+    assert dmResponse.json() == {
+        dmID: 0,
+        'dm_name': 'user1, user2',
+    }
+    pass
 
 def test_dm_remove():
     pass
