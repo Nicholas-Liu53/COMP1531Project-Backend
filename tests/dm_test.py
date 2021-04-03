@@ -27,6 +27,11 @@ handle  = 'handle_string'
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
+#* Fixture that returns an invalid dm_id 
+@pytest.fixture 
+def invalid_dm():
+    return -1
+
 #* Fixture that clears and registers the first user
 @pytest.fixture
 def user1():
@@ -152,118 +157,117 @@ def test_dm_create_errors(user1):
     with pytest.raises(InputError):
         dm_create_v1(user1[token], [invalid_u_id])
 
-#Ethan
+
+
+
+
+
+
 def test_dm_remove():
     src.other.clear_v1()
-    userID1 = src.auth.auth_register_v2("1531@gmail.com", "123456", "Tom", "Zhang")
-    userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
-    dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
-    dm_create_v1(userID1[token], [userID2[AuID]])
-    invalid_dm_id = -2
+    #Create two dm's: one which we will remove and one we will keep
+    dm_0 = dm_create_v1(user1[token], [user2[AuID]])
+    #This second dm will have dm_id 1 
+    dm_create_v1(user1[token], [user2[AuID]])
+    #Test for input error, when dm input is invalid 
     with pytest.raises(InputError):
-        dm_remove_v1(userID1[token], invalid_dm_id)
+        dm_remove_v1(user1[token], invalid_dm)
+    #Test for access error, when user requesting remove is not original creator 
     with pytest.raises(AccessError):
-        dm_remove_v1(userID2[token], dm_0['dm_id'])
-    dm_remove_v1(userID1[token],dm_0['dm_id'])
-
-    return_dict = dm_list_v1(userID1[token])
+        dm_remove_v1(user2[token], dm_0['dm_id'])
+    #Now that errors are omitted, can assert that we only have 1 dm remaining 
+    dm_remove_v1(user1[token],dm_0['dm_id'])
+    return_dict = dm_list_v1(user1[token])
     assert len(return_dict['dms']) == 1
 
 def test_dm_invite():
     src.other.clear_v1()
-    userID1 = src.auth.auth_register_v2("1531@gmail.com", "123456", "Tom", "Zhang")
-    userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
-    userID3 = src.auth.auth_register_v2("hello@gmail.com", "xyztfvtf", "Paul", "J")
-    dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
-    invalid_dm_id = -2
+    dm_0 = dm_create_v1(user1[token], [user2[AuID]])
+    #Test for input error, when dm input is invalid 
     with pytest.raises(InputError):
-        dm_invite_v1(userID1[token], invalid_dm_id, userID3[AuID])
+        dm_invite_v1(user1[token], invalid_dm, user3[AuID])
+    #AccessError when user who is not in DM tries to invite 
     with pytest.raises(AccessError):
-        dm_invite_v1(userID3[token], dm_0['dm_id'], userID2[AuID])
-    dm_invite_v1(userID1[token], dm_0['dm_id'], userID3[AuID])
-    assert dm_list_v1(userID3[token]) == {'dms': [{
+        dm_invite_v1(user3[token], dm_0['dm_id'], user2[AuID])
+    #Now that errors are committed can check that user3 has been invited to dm_0
+    dm_invite_v1(user1[token], dm_0['dm_id'], user3[AuID])
+    assert dm_list_v1(user3[token]) == {'dms': [{
         'dm_id': dm_0['dm_id'],
-        'name': 'jackp, tomzhang',
+        'name': 'user1, user2',
     }]}
 
 def test_dm_leave():
     src.other.clear_v1()
-    userID1 = src.auth.auth_register_v2("1531@gmail.com", "123456", "Tom", "Zhang")
-    userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
-    userID3 = src.auth.auth_register_v2("hello@gmail.com", "xyzxyz", "Paul", "J")
-    dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
-    invalid_dm_id = -2
+    dm_0 = dm_create_v1(user1[token], [user2[AuID]])
+    #InputError when dm input is not a valid dm 
     with pytest.raises(InputError):
-        dm_leave_v1(userID1[token], invalid_dm_id)
+        dm_leave_v1(userID1[token], invalid_dm)
+    #AccessError when user not in DM tries to leave 
     with pytest.raises(AccessError):
-        dm_leave_v1(userID3[token], dm_0['dm_id'])
-    dm_leave_v1(userID2[token], dm_0['dm_id'])
-    print(dm_list_v1(userID1[token]))
-    assert {dmID: dm_0[dmID], Name: 'jackp, tomzhang'} in dm_list_v1(userID1[token])['dms']
-    assert dm_list_v1(userID2[token]) == {'dms': []}
+        dm_leave_v1(user3[token], dm_0['dm_id'])
+    #Now that errors are omitted, can use user2 to leave dm 
+    dm_leave_v1(user2[token], dm_0['dm_id'])
+    #Assert that dm is still in user1 but not in user2
+    assert {dmID: dm_0[dmID], Name: 'user1, user2'} in dm_list_v1(user1[token])['dms']
+    #User 2 has no more dms
+    assert dm_list_v1(user2[token]) == {'dms': []}
 
 def test_dm_messages():
     src.other.clear_v1()
-    userID1 = src.auth.auth_register_v2("1531@gmail.com", "123456", "Tom", "Zhang")
-    userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
-    userID3 = src.auth.auth_register_v2("hello@gmail.com", "135769", "Harry", "J")
     dm_0 = dm_create_v1(userID1[token], [userID2[AuID]])
     dm_1 = dm_create_v1(userID2[token], [userID3[AuID]])
-    invalid_dm_id = -2
-
     #Input error when DM ID not valid or start is greater than # of messages in DM
     with pytest.raises(InputError):
         #Start greater than # of messages in DM
-        dm_messages_v1(userID1[token], dm_0['dm_id'], 1)
+        dm_messages_v1(user1[token], dm_0['dm_id'], 1)
     with pytest.raises(InputError):
         #DM ID not valid
-        dm_messages_v1(userID1[token], invalid_dm_id, 0)
+        dm_messages_v1(user1[token], invalid_dm, 0)
         
-
     #Access error when Authorised user is not a member of DM with dm_id
     with pytest.raises(AccessError):
-        dm_messages_v1(userID3[token], dm_0['dm_id'], 0)
+        dm_messages_v1(user3[token], dm_0['dm_id'], 0)
 
-    assert dm_messages_v1(userID1[token], dm_0['dm_id'], 0) == {
+    assert dm_messages_v1(user1[token], dm_0['dm_id'], 0) == {
         'messages': [],
         'start': 0,
         'end': -1,
     }
 
     #Send DM to dm_1 to make sure that it is sending to the correct dm
-    message_senddm_v1(userID2[token], dm_1['dm_id'], "Lawl")
+    message_senddm_v1(user2[token], dm_1['dm_id'], "Lawl")
 
     #Add certain number of DMs to dm_0 e.g. 10
     message_counter = 0
     while message_counter < 10:
-        message_senddm_v1(userID1[token], dm_0['dm_id'], f"{message_counter}")
+        message_senddm_v1(user1[token], dm_0['dm_id'], f"{message_counter}")
         message_counter += 1
 
     #Check dm_0 is correct
-    return_dict = dm_messages_v1(userID1[token], dm_0['dm_id'],0)
+    return_dict = dm_messages_v1(user1[token], dm_0['dm_id'],0)
     assert len(return_dict['messages']) == 10
     assert return_dict['start'] == 0
     assert return_dict['end'] == -1
 
     #Check dm_1 is unaffected
-    return_dict_dm_1 = dm_messages_v1(userID2[token], dm_1['dm_id'],0)
+    return_dict_dm_1 = dm_messages_v1(user2[token], dm_1['dm_id'],0)
     assert len(return_dict_dm_1['messages']) == 1
     assert return_dict_dm_1['start'] == 0
     assert return_dict_dm_1['end'] == -1
 
     #add so that there are 51 messages in DM
     while message_counter < 51:
-        message_senddm_v1(userID1[token], dm_0[dmID], f"{message_counter}")
+        message_senddm_v1(user1[token], dm_0[dmID], f"{message_counter}")
         message_counter += 1
 
-    return_dict2 = dm_messages_v1(userID1[token], dm_0['dm_id'], 0)
+    return_dict2 = dm_messages_v1(user1[token], dm_0['dm_id'], 0)
     assert len(return_dict2['messages']) == 50
     assert return_dict2['start'] == 0
     assert return_dict2['end'] == 50
 
     #Case when start is not equal to 0 but there are 51 messages in DM
     #If start is 20, there should be 32 messages in dictionary
-    return_dict3 = dm_messages_v1(userID1[token], dm_0['dm_id'], 20)
+    return_dict3 = dm_messages_v1(user1[token], dm_0['dm_id'], 20)
     assert len(return_dict3['messages']) == 31
     assert return_dict3['start'] == 20
     assert return_dict3['end'] == -1
