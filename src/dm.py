@@ -1,10 +1,8 @@
 import src.data
 from src.error import AccessError, InputError
-from src.other import decode, get_members, get_user, message_count, get_user_from_handlestring
+from src.other import decode, get_members, get_user, message_count, get_user_from_handlestring, push_added_notifications
 import src.auth
 import jwt
-
-SECRET = 'MENG'
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -21,6 +19,24 @@ dmID      = 'dm_id'
 seshID    = 'session_id'
 
 def dm_details_v1(token, dm_id):
+    '''
+    Users that are part of a DM can view basic information about the DM
+
+    Arguments:
+        token (str): JWT containing { u_id, session_id }
+        dm_id (int): dm_id of the DM that the authorised user is trying to access the DM's details
+
+    Exceptions:
+        InputError
+            - Raised when the dm_id inputed is not valid
+
+        AccessError
+            - Raised when an invalid token is given
+            - Raised when the authorised user is not a member of the DM corresponding to the dm_id
+
+    Return Value:
+        Returns a dictionary with key 'names' and 'members' when sucessful
+    '''
     auth_user_id, _ = decode(token)
     dm_name, dmMembers = get_members(-1, dm_id)
     if auth_user_id not in dmMembers:
@@ -35,6 +51,20 @@ def dm_details_v1(token, dm_id):
     }
 
 def dm_list_v1(token):
+    '''
+    Returns the list of DMs that the user is a member of
+
+    Arguments:
+        token (str): JWT containing { u_id, session_id }
+
+    Exceptions:
+        AccessError
+            - Raised when an invalid token is given
+
+    Return Value:
+        Returns a dictionary with key 'dms' mapping to a list of DMs that the user is a member of
+        Each DM is represented by a dictionary containing types { dm_id, name }
+    '''
     auth_user_id, _ = decode(token)
     output = []
     for dmDetails in src.data.dms:
@@ -49,6 +79,24 @@ def dm_list_v1(token):
     }
     
 def dm_create_v1(token, u_ids):
+    '''
+    Creates a DM with the creator and the users it is directed to
+    The name of the DM is an alphabetically-sorted, comma-separated list of user handles
+
+    Arguments:
+        token  (str): JWT containing { u_id, session_id }
+        u_ids (list): List of u_ids that the authoerised user is directing the DM to
+
+    Exceptions:
+        InputError
+            - u_id inside the list of u_ids does not refer to a valid user
+
+        AccessError
+            - Raised when an invalid token is given
+
+    Return Value:
+        Returns a dictionary with key 'dm_id' and 'dm_name' when sucessful
+    '''
     creator_id, _ = decode(token)
     if len(src.data.dms) == 0:
         dm_ID = 0
@@ -60,6 +108,7 @@ def dm_create_v1(token, u_ids):
         dmUsers.append(user_id)
     handles = []
     for user in dmUsers:
+        
         userInfo = get_user(user)
         handles.append(userInfo[handle])
     handles.sort()
@@ -71,6 +120,9 @@ def dm_create_v1(token, u_ids):
         creatorID: creator_id,
         'all_members': dmUsers,
     })
+
+    for user in u_ids:
+        push_added_notifications(creator_id, user, -1, dm_ID)
 
     return {
         'dm_id': dm_ID,
@@ -126,6 +178,7 @@ def dm_invite_v1(token, dm_id, u_id):
                 raise AccessError
             else:
                 items['all_members'].append(u_id)
+                push_added_notifications(auth_user_ID, u_id, -1, dm_id)
 
     if input_error:
         raise InputError
@@ -153,7 +206,29 @@ def dm_leave_v1(token, dm_id):
     return {}
 
 def dm_messages_v1(token, dm_id, start):
+    '''
+    Return up to 50 messages from a DM with dm_id between index "start" and "start + 50"
+    The message with index 0 is the most recent message in the channel
 
+    Arguments:
+        token (str): JWT containing { u_id, session_id }
+        dm_id (int): dm_id of the DM that the authorised user is trying to access the DM's messages
+
+    Exceptions:
+        InputError
+            - Raised when the dm_id inputed is not valid
+            = Raised when start is greater than the total number of messages in the DM
+
+        AccessError
+            - Raised when an invalid token is given
+            - Raised when the authorised user is not a member of the DM corresponding to the dm_id
+
+    Return Value:
+        Returns a dictionary with key 'messages', 'start', and 'end'
+        'messages' maps to a list of dictionary, where each dictionary contain types { message_id, u_id, message, time_created}
+        'start' is the value of start passed into the function
+        'end' is "start + 50" if there more messages that can be loaded, otherwise, -1 is returned in 'end'
+    '''
     auth_user_id, _ = decode(token)
     num_of_messages = message_count(-1, dm_id)
 

@@ -72,3 +72,15 @@ messages_log = [
 #       'message': None,     # For message/share/v1, the optional message will be stored in message string
 #   },
 ]
+
+notifs = {
+#   user_id1: [notifs],
+#   user_id2: [notifs], etc.
+}
+# A notif --> {
+#   'channel_id': None,
+#   'dm_id: None,
+#   'notification_message': 
+#       tagged: "{User's handle} tagged you in {channel/DM name}: {first 20 characters of the message}"
+#       added to a channel/DM: "{User's handle} added you to {channel/DM name}",
+#  }
