@@ -178,3 +178,20 @@ def test_dm_20_notifs(user1, user2):
         dmID: dm1[dmID],
         nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm1['dm_id'])['name']}: 0 {tagMessage}",
     } not in notifications_get_v1(user2[token])[notifs]
+
+#* Test message edit sends a new notif in dms
+def test_dm_edit_notif(user1, user2):
+    dm1 = dm_create_v1(user1[token], [user2[AuID]])
+    tagMessage = f"@{get_user(user2[AuID])[handle]}"
+    dmMessage = message_senddm_v1(user1[token], dm1[dmID], tagMessage)
+    message_edit_v1(user1[token], dmMessage['message_id'], f"Yo @{get_user(user2[AuID])[handle]}")
+    assert {
+        cID : -1,
+        dmID: dm1[dmID],
+        nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm1['dm_id'])['name']}: {tagMessage}",
+    } in notifications_get_v1(user2[token])[notifs]
+    assert {
+        cID : -1,
+        dmID: dm1[dmID],
+        nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm1['dm_id'])['name']}: Yo {tagMessage}",
+    } in notifications_get_v1(user2[token])[notifs]

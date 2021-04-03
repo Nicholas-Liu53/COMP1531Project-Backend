@@ -206,6 +206,14 @@ def test_channel_leave(user1, user2, user3, user4):
         'handle_string': "user4",
     } not in channel_details_v1(user1[token], firstChannel[cID])[allMems]
 
+    #* Test if the only owner cannot leave the channel
+    with pytest.raises(InputError):
+        channel_leave_v1(user1[token], firstChannel[cID])
+
+    #* Test if someone not in the group cannot 'leave' the group
+    with pytest.raises(AccessError):
+        channel_leave_v1(user3[token], firstChannel[cID])
+
     #* Finished testing for this function
     #! Clearing data
     src.other.clear_v1()

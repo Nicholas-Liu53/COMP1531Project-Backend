@@ -1,7 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 import src.auth
-from src.other import decode, get_channel, get_members, get_user, get_user_permissions, push_tagged_notifications
+from src.other import decode, get_channel, get_members, get_user, get_dm, get_user_permissions, push_tagged_notifications
 from datetime import timezone, datetime
 
 AuID      = 'auth_user_id'
@@ -108,7 +108,6 @@ def message_remove_v1(token, message_id):
         if message['message_id'] == message_id:
             messageDict = message
             messageFound = True
-            break
     if not messageFound:
         raise InputError
 
@@ -119,7 +118,7 @@ def message_remove_v1(token, message_id):
         raise AccessError
 
     #* Remove the message
-    message['message'] = '### Message Removed ###'
+    messageDict['message'] = '### Message Removed ###'
 
     return {
     }
@@ -158,24 +157,28 @@ def message_edit_v1(token, message_id, newMessage):
         if message['message_id'] == message_id:
             messageDict = message
             messageFound = True
-            break
     if not messageFound:
         raise InputError
 
     #* Check if the user is the writer, channel owner or owner of Dreams
     # Get the channel the message belongs to
-    channel = get_channel(messageDict['channel_id'])
-    if auth_user_id is not messageDict['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
-        raise AccessError
+    if messageDict[cID] != -1:
+        channel = get_channel(messageDict['channel_id'])
+        if auth_user_id is not messageDict['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
+            raise AccessError
+    else:
+        dm = get_dm(messageDict['dm_id'])
+        if auth_user_id is not messageDict['u_id']:
+            raise AccessError
 
     if len(newMessage) > 1000:  # If the message is too long, raise InputError
         raise InputError
     elif newMessage == '':      #* If new message is empty string --> remove message
         message_remove_v1(token, message_id)
     else:                       # Else 
-        message['message'] = newMessage
+        messageDict['message'] = newMessage
 
-    if message['channel_id'] != -1:     #* If message is in a channel
+    if messageDict['channel_id'] != -1:     #* If message is in a channel
         push_tagged_notifications(auth_user_id, message['channel_id'], -1, newMessage)
     else:
         push_tagged_notifications(auth_user_id, -1, message['dm_id'], newMessage)
