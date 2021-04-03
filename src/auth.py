@@ -22,6 +22,9 @@ def auth_login_v1(email, password):
             Returns (dict) containing user_id corresponding to the inputted email and password 
 
     """
+    if not re.search('^[a-zA-Z0-9]+[\\._]?[a-zA-Z0-9]+[@]\\w+[.]\\w{2,3}$', email):
+        raise InputError
+        
     for user in src.data.users:
         if email == user.get('email') and password == user.get('password'):
             user['session_id'].append(user['session_id'][-1] + 1)
