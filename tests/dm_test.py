@@ -179,7 +179,7 @@ def test_dm_remove(user1, user2, invalid_dm):
     return_dict = dm_list_v1(user1[token])
     assert len(return_dict['dms']) == 1
 
-def test_dm_invite(user1, user2, user3 invalid_dm):
+def test_dm_invite(user1, user2, user3, invalid_dm):
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     #Test for input error, when dm input is invalid 
     with pytest.raises(InputError):
@@ -194,11 +194,11 @@ def test_dm_invite(user1, user2, user3 invalid_dm):
         'name': 'user1, user2',
     }]}
 
-def test_dm_leave(user1, user2, invalid_dm):
+def test_dm_leave(user1, user2, user3, invalid_dm):
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     #InputError when dm input is not a valid dm 
     with pytest.raises(InputError):
-        dm_leave_v1(userID1[token], invalid_dm)
+        dm_leave_v1(user1[token], invalid_dm)
     #AccessError when user not in DM tries to leave 
     with pytest.raises(AccessError):
         dm_leave_v1(user3[token], dm_0['dm_id'])
