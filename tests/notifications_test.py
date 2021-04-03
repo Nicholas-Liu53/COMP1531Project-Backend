@@ -117,23 +117,23 @@ def test_notifications_dms_added(user1, user2, user3):
     assert {
         cID : -1,
         'dm_id': 0,
-        nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm_0['dm_id'])['name']}",
+        nMess : f"{get_user(user1[AuID])['handle_string']} added you to {get_dm(dm_0['dm_id'])['name']}",
     } in notifications_get_v1(user2[token])[notifs]
 
     #Test 2: For DM_invite inviting another person
-    dm_invite_v1(user1[token], dm_0['dm_id'], user3['u_id'])
+    dm_invite_v1(user1[token], dm_0['dm_id'], user3[AuID])
 
     assert {
         cID : -1,
         'dm_id': 0,
-        nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm_0['dm_id'])['name']}",
+        nMess : f"{get_user(user1[AuID])['handle_string']} added you to {get_dm(dm_0['dm_id'])['name']}",
     } in notifications_get_v1(user3[token])[notifs]
 
     #Test 3: being added to multiple dms
     assert {
         cID : -1,
         'dm_id': 1,
-        nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm_1['dm_id'])['name']}",
+        nMess : f"{get_user(user1[AuID])['handle_string']} added you to {get_dm(dm_1['dm_id'])['name']}",
     } in notifications_get_v1(user3[token])[notifs]
 
     #Test 4: Make sure ordered from most to least recent
@@ -172,7 +172,7 @@ def test_dm_20_notifs(user1, user2):
     for nNum in range(21):
         message = str(nNum) + ' ' + tagMessage
         message_senddm_v1(user1[token], dm1[dmID], message)
-    assert len(notifications_get_v1(user1[token])[notifs]) == 20
+    assert len(notifications_get_v1(user2[token])[notifs]) == 20
     assert {
         cID : -1,
         dmID: dm1[dmID],

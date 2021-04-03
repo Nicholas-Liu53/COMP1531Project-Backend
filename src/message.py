@@ -204,7 +204,6 @@ def message_senddm_v1(token, dm_id, message):
     })
 
     push_tagged_notifications(auth_user_id, -1, dm_id, message)
-
     return {
         'message_id': message_id,
     }

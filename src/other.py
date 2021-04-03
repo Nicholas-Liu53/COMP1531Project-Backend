@@ -214,13 +214,8 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
         try:
             src.data.notifs[taggedUser].insert(0, notification)
         except:
-<<<<<<< HEAD
-            
-            src.data.notifs[taggedUser] = [notification]
-=======
             src.data.notifs[taggedUser] = []
             src.data.notifs[taggedUser].append(notification)
->>>>>>> meltingPot
 
 def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
     if channel_id == -1 and dm_id == -1:
@@ -243,3 +238,4 @@ def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
     except:
         src.data.notifs[user_id] = []
         src.data.notifs[user_id].append(notification)
+        print(src.data.notifs)

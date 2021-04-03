@@ -154,10 +154,6 @@ def channel_messages_v1(token, channel_id, start):
     Return Value:
         Returns up to 50 messages alongside a start and and end value.
     '''
-<<<<<<< HEAD
-=======
-
->>>>>>> meltingPot
     decode(token)
 
     #Handling of input and access errors 
