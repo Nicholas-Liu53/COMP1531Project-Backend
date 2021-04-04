@@ -215,6 +215,46 @@ def test_http_channel_leave(user1, user2, user3, user4):
         'channel_id': c1.json()['channel_id']
     }).json()[allMems]
     
+    requests.post(f"{url}channel/leave/v1", json={
+        "token": user4[token],
+        "channel_id": c1.json()['channel_id']
+    })
+    assert {
+        uID: user4[AuID],
+        fName: 'User',
+        lName: "4",
+        'email': "fourth@gmail.com",
+        'handle_str': "user4"
+    } not in requests.get(f"{url}channel/details/v2", params={
+        'token': user1[token], 
+        'channel_id': c1.json()['channel_id']
+    }).json()[allMems]
+    requests.post(f"{url}channel/leave/v1", json={
+        "token": user3[token],
+        "channel_id": c1.json()['channel_id']
+    })
+    assert {
+        uID: user3[AuID],
+        fName: 'User',
+        lName: "3",
+        'email': "third@gmail.com",
+        'handle_str': "user3",
+    } not in requests.get(f"{url}channel/details/v2", params={
+        'token': user1[token], 
+        'channel_id': c1.json()['channel_id']
+    }).json()[allMems]
+    assert requests.post(f"{url}channel/leave/v1", json={
+        "token": user1[token],
+        "channel_id": c1.json()['channel_id']
+    }).status_code == 400
+    assert requests.post(f"{url}channel/leave/v1", json={
+        "token": user3[token],
+        "channel_id": c1.json()['channel_id']
+    }).status_code == 403
+    assert requests.post(f"{url}channel/leave/v1", json={
+        "token": user3[token],
+        "channel_id": -1
+    }).status_code == 400
 
 def test_http_channel_join(user1, user2, user3, user4):
     c1 = requests.post(f"{url}channels/create/v2", json={
