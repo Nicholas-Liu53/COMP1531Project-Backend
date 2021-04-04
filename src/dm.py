@@ -122,6 +122,7 @@ def dm_create_v1(token, u_ids):
     dm_name = ', '.join(handles)
 
     for user_id in u_ids:
+        dmUsers.append(user_id)
         check_removed(user_id)
 
     data['dms'].append({
