@@ -39,7 +39,7 @@ def clear():
     src.other.clear_v1()
     return {}
 
-#* AUTH ROUTES
+#* ************************************AUTH ROUTES****************************
 @APP.route("/auth/register/v2", methods=['POST'])
 def auth_register():
     payload = request.get_json()
@@ -82,7 +82,7 @@ def dm_leave():
 def dm_messages():
     pass
 
-#* CHANNEL ROUTES
+#* **********************************CHANNEL ROUTES****************************
 @APP.route("/channel/join/v2", methods=['POST'])
 def channel_join():
     payload = request.get_json()
@@ -119,7 +119,7 @@ def channel_removeowner():
     return src.channel.channel_removeowner_v1(payload.get('token'), payload.get('channel_id'), payload.get('u_id'))
 
 
-#* CHANNELS ROUTES
+#* ****************************CHANNELS ROUTES*********************************
 @APP.route("/channels/create/v2", methods=['POST'])
 def channels_create():
     payload = request.get_json()
@@ -166,8 +166,7 @@ def message_share():
     payload = request.get_json()
     return src.message.message_share_v1(payload.get('token'), payload.get('og_message_id'), payload.get('message'), payload.get('channel_id'), payload.get('dm_id'))
 
-
-#* USER ROUTES
+#* *********************************************USER ROUTES*****************************************
 @APP.route("/user/profile/v2", methods=['GET'])
 def user_profile():
     token, u_id = request.args.get('token'), request.args.get('u_id')
@@ -195,7 +194,7 @@ def users_all():
     token = request.args.get('token')
     return src.user.users_all(token)
 
-#* ADMIN ROUTES
+#* *************************************************ADMIN ROUTES******************************************
 @APP.route("/admin/userpermission/change/v1", methods=['POST'])
 def userpermission_change():
     payload = request.get_json()
