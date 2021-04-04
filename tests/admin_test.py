@@ -7,8 +7,6 @@ import src.channel, src.channels, src.auth, src.dm, src.message, src.other
 import jwt
 import json
 
-
-
 AuID    = 'auth_user_id'
 uID     = 'u_id'
 cID     = 'channel_id'
