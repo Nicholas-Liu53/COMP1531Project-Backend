@@ -195,7 +195,7 @@ def test_http_users_all_valid():
     requests.post(f"{url}auth/register/v2", json={'email': "ericamondy@gmail.com", "password": "1234567", "name_first": "erica", "name_last": "mondy"})
     requests.post(f"{url}auth/login/v2", json={'email': "ericamondy@gmail.com", "password": "1234567"})
     response = requests.get(f"{url}users/all/v1", param={'token': token,})
-    payload = response.json():
+    payload = response.json()
     assert payload == {
             'users':
             [{
