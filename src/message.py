@@ -183,12 +183,9 @@ def message_edit_v1(token, message_id, message):
 
     i -= 1          # Undo extra increment
 
-    print(data['messages_log'][i])
-
     #* Check if the user is the writer, channel owner or owner of Dreams
     # Get the channel the message belongs to
     if data['messages_log'][i][cID] != -1:
-        print('autism')
         channel = get_channel(data['messages_log'][i]['channel_id'])
         if auth_user_id is not data['messages_log'][i]['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
             raise AccessError

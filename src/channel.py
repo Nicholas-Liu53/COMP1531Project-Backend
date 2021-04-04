@@ -261,14 +261,11 @@ def channel_leave_v1(token, channel_id):
         channel_removeowner_v1(token, channel_id, auth_user_id)
 
     # Check if user is in the channel
-    # print(auth_user_id)
-    print(channelData['all_members'])
     if auth_user_id not in channelData['all_members']:
         raise AccessError
     
     # Time to remove from all_members list
     channelData['all_members'].remove(auth_user_id)
-    print(channelData['all_members'])
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
