@@ -68,8 +68,102 @@ def user4():
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
-def test_http_channel_invite():
-    pass
+def test_http_channel_invite(user1, user2, user3):
+    
+    responseChannel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Channel1',
+        "is_public": True}
+    )
+    #* Test 1: Invite user2 into channel1 should be successful
+    channel1 = responseChannel.json()
+    requests.post(f"{url}channel/invite/v2", json={
+        "token": user1[token],
+        "channel_id": channel1[cID],
+        "u_id": user2[AuID]}
+    )
+    response = requests.get(f"{url}channel/details/v2", params={
+        'token': user1[token],
+        'channel_id': channel1[cID]}
+    )
+    details = response.json()
+    assert {
+        fName: 'User', 
+        lName: '2', 
+        'email': "second@gmail.com", 
+        'handle_str': "user2",
+        uID: user2[AuID],
+    } in details[allMems]
+
+    #* Test 2: Channel id not valid raises inputerror
+    response2 = requests.post(f"{url}channel/invite/v2", json={
+        "token": user1[token],
+        "channel_id": -1,
+        "u_id": user2[AuID]}
+    )
+
+    assert response2.status_code == 400
+
+    #* Test 3: user id not valid raises inputerror
+    response3 = requests.post(f"{url}channel/invite/v2", json={
+        "token": user1[token],
+        "channel_id": user1[token],
+        "u_id": -1}
+    )
+
+    assert response3.status_code == 400
+
+    #* Test 4: user not in chnanel raises accesserror
+    response4 = requests.post(f"{url}channel/invite/v2", json={
+        "token": user3[token],
+        "channel_id": channel1[cID],
+        "u_id": user2[AuID]}
+    )
+
+    assert response4.status_code == 403
+
+def test_http_channel_details(user1, user2):
+
+    responseChannel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Channel1',
+        "is_public": True}
+    )
+    channel1 = responseChannel.json()
+
+    #* Test 1: expected channel details
+    expected = {'name': "Channel1",
+        'is_public': True, 
+        'owner_members':[{
+            'u_id': user1[AuID],
+            'name_first': "User",
+            'name_last': '1',
+            'email': 'first@gmail.com',
+            'handle_str': 'user1',
+        }],
+        'all_members':[{
+            'u_id': user1[AuID], 
+            'name_first': "User",
+            'name_last': '1',
+            'email': 'first@gmail.com',
+            'handle_str': 'user1',
+        }]
+    }
+
+    responseUser = requests.get(f"{url}channel/details/v2", params = {'token': user1[token], 'channel_id': channel1[cID]})
+
+    assert responseUser.json() == expected
+
+    #* Test 2: InputERRor when, channel id not a valid id
+    response1 = requests.get(f"{url}channel/details/v2", params = {'token': user1[token], 'channel_id': -1})
+
+    assert response1.status_code == 400
+
+    #* Test 3 : AccessError when user not in channel
+    responseUser2 = requests.get(f"{url}channel/details/v2", params = {'token': user2[token], 'channel_id': channel1[cID]})
+
+    assert responseUser2.status_code == 403
+
 
 def test_http_channel_leave(user1, user2, user3, user4):
     pass
@@ -111,3 +205,171 @@ def test_http_channel_join(user1, user2, user3, user4):
             }
         ]
     }
+
+def test_http_channel_addowner(user1, user2, user3, user4):
+
+    responseChannel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Channel1',
+        "is_public": True}
+    )
+    channel1 = responseChannel.json() 
+
+    #* Test 1: Succesfully add owner
+
+    requests.post(f"{url}channel/addowner/v1", json={
+        "token": user1[token],
+        "channel_id": channel1[cID],
+        "u_id": user2[AuID]}
+    )
+
+    response = requests.get(f"{url}channel/details/v2", params={
+        'token': user1[token],
+        'channel_id': channel1[cID]}
+    )
+    details = response.json()
+
+    assert {
+        uID: user2[AuID],
+        fName: 'User',
+        lName: '2',
+        'email': 'second@gmail.com',
+        'handle_str': 'user2',
+    } in details[allMems]
+    assert {
+        uID: user2[AuID],
+        fName: 'User',
+        lName: '2',
+        'email': 'second@gmail.com',
+        'handle_str': 'user2',
+    } in details[ownMems]
+
+    #* Test 2: Input error for invalid Channel iD
+
+    response2 = requests.post(f"{url}channel/addowner/v1", json={
+        "token": user1[token],
+        "channel_id": -1,
+        "u_id": user3[AuID]}
+    )
+
+    assert response2.status_code == 400
+
+    #* Test 3: Input error when user is already an owner
+    response3 = requests.post(f"{url}channel/addowner/v1", json={
+        "token": user1[token],
+        "channel_id": channel1[cID],
+        "u_id": user2[AuID]}
+    )
+
+    assert response3.status_code == 400
+
+    #* Test 4: Access error when user not owner or owner of channel
+
+    response4 = requests.post(f"{url}channel/addowner/v1", json={
+        "token": user3[token],
+        "channel_id": channel1[cID],
+        "u_id": user4[AuID]}
+    )
+
+    assert response4.status_code == 403
+
+def test_http_channel_removeowner(user1, user2, user3, user4):
+    
+    responseChannel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Channel1',
+        "is_public": True}
+    )
+    channel1 = responseChannel.json() 
+    #* Test 1 : see if successfully removed member from owner not all members
+    requests.post(f"{url}channel/addowner/v1", json={
+        "token": user1[token],
+        "channel_id": channel1[cID],
+        "u_id": user2[AuID]}
+    )
+
+    requests.post(f"{url}channel/removeowner/v1", json={
+        "token": user2[token],
+        "channel_id": channel1[cID],
+        "u_id": user1[AuID]}
+    )
+
+    response = requests.get(f"{url}channel/details/v2", params={
+        'token': user2[token],
+        'channel_id': channel1[cID]}
+    )
+    details = response.json()
+
+    assert {
+        uID: user1[AuID],
+        fName: 'User',
+        lName: '1',
+        'email': 'first@gmail.com',
+        'handle_str': 'user1',
+    } not in details[ownMems]
+    assert {
+        uID: user1[AuID],
+        fName: 'User',
+        lName: '1',
+        'email': 'first@gmail.com',
+        'handle_str': 'user1',
+    } in details[allMems]
+
+    #* Test 2: Input Error for channel ID not valid
+
+    requests.post(f"{url}channel/addowner/v1", json={
+        "token": user2[token],
+        "channel_id": channel1[cID],
+        "u_id": user1[AuID]}
+    )
+    response2 = requests.post(f"{url}channel/removeowner/v1", json={
+        "token": user1[token],
+        "channel_id": -1,
+        "u_id": user2[AuID]}
+    )
+
+    assert response2.status_code == 400
+
+    #* Test 3: Input error when user is not an owner
+    response3 = requests.post(f"{url}channel/removeowner/v1", json={
+        "token": user1[token],
+        "channel_id": channel1[cID],
+        "u_id": user3[AuID]}
+    )
+
+    assert response3.status_code == 400
+
+    #* Test 4: Input error when user is only owner
+    requests.post(f"{url}channel/removeowner/v1", json={
+        "token": user2[token],
+        "channel_id": channel1[cID],
+        "u_id": user1[AuID]}
+    )
+
+    response4 = requests.post(f"{url}channel/removeowner/v1", json={
+        "token": user2[token],
+        "channel_id": channel1[cID],
+        "u_id": user2[AuID]}
+    )
+
+    assert response4.status_code == 400
+
+    #* Test 5: Access Error when user is not owner of dreams
+    responseChannel2 = requests.post(f"{url}channels/create/v2", json={
+        "token": user2[token],
+        "name": 'Channel2',
+        "is_public": True}
+    )
+    channel2 = responseChannel2.json() 
+    requests.post(f"{url}channel/addowner/v1", json={
+        "token": user2[token],
+        "channel_id": channel2[cID],
+        "u_id": user1[AuID]}
+    )
+    response5 = requests.post(f"{url}channel/removeowner/v1", json={
+        "token": user4[token],
+        "channel_id": channel2[cID],
+        "u_id": user2[AuID]}
+    )
+
+    assert response5.status_code == 403
