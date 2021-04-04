@@ -153,7 +153,6 @@ def test_http_dm_remove_invalid_DM(user1):
     })
     assert dmResponse.status_code == 400
 
-'''
 def test_http_dm_remove_access_error(user1, user2):
     #Create dm by user1
     response = requests.post(f"{url}dm/create/v1", json={
@@ -169,11 +168,8 @@ def test_http_dm_remove_access_error(user1, user2):
     })
     
     assert access_error.status_code == 403
-'''   
+
   
-
-
-'''
 def test_http_dm_remove(user1, user2):
     #Create dm with dm_id 0 
     response = requests.post(f"{url}dm/create/v1", json={
@@ -181,23 +177,6 @@ def test_http_dm_remove(user1, user2):
         "u_ids": [user2[AuID]]
     })
     dm_0 = response.json()
-  
-    #Test for input error, when dm input is invalid
-    invalid_dmID = -1
-    
-    invalid_dm = requests.delete(f"{url}dm/remove/v1", json={
-        token: user1[token],
-        dmID: invalid_dmID,
-    })
-       
-    assert invalid_dm.status_code == 400
- 
-    #Test for access error, when user requesting remove is not original creator 
-    access_error = requests.delete(f"{url}dm/remove/v1", json={
-        "token": user2[token],
-        dmID: dm_0[dmID],
-    })
-    assert access_error.status_code == 400
     
     #Now can test success case, i.e. that dm is removed 
     requests.delete(f"{url}dm/remove/v1", json={
@@ -209,45 +188,58 @@ def test_http_dm_remove(user1, user2):
     
     expected = {'dms': []}
     assert responseUser1.json() == expected
-'''
 
 
+def test_http_dm_invite_invalid_dm(user1, user2):
+    invalid_dm_id = -1 
+    invalid_dm = requests.post(f"{url}dm/invite/v1", json={
+        "token": user1[token],
+        dmID: invalid_dm_id,
+        uID: [user2[AuID]],
+    })
+    assert invalid_dm.status_code == 400
+    
 
-
-'''
-def test_http_dm_invite(user1, user2, user3, invalid_dmID, invalid_u_id):
-
-    #Create dm with dm_id 0 containing user1 and user2 
+def test_http_dm_invite_invalid_u_id(user1, user2):
     response = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
         "u_ids": [user2[AuID]]
     })
     
     dm_0 = response.json()
-    
-    #Test for input error, when dm input is invalid or u_id is invalid 
-    invalid_dm = requests.post(f"{url}dm/invite/v1", json={
-        "token": user1[token],
-        dmID: invalid_dmID,
-        uID: [user2[AuID]],
-    })
-    
-    invalid_u_id = requests.post(f"{url}dm/invite/v1", json={
+
+    invalid_u_id = -1
+    invalid_result = requests.post(f"{url}dm/invite/v1", json={
         "token": user1[token],
         dmID: dm_0[dmID],
         uID: invalid_u_id,
     })
     
-    assert invalid_dm.status_code == 400
-    assert invalid_u_id.status_code == 400
+    assert invalid_result.status_code == 400
 
-    #Test for access error, when authorised user not a member of dm  
+def test_http_dm_invite_access_error(user1, user2, user3):
+    #Create dm with dm_id 0 containing user1 and user2 
+    response = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm_0 = response.json()
+    
     access_error = requests.post(f"{url}dm/invite/v1", json={
         "token": user3[token],
         dmID: dm_0[dmID],
         uID: [user2[AuID]],
     })
     assert access_error.status_code == 403
+    
+'''
+def test_http_dm_invite(user1, user2, user3):
+
+    #Create dm with dm_id 0 containing user1 and user2 
+    response = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
 
     #Check success case: user3 is invited to dm_0
     requests.post(f"{url}dm/invite/v1", json={
@@ -264,7 +256,7 @@ def test_http_dm_invite(user1, user2, user3, invalid_dmID, invalid_u_id):
     }]}
   
     assert responseUser3.json() == expected
-
+    
 
 
 
