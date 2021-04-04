@@ -63,14 +63,14 @@ def test_user_remove(user1, user2,):
             'email': "first@gmail.com", 
             'name_first': 'User', 
             'name_last': '1', 
-            'handle_string': 'user1'
+            'handle_str': 'user1'
             },
             {
             'u_id': 1, 
             'email': "second@gmail.com", 
             'name_first': 'Removed', 
             'name_last': 'User', 
-            'handle_string': 'user2'
+            'handle_str': 'user2'
             },]
     } 
 
