@@ -58,14 +58,6 @@ def user3():
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
-#* Fixture that returns an invalid dm_id 
-@pytest.fixture 
-def invalid_dmID():
-    return -1
-    
-@pytest.fixture
-def invalid_u_id():
-    return -1 
 
 def test_http_dm_details_valid(user1, user2):
     dmResponse = requests.post(f"{url}dm/create/v1", json={
@@ -153,30 +145,53 @@ def test_http_dm_create_invalid_u_ids(user1):
     assert dmResponse.status_code == 400
 
 
+def test_http_dm_remove_invalid_DM(user1):
+    invalid_dm_id = -1
+    dmResponse = requests.delete(f"{url}dm/remove/v1", json={
+        "token": user1[token],
+        dmID: invalid_dm_id
+    })
+    assert dmResponse.status_code == 400
 
-
-
-
-
-
-def test_http_dm_remove(user1, user2, invalid_dmID):
- 
-    #Create dm with dm_id 0 
+'''
+def test_http_dm_remove_access_error(user1, user2):
+    #Create dm by user1
     response = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
         "u_ids": [user2[AuID]]
     })
     
+    #access error when user2 tries to delete it
     dm_0 = response.json()
-    
-    #Test for input error, when dm input is invalid
-    invalid_dm = requests.delete(f"{url}dm/remove/v1", json={
-        "token": user1[token],
-        dmID: invalid_dmID,
+    access_error = requests.delete(f"{url}dm/remove/v1", json={
+        "token": user2[token],
+        dmID: dm_0[dmID],
     })
     
-    assert invalid_dm.status_code == 400
+    assert access_error.status_code == 403
+'''   
+  
 
+
+'''
+def test_http_dm_remove(user1, user2):
+    #Create dm with dm_id 0 
+    response = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm_0 = response.json()
+  
+    #Test for input error, when dm input is invalid
+    invalid_dmID = -1
+    
+    invalid_dm = requests.delete(f"{url}dm/remove/v1", json={
+        token: user1[token],
+        dmID: invalid_dmID,
+    })
+       
+    assert invalid_dm.status_code == 400
+ 
     #Test for access error, when user requesting remove is not original creator 
     access_error = requests.delete(f"{url}dm/remove/v1", json={
         "token": user2[token],
@@ -194,12 +209,12 @@ def test_http_dm_remove(user1, user2, invalid_dmID):
     
     expected = {'dms': []}
     assert responseUser1.json() == expected
+'''
 
 
 
 
-
-
+'''
 def test_http_dm_invite(user1, user2, user3, invalid_dmID, invalid_u_id):
 
     #Create dm with dm_id 0 containing user1 and user2 
@@ -343,15 +358,13 @@ def test__http_dm_messages(user1, user2, user3, invalid_dmID):
     
     responseUser2 = result.json()
     
-    '''
+ 
     
     
     #FROM HERE NOT TOO SURE NEED TO CHECK 
     
     
-    
-    '''
-   
+
     
     expected = {
         "len_messages": 1,
@@ -392,7 +405,7 @@ def test__http_dm_messages(user1, user2, user3, invalid_dmID):
     assert response_2['start'] == expected_2['start']
     assert response_2['end'] == expected_2['end']
     
-    
+'''   
     
     
 
