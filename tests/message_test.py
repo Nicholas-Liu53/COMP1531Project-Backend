@@ -2,7 +2,7 @@
 import pytest
 from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_share_v1, message_senddm_v1
 from src.error import InputError, AccessError
-import src.channel, src.channels, src.auth
+import src.channel, src.channels, src.auth, src.dm
 from src.other import clear_v1, SECRET
 from datetime import timezone, datetime
 import jwt
@@ -116,7 +116,7 @@ def test_message_edit(user1, user2, user3, user4):
     message3 = message_send_v1(user3[token], firstChannel[cID], "John Cena")
     message4 = message_send_v1(user3[token], firstChannel[cID], "Ricegum")
 
-        #* Test if user1 can edit the message
+    #* Test if user1 can edit the message
     message_edit_v1(user1[token], message1['message_id'], 'Jeffrey Meng')
     messageFound = False
     editedMessage = {}
@@ -169,6 +169,23 @@ def test_message_edit(user1, user2, user3, user4):
     assert messageFound is True 
     assert editedMessage['message'] == '### Message Removed ###'
 
+    #* Test if you cannot edit a message that doesn't exist
+    with pytest.raises(InputError):
+        message_edit_v1(user2[token], -1, "Troll")
+
+    #* Test you cannot edit into a super long message
+    tooLong = ""
+    for _ in range(1001):
+        tooLong += "?"
+    with pytest.raises(InputError):
+        message_edit_v1(user2[token], message4['message_id'], tooLong) 
+
+    #* Test in dm
+    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    dmMessage = message_senddm_v1(user1[token], dm1[dmID], "Herp derp")
+    with pytest.raises(AccessError):
+        message_edit_v1(user2[token], dmMessage['message_id'], 'Jeffrey Meng')
+
     #* All tests passed
     #! Clearing data
     clear_v1()
@@ -204,8 +221,7 @@ def test_message_remove(user1, user2, user3, user4):
             removedMessage = messageDict
             messageFound = True
             break
-    assert messageFound is True 
-    assert removedMessage['message'] == '### Message Removed ###'
+    assert messageFound is False
     
 
     #* Test if user2 can remove the message
@@ -217,8 +233,7 @@ def test_message_remove(user1, user2, user3, user4):
             removedMessage = messageDict
             messageFound = True
             break
-    assert messageFound is True 
-    assert removedMessage['message'] == '### Message Removed ###'
+    assert messageFound is False
 
     #* Test if user3 can remove the message
     message_remove_v1(user3[token], message3['message_id'])
@@ -229,12 +244,15 @@ def test_message_remove(user1, user2, user3, user4):
             removedMessage = messageDict
             messageFound = True
             break
-    assert messageFound is True 
-    assert removedMessage['message'] == '### Message Removed ###'
+    assert messageFound is False
 
     #* Test if user4 cannot remove the message
     with pytest.raises(AccessError):
         message_remove_v1(user4[token], message4['message_id'])
+
+    #* Test if you cannot remove a message that doesn't exist
+    with pytest.raises(InputError):
+        message_remove_v1(user4[token], -1)
 
     #* All tests passed
     #! Clearing data

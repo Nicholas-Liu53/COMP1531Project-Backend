@@ -104,6 +104,20 @@ def test_notifications_get_in_channels(user1, user2, user3):
         'dm_id': -1,
         nMess  : f"{get_user(user3[AuID])['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: Dooo dooo dooo dooo ",
     } in notifications_get_v1(user2[token])[notifs]
+    
+    #* Test if @ without a valid handle string won't raise an error nor tag anyone
+    message7 = src.message.message_send_v1(user1[token], channel1[cID], "@Joe_Biden")
+    assert {
+        cID    : channel1[cID],
+        'dm_id': -1,
+        nMess  : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: @Joe_Biden",
+    } not in notifications_get_v1(user2[token])[notifs]
+    assert {
+        cID    : channel1[cID],
+        'dm_id': -1,
+        nMess  : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: @Joe_Biden",
+    } not in notifications_get_v1(user3[token])[notifs]
+    
 
 def test_notifications_dms_added(user1, user2, user3):
     #Test that a notif is sent to user when they are added to dm with channel id = -1
@@ -178,3 +192,20 @@ def test_dm_20_notifs(user1, user2):
         dmID: dm1[dmID],
         nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm1['dm_id'])['name']}: 0 {tagMessage}",
     } not in notifications_get_v1(user2[token])[notifs]
+
+#* Test message edit sends a new notif in dms
+def test_dm_edit_notif(user1, user2):
+    dm1 = dm_create_v1(user1[token], [user2[AuID]])
+    tagMessage = f"@{get_user(user2[AuID])[handle]}"
+    dmMessage = message_senddm_v1(user1[token], dm1[dmID], tagMessage)
+    message_edit_v1(user1[token], dmMessage['message_id'], f"Yo @{get_user(user2[AuID])[handle]}")
+    assert {
+        cID : -1,
+        dmID: dm1[dmID],
+        nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm1['dm_id'])['name']}: {tagMessage}",
+    } in notifications_get_v1(user2[token])[notifs]
+    assert {
+        cID : -1,
+        dmID: dm1[dmID],
+        nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm1['dm_id'])['name']}: Yo {tagMessage}",
+    } in notifications_get_v1(user2[token])[notifs]

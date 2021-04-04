@@ -1,5 +1,6 @@
 import src.data
 from src.other import decode
+import json
 
 def notifications_get_v1(token):
     '''
@@ -15,13 +16,13 @@ def notifications_get_v1(token):
     Return value:
         Returns a dictionary containing a list of notifications with key 'notifications'
     '''
+
+    data = json.load(open('data.json', 'r'))
+
     #* Decode the taken and get the auth user's id
     auth_user_id, _ = decode(token)
 
-    try:
-        notifications = src.data.notifs[auth_user_id][0:20]
-    except: 
-        notifications = []
+    notifications = data['notifs'][f"{auth_user_id}"][0:20]
 
     return {
         'notifications': notifications
