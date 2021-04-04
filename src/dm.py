@@ -160,6 +160,7 @@ def dm_remove_v1(token, dm_id):
     auth_user_ID, _ = decode(token)
     input_error = True
 
+    data = json.load(open('data.json', 'r'))
     for items in data['dms']:
         #Loop for input errors:
         if dm_id == items['dm_id']:
@@ -242,6 +243,7 @@ def dm_leave_v1(token, dm_id):
 
     auth_user_ID, _ = decode(token)
     input_error = True
+    data = json.load(open('data.json', 'r'))
     for items in data['dms']:
         #Loop for input errors:
         if dm_id == items['dm_id']:
