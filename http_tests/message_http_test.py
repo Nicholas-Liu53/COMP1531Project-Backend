@@ -259,10 +259,19 @@ def test_http_senddm_access_error(user1, user2, user3):
     pass
 
 def test_http_senddm_long(user1, user2):
-    pass
+    dmResponse = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm1 = dmResponse.json()
+    message = 'a'*1001
+    response = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm1[dmID],
+        'message': message
+    })
 
-def test_http_senddm_invalid_dm(user1):
-    pass
+    assert response.status_code == 400
 
 def test_http_senddm_multiple(user1, user2):
     pass
