@@ -236,7 +236,7 @@ def test_http_message_edit(user1, user2, user3, user4):
         "token": user1[token],
         "dm_id": d1[dmID],
         "message": "Herp derp"
-    })
+    }).json()
     requests.put(f"{url}message/edit/v2", json={
         "token": user2[token],
         "message_id": dM1['message_id'],
