@@ -70,11 +70,12 @@ def channel_invite_v1(token, channel_id, u_id):
     for chan in data['channels']:
         if chan["channel_id"] == channel_id:
             # ensure no duplicates
-            chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
-    push_added_notifications(auth_user_id, u_id, channel_id, -1) 
+            chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None    
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
+
+    push_added_notifications(auth_user_id, u_id, channel_id, -1)    
 
     return {   
     }
@@ -243,18 +244,29 @@ def channel_leave_v1(token, channel_id):
     auth_user_id, _ = decode(token)
 
     # Get the channel directory from data.py
-    channelData = get_channel(channel_id)
+    channelData = {}
+    channelFound = False
+    for aChannel in data['channels']:
+        if aChannel['channel_id'] == channel_id:
+            channelData = aChannel
+            channelFound = True
+    if not channelFound:
+        raise InputError
+
 
     # If the user is an owner
     if auth_user_id in channelData['owner_members']:
         channel_removeowner_v1(token, channel_id, auth_user_id)
 
     # Check if user is in the channel
+    # print(auth_user_id)
+    print(channelData['all_members'])
     if auth_user_id not in channelData['all_members']:
         raise AccessError
     
     # Time to remove from all_members list
     channelData['all_members'].remove(auth_user_id)
+    print(channelData['all_members'])
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)

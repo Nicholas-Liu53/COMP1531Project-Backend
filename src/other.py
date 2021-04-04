@@ -204,6 +204,7 @@ def get_dm(dm_id):
     raise InputError
 
 def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
+    data = json.load(open('data.json', 'r'))
     taggerHandle = get_user(auth_user_id)['handle_string']
     if channel_id != -1:
         channelDMname = get_channel(channel_id)['name']
@@ -226,13 +227,12 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
         'notification_message': f"{taggerHandle} tagged you in {channelDMname}: {message[0:20]}"
     }
     for taggedUser in taggedUsersList:
-        try:
-            src.data.notifs[taggedUser].insert(0, notification)
-        except:
-            src.data.notifs[taggedUser] = []
-            src.data.notifs[taggedUser].append(notification)
+        data['notifs'][taggedUser].insert(0, notification)
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
 def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
+    data = json.load(open('data.json', 'r'))
     taggerHandle = get_user(auth_user_id)['handle_string']
     if channel_id != -1:
         channelDMname = get_channel(channel_id)['name']
@@ -244,8 +244,6 @@ def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
         'dm_id': dm_id,
         'notification_message': f"{taggerHandle} added you to {channelDMname}"
     }
-    try:
-        src.data.notifs[user_id].insert(0, notification)
-    except:
-        src.data.notifs[user_id] = []
-        src.data.notifs[user_id].append(notification)
+    data['notifs'][user_id].insert(0, notification)
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)

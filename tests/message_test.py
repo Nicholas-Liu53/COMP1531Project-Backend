@@ -116,7 +116,7 @@ def test_message_edit(user1, user2, user3, user4):
     message3 = message_send_v1(user3[token], firstChannel[cID], "John Cena")
     message4 = message_send_v1(user3[token], firstChannel[cID], "Ricegum")
 
-        #* Test if user1 can edit the message
+    #* Test if user1 can edit the message
     message_edit_v1(user1[token], message1['message_id'], 'Jeffrey Meng')
     messageFound = False
     editedMessage = {}

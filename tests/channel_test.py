@@ -211,6 +211,10 @@ def test_channel_leave(user1, user2, user3, user4):
     with pytest.raises(AccessError):
         channel_leave_v1(user3[token], firstChannel[cID])
 
+    #* Test you cannot leave a channel that doesn't exist
+    with pytest.raises(InputError):
+        channel_leave_v1(user3[token], -1)
+
     #* Finished testing for this function
     #! Clearing data
     src.other.clear_v1()
