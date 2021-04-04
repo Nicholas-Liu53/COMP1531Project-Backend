@@ -1,7 +1,7 @@
 from flask import Flask, request
 import src.data
 from src.error import AccessError, InputError
-from src.other import decode, get_user, get_dm, message_count, get_user_from_handlestring, push_added_notifications
+from src.other import decode, get_user, get_dm, message_count, get_user_from_handlestring, push_added_notifications, check_removed
 import src.auth
 import json
 import jwt
@@ -208,7 +208,7 @@ def dm_invite_v1(token, dm_id, u_id):
     data = json.load(open('data.json', 'r'))
     #ASSUME: Do not need to add new user into dm_name
     get_user(u_id)
-    check_removed(u)
+    check_removed(u_id)
     auth_user_ID, _ = decode(token)
     input_error = True
     for items in data['dms']:
