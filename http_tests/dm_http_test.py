@@ -57,7 +57,7 @@ def user3():
 @pytest.fixture
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
-s
+
 #* Fixture that returns an invalid dm_id 
 @pytest.fixture 
 def invalid_dmID():
@@ -190,7 +190,7 @@ def test_http_dm_remove(user1, user2, invalid_dmID):
         dmID: dm_0[dmID],
     })
     
-    responseUser1 = requests.get(f"{url}dm/list/v1", params = {'token': user1[token]}
+    responseUser1 = requests.get(f"{url}dm/list/v1", params = {'token': user1[token]})
     
     expected = {'dms': []}
     assert responseUser1.json() == expected
@@ -241,7 +241,7 @@ def test_http_dm_invite(user1, user2, user3, invalid_dmID, invalid_u_id):
         uID: [user3[AuID]],
     })
     
-    responseUser3 = requests.get(f"{url}dm/list/v1", params = {'token': user3[token]}
+    responseUser3 = requests.get(f"{url}dm/list/v1", params = {'token': user3[token]})
     
     expected = {'dms': [{
         dmID: dm_0[dmID],
@@ -284,7 +284,7 @@ def test_http_dm_leave(user1, user2, user3, invalid_dmID):
         dmID: dm_0[dmID],
     })
     
-     responseUser2 = requests.get(f"{url}dm/list/v1", params = {'token': user2[token]}
+    responseUser2 = requests.get(f"{url}dm/list/v1", params = {'token': user2[token]})
     
     expected = {'dms': []}
     assert responseUser2.json() == expected
@@ -306,14 +306,14 @@ def test__http_dm_messages(user1, user2, user3, invalid_dmID):
     invalid_dm = requests.get(f"{url}dm/messages/v1", json={
         "token": user1[token],
         dmID: invalid_dmID,
-        start : 0,
+        'start' : 0,
     })
     
-    #Test for input error, when start is greater than # of messages in DM 
+    #Test for input error, when 'start' is greater than # of messages in DM 
     invalid_start = requests.get(f"{url}dm/messages/v1", json={
         "token": user1[token],
         dmID: dm_0[dmID],
-        start : 1,
+        'start' : 1,
     })
     
     assert invalid_dm.status_code == 400
@@ -323,9 +323,9 @@ def test__http_dm_messages(user1, user2, user3, invalid_dmID):
     access_error = requests.get(f"{url}dm/messages/v1", json={
         "token": user3[token],
         dmID: dm_0[dmID],
-        start : 0,
+        'start' : 0,
     })
-    assert access_error.status_code = 403 
+    assert access_error.status_code == 403 
     
     #Now errors are gone can test success cases
     requests.post(f"{url}message/senddm/v1", json={
@@ -338,7 +338,7 @@ def test__http_dm_messages(user1, user2, user3, invalid_dmID):
     result = requests.get(f"{url}dm/messages/v1", json={
         "token": user2[token],
         dmID: dm_0[dmID],
-        start: 0
+        'start': 0
     })
     
     responseUser2 = result.json()
@@ -354,43 +354,43 @@ def test__http_dm_messages(user1, user2, user3, invalid_dmID):
    
     
     expected = {
-        "len_messages" = 1,
-        "start" : 0,
+        "len_messages": 1,
+        'start': 0,
         "end": -1,
     }
     
-    assert len(responseUser2['messages']) = expected['len_messages']
-    assert responseUser2['start'] = expected['start']
-    assert responseUser2['end'] = expected['end']
+    assert len(responseUser2['messages']) == expected['len_messages']
+    assert responseUser2['start'] == expected['start']
+    assert responseUser2['end'] == expected['end']
     
-    #Success case 2: More than 50 messages returns end as start + 50     
+    #Success case 2: More than 50 messages returns end as 'start' + 50     
     #Send 50 messages into dm_0 
     message_counter = 1
     while message_counter < 51:
-            requests.post(f"{url}message/senddm/v1", json={
-        "token": user1[token],
-        dmID: dm_0[dmID],
-        "message" : f"{message_counter}",
-    })
+        requests.post(f"{url}message/senddm/v1", json={
+            "token": user1[token],
+            dmID: dm_0[dmID],
+            "message" : f"{message_counter}",
+        })
         message_counter += 1
         
     result2 = requests.get(f"{url}dm/messages/v1", json={
         "token": user2[token],
         dmID: dm_0[dmID],
-        start: 1
+        'start': 1
     })
     
     response_2 = result2.json()
 
     expected_2 = {
-        "len_messages" = 50,
-        "start" : 1,
+        "len_messages": 50,
+        "'start'" : 1,
         "end": 51,
     }
     
-    assert len(response_2['messages']) = expected_2['len_messages']
-    assert response_2['start'] = expected_2['start']
-    assert response_2['end'] = expected_2['end']
+    assert len(response_2['messages']) == expected_2['len_messages']
+    assert response_2['start'] == expected_2['start']
+    assert response_2['end'] == expected_2['end']
     
     
     

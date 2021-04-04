@@ -110,7 +110,7 @@ def test_http_channel_messages(user1, user2):
         cID: channel1[cID],
         start : 0,
     })
-    assert access_error.status_code = 403 
+    assert access_error.status_code == 403 
     
     
     #Now can do success case 
@@ -141,43 +141,43 @@ def test_http_channel_messages(user1, user2):
     '''
     
     expected = {
-        "len_messages" = 1,
+        "len_messages": 1,
         "start" : 0,
         "end": -1,
     }
     
-    assert len(responseUser1['messages']) = expected['len_messages']
-    assert responseUser1['start'] = expected['start']
-    assert responseUser1['end'] = expected['end']
+    assert len(responseUser1['messages']) == expected['len_messages']
+    assert responseUser1['start'] == expected['start']
+    assert responseUser1['end'] == expected['end']
     
     #Success case 2: More than 50 messages returns end as start + 50     
     #Send 50 messages into dm_0 
     message_counter = 1
     while message_counter < 51:
-            requests.post(f"{url}message/send/v2", json={
-        "token": user1[token],
-        cID: channel1[cID],
-        "message" : f"{message_counter}",
-    })
+        requests.post(f"{url}message/send/v2", json={
+            "token": user1[token],
+            cID: channel1[cID],
+            "message" : f"{message_counter}",
+        })
         message_counter += 1
         
     result2 = requests.get(f"{url}dm/messages/v1", json={
         "token": user2[token],
         dmID: dm_0[dmID],
-        start: 1
+        'start': 1
     })
     
     response_2 = result2.json()
         
     expected_2 = {
-        "len_messages" = 50,
+        "len_messages": 50,
         "start" : 1,
         "end": 51,
     }
     
-    assert len(response_2['messages']) = expected_2['len_messages']
-    assert response_2['start'] = expected_2['stsart']
-    assert response_2['end'] = expected_2['end']
+    assert len(response_2['messages']) == expected_2['len_messages']
+    assert response_2['start'] == expected_2['stsart']
+    assert response_2['end'] == expected_2['end']
     
     
     
