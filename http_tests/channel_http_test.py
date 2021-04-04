@@ -71,7 +71,7 @@ def test_http_channel_invite():
     
 def test_http_channel_messages(user1, user2):
     #Create a private channel by user 1
-    response = request.post(f"{url}channels/create/v2", json={
+    response = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
         "name": "channel_1",
         "is_public": False,
@@ -80,7 +80,7 @@ def test_http_channel_messages(user1, user2):
     channel1 = response.json()
     
     #Send one message in channel 
-    request.post(f"{url}message/send/v2", json={
+    requests.post(f"{url}message/send/v2", json={
         "token": user1[token],
         cID: channel1[cID],
         "message": "first message :)",
@@ -91,14 +91,14 @@ def test_http_channel_messages(user1, user2):
     invalid_channel = requests.get(f"{url}channel/messages/v2", json={
         "token": user1[token],
         cID: invalid_cID,
-        start : 0,
+        'start' : 0,
     })
     
     #when start is greater than # of messages in channel
     invalid_start = requests.get(f"{url}channel/messages/v2", json={
         "token": user1[token],
         cID: channel1[cID],
-        start : 2,
+        'start': 2,
     })
     
     assert invalid_channel.status_code == 400
@@ -108,7 +108,7 @@ def test_http_channel_messages(user1, user2):
     access_error = requests.get(f"{url}channel/messages/v2", json={
         "token": user2[token],
         cID: channel1[cID],
-        start : 0,
+        'start': 0,
     })
     assert access_error.status_code == 403 
     
@@ -127,7 +127,7 @@ def test_http_channel_messages(user1, user2):
     result = requests.get(f"{url}channel/messages/v2", json={
         "token": user1[token],
         cID: channel1[cID],
-        start: 0
+        'start': 0
     })
     
     responseUser1 = result.json()
@@ -161,9 +161,9 @@ def test_http_channel_messages(user1, user2):
         })
         message_counter += 1
         
-    result2 = requests.get(f"{url}dm/messages/v1", json={
+    result2 = requests.get(f"{url}channel/messages/v2", json={
         "token": user2[token],
-        dmID: dm_0[dmID],
+        cID: channel1[cID],
         'start': 1
     })
     
