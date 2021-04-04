@@ -41,27 +41,23 @@ def clear():
 
 @APP.route("/auth/register/v2", methods=['POST'])
 def auth_register():
-    print(src.data.users)
     payload = request.get_json()
-    return dumps(
-        src.auth.auth_register_v2(payload['email'], payload['password'], payload['name_first'], payload['name_last'])
-    )
+    return src.auth.auth_register_v2(payload['email'], payload['password'], payload['name_first'], payload['name_last'])
 
 @APP.route("/dm/details/v1", methods=['GET'])
 def dm_details():
     token, dm_id = request.args.get('token'), request.args.get('dm_id')
-    return dumps(src.dm.dm_details_v1(token, dm_id))
+    return src.dm.dm_details_v1(token, dm_id)
 
 @APP.route("/dm/list/v1", methods=['GET'])
 def dm_list():
     token = request.args.get('token')
-    return dumps(src.dm.dm_list_v1(token))
+    return src.dm.dm_list_v1(token)
 
 @APP.route("/dm/create/v1", methods=['POST'])
 def dm_create():
     payload = request.get_json()
-    print(src.data.users)
-    return dumps(src.dm.dm_create_v1(payload.get('token'), payload.get('u_ids')))
+    return src.dm.dm_create_v1(payload.get('token'), payload.get('u_ids'))
 
 @APP.route("/dm/remove/v1", methods=['DELETE'])
 def dm_remove():
@@ -81,11 +77,8 @@ def dm_messages():
 
 @APP.route("/auth/login/v2", methods=['POST'])
 def auth_login():
-    print(src.data.users)
     payload = request.get_json()
-    return dumps(
-        src.auth.auth_login_v2(payload['email'], payload['password'])
-    )
+    return src.auth.auth_login_v2(payload['email'], payload['password'])
 
 if __name__ == "__main__":
     APP.run(port=config.port) # Do not edit this port
