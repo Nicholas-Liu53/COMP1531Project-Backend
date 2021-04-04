@@ -129,6 +129,8 @@ def get_channel(channel_id):
     data = json.load(open('data.json', 'r'))
     for channel in data['channels']:
         if channel_id == channel['channel_id']:
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)
             return channel
     raise InputError
 
@@ -136,6 +138,8 @@ def get_user(user_id):
     data = json.load(open('data.json', 'r'))
     for user in data['users']:
         if user_id == user[uID]:
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)
             return {
                 uID: user[uID],
                 'email': user['email'],
@@ -150,11 +154,15 @@ def get_members(channel_id, dm_id):
     if dm_id == -1:
         for chanDetails in data['channels']:
             if channel_id == chanDetails[cID]:
+                with open('data.json', 'w') as FILE:
+                    json.dump(data, FILE)
                 return chanDetails[Name], chanDetails[allMems]
         raise InputError
     else:
         for dmDetails in data['dms']:
             if dm_id == dmDetails[dmID]:
+                with open('data.json', 'w') as FILE:
+                    json.dump(data, FILE)
                 return dmDetails[Name], dmDetails[allMems]
         raise InputError
 
@@ -176,12 +184,17 @@ def get_user_permissions(user_id):
     data = json.load(open('data.json', 'r'))
     for user in data['users']:
         if user_id == user[uID]:
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)
             return user['permission_id']
     raise InputError
 
 def get_user_from_handlestring(handlestring):
-    for user in src.data.users:
+    data = json.load(open('data.json', 'r'))
+    for user in data['users']:
         if handlestring == user['handle_str']:
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)
             return {
                 uID: user[uID],
                 'email': user['email'],
@@ -195,6 +208,8 @@ def get_message(message_id):
     data = json.load(open('data.json', 'r'))
     for message in data['messages_log']:
         if message_id == message['message_id']:
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)
             return message
     raise InputError
 
@@ -202,15 +217,12 @@ def get_dm(dm_id):
     data = json.load(open('data.json', 'r'))
     for dm in data['dms']:
         if dm_id == dm['dm_id']:
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)
             return dm
     raise InputError
 
 def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
-    data = json.load(open('data.json', 'r'))
-    if channel_id == -1 and dm_id == -1:
-        raise InputError
-    elif channel_id != -1 and dm_id != -1:
-        raise InputError
     taggerHandle = get_user(auth_user_id)['handle_str']
     if channel_id != -1:
         channelDMname = get_channel(channel_id)['name']
@@ -232,17 +244,13 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
         'dm_id': dm_id,
         'notification_message': f"{taggerHandle} tagged you in {channelDMname}: {message[0:20]}"
     }
+    data = json.load(open('data.json', 'r'))
     for taggedUser in taggedUsersList:
         data['notifs'][f"{taggedUser}"].insert(0, notification)
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
 
 def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
-    data = json.load(open('data.json', 'r'))
-    if channel_id == -1 and dm_id == -1:
-        raise InputError
-    elif channel_id != -1 and dm_id != -1:
-        raise InputError
     taggerHandle = get_user(auth_user_id)['handle_str']
     if channel_id != -1:
         channelDMname = get_channel(channel_id)['name']
@@ -254,6 +262,7 @@ def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
         'dm_id': dm_id,
         'notification_message': f"{taggerHandle} added you to {channelDMname}"
     }
+    data = json.load(open('data.json', 'r'))
     data['notifs'][f"{user_id}"].insert(0, notification)
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
