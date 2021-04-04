@@ -110,8 +110,10 @@ def test_channel_messages():
     userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
     
 
-    #Create public channel by user_id 1
-    firstChannel = channels_create_v1(userID1[token], 'Yggdrasil', True)
+    #Create private channel by userID1
+    firstChannel = channels_create_v1(userID1[token], 'Yggdrasil', False)
+    #Now create a second public channel by userID1 to make sure that message only sent to first channel 
+    secondChannel = channels_create_v1(userID1[token], 'Marmot', True)
     
     #Send one message in channel 
     message_send_v1(userID1[token], firstChannel[cID], "First Message")
@@ -121,18 +123,13 @@ def test_channel_messages():
         #* messages in channel
         channel_messages_v1(userID1[token], firstChannel[cID], 4)
         
+    with pytest.raises(InputError):
         #* Test 2: Raises input error when channel_id is invalid 
         channel_messages_v1(userID1[token], -1, 0) 
         
     with pytest.raises(AccessError):
         #* Test 3: returns access error when authorised user not a member of channel
         channel_messages_v1(userID2[token], firstChannel[cID], 0)
-
-        
-    with pytest.raises(AccessError):
-        #Test 3: returns access error when authorised user not a member of channel
-        channel_messages_v1(userID2[token], firstChannel[cID], 0)
-
         
     #Test 4: if there are less than 50 messages, returns -1 in "end"
     assert channel_messages_v1(userID1[token], firstChannel[cID], 0)["end"] == -1
