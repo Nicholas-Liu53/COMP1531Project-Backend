@@ -159,7 +159,7 @@ def test_http_dm_create_invalid_u_ids(user1):
 
 
 
-def http_test_dm_remove(user1, user2, invalid_dmID):
+def test_http_dm_remove(user1, user2, invalid_dmID):
  
     #Create dm with dm_id 0 
     response = requests.post(f"{url}dm/create/v1", json={
@@ -200,7 +200,7 @@ def http_test_dm_remove(user1, user2, invalid_dmID):
 
 
 
-def http_test_dm_invite(user1, user2, user3, invalid_dmID, invalid_u_id):
+def test_http_dm_invite(user1, user2, user3, invalid_dmID, invalid_u_id):
 
     #Create dm with dm_id 0 containing user1 and user2 
     response = requests.post(f"{url}dm/create/v1", json={
@@ -254,7 +254,7 @@ def http_test_dm_invite(user1, user2, user3, invalid_dmID, invalid_u_id):
 
 
 
-def http_test_dm_leave(user1, user2, user3, invalid_dmID):
+def test_http_dm_leave(user1, user2, user3, invalid_dmID):
     #Create dm with dm_id 0 
     response = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
@@ -293,7 +293,7 @@ def http_test_dm_leave(user1, user2, user3, invalid_dmID):
     
     
     
-def http_test_dm_messages(user1, user2, user3, invalid_dmID):
+def test__http_dm_messages(user1, user2, user3, invalid_dmID):
     #Create dm with dm_id 0 
     response = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
