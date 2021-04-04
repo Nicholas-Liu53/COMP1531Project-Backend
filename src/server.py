@@ -47,7 +47,7 @@ def auth_register():
 @APP.route("/dm/details/v1", methods=['GET'])
 def dm_details():
     token, dm_id = request.args.get('token'), request.args.get('dm_id')
-    return src.dm.dm_details_v1(token, dm_id)
+    return src.dm.dm_details_v1(token, int(dm_id))
 
 @APP.route("/dm/list/v1", methods=['GET'])
 def dm_list():
