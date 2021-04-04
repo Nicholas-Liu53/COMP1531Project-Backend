@@ -112,7 +112,6 @@ def test_notifications_dms_added(user1, user2, user3):
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     dm_1 = dm_create_v1(user1[token], [user3[AuID]])
 
-
     #Test 1: for initial creation of DM
     assert {
         cID : -1,
