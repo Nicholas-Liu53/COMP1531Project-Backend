@@ -160,9 +160,6 @@ def test_dm_create_errors(user1):
 
 
 
-
-
-
 def test_dm_remove(user1, user2, invalid_dm):
     #Create two dm's: one which we will remove and one we will keep
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
