@@ -2,6 +2,7 @@ import src.data
 from src.error import AccessError, InputError
 from src.other import decode, get_members, get_user, message_count, get_user_from_handlestring, push_added_notifications
 import src.auth
+import json
 import jwt
 
 AuID      = 'auth_user_id'
@@ -65,9 +66,10 @@ def dm_list_v1(token):
         Returns a dictionary with key 'dms' mapping to a list of DMs that the user is a member of
         Each DM is represented by a dictionary containing types { dm_id, name }
     '''
+    data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
     output = []
-    for dmDetails in src.data.dms:
+    for dmDetails in data['dms']:
         if auth_user_id in dmDetails['all_members']:
             dm = {}
             dm[dmID] = dmDetails[dmID]
@@ -97,11 +99,12 @@ def dm_create_v1(token, u_ids):
     Return Value:
         Returns a dictionary with key 'dm_id' and 'dm_name' when sucessful
     '''
+    data = json.load(open('data.json', 'r'))
     creator_id, _ = decode(token)
-    if len(src.data.dms) == 0:
+    if len(data['dms']) == 0:
         dm_ID = 0
     else:
-        dm_ID = src.data.dms[-1][dmID] + 1
+        dm_ID = data['dms'][-1][dmID] + 1
 
     dmUsers = [creator_id]
     for user_id in u_ids:
@@ -114,12 +117,15 @@ def dm_create_v1(token, u_ids):
     handles.sort()
     dm_name = ', '.join(handles)
 
-    src.data.dms.append({
+    data['dms'].append({
         dmID: dm_ID,
         Name: dm_name,
         creatorID: creator_id,
         'all_members': dmUsers,
     })
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     for user in u_ids:
         push_added_notifications(creator_id, user, -1, dm_ID)
@@ -133,7 +139,7 @@ def dm_create_v1(token, u_ids):
 def dm_remove_v1(token, dm_id):
 #Remove an existing DM, can only be done by original creator of dm
 #ASSUMPTION: Rest of dms retain same dm_ids when a dm is removed
-
+    data = json.load(open('data.json', 'r'))
     auth_user_ID, _ = decode(token)
     #First omit errors
     #Raise input error if dm_id is not valid DM number
@@ -141,7 +147,7 @@ def dm_remove_v1(token, dm_id):
     #AccessError when the user is not original DM creator
     input_error = True
 
-    for items in src.data.dms:
+    for items in data['dms']:
         #Loop for input errors:
         if dm_id == items['dm_id']:
             input_error = False
@@ -153,24 +159,28 @@ def dm_remove_v1(token, dm_id):
 
     #Now that errors are fixed, can remove the existing DM with dm_id
     #Loop through dm_list, once dm_id is found remove it
-    for objects in src.data.dms:
+    for objects in data['dms']:
         if objects['dm_id'] == dm_id:
-            src.data.dms.remove(objects)
+            data['dms'].remove(objects)
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     return {}
 
 #Ethan
 def dm_invite_v1(token, dm_id, u_id):
 #ASSUME: Do not need to add new user into dm_name
+#ASSUME: u_id will not include a user who is already in the DM
 #Invites a user to an existing dm
-
+    data = json.load(open('data.json', 'r'))
+    auth_user_ID, _ = decode(token)
     #Check u_id
     get_user(u_id)
-    auth_user_ID, _ = decode(token)
     #Raises Input Error when dm_id is not valid
     #Access error if auth user i.e token is not a member of dm
     input_error = True
-    for items in src.data.dms:
+    for items in data['dms']:
         #Loop for input errors:
         if dm_id == items['dm_id']:
             input_error = False
@@ -178,6 +188,8 @@ def dm_invite_v1(token, dm_id, u_id):
                 raise AccessError
             else:
                 items['all_members'].append(u_id)
+                with open('data.json', 'w') as FILE:
+                    json.dump(data, FILE)
                 push_added_notifications(auth_user_ID, u_id, -1, dm_id)
 
     if input_error:
@@ -186,13 +198,14 @@ def dm_invite_v1(token, dm_id, u_id):
     return {}
 
 
-def dm_leave_v1(token, dm_id):
 #Given a DM ID, user is removed as a member of this DM
+def dm_leave_v1(token, dm_id):
+    data = json.load(open('data.json', 'r'))
     auth_user_ID, _ = decode(token)
     #Raises InputError when dm_id is not valid
     # Access error if auth_user is not a member of dm with dm_id
     input_error = True
-    for items in src.data.dms:
+    for items in data['dms']:
         #Loop for input errors:
         if dm_id == items['dm_id']:
             input_error = False
@@ -203,6 +216,10 @@ def dm_leave_v1(token, dm_id):
 
     if input_error:
         raise InputError
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+
     return {}
 
 def dm_messages_v1(token, dm_id, start):
@@ -229,6 +246,8 @@ def dm_messages_v1(token, dm_id, start):
         'start' is the value of start passed into the function
         'end' is "start + 50" if there more messages that can be loaded, otherwise, -1 is returned in 'end'
     '''
+    data = json.load(open('data.json', 'r'))
+
     auth_user_id, _ = decode(token)
     num_of_messages = message_count(-1, dm_id)
 
@@ -243,9 +262,9 @@ def dm_messages_v1(token, dm_id, start):
     desired_end = start + 50
     if num_of_messages < desired_end:
         desired_end = -1
-    messages = []
 
-    for objects in src.data.messages_log:
+    messages = []
+    for objects in data['messages_log']:
         if dm_id == objects['dm_id']:
             current_DM = objects.copy()
             del current_DM[cID]

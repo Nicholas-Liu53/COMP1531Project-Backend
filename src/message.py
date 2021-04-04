@@ -3,6 +3,7 @@ from src.error import AccessError, InputError
 import src.auth
 from src.other import decode, get_channel, get_members, get_user, get_dm, get_user_permissions, push_tagged_notifications
 from datetime import timezone, datetime
+import json
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -187,17 +188,18 @@ def message_edit_v1(token, message_id, newMessage):
     }
 
 def message_senddm_v1(token, dm_id, message):
+    data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
     _, dmMembers = get_members(-1, dm_id)
     if auth_user_id not in dmMembers:
         raise AccessError
     if len(message) > 1000:
         raise InputError
-    message_id = len(src.data.messages_log)
+    message_id = len(data['messages_log'])
     now = datetime.now()
     time_created = int(now.strftime("%s"))
     
-    src.data.messages_log.append({
+    data['messages_log'].append({
         cID: -1,
         dmID: dm_id,
         'message_id': message_id,
@@ -205,6 +207,9 @@ def message_senddm_v1(token, dm_id, message):
         'message': message, 
         'time_created': time_created,
     })
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     push_tagged_notifications(auth_user_id, -1, dm_id, message)
     return {
@@ -228,12 +233,15 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
     Return Value:
         Dictionary with a shared_message_id : (int)
     '''
+
+    data = json.load(open('data.json', 'r'))
+
     # the authorised user has not joined the channel or DM they are trying to share the message to
     auth_user_id, _ = decode(token)
 
     # put message with optional message first,
     newMessage = ''
-    for msg in src.data.messages_log:
+    for msg in data['messages_log']:
         if msg["message_id"] == og_message_id:
             if message != '':
                 newMessage = msg["message"] + " | " + message
@@ -241,7 +249,7 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
                 newMessage = msg["message"] 
     # Use both message/send and message/senddm to share message
     if dm_id == -1:
-        for chans in src.data.channels:
+        for chans in data['channels']:
             if chans["channel_id"] == channel_id:
                 userAuth = False
                 for users in chans["all_members"]:
@@ -253,7 +261,7 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
         push_tagged_notifications(auth_user_id, channel_id, -1, newMessage)
 
     if channel_id == -1:
-        for dm in src.data.dms:
+        for dm in data['dms']:
             if dm['dm_id'] == dm_id:
                 userAuth = False
                 for users in dm['all_members']:
@@ -267,4 +275,7 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
         # not an error in the spec sheet but if neither channel_id nor dm_id is not -1 or is both -1 probably raise inputerror
         pass 
     
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+
     return shared_message_id

@@ -1,6 +1,6 @@
 # File to test functions in src/admin.py
 import pytest
-from src.admin import user_remove_v1, userpermission_change_v1, notifications_get_v1
+from src.admin import user_remove_v1, userpermission_change_v1
 from src.error import AccessError, InputError
 from src.other import SECRET
 import src.channel, src.channels, src.auth, src.dm, src.message, src.other
