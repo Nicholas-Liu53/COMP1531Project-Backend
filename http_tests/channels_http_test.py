@@ -68,9 +68,9 @@ def user4():
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
-def test_http_channel_invite():
-    pass
-
-
-def test_http_channel_join(user1, user2, user3, user4):
-    pass
+def test_http_channels_create(user1, user2):
+    requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": "Oogway",
+        "is_public": True
+    })

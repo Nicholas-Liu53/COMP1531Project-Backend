@@ -5,7 +5,7 @@ from flask_cors import CORS
 from src.error import InputError
 from src import config
 import src.data
-import src.auth, src.other, src.dm
+import src.auth, src.other, src.dm, src.notifications, src.channel, src.channels, src.message
 
 def defaultHandler(err):
     response = err.get_response()
@@ -29,7 +29,7 @@ APP.register_error_handler(Exception, defaultHandler)
 def echo():
     data = request.args.get('data')
     if data == 'echo':
-   	    raise InputError(description='Cannot echo "echo"')
+        raise InputError(description='Cannot echo "echo"')
     return dumps({
         'data': data
     })
@@ -105,7 +105,16 @@ def message_send():
     return src.message.message_edit_v1(payload['token'], payload['message_id'], payload['message'])
 
 @APP.route("/message/remove/v1", methods=['DELETE'])
-    pass
+    payload = request.get_json()
+    return src.message.message_remove_v1(payload['token'], payload['message_id'])
+
+@APP.route("/notifications/get/v1", methods=['GET'])
+    token = request.args.get('token')
+    return src.notifications.notifications_get_v1(token)
+
+@APP.route("/search/v2", methods=['GET'])
+    token, query_str = request.args.get('token'), request.args.get('query_str')
+    return src.other.search_v1(token, query_str)
 
 if __name__ == "__main__":
     APP.run(port=config.port) # Do not edit this port
