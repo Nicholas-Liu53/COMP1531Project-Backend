@@ -1,9 +1,8 @@
 # File to test functions in src/user.py
 from src.error import AccessError, InputError
 import pytest
-from src.auth import auth_login_v2, auth_register_v2
-import src.channel, src.channels
 from src.user import user_profile_v2, user_setname_v2, user_setemail_v2, user_sethandle_v2, users_all
+from src.auth import auth_register_v2, auth_login_v2
 from src.other import clear_v1
 from jwt import encode
 
@@ -22,7 +21,7 @@ def test_user_profile_valid():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_string': 'caricoleman'
+            'handle_str': 'caricoleman'
             }
     }
 
@@ -44,7 +43,7 @@ def test_user_profile_valid_multiple():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_string': 'caricoleman'
+            'handle_str': 'caricoleman'
             }
     }
 
@@ -55,7 +54,7 @@ def test_user_profile_valid_multiple():
             'email': "ericamondy@gmail.com", 
             'name_first': 'erica', 
             'name_last': 'mondy', 
-            'handle_string': 'ericamondy'
+            'handle_str': 'ericamondy'
             }
     }
     
@@ -83,7 +82,7 @@ def test_user_setname_valid_first_name():
             'email': "caricoleman@gmail.com", 
             'name_first': 'kari', 
             'name_last': 'coleman', 
-            'handle_string': 'caricoleman'
+            'handle_str': 'caricoleman'
             }
     }
 
@@ -102,7 +101,7 @@ def test_user_setname_valid_last_name():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'koleman', 
-            'handle_string': 'caricoleman'
+            'handle_str': 'caricoleman'
             }
     }
 
@@ -121,7 +120,7 @@ def test_user_setname_valid_both_names():
             'email': "caricoleman@gmail.com", 
             'name_first': 'kari', 
             'name_last': 'koleman', 
-            'handle_string': 'caricoleman'
+            'handle_str': 'caricoleman'
             }
     }
 
@@ -145,7 +144,7 @@ def test_user_setname_valid_multiple():
         'email': "caricoleman@gmail.com", 
         'name_first': 'kari', 
         'name_last': 'koleman', 
-        'handle_string': 'caricoleman'
+        'handle_str': 'caricoleman'
         }
     }
     
@@ -158,7 +157,7 @@ def test_user_setname_valid_multiple():
         'email': "ericamondy@gmail.com", 
         'name_first': 'erika', 
         'name_last': 'money', 
-        'handle_string': 'ericamondy'
+        'handle_str': 'ericamondy'
         }
     }
 
@@ -213,7 +212,7 @@ def test_user_setemail_valid():
         'email': "karicoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_string': 'caricoleman'
+        'handle_str': 'caricoleman'
         }
     }
 
@@ -237,7 +236,7 @@ def test_user_setemail_valid_multiple():
         'email': "karicoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_string': 'caricoleman'
+        'handle_str': 'caricoleman'
         }
     }
     
@@ -250,7 +249,7 @@ def test_user_setemail_valid_multiple():
         'email': "erikamoney@gmail.com", 
         'name_first': 'erica', 
         'name_last': 'mondy', 
-        'handle_string': 'ericamondy'
+        'handle_str': 'ericamondy'
         }
     }
 
@@ -284,7 +283,7 @@ def test_user_setemail_invalid_email_in_use():
             'email': "karicoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_string': 'caricoleman'
+            'handle_str': 'caricoleman'
             }
         }
         
@@ -305,7 +304,7 @@ def test_user_sethandle_valid():
         'email': "caricoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_string': 'karikoleman'
+        'handle_str': 'karikoleman'
         }
     }
 
@@ -329,7 +328,7 @@ def test_user_sethandle_valid_multiple():
         'email': "caricoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_string': 'karikoleman'
+        'handle_str': 'karikoleman'
         }
     }
     
@@ -342,7 +341,7 @@ def test_user_sethandle_valid_multiple():
         'email': "ericamondy@gmail.com", 
         'name_first': 'erica', 
         'name_last': 'mondy', 
-        'handle_string': 'erikamoney'
+        'handle_str': 'erikamoney'
         }
     }
 
@@ -385,7 +384,7 @@ def test_user_sethandle_invalid_handle_in_use():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_string': 'kari'
+            'handle_str': 'kari'
             }
         }
         
@@ -404,7 +403,7 @@ def test_users_all_v1_one():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_string': 'caricoleman'
+            'handle_str': 'caricoleman'
             }]
     }
 
@@ -426,14 +425,14 @@ def test_users_all_v1_two():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_string': 'caricoleman'
+            'handle_str': 'caricoleman'
             },
             {
             'u_id': 1, 
             'email': "ericamondy@gmail.com", 
             'name_first': 'erica', 
             'name_last': 'mondy', 
-            'handle_string': 'ericamondy'
+            'handle_str': 'ericamondy'
             }]
     } 
     
@@ -467,35 +466,35 @@ def test_users_all_v1_multiple():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_string': 'caricoleman'
+            'handle_str': 'caricoleman'
             },
             {
             'u_id': 1, 
             'email': "ericamondy@gmail.com", 
             'name_first': 'erica', 
             'name_last': 'mondy', 
-            'handle_string': 'ericamondy'
+            'handle_str': 'ericamondy'
             },
             {
             'u_id': 2, 
             'email': "hilarybently@gmail.com", 
             'name_first': 'hillary', 
             'name_last': 'bently', 
-            'handle_string': 'hillarybently'
+            'handle_str': 'hillarybently'
             },
             {
             'u_id': 3, 
             'email': "kentonwatkins@gmail.com", 
             'name_first': 'kenton', 
             'name_last': 'watkins', 
-            'handle_string': 'kentonwatkins'
+            'handle_str': 'kentonwatkins'
             },
             {
             'u_id': 4, 
             'email': "claudiamarley@gmail.com", 
             'name_first': 'claudia', 
             'name_last': 'marley', 
-            'handle_string': 'claudiamarley'
+            'handle_str': 'claudiamarley'
             },]
         } 
     
