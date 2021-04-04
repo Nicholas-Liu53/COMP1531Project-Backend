@@ -106,7 +106,7 @@ def test_notifications_get_in_channels(user1, user2, user3):
     } in notifications_get_v1(user2[token])[notifs]
     
     #* Test if @ without a valid handle string won't raise an error nor tag anyone
-    message7 = src.message.message_send_v1(user1[token], channel1[cID], "@Joe_Biden")
+    src.message.message_send_v1(user1[token], channel1[cID], "@Joe_Biden")
     assert {
         cID    : channel1[cID],
         'dm_id': -1,

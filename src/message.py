@@ -190,7 +190,7 @@ def message_edit_v1(token, message_id, message):
         if auth_user_id is not data['messages_log'][i]['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
             raise AccessError
     else:
-        dm = get_dm(data['messages_log'][i]['dm_id'])
+        get_dm(data['messages_log'][i]['dm_id'])
         if auth_user_id is not data['messages_log'][i]['u_id']:
             raise AccessError
 
