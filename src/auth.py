@@ -23,10 +23,12 @@ def auth_login_v1(email, password):
             Returns (dict) containing user_id corresponding to the inputted email and password 
 
     """
+    data = json.load(open('data.json', 'r'))
+
     if not re.search('^[a-zA-Z0-9]+[\\._]?[a-zA-Z0-9]+[@]\\w+[.]\\w{2,3}$', email):
         raise InputError
         
-    for user in src.data.users:
+    for user in data['users']:
         if email == user.get('email') and password == user.get('password'):
             user['session_id'].append(user['session_id'][-1] + 1)
             return {
@@ -141,6 +143,8 @@ def auth_register_v1(email, password, name_first, name_last):
         'permission_id': permissionID,
         'session_id': [0],
     })
+
+    data['notifs'][f"{user_id}"] = [] 
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)

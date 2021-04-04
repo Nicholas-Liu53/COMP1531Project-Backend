@@ -69,11 +69,41 @@ def user4():
     return response.json()
 
 def test_http_channels_create(user1, user2):
-    requests.post(f"{url}channels/create/v2", json={
+    cResponse = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
         "name": "Oogway",
         "is_public": True
     })
+    chanOne = cResponse.json()
+    responseUser1 = requests.get(f"{url}channels/list/v2", params = {'token': user1[token]})
+    assert responseUser1.json() == {
+        'channels': [{
+            cID: chanOne[cID],
+            Name: 'Oogway'
+        }]
+    }
+    assert requests.get(f"{url}channels/listall/v2", params = {'token': user1[token]}).json() == {
+        'channels': [{
+            cID: chanOne[cID],
+            Name: 'Oogway'
+        }]
+    }
+    assert requests.get(f"{url}channels/listall/v2", params = {'token': user2[token]}).json() == {
+        'channels': [{
+            cID: chanOne[cID],
+            Name: 'Oogway'
+        }]
+    }
+    assert requests.get(f"{url}channels/list/v2", params = {'token': user2[token]}).json() == {
+        'channels': []
+    }
+
+    response = requests.get(f"{url}channels/create/v2", json={
+        "token": user2[token],
+        "name": "abcdefghijklmnopqrstuvwxyz",
+        "is_public": True
+    })
+    assert response.status_code == 400
 
 def test_http_channels_list_valid(user1, user2):
     cResponse = requests.post(f"{url}channels/create/v2", json={

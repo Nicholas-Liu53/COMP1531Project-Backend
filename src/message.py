@@ -72,11 +72,11 @@ def message_send_v1(token, channel_id, message):
         }
     )
 
-    #* Push notifications if anyone is tagged
-    push_tagged_notifications(auth_user_id, channel_id, -1, message)
-
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
+
+    #* Push notifications if anyone is tagged
+    push_tagged_notifications(auth_user_id, channel_id, -1, message)
 
     return {
         'message_id': newID,
@@ -196,13 +196,13 @@ def message_edit_v1(token, message_id, message):
     else:                       # Else 
         messageDict['message'] = message
 
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+
     if messageDict['channel_id'] != -1:     #* If message is in a channel
         push_tagged_notifications(auth_user_id, message['channel_id'], -1, message)
     else:
         push_tagged_notifications(auth_user_id, -1, message['dm_id'], message)
-
-    with open('data.json', 'w') as FILE:
-        json.dump(data, FILE)
 
     return {
     }

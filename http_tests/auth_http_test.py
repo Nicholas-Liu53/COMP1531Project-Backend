@@ -31,11 +31,9 @@ def test_http_auth_login_invalid_email():
 
 def test_http_auth_login_invalid_not_registered_email():
     requests.delete(f"{url}clear/v1")
-    responseOne = requests.post(f"{url}auth/login/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
-    assert responseOne.status_code == 400
-
-    responseTwo = requests.post(f"{url}auth/login/v2", json={"email": "caricoleman@yahoo.com", "password": "1234567"})
-    assert responseTwo.status_code == 400
+    requests.post(f"{url}auth/login/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
+    response = requests.post(f"{url}auth/login/v2", json={"email": "caricoleman@yahoo.com", "password": "1234567"})
+    assert response.status_code == 400
 
 def test_http_auth_login_invalid_incorrect_password():
     requests.delete(f"{url}clear/v1")
