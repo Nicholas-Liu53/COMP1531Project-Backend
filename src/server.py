@@ -50,10 +50,6 @@ def auth_login():
     payload = request.get_json()
     return src.auth.auth_login_v2(payload['email'], payload['password'])
     
-@APP.route("/channel/messages/v2", methods=['GET'])
-def channel_messages_v1():
-    token, channel_id, start = request.args.get('token'), request.args.get('channel_id'), request.args.get('start')
-    return src.dm.dm_messages_v1(token, int(channel_id), int(start))
 
 #* DM ROUTES
 @APP.route("/dm/details/v1", methods=['GET'])

@@ -70,6 +70,7 @@ def user4():
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
+
 def test_http_channel_invite(user1, user2, user3):
     
     responseChannel = requests.post(f"{url}channels/create/v2", json={
@@ -488,7 +489,9 @@ def test_http_channel_removeowner(user1, user2, user3, user4):
     )
 
     assert response5.status_code == 403
-def test_http_channel_messages(user1):
+    
+
+def test_http_channel_messages(user1, user2):
 
     #Create private channel by user1
     response = requests.post(f"{url}channels/create/v2", json={
@@ -515,7 +518,8 @@ def test_http_channel_messages(user1):
         'start': 2,
     })
     assert invalid_start.status_code == 400  
-    '''
+    
+    
     #Access error when authorised user not a member of channel 
     access_error = requests.get(f"{url}channel/messages/v2", params = {
         "token": user2[token],
@@ -533,13 +537,12 @@ def test_http_channel_messages(user1):
         "message" : "First message :)",
     })
         
-    #Success case 1: Less than 50 messages returns end as -1 
+
     result = requests.get(f"{url}channel/messages/v2", params = {
         "token": user1[token],
         cID: channel1[cID],
         'start': 0
     })
-    
     responseUser1 = result.json()
     expected = {
         "len_messages": 1,
@@ -563,11 +566,10 @@ def test_http_channel_messages(user1):
         message_counter += 1
         
     result2 = requests.get(f"{url}channel/messages/v2", params = {
-        "token": user2[token],
+        "token": user1[token],
         cID: channel1[cID],
         'start': 1
     })
-    
     response_2 = result2.json()
         
     expected_2 = {
@@ -577,6 +579,6 @@ def test_http_channel_messages(user1):
     }
     
     assert len(response_2['messages']) == expected_2['len_messages']
-    assert response_2['start'] == expected_2['stsart']
+    assert response_2['start'] == expected_2['start']
     assert response_2['end'] == expected_2['end']
-    '''
+   
