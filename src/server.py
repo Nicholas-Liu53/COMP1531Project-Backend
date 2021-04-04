@@ -80,11 +80,6 @@ def dm_leave():
 def dm_messages():
     pass
 
-@APP.route("/auth/login/v2", methods=['POST'])
-def auth_login():
-    payload = request.get_json()
-    return src.auth.auth_login_v2(payload['email'], payload['password'])
-
 @APP.route("/channel/join/v2", methods=['POST'])
 def channel_join():
     payload = request.get_json()
@@ -137,8 +132,8 @@ def search():
 
 @APP.route("/user/profile/v2", methods=['GET'])
 def user_profile():
-    payload = request.get_json()
-    return src.user.user_profile_v2(payload['token'], payload['u_id'])
+    token, u_id = request.args.get('token'), request.args.get('u_id')
+    return src.user.user_profile_v2(token, u_id)
 
 @APP.route("/user/profile/setname/v2", methods=['PUT'])
 def user_setname():
