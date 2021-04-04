@@ -134,27 +134,27 @@ def test_http_search_channels(user1, user2, user3, user4, user5, channel1, chann
         "channel_id": channel2[cID],
         "u_id": user5[AuID]
     })
-    m1 = requests.post(f"{url}message/send/v2", json={
+    requests.post(f"{url}message/send/v2", json={
         "token": user1[token],
         "channel_id": channel1['channel_id'],
         "message": "Welcome"
     }).json()
-    m2 = requests.post(f"{url}message/send/v2", json={
-        "token": user3[token],
+    requests.post(f"{url}message/send/v2", json={
+        "token": user2[token],
         "channel_id": channel2['channel_id'],
         "message": "Akeome"
     }).json()
-    m3 = requests.post(f"{url}message/send/v2", json={
+    requests.post(f"{url}message/send/v2", json={
         "token": user3[token],
         "channel_id": channel1['channel_id'],
         "message": "omg"
     }).json()
-    m4 = requests.post(f"{url}message/send/v2", json={
-        "token": user3[token],
+    requests.post(f"{url}message/send/v2", json={
+        "token": user4[token],
         "channel_id": channel2['channel_id'],
         "message": "Nomnom"
     }).json()
-    m5 = requests.post(f"{url}message/send/v2", json={
+    requests.post(f"{url}message/send/v2", json={
         "token": user3[token],
         "channel_id": channel1['channel_id'],
         "message": "Bruh haha"
@@ -219,14 +219,14 @@ def test_http_search_channels(user1, user2, user3, user4, user5, channel1, chann
             messageFound = True
     assert not messageFound
 
-    m6 = requests.post(f"{url}message/send/v2", json={
+    requests.post(f"{url}message/send/v2", json={
         "token": user4[token],
         "channel_id": channel2['channel_id'],
         "message": "Joe Biden"
     }).json()
     messageFound = False
     for messages in requests.get(f"{url}search/v2", params={
-        "token": user2[token],
+        "token": user5[token],
         "query_str": "jOE bIDEN"
     }).json()['messages']:
         if messages['message'] == "Joe Biden":
@@ -234,4 +234,24 @@ def test_http_search_channels(user1, user2, user3, user4, user5, channel1, chann
     assert messageFound
 
 def test_http_search_dms(user1, user2, user3, dm1):
-    pass
+    dmMessage = requests.post(f"{url}message/senddm/v1", json={
+        "token": user1[token],
+        "dm_id": dm1[dmID],
+        "message": "Biden Harris 2020"
+    })
+    messageFound = False
+    for messages in requests.get(f"{url}search/v2", params={
+        "token": user2[token],
+        "query_str": "bIDEN h"
+    }).json()['messages']:
+        if messages['message'] == "Biden Harris 2020":
+            messageFound = True
+    assert messageFound
+    messageFound = False
+    for messages in requests.get(f"{url}search/v2", params={
+        "token": user3[token],
+        "query_str": "bIDEN h"
+    }).json()['messages']:
+        if messages['message'] == "Biden Harris 2020":
+            messageFound = True
+    assert not messageFound
