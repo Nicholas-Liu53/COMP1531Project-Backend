@@ -213,20 +213,21 @@ def message_edit_v1(token, message_id, message):
     }
 
 def message_senddm_v1(token, dm_id, message):
-    data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
+    print(get_dm(dm_id))
     dmMembers = get_dm(dm_id)[allMems]
     if auth_user_id not in dmMembers:
         raise AccessError
     if len(message) > 1000:
         raise InputError
+    data = json.load(open('data.json', 'r'))
     if len(data['messages_log']) > 0:
         message_id = data['messages_log'][-1]['message_id'] + 1
     else:
         message_id = 0
     now = datetime.now()
     time_created = int(now.strftime("%s"))
-    
+
     data['messages_log'].append({
         cID: -1,
         dmID: dm_id,

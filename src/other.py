@@ -200,10 +200,10 @@ def get_dm(dm_id):
     data = json.load(open('data.json', 'r'))
     for dm in data['dms']:
         if dm_id == dm['dm_id']:
-            with open('data.json', 'w') as FILE:
-                json.dump(data, FILE)
+            # with open('data.json', 'w') as FILE:
+            #     json.dump(data, FILE)
             return dm
-    # raise InputError
+    raise InputError
 
 def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
     taggerHandle = get_user(auth_user_id)['handle_str']
