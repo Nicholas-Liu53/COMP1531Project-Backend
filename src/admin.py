@@ -22,7 +22,22 @@ def user_remove_v1():
     pass
 
 def userpermission_change_v1(token, u_id, permission_id):
+    '''
+    userpermission_change_v1 works when an authorised user (Dreams Owner) has the ability to change a user with u_id to grant or revoke
+    their permissions by changing permission_id
 
+    Arguments:
+        token (str) - JWT containing { u_id, session_id }
+        u_id (int) - The id of desired user we want to change permission of.
+        permission_id (int) - The id of which we want to set the user's permission to, it is 1 for Dreams Owners and 2 for all other members.
+    Exceptions:
+        InputError - Raise when the u_id does not refer to a valid user, user does not exist
+        InputError - Raised when an invalid permission_id is given, eg. not 1 or 2
+        AccessError - Raised when the token does not belong to a Dreams owner with permission_id 1.
+    
+    Return Value:
+        Empty dictionary
+    '''
     auth_user_id, _ = decode(token)
 
     validUser = False
@@ -33,15 +48,15 @@ def userpermission_change_v1(token, u_id, permission_id):
         if user[uID] == auth_user_id:
             if user['permission_id'] == 1:
                 validOwner = True
-    if not validUser:
-        raise InputError
     if not validOwner:
         raise AccessError
-    
-    if permission_id != 1 or permission_id != 2:
+    if not validUser:
         raise InputError
 
-    for user in src.data.user:
+    if permission_id != 1 and permission_id != 2:
+        raise InputError
+
+    for user in src.data.users:
         if user[uID] == u_id:
             user['permission_id'] = permission_id
 

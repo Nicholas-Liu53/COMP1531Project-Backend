@@ -6,6 +6,8 @@ import src.auth, src.channels, src.other
 from src.error import InputError, AccessError
 from src.channels import channels_create_v1, channels_list_v2
 from src.message import message_send_v1
+import jwt
+from src.other import SECRET
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
@@ -17,89 +19,87 @@ fName   = 'name_first'
 lName   = 'name_last'
 token   = 'token'
 
-def test_channel_invite():
-    #* Ensure database is empty
-    #! Clearing data
-    src.other.clear_v1()
+@pytest.fixture
+def user1():
+    src.other.clear_v1()    
+    return src.auth.auth_register_v2("first@gmail.com", "password", "User", "1")
 
-    #* Create user and channel for user to be invited
-    #* Users
-    userID1 = src.auth.auth_register_v2("testing1@gmail.com", "Monkey", "Vincent", "Le")
-    userID2 = src.auth.auth_register_v2("testing2@gmail.com", "jonkey", "Darius", "Kuan")
-    #* Channel create
-    privateChannel = src.channels.channels_create_v1(userID1[token], 'Coolkids', False)
+@pytest.fixture
+def user2():
+    return src.auth.auth_register_v2("second@gmail.com", "password", "User", "2")
 
-    #* Test 1: Does userID2 get successfully invited to channel "Coolkids"
-    channel_invite_v1(userID1[token], privateChannel[cID], userID2[AuID])
+@pytest.fixture
+def user3():
+    return src.auth.auth_register_v2("third@gmail.com", "password", "User", "3")
+
+@pytest.fixture
+def user4():
+    return src.auth.auth_register_v2("fourth@gmail.com", "password", "User", "4")
+
+@pytest.fixture
+def user5():
+    return src.auth.auth_register_v2("fifth@gmail.com", "password", "User", "5")
+
+def test_channel_invite(user1, user2, user3):
+
+    privateChannel = src.channels.channels_create_v1(user1[token], 'Coolkids', False)
+
+    #* Test 1: Does user2 get successfully invited to channel "Coolkids"
+    channel_invite_v1(user1[token], privateChannel[cID], user2[AuID])
     assert {
-        fName: 'Darius', 
-        lName: 'Kuan', 
-        'email': "testing2@gmail.com", 
-        'handle_string': "dariuskuan",
-        uID: userID2[AuID],
-    } in channel_details_v1(userID1[token], privateChannel[cID])[allMems]
+        fName: 'User', 
+        lName: '2', 
+        'email': "second@gmail.com", 
+        'handle_string': "user2",
+        uID: user2[AuID],
+    } in channel_details_v1(user1[token], privateChannel[cID])[allMems]
     
     #* Test 2: is InputError raised when cID does not refer to valid channel
     with pytest.raises(InputError):
-        channel_invite_v1(userID1[token], "ThischannelIDdoesNotExist", userID2[AuID])
+        channel_invite_v1(user1[token], "ThischannelIDdoesNotExist", user2[AuID])
     
     #* Test 3: is InputError raised when u_id isnt a valid user
     with pytest.raises(InputError):
-        channel_invite_v1(userID1[token], "ThischannelIDdoesNotExist", "DoesntExist")
+        channel_invite_v1(user1[token], "ThischannelIDdoesNotExist", "DoesntExist")
     
     #* Test 4: is AccessError raised when auth_uID is not already a member of the channel
-    userID3 = src.auth.auth_register_v2("imposter@gmail.com", "g2g2gkden", "Among", "Us")
     with pytest.raises(AccessError):
-        channel_invite_v1(userID3[token], privateChannel[cID], userID2[AuID])
-
-    #* Finished testing for this function
-    #! Clearing data
-    src.other.clear_v1()
+        channel_invite_v1(user3[token], privateChannel[cID], user2[AuID])
 
 
-def test_channel_details():
-    #* Ensure database is empty
-    #! Clearing data
-    src.other.clear_v1()
-    
-    # Creating users and channels
-    userID1 = src.auth.auth_register_v2("testing4@gmail.com", "Monkey1", "Vincentd", "Lee")
-    userID2 = src.auth.auth_register_v2("testing3@gmail.com", "jonkey1", "Imposterd", "Kuand")
-    realChannel = src.channels.channels_create_v1(userID1[token], 'ChannelINFO', True)
+def test_channel_details(user1, user2):
+
+    realChannel = src.channels.channels_create_v1(user1[token], 'ChannelINFO', True)
 
     #* Test 1: Using the authorised user, does the channel details get presented for one user in channel
     
-    assert channel_details_v1(userID1[token], realChannel[cID]) == {
+    assert channel_details_v1(user1[token], realChannel[cID]) == {
         'name': "ChannelINFO",
         'is_public': True, 
         'owner_members':[{
-            'u_id': userID1[AuID],
-            'name_first': "Vincentd",
-            'name_last': 'Lee',
-            'email': 'testing4@gmail.com',
-            'handle_string': 'vincentdlee',
+            'u_id': user1[AuID],
+            'name_first': "User",
+            'name_last': '1',
+            'email': 'first@gmail.com',
+            'handle_string': 'user1',
         }],
         'all_members':[{
-            'u_id': userID1[AuID], 
-            'name_first': "Vincentd",
-            'name_last': 'Lee',
-            'email': 'testing4@gmail.com',
-            'handle_string': 'vincentdlee',
+            'u_id': user1[AuID], 
+            'name_first': "User",
+            'name_last': '1',
+            'email': 'first@gmail.com',
+            'handle_string': 'user1',
         }]
     }
     
     #* Test 2: Is InputError raised when Channel ID is not a valid channel
     with pytest.raises(InputError):
-        channel_details_v1(userID1[token], 'InvalidID')
+        channel_details_v1(user1[token], 'InvalidID')
 
     #* Test 3: Is AccessError raised when the user is not membber of channel with the channel id
     with pytest.raises(AccessError):
-        channel_details_v1(userID2[token], realChannel[cID])
+        channel_details_v1(user2[token], realChannel[cID])
     
-    #* Finished testing for this function
-    #! Clearing data
-    src.other.clear_v1()
-
 
 def test_channel_messages():
     #* Ensure database is empty
@@ -113,271 +113,254 @@ def test_channel_messages():
     #Create public channel by user_id 1
     firstChannel = channels_create_v1(userID1[token], 'Yggdrasil', True)
     
-    '''
     #Send one message in channel 
-    message_send_v1(1, firstChannel[cID], "First Message")
-    '''
+    message_send_v1(userID1[token], firstChannel[cID], "First Message")
 
     with pytest.raises(InputError):
         #* Test 1: returns input error when start is greater than total number of 
         #* messages in channel
-        channel_messages_v1(userID1[AuID], firstChannel[cID], 4)
+        channel_messages_v1(userID1[token], firstChannel[cID], 4)
         
         #* Test 2: Raises input error when channel_id is invalid 
-        channel_messages_v1(userID1[AuID], -1, 0) 
+        channel_messages_v1(userID1[token], -1, 0) 
         
     with pytest.raises(AccessError):
         #* Test 3: returns access error when authorised user not a member of channel
-        channel_messages_v1(userID2[AuID], firstChannel[cID], 0)
+        channel_messages_v1(userID2[token], firstChannel[cID], 0)
 
         
     with pytest.raises(AccessError):
         #Test 3: returns access error when authorised user not a member of channel
-        channel_messages_v1(2, "Yggdrasil", 0)
+        channel_messages_v1(userID2[token], firstChannel[cID], 0)
 
         
     #Test 4: if there are less than 50 messages, returns -1 in "end"
     assert channel_messages_v1(userID1[token], firstChannel[cID], 0)["end"] == -1
     
-    '''
     #Test 5: if there are more than 50 messages, returns "start+50" as "end"
     #first need to write 50 messages in channel 
     counter = 0
     while counter < 51:
-        message_send_v1(1, "Yggdrasil", "Spam :)")
+        message_send_v1(userID1[token], firstChannel[cID], "Spam :)")
         counter += 1  
     
     #Now there should be 52 messages in our channel (1 from start + 51 from while loop)
-    assert channel_messages_v1(1, "Yggdrasil", 1) == 51
-    '''
-    
-    pass
+    assert channel_messages_v1(userID1[token], firstChannel[cID], 1)['end'] == 51
+    assert channel_messages_v1(userID1[token], firstChannel[cID], 1)['start'] == 1
+    assert len(channel_messages_v1(userID1[token], firstChannel[cID], 1)['messages']) == 50
 
-def test_channel_leave():
-    #* Ensure database is empty
+    #* Finished testing for this function
     #! Clearing data
     src.other.clear_v1()
 
-    #* Setup users and channels and create shorthand for strings for testing code
-    userID1 = src.auth.auth_register_v2("ayelmao@gmail.com", "Bl00dO4th", "C", "L")
-    userID2 = src.auth.auth_register_v2("lolrofl@gmail.com", "pr3ttynAme", "S", "S")
-    userID3 = src.auth.auth_register_v2("zodiac@gmail.com", "T3dCruz", "T", "C")
-    userID4 = src.auth.auth_register_v2("ocasio@gmail.com", "Alex4ndr1a", "A", "O")
+def test_channel_leave(user1, user2, user3, user4):
 
-    # userID1 made public channel 'TrumpPence'
-    firstChannel = src.channels.channels_create_v1(userID1[token], 'TrumpPence', True)
+    #* user1 made public channel 'TrumpPence'
+    firstChannel = src.channels.channels_create_v1(user1[token], 'TrumpPence', True)
 
-    #* userID2, userID3 and userID4 join public channel 'TrumpPence'
-    channel_join_v1(userID2[token], firstChannel[cID])
-    channel_join_v1(userID3[token], firstChannel[cID])
-    channel_join_v1(userID4[token], firstChannel[cID])
+    #* user2, user3 and user4 join public channel 'TrumpPence'
+    channel_join_v1(user2[token], firstChannel[cID])
+    channel_join_v1(user3[token], firstChannel[cID])
+    channel_join_v1(user4[token], firstChannel[cID])
 
     #* Make sure they joined
     assert {
-        uID: userID2[AuID],
-        fName: 'S',
-        lName: "S",
-        'email': "lolrofl@gmail.com",
-        'handle_string': "ss",
-    } in channel_details_v1(userID2[token], firstChannel[cID])[allMems]
+        uID: user2[AuID],
+        fName: 'User',
+        lName: "2",
+        'email': "second@gmail.com",
+        'handle_string': "user2",
+    } in channel_details_v1(user2[token], firstChannel[cID])[allMems]
     assert {
-        uID: userID3[AuID],
-        fName: 'T',
-        lName: "C",
-        'email': "zodiac@gmail.com",
-        'handle_string': "tc",
-    } in channel_details_v1(userID3[token], firstChannel[cID])[allMems]
+        uID: user3[AuID],
+        fName: 'User',
+        lName: "3",
+        'email': "third@gmail.com",
+        'handle_string': "user3",
+    } in channel_details_v1(user3[token], firstChannel[cID])[allMems]
     assert {
-        uID: userID4[AuID],
-        fName: 'A',
-        lName: "O",
-        'email': "ocasio@gmail.com",
-        'handle_string': "ao",
-    } in channel_details_v1(userID4[token], firstChannel[cID])[allMems]
+        uID: user4[AuID],
+        fName: 'User',
+        lName: "4",
+        'email': "fourth@gmail.com",
+        'handle_string': "user4",
+    } in channel_details_v1(user4[token], firstChannel[cID])[allMems]
 
     #* One of them gets removed
-    channel_leave_v1(userID3[token], firstChannel[cID])
+    channel_leave_v1(user3[token], firstChannel[cID])
     assert {
-        uID: userID3[token],
-        fName: 'T',
-        lName: "C",
-        'email': "zodiac@gmail.com",
-        'handle_string': "tc",
-    } not in channel_details_v1(userID1[token], firstChannel[cID])[allMems]
+        uID: user3[token],
+        fName: 'User',
+        lName: "3",
+        'email': "third@gmail.com",
+        'handle_string': "user3",
+    } not in channel_details_v1(user1[token], firstChannel[cID])[allMems]
 
     #* Another gets removed 
-    channel_leave_v1(userID4[token], firstChannel[cID])
+    channel_leave_v1(user4[token], firstChannel[cID])
     assert {
-        uID: userID4[token],
-        fName: 'A',
-        lName: "O",
-        'email': "ocasio@gmail.com",
-        'handle_string': "ao",
-    } not in channel_details_v1(userID1[token], firstChannel[cID])[allMems]
+        uID: user4[token],
+        fName: 'User',
+        lName: "4",
+        'email': "fourth@gmail.com",
+        'handle_string': "user4",
+    } not in channel_details_v1(user1[token], firstChannel[cID])[allMems]
+
+    #* Test if the only owner cannot leave the channel
+    with pytest.raises(InputError):
+        channel_leave_v1(user1[token], firstChannel[cID])
+
+    #* Test if someone not in the group cannot 'leave' the group
+    with pytest.raises(AccessError):
+        channel_leave_v1(user3[token], firstChannel[cID])
 
     #* Finished testing for this function
     #! Clearing data
     src.other.clear_v1()
 
 
-def test_channel_join():
-    #* Ensure database is empty
-    #! Clearing data
-    src.other.clear_v1()
+def test_channel_join(user1, user2, user3, user4):
 
-    #* Setup users and channels and create shorthand for strings for testing code
-    userID1 = src.auth.auth_register_v2("ayelmao@gmail.com", "Bl00dO4th", "C", "L")
-    userID2 = src.auth.auth_register_v2("lolrofl@gmail.com", "pr3ttynAme", "S", "S")
-    userID3 = src.auth.auth_register_v2("zodiac@gmail.com", "T3dCruz", "T", "C")
-    userID4 = src.auth.auth_register_v2("ocasio@gmail.com", "Alex4ndr1a", "A", "O")
+    # user1 made public channel 'TrumpPence'
+    firstChannel = src.channels.channels_create_v1(user1[token], 'TrumpPence', True)
+    # user2 made private channel 'BidenHarris'
+    secondChannel = src.channels.channels_create_v1(user2[token], 'BidenHarris', False)
 
-    # userID1 made public channel 'TrumpPence'
-    firstChannel = src.channels.channels_create_v1(userID1[token], 'TrumpPence', True)
-    # userID2 made private channel 'BidenHarris'
-    secondChannel = src.channels.channels_create_v1(userID2[token], 'BidenHarris', False)
-
-    #* Test 1: If userID3 successfully joins public channel 'TrumpPence'
-    channel_join_v1(userID3[token], firstChannel[cID])
+    #* Test 1: If user3 successfully joins public channel 'TrumpPence'
+    channel_join_v1(user3[token], firstChannel[cID])
     assert {
-        uID: userID3[AuID],
-        'email': "zodiac@gmail.com",
-        fName: "T",
-        lName: "C",
-        'handle_string': 'tc'
-    } in channel_details_v1(userID3[token], firstChannel[cID])[allMems]
+        uID: user3[AuID],
+        'email': "third@gmail.com",
+        fName: "User",
+        lName: "3",
+        'handle_string': 'user3'
+    } in channel_details_v1(user3[token], firstChannel[cID])[allMems]
 
-    #* Test 2: If userID4 unsuccessfully joins private channel 'BidenHarris'
+    #* Test 2: If user4 unsuccessfully joins private channel 'BidenHarris'
     with pytest.raises(AccessError): 
         # Check if AccessError is raised when trying to join a private channel
-        channel_join_v1(userID4[token], secondChannel[cID])
+        channel_join_v1(user4[token], secondChannel[cID])
 
-    #* Test 3: userID3 and userID4 aren't in channels they haven't joined 
+    #* Test 3: user3 and user4 aren't in channels they haven't joined 
     with pytest.raises(AccessError):
-        channel_details_v1(userID3[token], secondChannel[cID])[allMems]
-        channel_details_v1(userID4[token], firstChannel[cID])[allMems]
+        channel_details_v1(user3[token], secondChannel[cID])[allMems]
+        channel_details_v1(user4[token], firstChannel[cID])[allMems]
 
     #* Test 4: Check if InputError is raised when channel does not exist
     #! Clearing data
     src.other.clear_v1()                                    # Channel is deleted
     with pytest.raises(InputError):                         
-        channel_join_v1(userID1[token], firstChannel[cID])   # userID1 tries to join the non-existent channel
+        channel_join_v1(user1[token], firstChannel[cID])   # user1 tries to join the non-existent channel
 
     #* Test 4: Check if InputError is raised when channel does not exist
     #! Clearing data
     src.other.clear_v1()                                    # Channel is deleted
     with pytest.raises(InputError):                         
-        channel_join_v1(userID1[token], firstChannel[cID])   # userID1 tries to join the non-existent channel
+        channel_join_v1(user1[token], firstChannel[cID])   # user1 tries to join the non-existent channel
 
     #* Finished testing for this function
     #! Clearing data
-    src.other.clear_v1()
+    #   src.other.clear_v1()
 
-def test_channel_addowner():
+def test_channel_addowner(user1, user2,user3,user4, user5):
 
-    src.other.clear_v1()
+    channelTest = src.channels.channels_create_v1(user2[token], 'Channel', False)
 
-    userID0 = src.auth.auth_register_v2("ownerDreams@gmail.com", "GodOwner123", "Owner", "Owner")
-    userID1 = src.auth.auth_register_v2("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
-    userID2 = src.auth.auth_register_v2("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
-
-    channelTest = src.channels.channels_create_v1(userID1[token], 'Channel', True)
-
-    channel_addowner_v1(userID1[token], channelTest[cID], userID2[AuID])
+    # Test 1: Testing for whether added user now appears in both owner list and all members list of private chan
+    channel_addowner_v1(user2[token], channelTest[cID], user3[AuID])
     assert {
-        uID: userID2[AuID],        
-        fName: 'Meng',
-        lName: 'Jeffrey',
-        'email': 'imthekewlest@gmail.com',
-        'handle_string': 'mengjeffrey',
-    } in channel_details_v1(userID1[token], channelTest[cID])[ownMems]
+        uID: user3[AuID],        
+        fName: 'User',
+        lName: '3',
+        'email': 'third@gmail.com',
+        'handle_string': 'user3',
+    } in channel_details_v1(user2[token], channelTest[cID])[ownMems]
     assert {
-        uID: userID2[AuID],
-        fName: 'Meng',
-        lName: 'Jeffrey',
-        'email': 'imthekewlest@gmail.com',
-        'handle_string': 'mengjeffrey',
-    } in channel_details_v1(userID1[token], channelTest[cID])[allMems]
+        uID: user3[AuID],
+        fName: 'User',
+        lName: '3',
+        'email': 'third@gmail.com',
+        'handle_string': 'user3',
+    } in channel_details_v1(user2[token], channelTest[cID])[allMems]
 
-    channelTest2 = src.channels.channels_create_v1(userID0[token], 'Channel2', True)
+    channelTest2 = src.channels.channels_create_v1(user1[token], 'Channel2', True)
 
-    channel_addowner_v1(userID0[token], channelTest2[cID], userID2[AuID])
+    # Test 2: Testing for whether added user now appears in both owner list and all members list of public chan
+    channel_addowner_v1(user1[token], channelTest2[cID], user3[AuID])
     assert {
-        uID: userID2[AuID],
-        fName: 'Meng',
-        lName: 'Jeffrey',
-        'email': 'imthekewlest@gmail.com',
-        'handle_string': 'mengjeffrey',
-    } in channel_details_v1(userID2[token], channelTest2[cID])[ownMems]
+        uID: user3[AuID],
+        fName: 'User',
+        lName: '3',
+        'email': 'third@gmail.com',
+        'handle_string': 'user3',
+    } in channel_details_v1(user3[token], channelTest2[cID])[ownMems]
     assert {
-        uID: userID2[AuID],
-        fName: 'Meng',
-        lName: 'Jeffrey',
-        'email': 'imthekewlest@gmail.com',
-        'handle_string': 'mengjeffrey',
-    } in channel_details_v1(userID2[token], channelTest2[cID])[allMems]
+        uID: user3[AuID],
+        fName: 'User',
+        lName: '3',
+        'email': 'third@gmail.com',
+        'handle_string': 'user3',
+    } in channel_details_v1(user3[token], channelTest2[cID])[allMems]
 
-    userID3 = src.auth.auth_register_v2("owner@gmail.com", "T3dCruz", "emfrigos", "Meng")
-    # invalid channel
+    # Test 3: for invalid channel, raising input error
     with pytest.raises(InputError): 
-        channel_addowner_v1(userID1[token], 999, userID3[AuID])
+        channel_addowner_v1(user2[token], 999, user4[AuID])
     
-    # alr an owner
+    # Test 4: for user already in owner list
     with pytest.raises(InputError):
-        channel_addowner_v1(userID1[token], channelTest[cID], userID2[AuID])
+        channel_addowner_v1(user2[token], channelTest[cID], user3[AuID])
 
-    userID4 = src.auth.auth_register_v2("owner123@gmail.com", "T3dCruz", "Mengsoris", "Meng")
-
+    # Test 5: User with no permission to add owner
     with pytest.raises(AccessError):
-        channel_addowner_v1(userID3[token], channelTest[cID], userID4[AuID])
+        channel_addowner_v1(user4[token], channelTest[cID], user5[AuID])
     
         
 
-def test_channel_removeowner():
+def test_channel_removeowner(user1, user2, user3, user4):
 
-    src.other.clear_v1()
-
-    userID0 = src.auth.auth_register_v2("ownerDreams@gmail.com", "GodOwner123", "Owner", "Owner")
-    userID1 = src.auth.auth_register_v2("testing4@gmail.com", "PasswordisKewl", "Jeffrey", "Meng")
-    userID2 = src.auth.auth_register_v2("imthekewlest@gmail.com", "emfrigoslover123", "Meng", "Jeffrey")
-    userID3 = src.auth.auth_register_v2("zodiac@gmail.com", "T3dCruz", "T", "C")
-    channelTest = src.channels.channels_create_v1(userID1[token], 'Channel', True)
-    channel_addowner_v1(userID1[token], channelTest[cID], userID2[AuID])
-
-    channel_removeowner_v1(userID2[token], channelTest[cID], userID1[AuID])
+    channelTest = src.channels.channels_create_v1(user2[token], 'Channel5', True)
+    channelTest2 = src.channels.channels_create_v1(user3[token], 'Channel6', True)
+    
+    # Test 1: adding a owner into channel and testing if they are successfully removed
+    channel_addowner_v1(user2[token], channelTest[cID], user3[AuID])
+    channel_addowner_v1(user2[token], channelTest[cID], user4[AuID])
+    channel_removeowner_v1(user3[token], channelTest[cID], user4[AuID])
+    # check to see if user2 has been removed from owners, but remains in all members
     assert {
-        uID: userID2[AuID],
-        fName: 'Meng',
-        lName: 'Jeffrey',
-        'email': 'imthekewlest@gmail.com',
-        'handle_string': 'mengjeffrey',
-    } in channel_details_v1(userID1[token], channelTest[cID])[ownMems]
+        uID: user3[AuID],
+        fName: 'User',
+        lName: '3',
+        'email': 'third@gmail.com',
+        'handle_string': 'user3',
+    } in channel_details_v1(user2[token], channelTest[cID])[ownMems]
     assert {
-        uID: userID2[AuID],
-        fName: 'Meng',
-        lName: 'Jeffrey',
-        'email': 'imthekewlest@gmail.com',
-        'handle_string': 'mengjeffrey',
-    } in channel_details_v1(userID1[token], channelTest[cID])[allMems]
+        uID: user3[AuID],
+        fName: 'User',
+        lName: '3',
+        'email': 'third@gmail.com',
+        'handle_string': 'user3',
+    } in channel_details_v1(user2[token], channelTest[cID])[allMems]
     assert{
-        uID: userID1[AuID],
-        fName: 'Jeffrey',
-        lName: 'Meng',
-        'email': 'testing4@gmail.com',
-        'handle_string': 'jeffreymeng',
-    } in channel_details_v1(userID1[token], channelTest[cID])[allMems]
+        uID: user4[AuID],
+        fName: 'User',
+        lName: '4',
+        'email': 'fourth@gmail.com',
+        'handle_string': 'user4',
+    } in channel_details_v1(user2[token], channelTest[cID])[allMems]
 
+    # Test 2: with an invalid Channel ID, tests for Input Error being raised
     with pytest.raises(InputError):
-        channel_removeowner_v1(userID2[token], 9999, userID1[AuID])
+        channel_removeowner_v1(user3[token], 9999, user2[AuID])
 
+    # Test 3: Raise Input error successful for user not in the owner members
     with pytest.raises(InputError):
-        channel_removeowner_v1(userID2[token], channelTest[cID], userID3[AuID])
+        channel_removeowner_v1(user3[token], channelTest[cID], user4[AuID])
     
-    #only owner
+    # Test 4: With only one member in owner left, does not remove them, raising input error
     with pytest.raises(InputError):
-        channel_removeowner_v1(userID0[token], channelTest[cID], userID1[AuID])
+        channel_removeowner_v1(user1[token], channelTest2[cID], user3[AuID])
 
+    # Test 5: Non-owner trying to remove, raising access Error
+    channel_addowner_v1(user3[token], channelTest2[cID], user4[AuID])
     with pytest.raises(AccessError):
-        channel_removeowner_v1(userID3[token], channelTest[cID], userID2[AuID])
-    
-
-
+        channel_removeowner_v1(user2[token], channelTest2[cID], user3[AuID])

@@ -95,10 +95,7 @@ def channels_create_v1(token, name, is_public):
     userFound = False
     j = 0
     while not userFound:
-        if j >= len(src.data.users):
-            # If user doesn't exist in database, AccessError
-            raise AccessError
-        elif src.data.users[j][uID] == auth_user_id:
+        if src.data.users[j][uID] == auth_user_id:
             userFound = True
         j += 1
 
