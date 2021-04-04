@@ -66,19 +66,23 @@ def dm_create():
 
 @APP.route("/dm/remove/v1", methods=['DELETE'])
 def dm_remove():
-    pass
+   payload = request.get_json()
+   return src.dm.dm_remove_v1(payload.get('token'), payload.get('dm_id'))
 
 @APP.route("/dm/invite/v1", methods=['POST'])
 def dm_invite():
-    pass
+    payload = request.get_json()
+    return src.dm.dm_invite_v1(payload.get('token'), payload.get('dm_id'), payload.get('u_id'))
 
 @APP.route("/dm/leave/v1", methods=['POST'])
 def dm_leave():
-    pass
-
+    payload = request.get_json()
+    return src.dm.dm_leave_v1(payload.get('token'), payload.get('dm_id'))
+    
 @APP.route("/dm/messages/v1", methods=['GET'])
 def dm_messages():
-    pass
+    token, dm_id, start = request.args.get('token'), request.args.get('dm_id'), request.args.get('start')
+    return src.dm.dm_messages_v1(token, int(dm_id), int(start))
 
 if __name__ == "__main__":
     APP.run(port=config.port) # Do not edit this port
