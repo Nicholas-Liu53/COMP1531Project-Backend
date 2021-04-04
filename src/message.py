@@ -41,6 +41,9 @@ def message_send_v1(token, channel_id, message):
     Return Value:
         Returns a dictionary with key 'message_id' to the new message's message_id
     '''
+
+    data = json.load(open('data.json', 'r'))
+    
     # Decode the token
     auth_user_id, _ = decode(token)
 
@@ -54,11 +57,11 @@ def message_send_v1(token, channel_id, message):
 
     now = datetime.now()
     time_created = int(now.strftime("%s"))
-    newID = len(src.data.messages_log)
+    newID = len(data['messages_log'])
 
     # User is in the channel (which exists) & message is appropriate length
     #* Time to send a message
-    src.data.messages_log.append(
+    data['messages_log'].append(
         {
             'channel_id'    : channel_id,
             'dm_id'         : -1,
@@ -71,6 +74,9 @@ def message_send_v1(token, channel_id, message):
 
     #* Push notifications if anyone is tagged
     push_tagged_notifications(auth_user_id, channel_id, -1, message)
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     return {
         'message_id': newID,
@@ -99,41 +105,49 @@ def message_remove_v1(token, message_id):
     Return Value:
         Returns an empty dictionary
     '''
+
+    data = json.load(open('data.json', 'r'))
+
     #* Decode the token
     auth_user_id, _ = decode(token)
 
     #* Get message dictionary in data
     messageFound = False
-    messageDict = {}
-    for message in src.data.messages_log:
-        if message['message_id'] == message_id:
-            messageDict = message
+    i = 0
+    while not messageFound:
+        if i >= len(data['messages_log']):
+            raise InputError
+        if data['messages_log'][i]['message_id'] == message_id:
             messageFound = True
-    if not messageFound:
-        raise InputError
+        i += 1
+
+    i -= 1              # Remove extra increment
 
     #* Check if the user is the writer, channel owner or owner of Dreams
     # Get the channel the message belongs to
-    channel = get_channel(messageDict['channel_id'])
-    if auth_user_id is not messageDict['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
+    channel = get_channel(data['messages_log'][i]['channel_id'])
+    if auth_user_id is not data['messages_log'][i]['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
         raise AccessError
 
     #* Remove the message
-    messageDict['message'] = '### Message Removed ###'
+    data['messages_log'].remove(data['messages_log'][i])
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     return {
     }
 
-def message_edit_v1(token, message_id, newMessage):
+def message_edit_v1(token, message_id, message):
     '''
-    Takes in a user's token, a message's id and newMessage string 
-    and replaces the message with the newMessage string.
-        --> Note: When the newMessage is an empty string, the message is removed
+    Takes in a user's token, a message's id and message string 
+    and replaces the message with the message string.
+        --> Note: When the message is an empty string, the message is removed
 
     Arguments:
         token        (str) - The JWT containing user_id and session_id of the user that is to leave the channel
         message_id   (int) - The id of the message that is to be removed
-        newMessage   (str) - The string for the message that will replace the old message
+        message      (str) - The string for the message that will replace the old message
 
     Exceptions:
         InputError - Occurs when:
@@ -148,13 +162,16 @@ def message_edit_v1(token, message_id, newMessage):
     Return Value:
         Returns an empty dictionary
     '''
+
+    data = json.load(open('data.json', 'r'))
+
     #* Decode the token
     auth_user_id, _ = decode(token)
 
     #* Get message dictionary in data
     messageFound = False
     messageDict = {}
-    for message in src.data.messages_log:
+    for message in data['messages_log']:
         if message['message_id'] == message_id:
             messageDict = message
             messageFound = True
@@ -172,17 +189,20 @@ def message_edit_v1(token, message_id, newMessage):
         if auth_user_id is not messageDict['u_id']:
             raise AccessError
 
-    if len(newMessage) > 1000:  # If the message is too long, raise InputError
+    if len(message) > 1000:  # If the message is too long, raise InputError
         raise InputError
-    elif newMessage == '':      #* If new message is empty string --> remove message
+    elif message == '':      #* If new message is empty string --> remove message
         message_remove_v1(token, message_id)
     else:                       # Else 
-        messageDict['message'] = newMessage
+        messageDict['message'] = message
 
     if messageDict['channel_id'] != -1:     #* If message is in a channel
-        push_tagged_notifications(auth_user_id, message['channel_id'], -1, newMessage)
+        push_tagged_notifications(auth_user_id, message['channel_id'], -1, message)
     else:
-        push_tagged_notifications(auth_user_id, -1, message['dm_id'], newMessage)
+        push_tagged_notifications(auth_user_id, -1, message['dm_id'], message)
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     return {
     }

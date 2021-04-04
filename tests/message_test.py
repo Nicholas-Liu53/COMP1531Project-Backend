@@ -221,8 +221,7 @@ def test_message_remove(user1, user2, user3, user4):
             removedMessage = messageDict
             messageFound = True
             break
-    assert messageFound is True 
-    assert removedMessage['message'] == '### Message Removed ###'
+    assert messageFound is False
     
 
     #* Test if user2 can remove the message
@@ -234,8 +233,7 @@ def test_message_remove(user1, user2, user3, user4):
             removedMessage = messageDict
             messageFound = True
             break
-    assert messageFound is True 
-    assert removedMessage['message'] == '### Message Removed ###'
+    assert messageFound is False
 
     #* Test if user3 can remove the message
     message_remove_v1(user3[token], message3['message_id'])
@@ -246,8 +244,7 @@ def test_message_remove(user1, user2, user3, user4):
             removedMessage = messageDict
             messageFound = True
             break
-    assert messageFound is True 
-    assert removedMessage['message'] == '### Message Removed ###'
+    assert messageFound is False
 
     #* Test if user4 cannot remove the message
     with pytest.raises(AccessError):

@@ -238,6 +238,8 @@ def channel_leave_v1(token, channel_id):
         Returns an empty list regardless of conditions :)
     '''
 
+    data = json.load(open('data.json', 'r'))
+
     auth_user_id, _ = decode(token)
 
     # Get the channel directory from data.py
@@ -250,9 +252,13 @@ def channel_leave_v1(token, channel_id):
     # Check if user is in the channel
     if auth_user_id not in channelData['all_members']:
         raise AccessError
-
+    
     # Time to remove from all_members list
     channelData['all_members'].remove(auth_user_id)
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+
     return {
     }
 
@@ -276,16 +282,18 @@ def channel_join_v1(token, channel_id):
         Returns an empty list regardless of conditions :)
     '''
 
+    data = json.load(open('data.json', 'r'))
+
     # Find the channel in the database
     channelFound = False
     i = 0
 
     # Loop throug channel data base until channel is found
     while not channelFound:
-        if i >= len(src.data.channels):
+        if i >= len(data['channels']):
             # If channel doesn't exist in database, inputError
             raise InputError
-        elif src.data.channels[i]['channel_id'] == channel_id:
+        elif data['channels'][i]['channel_id'] == channel_id:
             # If channel is found
             channelFound = True
         i += 1
@@ -298,18 +306,21 @@ def channel_join_v1(token, channel_id):
     userFound = False
     j = 0
     while not userFound:
-        if src.data.users[j]['u_id'] == auth_user_id:
+        if data['users'][j]['u_id'] == auth_user_id:
             userFound = True
         j += 1
 
     j -= 1      # Undo extra increment
     
-    if src.data.channels[i]['is_public'] == False and src.data.users[j]['permission_id'] != 1:
+    if data['channels'][i]['is_public'] == False and data['users'][j]['permission_id'] != 1:
         # If channel is private, AccessError
         raise AccessError
 
     # Time to add the user into the channel
-    src.data.channels[i]['all_members'].append(src.data.users[j]['u_id'])
+    data['channels'][i]['all_members'].append(data['users'][j]['u_id'])
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     # Done, return empty list 
     return {

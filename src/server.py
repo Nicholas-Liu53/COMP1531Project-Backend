@@ -80,5 +80,32 @@ def auth_login():
     payload = request.get_json()
     return src.auth.auth_login_v2(payload['email'], payload['password'])
 
+@APP.route("/channel/join/v2", methods=['POST'])
+def channel_join():
+    payload = request.get_json()
+    return src.channel.channel_join_v1(payload['token'], payload['channel_id'])
+
+@APP.route("/channel/leave/v1", methods=['POST'])
+def channel_join():
+    payload = request.get_json()
+    return src.channel.channel_leave_v1(payload['token'], payload['channel_id'])
+
+@APP.route("/channels/create/v2", methods=['POST'])
+def channels_create():
+    payload = request.get_json()
+    return src.channels.channels_create_v1(payload['token'], payload['name'], payload['is_public'])
+
+@APP.route("/message/send/v2", methods=['POST'])
+def message_send():
+    payload = request.get_json()
+    return src.message.message_send_v1(payload['token'], payload['channel_id'], payload['message'])
+
+@APP.route("/message/edit/v2", methods=['PUT'])
+    payload = request.get_json()
+    return src.message.message_edit_v1(payload['token'], payload['message_id'], payload['message'])
+
+@APP.route("/message/remove/v1", methods=['DELETE'])
+    pass
+
 if __name__ == "__main__":
     APP.run(port=config.port) # Do not edit this port
