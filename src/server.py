@@ -44,6 +44,11 @@ def auth_register():
     payload = request.get_json()
     return src.auth.auth_register_v2(payload['email'], payload['password'], payload['name_first'], payload['name_last'])
 
+@APP.route("/auth/login/v2", methods=['POST'])
+def auth_login():
+    payload = request.get_json()
+    return src.auth.auth_login_v2(payload['email'], payload['password'])
+
 @APP.route("/dm/details/v1", methods=['GET'])
 def dm_details():
     token, dm_id = request.args.get('token'), request.args.get('dm_id')
@@ -129,6 +134,32 @@ def notifications_get():
 def search():
     token, query_str = request.args.get('token'), request.args.get('query_str')
     return src.other.search_v1(token, query_str)
+
+@APP.route("/user/profile/v2", methods=['GET'])
+def user_profile():
+    payload = request.get_json()
+    return src.user.user_profile_v2(payload['token'], payload['u_id'])
+
+@APP.route("/user/profile/setname/v2", methods=['PUT'])
+def user_setname():
+    payload = request.get_json()
+    return src.user.user_setname_v2(payload['token'], payload['name_first'], payload['name_last'])
+
+@APP.route("/user/profile/setemail/v2", methods=['PUT'])
+def user_setemail():
+    payload = request.get_json()
+    return src.user.user_setname_v2(payload['token'], payload['email'])
+
+@APP.route("/user/profile/sethandle/v2", methods=['PUT'])
+def user_sethandle():
+    payload = request.get_json()
+    return src.user.user_setname_v2(payload['token'], payload['handle_str'])
+
+@APP.route("/users/all/v1", methods=['GET'])
+def users_all():
+    payload = request.get_json()
+    return src.user.users_all(payload['token'])
+
 
 if __name__ == "__main__":
     APP.run(port=config.port) # Do not edit this port
