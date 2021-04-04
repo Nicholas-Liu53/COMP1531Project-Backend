@@ -80,11 +80,6 @@ def dm_leave():
 def dm_messages():
     pass
 
-@APP.route("/auth/login/v2", methods=['POST'])
-def auth_login():
-    payload = request.get_json()
-    return src.auth.auth_login_v2(payload['email'], payload['password'])
-
 @APP.route("/channel/join/v2", methods=['POST'])
 def channel_join():
     payload = request.get_json()
