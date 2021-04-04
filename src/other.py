@@ -253,6 +253,6 @@ def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
 def check_removed(u_id):
     data = json.load(open('data.json', 'r'))
     for user in data["users"]:
-        if user["user_id"] == u_id:
+        if user["u_id"] == u_id:
             if user['permission_id'] == 0:
                 raise InputError
