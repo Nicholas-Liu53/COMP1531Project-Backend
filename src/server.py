@@ -101,18 +101,22 @@ def message_send():
     return src.message.message_send_v1(payload['token'], payload['channel_id'], payload['message'])
 
 @APP.route("/message/edit/v2", methods=['PUT'])
+def message_edit():
     payload = request.get_json()
     return src.message.message_edit_v1(payload['token'], payload['message_id'], payload['message'])
 
 @APP.route("/message/remove/v1", methods=['DELETE'])
+def message_remove():
     payload = request.get_json()
     return src.message.message_remove_v1(payload['token'], payload['message_id'])
 
 @APP.route("/notifications/get/v1", methods=['GET'])
+def notifications_get():
     token = request.args.get('token')
     return src.notifications.notifications_get_v1(token)
 
 @APP.route("/search/v2", methods=['GET'])
+def search():
     token, query_str = request.args.get('token'), request.args.get('query_str')
     return src.other.search_v1(token, query_str)
 
