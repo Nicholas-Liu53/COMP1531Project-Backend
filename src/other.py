@@ -254,3 +254,11 @@ def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
     data['notifs'][f"{user_id}"].insert(0, notification)
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
+
+def check_removed(u_id):
+    data = json.load(open('data.json', 'r'))
+    for user in data["users"]:
+        if user["u_id"] == u_id:
+            if user['permission_id'] == 0:
+                raise InputError
+

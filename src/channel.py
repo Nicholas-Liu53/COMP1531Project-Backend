@@ -1,7 +1,7 @@
 import src.data
 from src.error import AccessError, InputError 
 from src.channels import channels_listall_v2, channels_list_v2
-from src.other import decode, get_channel, get_members, get_user, message_count, push_added_notifications
+from src.other import decode, get_channel, get_members, get_user, message_count, push_added_notifications, check_removed
 import jwt
 import json
 from src.other import SECRET
@@ -65,6 +65,7 @@ def channel_invite_v1(token, channel_id, u_id):
     # should check for auth_user_id in channel info first for owners
 
     get_user(u_id)
+    check_removed(u_id)
 
     # now searches for channel_id
     for chan in data['channels']:

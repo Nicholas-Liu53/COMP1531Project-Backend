@@ -40,7 +40,7 @@ def user4():
 def user5():
     return src.auth.auth_register_v2("fifth@gmail.com", "password", "User", "5")
 
-def test_user_remove(user1, user2,):
+def test_user_remove(user1, user2):
     
     channelTest = src.channels.channels_create_v1(user1[token], 'Channel', True)
     src.channel.channel_join_v1(user2[token], channelTest[cID])
@@ -73,7 +73,9 @@ def test_user_remove(user1, user2,):
             'handle_str': 'user2'
             },]
     } 
-
+    with pytest.raises(InputError):
+        src.channel.channel_invite_v1(user1['token'], channelTest['channel_id'], user2[AuID])
+    
     #* Test: u_id does not refer to a valid user
     with pytest.raises(InputError):
         user_remove_v1(user1[token], -1)
