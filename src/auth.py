@@ -4,6 +4,7 @@ import re
 from jwt import encode
 import json
 from src.other import SECRET
+import hashlib
 
 def auth_register_v1(email, password, name_first, name_last):
     """ With the inputted data (email, password, name_first, name_last), checks whether the format of the data are valid. 
@@ -108,7 +109,7 @@ def auth_register_v1(email, password, name_first, name_last):
     #* appending the user dictionary into the users list
     data['users'].append({
         'email' : email,
-        'password' : password,
+        'password' : hashlib.sha256(password.encode()).hexdigest(),
         'name_first' : nameF,
         'name_last' : nameL,
         'u_id' : user_id,
@@ -170,7 +171,7 @@ def auth_login_v2(email, password):
     data = json.load(open('data.json', 'r'))
 
     for user in data['users']:
-        if email == user.get('email') and password == user.get('password'):
+        if email == user.get('email') and hashlib.sha256(password.encode()).hexdigest() == user.get('password'):
             new_session_id = user['session_id'][-1] + 1
             user['session_id'].append(new_session_id)
             token = encode({'session_id': new_session_id, 'user_id': user['u_id']}, SECRET, algorithm='HS256')
