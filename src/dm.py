@@ -1,9 +1,12 @@
+from flask import Flask, request
 import src.data
 from src.error import AccessError, InputError
 from src.other import decode, get_members, get_user, message_count, get_user_from_handlestring, push_added_notifications
 import src.auth
 import json
 import jwt
+
+APP = Flask(__name__)
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -135,16 +138,26 @@ def dm_create_v1(token, u_ids):
         'dm_name': dm_name
     }
 
-#Ethan
+
 def dm_remove_v1(token, dm_id):
-#Remove an existing DM, can only be done by original creator of dm
-#ASSUMPTION: Rest of dms retain same dm_ids when a dm is removed
-    data = json.load(open('data.json', 'r'))
+    '''
+    Removes a DM created by user 
+
+    Arguments:
+        token (str): JWT containing { u_id, session_id }
+        dm_id (int): dm_id of the DM that the authorised user is trying to access the DM's details
+
+    Exceptions:
+        Input Error
+            - Raise when dm_id does not refer to a valid DM
+        AccessError
+            - Raised when the user is not original DM creator 
+
+    Return Value:
+        {}
+    '''
+    #ASSUMPTION: Rest of dms retain same dm_ids when a dm is removed
     auth_user_ID, _ = decode(token)
-    #First omit errors
-    #Raise input error if dm_id is not valid DM number
-    #If dm_id not contained in list
-    #AccessError when the user is not original DM creator
     input_error = True
 
     for items in data['dms']:
@@ -168,17 +181,27 @@ def dm_remove_v1(token, dm_id):
 
     return {}
 
-#Ethan
 def dm_invite_v1(token, dm_id, u_id):
-#ASSUME: Do not need to add new user into dm_name
-#ASSUME: u_id will not include a user who is already in the DM
-#Invites a user to an existing dm
-    data = json.load(open('data.json', 'r'))
-    auth_user_ID, _ = decode(token)
-    #Check u_id
+    '''
+    Invites a user to join an existing dm
+    Arguments:
+        token (str): JWT containing { u_id, session_id }
+        dm_id (int): dm_id of the DM that the authorised user is trying to access the DM's details
+        u_id (int): user ID of the user that is being added to the DM
+
+    Exceptions:
+        Input Error
+            - Raise when dm_id does not refer to a valid DM
+            - Raise when u_id does not refer to existing user 
+        AccessError
+            - Raised when the authorised user is not a member of DM
+
+    Return Value:
+        {}
+    '''
+    #ASSUME: Do not need to add new user into dm_name
     get_user(u_id)
-    #Raises Input Error when dm_id is not valid
-    #Access error if auth user i.e token is not a member of dm
+    auth_user_ID, _ = decode(token)
     input_error = True
     for items in data['dms']:
         #Loop for input errors:
@@ -187,6 +210,7 @@ def dm_invite_v1(token, dm_id, u_id):
             if auth_user_ID not in items['all_members']:
                 raise AccessError
             else:
+                #If no errors found can add dm to list
                 items['all_members'].append(u_id)
                 with open('data.json', 'w') as FILE:
                     json.dump(data, FILE)
@@ -198,12 +222,24 @@ def dm_invite_v1(token, dm_id, u_id):
     return {}
 
 
-#Given a DM ID, user is removed as a member of this DM
 def dm_leave_v1(token, dm_id):
-    data = json.load(open('data.json', 'r'))
+    '''
+    Current user to leave DM with dm_id 
+    Arguments:
+        token (str): JWT containing { u_id, session_id }
+        dm_id (int): dm_id of the DM that the authorised user is trying to access the DM's details
+
+    Exceptions:
+        Input Error
+            - Raise when dm_id does not refer to a valid DM
+        AccessError
+            - Raised when the authorised user is not a member of DM
+
+    Return Value:
+        {}
+    '''
+
     auth_user_ID, _ = decode(token)
-    #Raises InputError when dm_id is not valid
-    # Access error if auth_user is not a member of dm with dm_id
     input_error = True
     for items in data['dms']:
         #Loop for input errors:
@@ -212,6 +248,7 @@ def dm_leave_v1(token, dm_id):
             if auth_user_ID not in items['all_members']:
                 raise AccessError
             else:
+                #If error not found remove dm from list 
                 items['all_members'].remove(auth_user_ID)
 
     if input_error:

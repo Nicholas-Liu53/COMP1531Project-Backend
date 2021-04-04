@@ -39,8 +39,29 @@ def user4():
 @pytest.fixture
 def user5():
     return src.auth.auth_register_v2("fifth@gmail.com", "password", "User", "5")
-def test_user_remove():
-    pass
+
+def test_user_remove(user1, user2):
+    
+    channelTest = src.channels.channels_create_v1(user1[token], 'Channel', True)
+    src.channel.channel_join_v1(user2[token], channelTest[cID])
+    src.message.message_send_v1(user2[token], channelTest[cID], 'Hello')
+    
+    user_remove_v1(user1[token], user2[AuID])
+    for dictionary in (src.channel.channel_messages_v1(user1[token], firstChannel[cID], 0)['messages']):
+        assert 'Removed user' in dictionary['message']
+
+    #* Test: u_id does not refer to a valid user
+    with pytest.raises(InputError):
+        user_remove_v1(user1[token], -1)
+
+    #* Test: the user is currently only owner
+    with pytest.raises(InputError): 
+        user_remove_v1(user1[token], user1[AuID])
+
+    #* User not an owner
+    with pytest.raises(AccessError): 
+        user_remove_v1(user2[token], user1[AuID])
+    
 
 def test_userpermissions_change(user1, user2, user3):
 
