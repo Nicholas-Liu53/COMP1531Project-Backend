@@ -256,4 +256,3 @@ def check_removed(u_id):
         if user["user_id"] == u_id:
             if user['permission_id'] == 0:
                 raise InputError
-        s
