@@ -65,6 +65,9 @@ def search_v1(token, query_str):
                 message string, and
                 time_created.
     '''
+
+    data = json.load(open('data.json', 'r'))
+
     #* Decode the token
     auth_user_id, _ = decode(token)
 
@@ -74,20 +77,20 @@ def search_v1(token, query_str):
 
     channelList = []
     #* Check which channels the user is in
-    for channel in src.data.channels:
+    for channel in data['channels']:
         if auth_user_id in channel[allMems]:
             channelList.append(channel[cID])
     
     DMList = []
     #* Check which DMs the user is in
-    for dm in src.data.dms:
+    for dm in data['dms']:
         if auth_user_id in dm[allMems]:
             DMList.append(dm['dm_id'])
 
     messages = []
 
     #* Add in every message in the channel/DM that contains query_str
-    for message in src.data.messages_log:
+    for message in data['messages_log']:
         if (message[cID] in channelList or message['dm_id'] in DMList) and query_str.lower() in message['message'].lower():
             messages.append(
                 {
@@ -191,7 +194,7 @@ def get_user_from_handlestring(handlestring):
 
 def get_message(message_id):
     data = json.load(open('data.json', 'r'))
-    for message in data['message_log']:
+    for message in data['messages_log']:
         if message_id == message['message_id']:
             return message
     raise InputError

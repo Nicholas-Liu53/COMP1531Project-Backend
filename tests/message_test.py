@@ -166,8 +166,7 @@ def test_message_edit(user1, user2, user3, user4):
             editedMessage = messageDict
             messageFound = True
             break
-    assert messageFound is True 
-    assert editedMessage['message'] == '### Message Removed ###'
+    assert messageFound is False
 
     #* Test if you cannot edit a message that doesn't exist
     with pytest.raises(InputError):

@@ -57,7 +57,10 @@ def message_send_v1(token, channel_id, message):
 
     now = datetime.now()
     time_created = int(now.strftime("%s"))
-    newID = len(data['messages_log'])
+    if len(data['messages_log']) > 0:
+        newID = data['messages_log'][-1]['message_id'] + 1
+    else:
+        newID = 0
 
     # User is in the channel (which exists) & message is appropriate length
     #* Time to send a message
@@ -171,18 +174,21 @@ def message_edit_v1(token, message_id, message):
     #* Get message dictionary in data
     messageFound = False
     i = 0
-    while i < len(data['messages_log']):
-        if data['messages_log'][i]['message_id'] == message_id:
+    while not messageFound:
+        if i >= len(data['messages_log']):
+            raise InputError
+        elif data['messages_log'][i]['message_id'] == message_id:
             messageFound = True
         i += 1
-    if not messageFound:
-        raise InputError
 
     i -= 1          # Undo extra increment
+
+    print(data['messages_log'][i])
 
     #* Check if the user is the writer, channel owner or owner of Dreams
     # Get the channel the message belongs to
     if data['messages_log'][i][cID] != -1:
+        print('autism')
         channel = get_channel(data['messages_log'][i]['channel_id'])
         if auth_user_id is not data['messages_log'][i]['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
             raise AccessError
@@ -194,12 +200,12 @@ def message_edit_v1(token, message_id, message):
     if len(message) > 1000:  # If the message is too long, raise InputError
         raise InputError
     elif message == '':      #* If new message is empty string --> remove message
-        message_remove_v1(token, message_id)
+        data['messages_log'].remove(data['messages_log'][i])
     else:                       # Else 
         data['messages_log'][i]['message'] = message
-        with open('data.json', 'w') as FILE:
-            json.dump(data, FILE)
-
+    
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     if data['messages_log'][i]['channel_id'] != -1:     #* If message is in a channel
         push_tagged_notifications(auth_user_id, data['messages_log'][i]['channel_id'], -1, message)
@@ -217,7 +223,10 @@ def message_senddm_v1(token, dm_id, message):
         raise AccessError
     if len(message) > 1000:
         raise InputError
-    message_id = len(data['messages_log'])
+    if len(data['messages_log']) > 0:
+        message_id = data['messages_log'][-1]['message_id'] + 1
+    else:
+        message_id = 0
     now = datetime.now()
     time_created = int(now.strftime("%s"))
     
