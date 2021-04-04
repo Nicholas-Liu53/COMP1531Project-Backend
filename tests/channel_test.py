@@ -50,7 +50,7 @@ def test_channel_invite(user1, user2, user3):
         fName: 'User', 
         lName: '2', 
         'email': "second@gmail.com", 
-        'handle_string': "user2",
+        'handle_str': "user2",
         uID: user2[AuID],
     } in channel_details_v1(user1[token], privateChannel[cID])[allMems]
     
@@ -81,14 +81,14 @@ def test_channel_details(user1, user2):
             'name_first': "User",
             'name_last': '1',
             'email': 'first@gmail.com',
-            'handle_string': 'user1',
+            'handle_str': 'user1',
         }],
         'all_members':[{
             'u_id': user1[AuID], 
             'name_first': "User",
             'name_last': '1',
             'email': 'first@gmail.com',
-            'handle_string': 'user1',
+            'handle_str': 'user1',
         }]
     }
     
@@ -110,8 +110,10 @@ def test_channel_messages():
     userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
     
 
-    #Create public channel by user_id 1
-    firstChannel = channels_create_v1(userID1[token], 'Yggdrasil', True)
+    #Create private channel by userID1
+    firstChannel = channels_create_v1(userID1[token], 'Yggdrasil', False)
+    #Now create a second public channel by userID1 to make sure that message only sent to first channel 
+    channels_create_v1(userID1[token], 'Marmot', True)
     
     #Send one message in channel 
     message_send_v1(userID1[token], firstChannel[cID], "First Message")
@@ -121,18 +123,13 @@ def test_channel_messages():
         #* messages in channel
         channel_messages_v1(userID1[token], firstChannel[cID], 4)
         
+    with pytest.raises(InputError):
         #* Test 2: Raises input error when channel_id is invalid 
         channel_messages_v1(userID1[token], -1, 0) 
         
     with pytest.raises(AccessError):
         #* Test 3: returns access error when authorised user not a member of channel
         channel_messages_v1(userID2[token], firstChannel[cID], 0)
-
-        
-    with pytest.raises(AccessError):
-        #Test 3: returns access error when authorised user not a member of channel
-        channel_messages_v1(userID2[token], firstChannel[cID], 0)
-
         
     #Test 4: if there are less than 50 messages, returns -1 in "end"
     assert channel_messages_v1(userID1[token], firstChannel[cID], 0)["end"] == -1
@@ -169,21 +166,21 @@ def test_channel_leave(user1, user2, user3, user4):
         fName: 'User',
         lName: "2",
         'email': "second@gmail.com",
-        'handle_string': "user2",
+        'handle_str': "user2",
     } in channel_details_v1(user2[token], firstChannel[cID])[allMems]
     assert {
         uID: user3[AuID],
         fName: 'User',
         lName: "3",
         'email': "third@gmail.com",
-        'handle_string': "user3",
+        'handle_str': "user3",
     } in channel_details_v1(user3[token], firstChannel[cID])[allMems]
     assert {
         uID: user4[AuID],
         fName: 'User',
         lName: "4",
         'email': "fourth@gmail.com",
-        'handle_string': "user4",
+        'handle_str': "user4",
     } in channel_details_v1(user4[token], firstChannel[cID])[allMems]
 
     #* One of them gets removed
@@ -193,7 +190,7 @@ def test_channel_leave(user1, user2, user3, user4):
         fName: 'User',
         lName: "3",
         'email': "third@gmail.com",
-        'handle_string': "user3",
+        'handle_str': "user3",
     } not in channel_details_v1(user1[token], firstChannel[cID])[allMems]
 
     #* Another gets removed 
@@ -203,7 +200,7 @@ def test_channel_leave(user1, user2, user3, user4):
         fName: 'User',
         lName: "4",
         'email': "fourth@gmail.com",
-        'handle_string': "user4",
+        'handle_str': "user4",
     } not in channel_details_v1(user1[token], firstChannel[cID])[allMems]
 
     #* Finished testing for this function
@@ -225,7 +222,7 @@ def test_channel_join(user1, user2, user3, user4):
         'email': "third@gmail.com",
         fName: "User",
         lName: "3",
-        'handle_string': 'user3'
+        'handle_str': 'user3'
     } in channel_details_v1(user3[token], firstChannel[cID])[allMems]
 
     #* Test 2: If user4 unsuccessfully joins private channel 'BidenHarris'
@@ -265,14 +262,14 @@ def test_channel_addowner(user1, user2,user3,user4, user5):
         fName: 'User',
         lName: '3',
         'email': 'third@gmail.com',
-        'handle_string': 'user3',
+        'handle_str': 'user3',
     } in channel_details_v1(user2[token], channelTest[cID])[ownMems]
     assert {
         uID: user3[AuID],
         fName: 'User',
         lName: '3',
         'email': 'third@gmail.com',
-        'handle_string': 'user3',
+        'handle_str': 'user3',
     } in channel_details_v1(user2[token], channelTest[cID])[allMems]
 
     channelTest2 = src.channels.channels_create_v1(user1[token], 'Channel2', True)
@@ -284,14 +281,14 @@ def test_channel_addowner(user1, user2,user3,user4, user5):
         fName: 'User',
         lName: '3',
         'email': 'third@gmail.com',
-        'handle_string': 'user3',
+        'handle_str': 'user3',
     } in channel_details_v1(user3[token], channelTest2[cID])[ownMems]
     assert {
         uID: user3[AuID],
         fName: 'User',
         lName: '3',
         'email': 'third@gmail.com',
-        'handle_string': 'user3',
+        'handle_str': 'user3',
     } in channel_details_v1(user3[token], channelTest2[cID])[allMems]
 
     # Test 3: for invalid channel, raising input error
@@ -323,21 +320,21 @@ def test_channel_removeowner(user1, user2, user3, user4):
         fName: 'User',
         lName: '3',
         'email': 'third@gmail.com',
-        'handle_string': 'user3',
+        'handle_str': 'user3',
     } in channel_details_v1(user2[token], channelTest[cID])[ownMems]
     assert {
         uID: user3[AuID],
         fName: 'User',
         lName: '3',
         'email': 'third@gmail.com',
-        'handle_string': 'user3',
+        'handle_str': 'user3',
     } in channel_details_v1(user2[token], channelTest[cID])[allMems]
     assert{
         uID: user4[AuID],
         fName: 'User',
         lName: '4',
         'email': 'fourth@gmail.com',
-        'handle_string': 'user4',
+        'handle_str': 'user4',
     } in channel_details_v1(user2[token], channelTest[cID])[allMems]
 
     # Test 2: with an invalid Channel ID, tests for Input Error being raised

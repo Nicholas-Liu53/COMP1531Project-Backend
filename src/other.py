@@ -11,7 +11,7 @@ Name      = 'name'
 fName     = 'name_first'
 lName     = 'name_last'
 chans     = 'channels'
-handle    = 'handle_string'
+handle    = 'handle_str'
 dmID      = 'dm_id'
 seshID    = 'session_id'
 SECRET    = 'MENG'
@@ -125,7 +125,7 @@ def get_user(user_id):
                 'email': user['email'],
                 'name_first': user['name_first'],
                 'name_last': user['name_last'],
-                'handle_string': user['handle_string'],
+                'handle_str': user['handle_str'],
             }
     raise InputError
 
@@ -162,13 +162,13 @@ def get_user_permissions(user_id):
 
 def get_user_from_handlestring(handlestring):
     for user in src.data.users:
-        if handlestring == user['handle_string']:
+        if handlestring == user['handle_str']:
             return {
                 uID: user[uID],
                 'email': user['email'],
                 'name_first': user['name_first'],
                 'name_last': user['name_last'],
-                'handle_string': user['handle_string'],
+                'handle_str': user['handle_str'],
             }
     raise InputError
 
@@ -189,7 +189,7 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
         raise InputError
     elif channel_id != -1 and dm_id != -1:
         raise InputError
-    taggerHandle = get_user(auth_user_id)['handle_string']
+    taggerHandle = get_user(auth_user_id)['handle_str']
     if channel_id != -1:
         channelDMname = get_channel(channel_id)['name']
     else:
@@ -222,7 +222,7 @@ def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
         raise InputError
     elif channel_id != -1 and dm_id != -1:
         raise InputError
-    taggerHandle = get_user(auth_user_id)['handle_string']
+    taggerHandle = get_user(auth_user_id)['handle_str']
     if channel_id != -1:
         channelDMname = get_channel(channel_id)['name']
     else:
