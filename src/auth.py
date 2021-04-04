@@ -2,6 +2,7 @@ import src.data
 from src.error import AccessError, InputError
 import re
 from jwt import encode
+import json
 
 SECRET = 'MENG'
 
@@ -22,10 +23,12 @@ def auth_login_v1(email, password):
             Returns (dict) containing user_id corresponding to the inputted email and password 
 
     """
+    data = json.load(open('data.json', 'r'))
+
     if not re.search('^[a-zA-Z0-9]+[\\._]?[a-zA-Z0-9]+[@]\\w+[.]\\w{2,3}$', email):
         raise InputError
         
-    for user in src.data.users:
+    for user in data['users']:
         if email == user.get('email') and password == user.get('password'):
             user['session_id'].append(user['session_id'][-1] + 1)
             return {
@@ -58,6 +61,8 @@ def auth_register_v1(email, password, name_first, name_last):
             Returns (dict) containing user_id corresponding to the inputted email, password, name_first and name_last
 
     """
+    data = json.load(open('data.json', 'r'))
+
     #* Storing name_first & name_list so original names 
     #* unaffected by handle generation
     nameF = name_first
@@ -84,7 +89,7 @@ def auth_register_v1(email, password, name_first, name_last):
         raise InputError
 
     # checking if inputted email is already being used by another user
-    for user in src.data.users:
+    for user in data['users']:
         if email == user['email']:
             raise InputError
 
@@ -116,19 +121,19 @@ def auth_register_v1(email, password, name_first, name_last):
         trailing_int = 0 
         
         # checking for duplicated names   
-        for user in src.data.users:
+        for user in data['users']:
             if check_handle(handle_string + str(trailing_int)):
                 trailing_int += 1
         
         handle_string = handle_string + str(trailing_int)
 
-    user_id = len(src.data.users)
+    user_id = len(data['users'])
 
     permissionID = 2
-    if len(src.data.users) == 0:
+    if len(data['users']) == 0:
         permissionID = 1
 
-    src.data.users.append({
+    data['users'].append({
         'email' : email,
         'password' : password,
         'name_first' : nameF,
@@ -138,19 +143,27 @@ def auth_register_v1(email, password, name_first, name_last):
         'permission_id': permissionID,
         'session_id': [0],
     })
+
+    data['notifs'][f"{u_id}"] = [] 
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+
     return {
         'auth_user_id': user_id
     }
 
 def check_handle(handle_string):
-    for user in src.data.users:
+    for user in data['users']:
         if handle_string == user['handle_string']:
             return True
     
     return False
 
 def auth_login_v2(email, password):  
-    for user in src.data.users:
+    data = json.load(open('data.json', 'r'))
+
+    for user in data['users']:
         if email == user.get('email') and password == user.get('password'):
             new_session_id = user['session_id'][-1] + 1
             user['session_id'].append(new_session_id)
