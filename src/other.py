@@ -250,11 +250,3 @@ def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
 
-def check_removed(u_id):
-    for channel in src.data.channels.items():
-            passed = False
-            if channel == ("channel_id", channel_id):
-                passed = True
-                break
-        if passed == False:
-            raise InputError       
