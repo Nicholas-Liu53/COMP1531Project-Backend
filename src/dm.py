@@ -1,7 +1,7 @@
 from flask import Flask, request
 import src.data
 from src.error import AccessError, InputError
-from src.other import decode, get_members, get_user, message_count, get_user_from_handlestring, push_added_notifications
+from src.other import decode, get_user, message_count, get_user_from_handlestring, push_added_notifications
 import src.auth
 import json
 import jwt

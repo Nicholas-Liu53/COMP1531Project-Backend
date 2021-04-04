@@ -132,7 +132,7 @@ def get_channel(channel_id):
             with open('data.json', 'w') as FILE:
                 json.dump(data, FILE)
             return channel
-    raise InputError
+    # raise InputError
 
 def get_user(user_id):
     data = json.load(open('data.json', 'r'))
@@ -148,23 +148,6 @@ def get_user(user_id):
                 'handle_str': user['handle_str'],
             }
     raise InputError
-
-def get_members(channel_id, dm_id):
-    data = json.load(open('data.json', 'r'))
-    if dm_id == -1:
-        for chanDetails in data['channels']:
-            if channel_id == chanDetails[cID]:
-                with open('data.json', 'w') as FILE:
-                    json.dump(data, FILE)
-                return chanDetails[Name], chanDetails[allMems]
-        raise InputError
-    else:
-        for dmDetails in data['dms']:
-            if dm_id == dmDetails[dmID]:
-                with open('data.json', 'w') as FILE:
-                    json.dump(data, FILE)
-                return dmDetails[Name], dmDetails[allMems]
-        raise InputError
 
 def message_count(channel_id, dm_id):
     counter = 0
@@ -187,7 +170,7 @@ def get_user_permissions(user_id):
             with open('data.json', 'w') as FILE:
                 json.dump(data, FILE)
             return user['permission_id']
-    raise InputError
+    # raise InputError
 
 def get_user_from_handlestring(handlestring):
     data = json.load(open('data.json', 'r'))
@@ -202,7 +185,7 @@ def get_user_from_handlestring(handlestring):
                 'name_last': user['name_last'],
                 'handle_str': user['handle_str'],
             }
-    raise InputError
+    # raise InputError
 
 def get_message(message_id):
     data = json.load(open('data.json', 'r'))
@@ -211,7 +194,7 @@ def get_message(message_id):
             with open('data.json', 'w') as FILE:
                 json.dump(data, FILE)
             return message
-    raise InputError
+    # raise InputError
 
 def get_dm(dm_id):
     data = json.load(open('data.json', 'r'))
@@ -220,7 +203,7 @@ def get_dm(dm_id):
             with open('data.json', 'w') as FILE:
                 json.dump(data, FILE)
             return dm
-    raise InputError
+    # raise InputError
 
 def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
     taggerHandle = get_user(auth_user_id)['handle_str']

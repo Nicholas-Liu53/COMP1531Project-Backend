@@ -6,38 +6,6 @@ import json
 
 SECRET = 'MENG'
 
-def auth_login_v1(email, password):
-    """ Checks if inputted email is present within the registered users
-        If email is present, checks that the inputted password matches the password stored for 
-        that particular registered email. 
-
-        Arguments:
-            email (str): The email of the user
-            password (str): The password of the user
-
-        Exceptions:
-            InputError : occurs when the inputted email isn't present within the registered users
-            InputError : occurs when the inputted password does not match the password stored for that particular inputted email
-
-        Return Value:
-            Returns (dict) containing user_id corresponding to the inputted email and password 
-
-    """
-    data = json.load(open('data.json', 'r'))
-
-    if not re.search('^[a-zA-Z0-9]+[\\._]?[a-zA-Z0-9]+[@]\\w+[.]\\w{2,3}$', email):
-        raise InputError
-        
-    for user in data['users']:
-        if email == user.get('email') and password == user.get('password'):
-            user['session_id'].append(user['session_id'][-1] + 1)
-            return {
-                'auth_user_id': user['u_id'],
-            }
-    raise InputError    
-
-
-
 def auth_register_v1(email, password, name_first, name_last):
     """ With the inputted data (email, password, name_first, name_last), checks whether the format of the data are valid. 
         If the data is valid, inserts (registers) the inputted information into a dictionary containing all users information

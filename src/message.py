@@ -1,7 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 import src.auth
-from src.other import decode, get_channel, get_members, get_user, get_dm, get_user_permissions, push_tagged_notifications
+from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications
 from datetime import timezone, datetime
 import json
 
@@ -215,7 +215,7 @@ def message_edit_v1(token, message_id, message):
 def message_senddm_v1(token, dm_id, message):
     data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
-    _, dmMembers = get_members(-1, dm_id)
+    dmMembers = get_dm(dm_id)[allMems]
     if auth_user_id not in dmMembers:
         raise AccessError
     if len(message) > 1000:

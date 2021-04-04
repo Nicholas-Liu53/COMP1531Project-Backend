@@ -1,6 +1,6 @@
 import src.data
 from src.error import AccessError, InputError
-from src.other import decode, get_channel, get_members, get_user
+from src.other import decode, get_channel, get_user
 import json
 import jwt
 
