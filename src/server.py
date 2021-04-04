@@ -95,15 +95,15 @@ def channels_create():
     payload = request.get_json()
     return src.channels.channels_create_v1(payload['token'], payload['name'], payload['is_public'])
 
-@APP.route("/channels/list/v2", methods=['POST'])
+@APP.route("/channels/list/v2", methods=['GET'])
 def channels_list():
     token = request.args.get('token')
-    src.channels.channels_list_v2(token)
+    return src.channels.channels_list_v2(token)
 
-@APP.route("/channels/listall/v2", methods=['POST'])
+@APP.route("/channels/listall/v2", methods=['GET'])
 def channels_listall():
     token = request.args.get('token')
-    src.channels.channels_listall_v2(token)
+    return src.channels.channels_listall_v2(token)
 
 @APP.route("/message/send/v2", methods=['POST'])
 def message_send():

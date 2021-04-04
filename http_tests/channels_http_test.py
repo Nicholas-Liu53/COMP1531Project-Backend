@@ -18,6 +18,11 @@ token   = 'token'
 dmID    = 'dm_id'
 handle  = 'handle_string'
 
+#* Fixture that returns a JWT with invalid u_id and session_id
+@pytest.fixture
+def invalid_token():
+    return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
+
 #* Fixture that clears and registers the first user
 @pytest.fixture
 def user1():
@@ -63,14 +68,32 @@ def user4():
     })
     return response.json()
 
-#* Fixture that returns a JWT with invalid u_id and session_id
-@pytest.fixture
-def invalid_token():
-    return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
-
 def test_http_channels_create(user1, user2):
     requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
         "name": "Oogway",
         "is_public": True
     })
+
+def test_http_channels_list_valid(user1, user2):
+    cResponse = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": "Oogway",
+        "is_public": True
+    })
+
+    chanOne = cResponse.json()
+    responseUser1 = requests.get(f"{url}channels/list/v2", params = {'token': user1[token]})
+
+    assert responseUser1.json() == {
+        'channels': [{
+            cID: chanOne[cID],
+            Name: 'Oogway'
+        }]
+    }
+
+    responseUser2 = requests.get(f"{url}channels/list/v2", params = {'token': user2[token]})
+
+    assert responseUser2.json() == {
+        'channels': []
+    }
