@@ -57,7 +57,15 @@ def user3():
 @pytest.fixture
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
-
+s
+#* Fixture that returns an invalid dm_id 
+@pytest.fixture 
+def invalid_dmID():
+    return -1
+    
+@pytest.fixture
+def invalid_u_id():
+    return -1 
 
 def test_http_dm_details_valid(user1, user2):
     dmResponse = requests.post(f"{url}dm/create/v1", json={
@@ -263,10 +271,6 @@ def test_http_dm_invite(user1, user2, user3):
 
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> Fixing names of testing functions
 def test_http_dm_leave(user1, user2, user3, invalid_dmID):
     #Create dm with dm_id 0 
     response = requests.post(f"{url}dm/create/v1", json={
