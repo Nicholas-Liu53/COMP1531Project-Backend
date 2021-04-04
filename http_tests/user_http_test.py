@@ -13,9 +13,9 @@ SECRET = "MENG"
 def test_http_user_profile_valid():
     requests.delete(f"{url}clear/v1")
     requests.post(f"{url}auth/register/v2", json={'email': "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
-    requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
-    token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    response = requests.get(f"{url}user/profile/v2", params={'token': token, 'u_id': 0})
+    userResponse = requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
+    user1 = userResponse.json()
+    response = requests.get(f"{url}user/profile/v2", params={'token': user1['token'], 'u_id': user1['auth_user_id']})
     payload = response.json()
     assert payload == { 
         'user':
@@ -24,7 +24,7 @@ def test_http_user_profile_valid():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_string': 'caricoleman'
+            'handle_str': 'caricoleman'
             }
     }
     
@@ -53,7 +53,7 @@ def test_http_user_setname_valid():
             'email': "caricoleman@gmail.com", 
             'name_first': 'kari', 
             'name_last': 'koleman', 
-            'handle_string': 'caricoleman'
+            'handle_str': 'caricoleman'
             }
     }
 
@@ -106,7 +106,7 @@ def test_http_user_setemail_valid():
         'email': "karicoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_string': 'caricoleman'
+        'handle_str': 'caricoleman'
         }
     }
 
@@ -123,7 +123,7 @@ def test_http_user_setemail_invalid_email_in_use():
     requests.post(f"{url}auth/register/v2", json={'email': "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
     requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
     token_1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    requests.post(f"{url}auth/register/v2", json={'email': "eicamondy@gmail.com", "password": "1234567", "name_first": "erica", "name_last": "mondy"})
+    requests.post(f"{url}auth/register/v2", json={'email': "ericamondy@gmail.com", "password": "1234567", "name_first": "erica", "name_last": "mondy"})
     requests.post(f"{url}auth/login/v2", json={'email': "ericamondy@gmail.com", "password": "1234567"})
     token_2 = encode({'session_id': 1, 'user_id': 1}, SECRET, algorithm='HS256')
     requests.put(f"{url}user/profile/setemail/v2", json={'token': token_1, 'email': 'karicoleman.com'})
@@ -135,7 +135,7 @@ def test_http_user_sethandle_valid():
     requests.post(f"{url}auth/register/v2", json={'email': "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
     requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
     token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    response_1 = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token, 'handle_string': 'karikoleman'})
+    response_1 = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token, 'handle_str': 'karikoleman'})
     payload_1 = response_1.json()
     assert payload_1 == {}
     response_2 = requests.get(f"{url}user/profile/v2", params={'token': token, 'u_id': 0})
@@ -147,7 +147,7 @@ def test_http_user_sethandle_valid():
         'email': "caricoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_string': 'karikoleman'
+        'handle_str': 'karikoleman'
         }
     }
 
@@ -156,7 +156,7 @@ def test_http_user_sethandle_invalid_short_handle():
     requests.post(f"{url}auth/register/v2", json={'email': "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
     requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
     token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    response = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token, 'handle_string': 'cc'})
+    response = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token, 'handle_str': 'cc'})
     assert response.status_code == 400    
 
 def test_http_user_sethandle_invalid_long_handle():
@@ -164,7 +164,7 @@ def test_http_user_sethandle_invalid_long_handle():
     requests.post(f"{url}auth/register/v2", json={'email': "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
     requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
     token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    response = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token, 'handle_string': 'cariiiiiiiiiiiiiiiiii'})
+    response = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token, 'handle_str': 'cariiiiiiiiiiiiiiiiii'})
     assert response.status_code == 400    
 
 def test_http_user_sethandle_invalid_handle_in_use():
@@ -172,13 +172,13 @@ def test_http_user_sethandle_invalid_handle_in_use():
     requests.post(f"{url}auth/register/v2", json={'email': "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
     requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
     token_1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    response_1 = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token_1, 'handle_string': 'kari'})
+    response_1 = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token_1, 'handle_str': 'kari'})
     payload_1 = response_1.json()
     assert payload_1 == {}
     requests.post(f"{url}auth/register/v2", json={'email': "ericamondy@gmail.com", "password": "1234567", "name_first": "erica", "name_last": "mondy"})
     requests.post(f"{url}auth/login/v2", json={'email': "ericamondy@gmail.com", "password": "1234567"})
     token_2 = encode({'session_id': 1, 'user_id': 1}, SECRET, algorithm='HS256')
-    response_2 = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token_2, 'handle_string': 'kari'})
+    response_2 = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token_2, 'handle_str': 'kari'})
     assert response_2.status_code == 400
 
 def test_http_users_all_valid():
@@ -197,14 +197,14 @@ def test_http_users_all_valid():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_string': 'caricoleman'
+            'handle_str': 'caricoleman'
             },
             {
             'u_id': 1, 
             'email': "ericamondy@gmail.com", 
             'name_first': 'erica', 
             'name_last': 'mondy', 
-            'handle_string': 'ericamondy'
+            'handle_str': 'ericamondy'
             }]
     } 
     
