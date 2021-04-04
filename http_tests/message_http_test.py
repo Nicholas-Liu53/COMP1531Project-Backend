@@ -228,7 +228,7 @@ def test_http_message_edit(user1, user2, user3, user4):
         "message_id": m4['message_id'],
         "message": tooLong
     }).status_code == 400
-    d1 = requests.get(f"{url}dm/create/v1", params={
+    d1 = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
         "u_ids": [user2[AuID]]
     }).json()

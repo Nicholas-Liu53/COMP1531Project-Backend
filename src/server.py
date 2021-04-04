@@ -170,6 +170,8 @@ def message_share():
 def message_senddm():
     payload = request.get_json()
     return src.message.message_senddm_v1(payload['token'], payload['dm_id'], payload['message'])
+
+
 #* *********************************************USER ROUTES*****************************************
 @APP.route("/user/profile/v2", methods=['GET'])
 def user_profile():
