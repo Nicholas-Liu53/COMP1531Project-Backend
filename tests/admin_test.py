@@ -79,7 +79,7 @@ def test_userpermissions_change(user1, user2, user3):
         fName: 'User',
         lName: '2',
         'email': 'second@gmail.com',
-        'handle_string': 'user2',
+        'handle_str': 'user2',
     } in src.channel.channel_details_v1(user2[token], channelTest[cID])[allMems]
 
     src.channel.channel_addowner_v1(user2[token], channelTest[cID], user2[AuID])
@@ -90,7 +90,7 @@ def test_userpermissions_change(user1, user2, user3):
         fName: 'User',
         lName: '2',
         'email': 'second@gmail.com',
-        'handle_string': 'user2',
+        'handle_str': 'user2',
     } in src.channel.channel_details_v1(user2[token], channelTest[cID])[ownMems]
 
     src.channel.channel_removeowner_v1(user2[token], channelTest[cID], user3[AuID])
@@ -101,7 +101,7 @@ def test_userpermissions_change(user1, user2, user3):
         fName: 'User',
         lName: '3',
         'email': 'third@gmail.com',
-        'handle_string': 'user3',
+        'handle_str': 'user3',
     } not in src.channel.channel_details_v1(user2[token], channelTest[cID])[ownMems]
 
     assert {
@@ -109,7 +109,7 @@ def test_userpermissions_change(user1, user2, user3):
         fName: 'User',
         lName: '3',
         'email': 'third@gmail.com',
-        'handle_string': 'user3',
+        'handle_str': 'user3',
     } in src.channel.channel_details_v1(user2[token], channelTest[cID])[allMems]
 
     # Test 5: Raise input error for invalid permission id

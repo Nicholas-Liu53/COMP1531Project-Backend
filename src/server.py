@@ -154,8 +154,8 @@ def user_sethandle():
 
 @APP.route("/users/all/v1", methods=['GET'])
 def users_all():
-    payload = request.get_json()
-    return src.user.users_all(payload['token'])
+    token = request.args.get('token')
+    return src.user.users_all(token)
 
 
 if __name__ == "__main__":

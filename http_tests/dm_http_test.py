@@ -17,7 +17,7 @@ lName   = 'name_last'
 chans   = 'channels'
 token   = 'token'
 dmID    = 'dm_id'
-handle  = 'handle_string'
+handle  = 'handle_str'
 
 #* Fixture that clears and registers the first user
 @pytest.fixture

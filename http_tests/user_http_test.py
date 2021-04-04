@@ -188,7 +188,7 @@ def test_http_users_all_valid():
     token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
     requests.post(f"{url}auth/register/v2", json={'email': "ericamondy@gmail.com", "password": "1234567", "name_first": "erica", "name_last": "mondy"})
     requests.post(f"{url}auth/login/v2", json={'email': "ericamondy@gmail.com", "password": "1234567"})
-    response = requests.get(f"{url}users/all/v1", params={'token': token,})
+    response = requests.get(f"{url}users/all/v1", params={'token': token})
     payload = response.json()
     assert payload == {
             'users':
