@@ -160,10 +160,8 @@ def test_message_edit(user1, user2, user3, user4):
     #* Test if empty edit removes message
     message_edit_v1(user3[token], message3['message_id'], '')
     messageFound = False
-    editedMessage = {}
     for messageDict in src.channel.channel_messages_v1(user3[token], firstChannel[cID], 0)['messages']:
         if message3['message_id'] == messageDict['message_id']:
-            editedMessage = messageDict
             messageFound = True
             break
     assert messageFound is False
@@ -214,10 +212,8 @@ def test_message_remove(user1, user2, user3, user4):
     #* Test if user1 can remove the message
     message_remove_v1(user1[token], message1['message_id'])
     messageFound = False
-    removedMessage = {}
     for messageDict in src.channel.channel_messages_v1(user1[token], firstChannel[cID], 0)['messages']:
         if message1['message_id'] == messageDict['message_id']:
-            removedMessage = messageDict
             messageFound = True
             break
     assert messageFound is False
@@ -226,10 +222,8 @@ def test_message_remove(user1, user2, user3, user4):
     #* Test if user2 can remove the message
     message_remove_v1(user2[token], message2['message_id'])
     messageFound = False
-    removedMessage = {}
     for messageDict in src.channel.channel_messages_v1(user2[token], firstChannel[cID], 0)['messages']:
         if message2['message_id'] == messageDict['message_id']:
-            removedMessage = messageDict
             messageFound = True
             break
     assert messageFound is False
@@ -237,10 +231,8 @@ def test_message_remove(user1, user2, user3, user4):
     #* Test if user3 can remove the message
     message_remove_v1(user3[token], message3['message_id'])
     messageFound = False
-    removedMessage = {}
     for messageDict in src.channel.channel_messages_v1(user3[token], firstChannel[cID], 0)['messages']:
         if message3['message_id'] == messageDict['message_id']:
-            removedMessage = messageDict
             messageFound = True
             break
     assert messageFound is False

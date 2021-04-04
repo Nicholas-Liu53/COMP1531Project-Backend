@@ -166,6 +166,12 @@ def message_share():
     payload = request.get_json()
     return src.message.message_share_v1(payload.get('token'), payload.get('og_message_id'), payload.get('message'), payload.get('channel_id'), payload.get('dm_id'))
 
+@APP.route("/message/senddm/v1", methods=['POST'])
+def message_senddm():
+    payload = request.get_json()
+    return src.message.message_senddm_v1(payload['token'], payload['dm_id'], payload['message'])
+
+
 #* *********************************************USER ROUTES*****************************************
 @APP.route("/user/profile/v2", methods=['GET'])
 def user_profile():

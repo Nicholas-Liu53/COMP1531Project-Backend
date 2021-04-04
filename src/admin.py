@@ -2,7 +2,7 @@ import src.data
 from src.error import AccessError, InputError
 import jwt
 import json
-from src.other import decode, get_channel, get_members, get_user, get_user_permissions
+from src.other import decode, get_channel, get_user, get_user_permissions
 
 
 AuID      = 'auth_user_id'
