@@ -47,7 +47,7 @@ def auth_register():
 @APP.route("/dm/details/v1", methods=['GET'])
 def dm_details():
     token, dm_id = request.args.get('token'), request.args.get('dm_id')
-    return src.dm.dm_details_v1(token, dm_id)
+    return src.dm.dm_details_v1(token, int(dm_id))
 
 @APP.route("/dm/list/v1", methods=['GET'])
 def dm_list():
@@ -86,7 +86,7 @@ def channel_join():
     return src.channel.channel_join_v1(payload['token'], payload['channel_id'])
 
 @APP.route("/channel/leave/v1", methods=['POST'])
-def channel_join():
+def channel_leave():
     payload = request.get_json()
     return src.channel.channel_leave_v1(payload['token'], payload['channel_id'])
 
@@ -94,6 +94,16 @@ def channel_join():
 def channels_create():
     payload = request.get_json()
     return src.channels.channels_create_v1(payload['token'], payload['name'], payload['is_public'])
+
+@APP.route("/channels/list/v2", methods=['POST'])
+def channels_list():
+    token = request.args.get('token')
+    src.channels.channels_list_v2(token)
+
+@APP.route("/channels/listall/v2", methods=['POST'])
+def channels_listall():
+    token = request.args.get('token')
+    src.channels.channels_listall_v2(token)
 
 @APP.route("/message/send/v2", methods=['POST'])
 def message_send():
