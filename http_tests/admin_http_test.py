@@ -43,10 +43,7 @@ def user3():
 
 def test_http_admin_user_remove_valid(user1, user2):
 
-
-
-
-channelTest = src.channels.channels_create_v1(user1[token], 'Channel', True)
+    channelTest = src.channels.channels_create_v1(user1[token], 'Channel', True)
     src.channel.channel_join_v1(user2[token], channelTest[cID])
     message = src.message.message_send_v1(user2[token], channelTest[cID], 'Hello')
 

@@ -1,11 +1,7 @@
 import src.data
 from src.error import AccessError, InputError 
 from src.channels import channels_listall_v2, channels_list_v2
-<<<<<<< HEAD
-from src.other import decode, get_channel, get_user, message_count, push_added_notifications
-=======
-from src.other import decode, get_channel, get_members, get_user, message_count, push_added_notifications, check_removed
->>>>>>> Meng
+from src.other import decode, get_channel, get_user, message_count, push_added_notifications, check_removed
 import jwt
 import json
 from src.other import SECRET
