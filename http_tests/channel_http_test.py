@@ -17,6 +17,7 @@ chans   = 'channels'
 token   = 'token'
 dmID    = 'dm_id'
 handle  = 'handle_string'
+ownMems = 'owner_members'
 
 #* Fixture that clears and registers the first user
 @pytest.fixture
