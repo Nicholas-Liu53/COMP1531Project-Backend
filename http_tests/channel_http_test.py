@@ -4,7 +4,8 @@ import json
 from src.config import url
 from src.other import SECRET
 import jwt
-
+from src.channels import channels_create_v1
+from src.message import message_send_v1
 AuID    = 'auth_user_id'
 uID     = 'u_id'
 cID     = 'channel_id'
@@ -16,7 +17,7 @@ lName   = 'name_last'
 chans   = 'channels'
 token   = 'token'
 dmID    = 'dm_id'
-handle  = 'handle_string'
+handle  = 'handle_str'
 ownMems = 'owner_members'
 
 #* Fixture that clears and registers the first user
@@ -68,6 +69,7 @@ def user4():
 @pytest.fixture
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
+
 
 def test_http_channel_invite(user1, user2, user3):
     
@@ -487,3 +489,96 @@ def test_http_channel_removeowner(user1, user2, user3, user4):
     )
 
     assert response5.status_code == 403
+    
+
+def test_http_channel_messages(user1, user2):
+
+    #Create private channel by user1
+    response = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": "channel1",
+        "is_public": False,
+    })
+    channel1 = response.json()
+    
+    
+    #channel ID not a valid channel 
+    invalid_cID = -1
+    invalid_channel = requests.get(f"{url}channel/messages/v2", params = {
+        'token': user1[token],
+         cID: invalid_cID, 
+        "start": "0"
+    })
+    assert invalid_channel.status_code == 400
+    
+    #when start is greater than # of messages in channel
+    invalid_start = requests.get(f"{url}channel/messages/v2", params = {
+        "token": user1[token],
+        cID: channel1[cID],
+        'start': 2,
+    })
+    assert invalid_start.status_code == 400  
+    
+    
+    #Access error when authorised user not a member of channel 
+    access_error = requests.get(f"{url}channel/messages/v2", params = {
+        "token": user2[token],
+        cID: channel1[cID],
+        'start': 0,
+    })
+    assert access_error.status_code == 403 
+    
+    
+    #Success Case 1: less than 50 messages returns end as -1    
+    #Send one message in channel  
+    requests.post(f"{url}message/send/v2", json = {
+        "token": user1[token],
+        cID: channel1[cID],
+        "message" : "First message :)",
+    })
+        
+
+    result = requests.get(f"{url}channel/messages/v2", params = {
+        "token": user1[token],
+        cID: channel1[cID],
+        'start': 0
+    })
+    responseUser1 = result.json()
+    expected = {
+        "len_messages": 1,
+        "start" : 0,
+        "end": -1,
+    }
+    
+    assert len(responseUser1['messages']) == expected['len_messages']
+    assert responseUser1['start'] == expected['start']
+    assert responseUser1['end'] == expected['end']
+    
+    #Success case 2: More than 50 messages returns end as start + 50     
+    #Send 50 messages into dm_0 
+    message_counter = 1
+    while message_counter < 51:
+        requests.post(f"{url}message/send/v2", json = {
+            "token": user1[token],
+            cID: channel1[cID],
+            "message" : f"{message_counter}",
+        })
+        message_counter += 1
+        
+    result2 = requests.get(f"{url}channel/messages/v2", params = {
+        "token": user1[token],
+        cID: channel1[cID],
+        'start': 1
+    })
+    response_2 = result2.json()
+        
+    expected_2 = {
+        "len_messages": 50,
+        "start" : 1,
+        "end": 51,
+    }
+    
+    assert len(response_2['messages']) == expected_2['len_messages']
+    assert response_2['start'] == expected_2['start']
+    assert response_2['end'] == expected_2['end']
+   
