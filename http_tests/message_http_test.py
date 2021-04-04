@@ -357,9 +357,9 @@ def test_http_message_share_todm(user1, user2, user3, user4):
         "message": 'hi'}
     )
     ogMessage = ogmsg.json()
-    user2[token], ogMessage[mID],'', -1, dmTest[dmID]
+    user2[token], ogMessage['message_id'],'', -1, dm[dmID]
     response = requests.post(f"{url}message/share/v1", json={
-        "token":user1[token],
+        "token": user2[token],
         "og_message_id": ogMessage['message_id'],
         "message": '',
         "channel_id": -1,
