@@ -294,7 +294,6 @@ def test_message_share_tochannel(user1, user2, user3):
     for messageDict in src.channel.channel_messages_v1(user2[token],channelTest2[cID],0)['messages']:
         if sharedMessage['message_id'] == messageDict['message_id']:
             messageFound = True
-            break
     assert messageFound is True 
 
     with pytest.raises(AccessError):
@@ -312,7 +311,7 @@ def test_message_share_dmtodm(user1,user2,user3,user4):
     for messageDict in src.dm.dm_messages_v1(user4[token],dmTest[dmID],0)['messages']:
         if sharedMessage['message_id'] == messageDict['message_id']:
             messageFound = True
-            break
+
     assert messageFound is True 
 
     with pytest.raises(AccessError):

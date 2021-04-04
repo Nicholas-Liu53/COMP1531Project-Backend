@@ -285,9 +285,10 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
                         userAuth = True
                 if not userAuth:
                     raise AccessError
+        with open('data.json', 'w') as FILE:
+            json.dump(data, FILE)
         shared_message_id = message_send_v1(token, channel_id, newMessage)
         
-
     if channel_id == -1:
         for dm in data['dms']:
             if dm['dm_id'] == dm_id:
@@ -297,14 +298,10 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
                         userAuth = True
                 if not userAuth:
                     raise AccessError
+        with open('data.json', 'w') as FILE:
+            json.dump(data, FILE)
         shared_message_id = message_senddm_v1(token, dm_id, newMessage)
         
-    else:
-        # not an error in the spec sheet but if neither channel_id nor dm_id is not -1 or is both -1 probably raise inputerror
-        pass 
-    
-    with open('data.json', 'w') as FILE:
-        json.dump(data, FILE)
 
     if dm_id == -1:
         push_tagged_notifications(auth_user_id, channel_id, -1, newMessage)
