@@ -3,7 +3,7 @@ import pytest
 from src.admin import user_remove_v1, userpermission_change_v1
 from src.error import AccessError, InputError
 from src.other import SECRET
-import src.channel, src.channels, src.auth, src.dm, src.message, src.other
+import src.channel, src.channels, src.auth, src.dm, src.message, src.other, src.user
 import jwt
 import json
 
@@ -38,15 +38,39 @@ def user4():
 def user5():
     return src.auth.auth_register_v2("fifth@gmail.com", "password", "User", "5")
 
-def test_user_remove(user1, user2):
+def test_user_remove(user1, user2,):
     
     channelTest = src.channels.channels_create_v1(user1[token], 'Channel', True)
     src.channel.channel_join_v1(user2[token], channelTest[cID])
-    src.message.message_send_v1(user2[token], channelTest[cID], 'Hello')
+    message = src.message.message_send_v1(user2[token], channelTest[cID], 'Hello')
+
+    #* User not an owner
+    with pytest.raises(AccessError): 
+        user_remove_v1(user2[token], user1[AuID])
     
     user_remove_v1(user1[token], user2[AuID])
-    for dictionary in (src.channel.channel_messages_v1(user1[token], firstChannel[cID], 0)['messages']):
-        assert 'Removed user' in dictionary['message']
+    for dictionary in (src.channel.channel_messages_v1(user1[token], channelTest[cID], 0)['messages']):
+        if dictionary['message_id'] == message['message_id']:
+            assert 'Removed User' in dictionary['message']
+
+    users = src.user.users_all(user1[token])
+    assert users == {
+            'users':
+            [{
+            'u_id': 0, 
+            'email': "first@gmail.com", 
+            'name_first': 'User', 
+            'name_last': '1', 
+            'handle_str': 'user1'
+            },
+            {
+            'u_id': 1, 
+            'email': "second@gmail.com", 
+            'name_first': 'Removed', 
+            'name_last': 'User', 
+            'handle_str': 'user2'
+            },]
+    } 
 
     #* Test: u_id does not refer to a valid user
     with pytest.raises(InputError):
@@ -55,11 +79,6 @@ def test_user_remove(user1, user2):
     #* Test: the user is currently only owner
     with pytest.raises(InputError): 
         user_remove_v1(user1[token], user1[AuID])
-
-    #* User not an owner
-    with pytest.raises(AccessError): 
-        user_remove_v1(user2[token], user1[AuID])
-    
 
 def test_userpermissions_change(user1, user2, user3):
 
