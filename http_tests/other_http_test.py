@@ -85,7 +85,7 @@ def channel1(user1):
         "token": user1[token],
         "name": "TrumpPence",
         "is_public": True
-    }).json
+    }).json()
 
 #* Fixture that registers a second channel
 @pytest.fixture
@@ -94,7 +94,7 @@ def channel2(user2):
         "token": user2[token],
         "name": "BidenHarris",
         "is_public": False
-    }).json
+    }).json()
 
 #* Fixture that registers a dm
 @pytest.fixture
@@ -110,8 +110,128 @@ def dm1(user1, user2):
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
-def test_http_search_channels(user1, user2, user3, user4, channel1, channel2):
-    pass
+def test_http_search_channels(user1, user2, user3, user4, user5, channel1, channel2):
+    assert requests.get(f"{url}search/v2", params={
+        "token": user5[token],
+        "query_str": "om"
+    }).json()['messages'] == []
+    requests.post(f"{url}channel/join/v2", json={
+        "token": user3[token],
+        "channel_id": channel1['channel_id']
+    })
+    requests.post(f"{url}channel/invite/v2", json={
+        "token": user2[token],
+        "channel_id": channel2[cID],
+        "u_id": user4[AuID]
+    })
+    requests.post(f"{url}channel/invite/v2", json={
+        "token": user1[token],
+        "channel_id": channel1[cID],
+        "u_id": user5[AuID]
+    })
+    requests.post(f"{url}channel/invite/v2", json={
+        "token": user2[token],
+        "channel_id": channel2[cID],
+        "u_id": user5[AuID]
+    })
+    m1 = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel1['channel_id'],
+        "message": "Welcome"
+    }).json()
+    m2 = requests.post(f"{url}message/send/v2", json={
+        "token": user3[token],
+        "channel_id": channel2['channel_id'],
+        "message": "Akeome"
+    }).json()
+    m3 = requests.post(f"{url}message/send/v2", json={
+        "token": user3[token],
+        "channel_id": channel1['channel_id'],
+        "message": "omg"
+    }).json()
+    m4 = requests.post(f"{url}message/send/v2", json={
+        "token": user3[token],
+        "channel_id": channel2['channel_id'],
+        "message": "Nomnom"
+    }).json()
+    m5 = requests.post(f"{url}message/send/v2", json={
+        "token": user3[token],
+        "channel_id": channel1['channel_id'],
+        "message": "Bruh haha"
+    }).json()
+    messageFound = False
+    for messages in requests.get(f"{url}search/v2", params={
+        "token": user5[token],
+        "query_str": "om"
+    }).json()['messages']:
+        if messages['message'] == "Welcome":
+            messageFound = True
+    assert messageFound
+    messageFound = False
+    for messages in requests.get(f"{url}search/v2", params={
+        "token": user5[token],
+        "query_str": "om"
+    }).json()['messages']:
+        print(messages)
+        if messages['message'] == "Akeome":
+            messageFound = True
+    assert messageFound
+    messageFound = False
+    for messages in requests.get(f"{url}search/v2", params={
+        "token": user5[token],
+        "query_str": "om"
+    }).json()['messages']:
+        if messages['message'] == "omg":
+            messageFound = True
+    assert messageFound
+    messageFound = False
+    for messages in requests.get(f"{url}search/v2", params={
+        "token": user5[token],
+        "query_str": "om"
+    }).json()['messages']:
+        if messages['message'] == "Nomnom":
+            messageFound = True
+    assert messageFound
+
+    messageFound = False
+    for messages in requests.get(f"{url}search/v2", params={
+        "token": user5[token],
+        "query_str": "om"
+    }).json()['messages']:
+        if messages['message'] == "Bruh haha":
+            messageFound = True
+    assert not messageFound
+
+    tooLongMessage = ""
+    for _ in range(1002):
+        tooLongMessage += "@"
+    requests.get(f"{url}search/v2", params={
+        "token": user5[token],
+        "query_str": tooLongMessage
+    }).status_code == 400
+
+    messageFound = False
+    for messages in requests.get(f"{url}search/v2", params={
+        "token": user2[token],
+        "query_str": "om"
+    }).json()['messages']:
+        if messages['message'] == "omg":
+            messageFound = True
+    assert not messageFound
+
+    m6 = requests.post(f"{url}message/send/v2", json={
+        "token": user4[token],
+        "channel_id": channel2['channel_id'],
+        "message": "Joe Biden"
+    }).json()
+    messageFound = False
+    for messages in requests.get(f"{url}search/v2", params={
+        "token": user2[token],
+        "query_str": "jOE bIDEN"
+    }).json()['messages']:
+        if messages['message'] == "Joe Biden":
+            messageFound = True
+    assert messageFound
 
 def test_http_search_dms(user1, user2, user3, dm1):
     pass
