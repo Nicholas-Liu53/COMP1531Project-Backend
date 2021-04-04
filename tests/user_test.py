@@ -1,14 +1,9 @@
 # File to test functions in src/user.py
 from src.error import AccessError, InputError
 import pytest
-<<<<<<< HEAD
-from src.user import user_profile_v2, user_setname_v2, user_setemail_v2, user_sethandle_v2, users_all
-from src.auth import auth_register_v2, auth_login_v2
-=======
 from src.auth import auth_login_v2, auth_register_v2
 import src.channel, src.channels
 from src.user import user_profile_v2, user_setname_v2, user_setemail_v2, user_sethandle_v2, users_all
->>>>>>> liu/project-backend
 from src.other import clear_v1
 from jwt import encode
 

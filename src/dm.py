@@ -199,6 +199,7 @@ def dm_invite_v1(token, dm_id, u_id):
     Return Value:
         {}
     '''
+    data = json.load(open('data.json', 'r'))
     #ASSUME: Do not need to add new user into dm_name
     get_user(u_id)
     auth_user_ID, _ = decode(token)

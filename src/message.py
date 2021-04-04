@@ -170,23 +170,25 @@ def message_edit_v1(token, message_id, message):
 
     #* Get message dictionary in data
     messageFound = False
-    messageDict = {}
-    for message in data['messages_log']:
-        if message['message_id'] == message_id:
-            messageDict = message
+    i = 0
+    while i < len(data['messages_log']):
+        if data['messages_log'][i]['message_id'] == message_id:
             messageFound = True
+        i += 1
     if not messageFound:
         raise InputError
 
+    i -= 1          # Undo extra increment
+
     #* Check if the user is the writer, channel owner or owner of Dreams
     # Get the channel the message belongs to
-    if messageDict[cID] != -1:
-        channel = get_channel(messageDict['channel_id'])
-        if auth_user_id is not messageDict['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
+    if data['messages_log'][i][cID] != -1:
+        channel = get_channel(data['messages_log'][i]['channel_id'])
+        if auth_user_id is not data['messages_log'][i]['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
             raise AccessError
     else:
-        dm = get_dm(messageDict['dm_id'])
-        if auth_user_id is not messageDict['u_id']:
+        dm = get_dm(data['messages_log'][i]['dm_id'])
+        if auth_user_id is not data['messages_log'][i]['u_id']:
             raise AccessError
 
     if len(message) > 1000:  # If the message is too long, raise InputError
@@ -194,15 +196,15 @@ def message_edit_v1(token, message_id, message):
     elif message == '':      #* If new message is empty string --> remove message
         message_remove_v1(token, message_id)
     else:                       # Else 
-        messageDict['message'] = message
+        data['messages_log'][i]['message'] = message
+        with open('data.json', 'w') as FILE:
+            json.dump(data, FILE)
 
-    with open('data.json', 'w') as FILE:
-        json.dump(data, FILE)
 
-    if messageDict['channel_id'] != -1:     #* If message is in a channel
-        push_tagged_notifications(auth_user_id, message['channel_id'], -1, message)
+    if data['messages_log'][i]['channel_id'] != -1:     #* If message is in a channel
+        push_tagged_notifications(auth_user_id, data['messages_log'][i]['channel_id'], -1, message)
     else:
-        push_tagged_notifications(auth_user_id, -1, message['dm_id'], message)
+        push_tagged_notifications(auth_user_id, -1, data['messages_log'][i]['dm_id'], message)
 
     return {
     }
@@ -278,7 +280,7 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
                 if not userAuth:
                     raise AccessError
         shared_message_id = message_send_v1(token, channel_id, newMessage)
-        push_tagged_notifications(auth_user_id, channel_id, -1, newMessage)
+        
 
     if channel_id == -1:
         for dm in data['dms']:
@@ -290,12 +292,17 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
                 if not userAuth:
                     raise AccessError
         shared_message_id = message_senddm_v1(token, dm_id, newMessage)
-        push_tagged_notifications(auth_user_id, -1, dm_id, newMessage)
+        
     else:
         # not an error in the spec sheet but if neither channel_id nor dm_id is not -1 or is both -1 probably raise inputerror
         pass 
     
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
+
+    if dm_id == -1:
+        push_tagged_notifications(auth_user_id, channel_id, -1, newMessage)
+    else: 
+        push_tagged_notifications(auth_user_id, -1, dm_id, newMessage)
 
     return shared_message_id

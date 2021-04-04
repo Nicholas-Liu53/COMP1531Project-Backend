@@ -98,12 +98,11 @@ def test_http_channels_create(user1, user2):
         'channels': []
     }
 
-    response = requests.get(f"{url}channels/create/v2", json={
-        "token": user2[token],
+    assert requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
         "name": "abcdefghijklmnopqrstuvwxyz",
         "is_public": True
-    })
-    assert response.status_code == 400
+    }).status_code == 400
 
 def test_http_channels_list_valid(user1, user2):
     cResponse = requests.post(f"{url}channels/create/v2", json={
