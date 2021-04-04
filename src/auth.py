@@ -144,7 +144,7 @@ def auth_register_v1(email, password, name_first, name_last):
         'session_id': [0],
     })
 
-    data['notifs'][f"{u_id}"] = [] 
+    data['notifs'][f"{user_id}"] = [] 
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
@@ -154,6 +154,7 @@ def auth_register_v1(email, password, name_first, name_last):
     }
 
 def check_handle(handle_string):
+    data = json.load(open('data.json', 'r'))
     for user in data['users']:
         if handle_string == user['handle_string']:
             return True
