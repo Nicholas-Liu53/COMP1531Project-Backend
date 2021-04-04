@@ -44,6 +44,11 @@ def auth_register():
     payload = request.get_json()
     return src.auth.auth_register_v2(payload['email'], payload['password'], payload['name_first'], payload['name_last'])
 
+@APP.route("/auth/login/v2", methods=['POST'])
+def auth_login():
+    payload = request.get_json()
+    return src.auth.auth_login_v2(payload['email'], payload['password'])
+
 @APP.route("/dm/details/v1", methods=['GET'])
 def dm_details():
     token, dm_id = request.args.get('token'), request.args.get('dm_id')
@@ -74,11 +79,6 @@ def dm_leave():
 @APP.route("/dm/messages/v1", methods=['GET'])
 def dm_messages():
     pass
-
-@APP.route("/auth/login/v2", methods=['POST'])
-def auth_login():
-    payload = request.get_json()
-    return src.auth.auth_login_v2(payload['email'], payload['password'])
 
 if __name__ == "__main__":
     APP.run(port=config.port) # Do not edit this port

@@ -134,7 +134,7 @@ def auth_register_v1(email, password, name_first, name_last):
         'name_first' : nameF,
         'name_last' : nameL,
         'u_id' : user_id,
-        'handle_string' : handle_string,
+        'handle_str' : handle_string,
         'permission_id': permissionID,
         'session_id': [0],
     })
@@ -144,7 +144,7 @@ def auth_register_v1(email, password, name_first, name_last):
 
 def check_handle(handle_string):
     for user in src.data.users:
-        if handle_string == user['handle_string']:
+        if handle_string == user['handle_str']:
             return True
     
     return False

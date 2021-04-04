@@ -49,12 +49,12 @@ def user_sethandle_v2(token, handle_str):
         raise InputError
     
     for user in src.data.users:
-        if handle_str == user['handle_string']:
+        if handle_str == user['handle_str']:
             raise InputError
             
     for user in src.data.users:
         if auth_user_id == user['u_id']:
-            user['handle_string'] = handle_str
+            user['handle_str'] = handle_str
             
     return {
     }
