@@ -5,7 +5,7 @@ from flask_cors import CORS
 from src.error import InputError
 from src import config
 import src.data
-import src.auth, src.other, src.dm, src.notifications, src.channel, src.channels, src.message
+import src.auth, src.other, src.dm, src.notifications, src.channel, src.channels, src.message, src.user
 
 def defaultHandler(err):
     response = err.get_response()
@@ -132,8 +132,8 @@ def search():
 
 @APP.route("/user/profile/v2", methods=['GET'])
 def user_profile():
-    payload = request.get_json()
-    return src.user.user_profile_v2(payload['token'], payload['u_id'])
+    token, u_id = request.args.get('token'), request.args.get('u_id')
+    return src.user.user_profile_v2(token, int(u_id))
 
 @APP.route("/user/profile/setname/v2", methods=['PUT'])
 def user_setname():
@@ -143,17 +143,19 @@ def user_setname():
 @APP.route("/user/profile/setemail/v2", methods=['PUT'])
 def user_setemail():
     payload = request.get_json()
-    return src.user.user_setname_v2(payload['token'], payload['email'])
+    print(payload['email'])
+    print(payload['token'])
+    return src.user.user_setemail_v2(payload['token'], payload['email'])
 
 @APP.route("/user/profile/sethandle/v2", methods=['PUT'])
 def user_sethandle():
     payload = request.get_json()
-    return src.user.user_setname_v2(payload['token'], payload['handle_str'])
+    return src.user.user_sethandle_v2(payload['token'], payload['handle_str'])
 
 @APP.route("/users/all/v1", methods=['GET'])
 def users_all():
-    payload = request.get_json()
-    return src.user.users_all(payload['token'])
+    token = request.args.get('token')
+    return src.user.users_all(token)
 
 
 if __name__ == "__main__":

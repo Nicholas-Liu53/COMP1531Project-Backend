@@ -63,12 +63,12 @@ def user_sethandle_v2(token, handle_str):
         raise InputError
     
     for user in data['users']:
-        if handle_str == user['handle_string']:
+        if handle_str == user['handle_str']:
             raise InputError
             
     for user in data['users']:
         if auth_user_id == user['u_id']:
-            user['handle_string'] = handle_str
+            user['handle_str'] = handle_str
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)

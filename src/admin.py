@@ -14,7 +14,7 @@ Name      = 'name'
 fName     = 'name_first'
 lName     = 'name_last'
 chans     = 'channels'
-handle    = 'handle_string'
+handle    = 'handle_str'
 dmID      = 'dm_id'
 seshID    = 'session_id'
 
