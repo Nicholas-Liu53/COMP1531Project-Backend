@@ -113,7 +113,7 @@ def test_channel_messages():
     #Create private channel by userID1
     firstChannel = channels_create_v1(userID1[token], 'Yggdrasil', False)
     #Now create a second public channel by userID1 to make sure that message only sent to first channel 
-    secondChannel = channels_create_v1(userID1[token], 'Marmot', True)
+    channels_create_v1(userID1[token], 'Marmot', True)
     
     #Send one message in channel 
     message_send_v1(userID1[token], firstChannel[cID], "First Message")
