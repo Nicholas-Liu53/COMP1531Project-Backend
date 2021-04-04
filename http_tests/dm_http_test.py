@@ -238,28 +238,26 @@ def test_http_dm_invite_access_error(user1, user2, user3):
     access_error = requests.post(f"{url}dm/invite/v1", json={
         "token": user3[token],
         dmID: dm_0[dmID],
-        uID: [user2[AuID]],
+        uID: user2[AuID],
     })
     assert access_error.status_code == 403
     
-'''
-def test_http_dm_invite(user1, user2, user3):
 
+def test_http_dm_invite(user1, user2, user3):
     #Create dm with dm_id 0 containing user1 and user2 
     response = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
         "u_ids": [user2[AuID]]
     })
-
+    dm_0 = response.json()
     #Check success case: user3 is invited to dm_0
     requests.post(f"{url}dm/invite/v1", json={
         "token": user1[token],
         dmID: dm_0[dmID],
-        uID: [user3[AuID]],
+        uID: user3[AuID],
     })
     
     responseUser3 = requests.get(f"{url}dm/list/v1", params = {'token': user3[token]})
-    
     expected = {'dms': [{
         dmID: dm_0[dmID],
         Name: 'user1, user2'
@@ -270,8 +268,7 @@ def test_http_dm_invite(user1, user2, user3):
 
 
 
-
-def test_http_dm_leave(user1, user2, user3, invalid_dmID):
+def test_http_dm_leave(user1, user2, user3):
     #Create dm with dm_id 0 
     response = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
@@ -281,9 +278,10 @@ def test_http_dm_leave(user1, user2, user3, invalid_dmID):
     dm_0 = response.json()
     
     #Test for input error, when dm input is invalid
+    invalid_dm_id = -1
     invalid_dm = requests.post(f"{url}dm/leave/v1", json={
         "token": user1[token],
-        dmID: invalid_dmID,
+        dmID: invalid_dm_id,
     })
     
     assert invalid_dm.status_code == 400
@@ -306,11 +304,19 @@ def test_http_dm_leave(user1, user2, user3, invalid_dmID):
     expected = {'dms': []}
     assert responseUser2.json() == expected
     
+def test_http_dm_messages_invalid_dm(user1, user2):
+    #Test for input error, when dm input is invalid
+    invalid_dm_id = -1
+    invalid_dm = requests.get(f"{url}dm/messages/v1", params = {
+        "token": user1[token],
+        dmID: invalid_dm_id,
+        'start' : 0,
+    })
+    assert invalid_dm.status_code == 400
     
-    
-    
-    
-def test__http_dm_messages(user1, user2, user3, invalid_dmID):
+
+def test_http_dm_messages_invalid_start(user1, user2):
+    #Test for input error, when 'start' is greater than # of messages in DM 
     #Create dm with dm_id 0 
     response = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
@@ -319,32 +325,36 @@ def test__http_dm_messages(user1, user2, user3, invalid_dmID):
     
     dm_0 = response.json()
     
-    #Test for input error, when dm input is invalid
-    invalid_dm = requests.get(f"{url}dm/messages/v1", json={
-        "token": user1[token],
-        dmID: invalid_dmID,
-        'start' : 0,
-    })
-    
-    #Test for input error, when 'start' is greater than # of messages in DM 
-    invalid_start = requests.get(f"{url}dm/messages/v1", json={
+    invalid_start = requests.get(f"{url}dm/messages/v1", params = {
         "token": user1[token],
         dmID: dm_0[dmID],
         'start' : 1,
     })
-    
-    assert invalid_dm.status_code == 400
-    assert invalid_start.status_code == 400 
-    
+    assert invalid_start.status_code == 400
+
+def test_http_dm_messages_access_error(user1, user2, user3): 
     #Test for access error, when Authorised user is not a member of DM with dm_id
-    access_error = requests.get(f"{url}dm/messages/v1", json={
+    response = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]],
+    })
+    dm_0 = response.json()
+    access_error = requests.get(f"{url}dm/messages/v1", params = {
         "token": user3[token],
         dmID: dm_0[dmID],
         'start' : 0,
     })
     assert access_error.status_code == 403 
+
+
+def test_http_dm_messages(user1, user2, user3):
+    #Create dm with dm_id 0 
+    response = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]],
+    })
     
-    #Now errors are gone can test success cases
+    dm_0 = response.json()
     requests.post(f"{url}message/senddm/v1", json={
         "token": user1[token],
         dmID: dm_0[dmID],
@@ -352,21 +362,12 @@ def test__http_dm_messages(user1, user2, user3, invalid_dmID):
     })
         
     #Success case 1: Less than 50 messages returns end as -1 
-    result = requests.get(f"{url}dm/messages/v1", json={
-        "token": user2[token],
+    result = requests.get(f"{url}dm/messages/v1", params = {
+        "token": user1[token],
         dmID: dm_0[dmID],
         'start': 0
     })
-    
-    responseUser2 = result.json()
-    
- 
-    
-    
-    #FROM HERE NOT TOO SURE NEED TO CHECK 
-    
-    
-
+    responseUser1 = result.json()
     
     expected = {
         "len_messages": 1,
@@ -374,23 +375,24 @@ def test__http_dm_messages(user1, user2, user3, invalid_dmID):
         "end": -1,
     }
     
-    assert len(responseUser2['messages']) == expected['len_messages']
-    assert responseUser2['start'] == expected['start']
-    assert responseUser2['end'] == expected['end']
+    assert len(responseUser1['messages']) == expected['len_messages']
+    assert responseUser1['start'] == expected['start']
+    assert responseUser1['end'] == expected['end']
     
+
     #Success case 2: More than 50 messages returns end as 'start' + 50     
     #Send 50 messages into dm_0 
     message_counter = 1
     while message_counter < 51:
-        requests.post(f"{url}message/senddm/v1", json={
+        requests.post(f"{url}message/senddm/v1", json = {
             "token": user1[token],
             dmID: dm_0[dmID],
             "message" : f"{message_counter}",
         })
         message_counter += 1
         
-    result2 = requests.get(f"{url}dm/messages/v1", json={
-        "token": user2[token],
+    result2 = requests.get(f"{url}dm/messages/v1", params = {
+        'token': user2[token],
         dmID: dm_0[dmID],
         'start': 1
     })
@@ -398,16 +400,15 @@ def test__http_dm_messages(user1, user2, user3, invalid_dmID):
     response_2 = result2.json()
 
     expected_2 = {
-        "len_messages": 50,
-        "'start'" : 1,
-        "end": 51,
+        'len_messages': 50,
+        'start' : 1,
+        'end': 51,
     }
     
     assert len(response_2['messages']) == expected_2['len_messages']
     assert response_2['start'] == expected_2['start']
     assert response_2['end'] == expected_2['end']
-    
-'''   
+   
     
     
 
