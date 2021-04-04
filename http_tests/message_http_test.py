@@ -343,7 +343,7 @@ def test_http_message_share_todm(user1, user2, user3, user4):
     channel = responseChannel.json()
     requests.post(f"{url}channel/invite/v2", json={
         "token": user1[token],
-        "channel_id": channel1[cID],
+        "channel_id": channel[cID],
         "u_id": user2[AuID]}
     )
     dmresponse = requests.post(f"{url}dm/create/v1", json={
