@@ -2,7 +2,7 @@ import src.data
 from src.error import AccessError, InputError
 import jwt
 import json
-from src.other import decode, get_channel, get_user, get_user_permissions
+from src.other import decode, get_channel, get_user, get_user_permissions, check_removed
 
 
 AuID      = 'auth_user_id'
@@ -90,6 +90,7 @@ def userpermission_change_v1(token, u_id, permission_id):
         raise AccessError
     if not validUser:
         raise InputError
+    check_removed(u_id)
 
     if permission_id != 1 and permission_id != 2:
         raise InputError

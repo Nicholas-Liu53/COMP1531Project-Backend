@@ -112,6 +112,7 @@ def dm_create_v1(token, u_ids):
     dmUsers = [creator_id]
     for user_id in u_ids:
         dmUsers.append(user_id)
+
     handles = []
     for user in dmUsers:
         
@@ -119,6 +120,10 @@ def dm_create_v1(token, u_ids):
         handles.append(userInfo[handle])
     handles.sort()
     dm_name = ', '.join(handles)
+
+    for user_id in u_ids:
+        dmUsers.append(user_id)
+        check_removed(user_id)
 
     data['dms'].append({
         dmID: dm_ID,
@@ -203,6 +208,7 @@ def dm_invite_v1(token, dm_id, u_id):
     data = json.load(open('data.json', 'r'))
     #ASSUME: Do not need to add new user into dm_name
     get_user(u_id)
+    check_removed(u)
     auth_user_ID, _ = decode(token)
     input_error = True
     for items in data['dms']:
