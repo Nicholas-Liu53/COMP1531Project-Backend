@@ -153,8 +153,9 @@ def test_http_dm_remove_invalid_DM(user1):
     })
     assert dmResponse.status_code == 400
 
-def test_http_dm_remove_access_error(user1, user2):
-    #Create dm by user1
+def test_http_dm_remove(user1, user2, invalid_dmID):
+ 
+    #Create dm with dm_id 0 
     response = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
         "u_ids": [user2[AuID]]
@@ -198,9 +199,10 @@ def test_http_dm_invite_invalid_dm(user1, user2):
         uID: [user2[AuID]],
     })
     assert invalid_dm.status_code == 400
-    
 
-def test_http_dm_invite_invalid_u_id(user1, user2):
+def test_http_dm_invite(user1, user2, user3, invalid_dmID, invalid_u_id):
+
+    #Create dm with dm_id 0 containing user1 and user2 
     response = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
         "u_ids": [user2[AuID]]
@@ -261,6 +263,10 @@ def test_http_dm_invite(user1, user2, user3):
 
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> Fixing names of testing functions
 def test_http_dm_leave(user1, user2, user3, invalid_dmID):
     #Create dm with dm_id 0 
     response = requests.post(f"{url}dm/create/v1", json={
