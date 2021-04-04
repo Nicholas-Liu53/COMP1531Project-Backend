@@ -1,6 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 from src.other import decode, get_channel, get_members, get_user
+import json
 import jwt
 
 AuID    = 'auth_user_id'
@@ -27,9 +28,10 @@ def channels_list_v2(token):
         Returns dictionary of a list of channels mapped to the key string 'channels'
         Each channel is represented by a dictionary containing types { channel_id, name }
     '''
+    data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
     output = []
-    for chanD in src.data.channels:
+    for chanD in data['channels']:
         if auth_user_id in chanD['all_members']:
             channel = {}
             channel[cID] = chanD[cID]
@@ -56,9 +58,10 @@ def channels_listall_v2(token):
         Returns dictionary of a list of channels mapped to the key string 'channels'
         Each channel is represented by a dictionary containing types { channel_id, name }
     '''
+    data = json.load(open('data.json', 'r'))
     decode(token)
     output = []
-    for d in src.data.channels:
+    for d in data['channels']:
         channel = {}
         channel[cID] = d[cID]
         channel[Name] = d[Name]

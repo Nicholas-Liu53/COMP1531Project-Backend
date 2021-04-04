@@ -1,6 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 import jwt
+import json
 from src.other import decode, get_channel, get_members, get_user
 
 
@@ -38,11 +39,14 @@ def userpermission_change_v1(token, u_id, permission_id):
     Return Value:
         Empty dictionary
     '''
+
+    data = json.load(open('data.json', 'r'))
+
     auth_user_id, _ = decode(token)
 
     validUser = False
     validOwner = False
-    for user in src.data.users:
+    for user in data['users']:
         if user[uID] == u_id:
             validUser = True
         if user[uID] == auth_user_id:
@@ -56,12 +60,12 @@ def userpermission_change_v1(token, u_id, permission_id):
     if permission_id != 1 and permission_id != 2:
         raise InputError
 
-    for user in src.data.users:
+    for user in data['users']:
         if user[uID] == u_id:
             user['permission_id'] = permission_id
+    
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     return {
     }
-
-def notifications_get_v1():
-    pass

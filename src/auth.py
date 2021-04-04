@@ -158,21 +158,23 @@ def check_handle(handle_string):
     for user in data['users']:
         if handle_string == user['handle_string']:
             return True
-    
     return False
 
 def auth_login_v2(email, password):  
     data = json.load(open('data.json', 'r'))
-
     for user in data['users']:
         if email == user.get('email') and password == user.get('password'):
             new_session_id = user['session_id'][-1] + 1
             user['session_id'].append(new_session_id)
             token = encode({'session_id': new_session_id, 'user_id': user['u_id']}, SECRET, algorithm='HS256')
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)
             return {
                 'token': token,
                 'auth_user_id': user['u_id'],
             }
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
     raise InputError    
 
 def auth_register_v2(email, password, name_first, name_last):
