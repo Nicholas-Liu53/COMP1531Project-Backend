@@ -68,7 +68,7 @@ def channel_invite_v1(token, channel_id, u_id):
 
     # now searches for channel_id
     for chan in data['channels']:
-        if chan["channel_id"] == channel_id:
+        if chan["chaznnel_id"] == channel_id:
             # ensure no duplicates
             chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
     push_added_notifications(auth_user_id, u_id, channel_id, -1) 
@@ -97,7 +97,6 @@ def channel_details_v1(token, channel_id):
         Returns filteredDetails on succesfully creating a copy of the channel we want, with only the filtered information. The return is a dictionary.
     '''
     data = json.load(open('data.json', 'r'))
-
     auth_user_id, _ = decode(token)
 
     # check for valid channel
@@ -144,8 +143,10 @@ def channel_details_v1(token, channel_id):
     return filteredDetails
 
 
-def channel_messages_v1(token, channel_id, start):
 
+
+
+def channel_messages_v1(token, channel_id, start):
     '''
     channel_messages_v1 returns up to 50 messages within a specified channel.
     
@@ -161,8 +162,8 @@ def channel_messages_v1(token, channel_id, start):
     Return Value:
         Returns up to 50 messages alongside a start and and end value.
     '''
-    decode(token)
-
+    data = json.load(open('data.json', 'r'))
+    
     #Handling of input and access errors 
     #Input error: Channel ID is not a valid channel 
     #This is the case
@@ -174,9 +175,8 @@ def channel_messages_v1(token, channel_id, start):
     if not channelFound:
         raise InputError
 
-
     #Input error: Start is greater than total number of messages in list 
-    if start > len(src.data.messages_log):
+    if start > len(data['messages_log']):
         raise InputError
     
     #Access error: When auth_user_id is not a member of channel with channel_id 
@@ -187,7 +187,6 @@ def channel_messages_v1(token, channel_id, start):
     
     if not userFound:
         raise AccessError
-
     
     desired_end = start + 50
     num_of_messages = message_count(channel_id, -1)
@@ -196,7 +195,7 @@ def channel_messages_v1(token, channel_id, start):
         desired_end = -1
     messages = []
 
-    for objects in src.data.messages_log:
+    for objects in data['messages_log']:
         if channel_id == objects['channel_id']:
             current_DM = objects.copy()
             del current_DM['channel_id']
@@ -213,6 +212,9 @@ def channel_messages_v1(token, channel_id, start):
     
     while len(messages) > 50:
         messages.pop(-1)
+        
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
     
     return {
         'messages': messages,
@@ -275,17 +277,17 @@ def channel_join_v1(token, channel_id):
     Return Value:
         Returns an empty list regardless of conditions :)
     '''
-
+    data = json.load(open('data.json', 'r'))
     # Find the channel in the database
     channelFound = False
     i = 0
 
     # Loop throug channel data base until channel is found
     while not channelFound:
-        if i >= len(src.data.channels):
+        if i >= len(data['channels']):
             # If channel doesn't exist in database, inputError
             raise InputError
-        elif src.data.channels[i]['channel_id'] == channel_id:
+        elif data['channels'][i]['channel_id'] == channel_id:
             # If channel is found
             channelFound = True
         i += 1
@@ -298,19 +300,22 @@ def channel_join_v1(token, channel_id):
     userFound = False
     j = 0
     while not userFound:
-        if src.data.users[j]['u_id'] == auth_user_id:
+        if data['users'][j]['u_id'] == auth_user_id:
             userFound = True
         j += 1
 
     j -= 1      # Undo extra increment
     
-    if src.data.channels[i]['is_public'] == False and src.data.users[j]['permission_id'] != 1:
+    if data['channels'][i]['is_public'] == False and data['users'][j]['permission_id'] != 1:
         # If channel is private, AccessError
         raise AccessError
 
     # Time to add the user into the channel
-    src.data.channels[i]['all_members'].append(src.data.users[j]['u_id'])
+    data['channels'][i]['all_members'].append(data['users'][j]['u_id'])
 
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+        
     # Done, return empty list 
     return {
     }
@@ -333,7 +338,6 @@ def channel_addowner_v1(token, channel_id, u_id):
         Empty Dictionary
     '''
     data = json.load(open('data.json', 'r'))
-
     auth_user_id, _ = decode(token)
     
     passed = False
@@ -355,7 +359,7 @@ def channel_addowner_v1(token, channel_id, u_id):
     # Access error
     dreamsOwner = False
     userAuth = False
-    for users in src.data.users:
+    for users in data['users']:
         if users['u_id'] == auth_user_id:
             if users['permission_id'] == 1:
                 dreamsOwner = True
@@ -402,7 +406,6 @@ def channel_removeowner_v1(token, channel_id, u_id):
         Empty Dictionary
     '''
     data = json.load(open('data.json', 'r'))
-
     auth_user_id, _ = decode(token)
     
     passed = False
@@ -423,7 +426,7 @@ def channel_removeowner_v1(token, channel_id, u_id):
         raise InputError
         
     dreamsOwner = False
-    for users in src.data.users:
+    for users in data['users']:
         if users['u_id'] == auth_user_id:
             if users['permission_id'] == 1:
                 dreamsOwner = True
