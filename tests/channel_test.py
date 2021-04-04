@@ -253,12 +253,6 @@ def test_channel_join(user1, user2, user3, user4):
     with pytest.raises(InputError):                         
         channel_join_v1(user1[token], firstChannel[cID])   # user1 tries to join the non-existent channel
 
-    #* Test 4: Check if InputError is raised when channel does not exist
-    #! Clearing data
-    src.other.clear_v1()                                    # Channel is deleted
-    with pytest.raises(InputError):                         
-        channel_join_v1(user1[token], firstChannel[cID])   # user1 tries to join the non-existent channel
-
     #* Finished testing for this function
     #! Clearing data
     #   src.other.clear_v1()
