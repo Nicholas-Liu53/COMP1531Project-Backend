@@ -157,6 +157,46 @@ def users_all():
     token = request.args.get('token')
     return src.user.users_all(token)
 
+#* CHANNEL ROUTES
+@APP.route("/channel/invite/v2", methods=['POST'])
+def channel_invite():
+    payload = request.get_json()
+    return src.channel.channel_invite_v1(payload.get('token'), payload.get('channel_id'), payload.get('u_id'))
+
+@APP.route("/channel/details/v2", methods=['GET'])
+def channel_detail():
+    token, channel_id = request.args.get('token'), request.args.get('channel_id')
+    return src.channel.channel_details_v1(token, int(channel_id))
+
+@APP.route("/channel/message/v2", methods=['GET'])
+def channel_messages():
+    token, channel_id, start = request.args.get('token'), request.args.get('channel_id'), request.args.get('start')
+    return src.channel.channel_messages_v1(token, int(channel_id), int(start))
+
+@APP.route("/channel/addowner/v1", methods=['POST'])
+def channel_addowner():
+    payload = request.get_json()
+    return src.channel.channel_addowner_v1(payload.get('token'), payload.get('channel_id'), payload.get('u_id'))
+    
+@APP.route("/channel/removeowner/v1", methods= ['POST'])
+def channel_removeowner():
+    payload = request.get_json()
+    return src.channel.channel_removeowner_v1(payload.get('token'), payload.get('channel_id'), payload.get('u_id'))
+
+#* MESSAGE ROUTES
+
+@APP.route("/message/share/v1", methods=['POST'])
+def message_share():
+    payload = request.get_json()
+    return src.message.message_share_v1(payload.get('token'), payload.get('og_message_id'), payload.get('message'), payload.get('channel_id'), payload.get('dm_id'))
+
+#* ADMIN ROUTES
+
+@APP.route("/admin/userpermission/change/v1", methods=['POST'])
+def userpermission_change():
+    payload = request.get_json()
+    return src.admin.userpermission_change_v1(payload.get('token'),payload.get('u_id'),payload.get('permission_id'))
+
 
 if __name__ == "__main__":
     APP.run(port=config.port) # Do not edit this port
