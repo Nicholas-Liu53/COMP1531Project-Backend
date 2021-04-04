@@ -1,7 +1,7 @@
 from flask import Flask, request
 import src.data
 from src.error import AccessError, InputError
-from src.other import decode, get_user, message_count, get_user_from_handlestring, push_added_notifications
+from src.other import decode, get_user, get_dm, message_count, get_user_from_handlestring, push_added_notifications
 import src.auth
 import json
 import jwt
@@ -42,7 +42,7 @@ def dm_details_v1(token, dm_id):
         Returns a dictionary with key 'names' and 'members' when sucessful
     '''
     auth_user_id, _ = decode(token)
-    dm_name, dmMembers = get_members(-1, dm_id)
+    dm_name, dmMembers = get_dm(dm_id)['name'], get_dm(dm_id)[allMems]
     if auth_user_id not in dmMembers:
         raise AccessError
     mOutput = []
@@ -291,7 +291,7 @@ def dm_messages_v1(token, dm_id, start):
     auth_user_id, _ = decode(token)
     num_of_messages = message_count(-1, dm_id)
 
-    _, dmMembers = get_members(-1, dm_id)
+    dmMembers = get_dm(dm_id)[allMems]
     if auth_user_id not in dmMembers:
         raise AccessError
     
