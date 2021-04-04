@@ -76,7 +76,7 @@ def test_http_channel_messages(user1):
     })
     channel1 = response.json()
     
-    '''
+    
     #channel ID not a valid channel 
     invalid_cID = -1
     invalid_channel = requests.get(f"{url}channel/messages/v2", params = {
@@ -93,7 +93,7 @@ def test_http_channel_messages(user1):
         'start': 2,
     })
     assert invalid_start.status_code == 400  
-    
+    '''
     #Access error when authorised user not a member of channel 
     access_error = requests.get(f"{url}channel/messages/v2", params = {
         "token": user2[token],
@@ -101,8 +101,8 @@ def test_http_channel_messages(user1):
         'start': 0,
     })
     assert access_error.status_code == 403 
-    '''
-
+    
+    
     #Success Case 1: less than 50 messages returns end as -1    
     #Send one message in channel  
     requests.post(f"{url}message/send/v2", json = {
@@ -157,7 +157,7 @@ def test_http_channel_messages(user1):
     assert len(response_2['messages']) == expected_2['len_messages']
     assert response_2['start'] == expected_2['stsart']
     assert response_2['end'] == expected_2['end']
-
+    '''
     
     
     
