@@ -9,7 +9,7 @@ import jwt
 
 @pytest.fixture
 def invalid_token():
-    return jwt.jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
+    return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
 @pytest.fixture
 def user1():
