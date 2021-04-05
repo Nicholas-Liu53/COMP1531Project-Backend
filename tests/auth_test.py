@@ -2,6 +2,7 @@
 from src.error import AccessError, InputError
 import pytest
 from src.auth import auth_login_v2, auth_register_v2
+from src.user import user_profile_v2
 import src.channel, src.channels
 from src.other import clear_v1
 from jwt import encode
@@ -98,6 +99,28 @@ def test_auth_register_valid_same_name():
     
     assert auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman") == {'token': token1, 'auth_user_id': 0,}
     assert auth_register_v2("caricoleman@hotmail.com", "1234567", "cari", "coleman") == {'token': token2, 'auth_user_id': 1,}
+
+    assert user_profile_v2(token2, 1) == { 
+        'user':
+            {
+            'u_id': 1, 
+            'email': "caricoleman@hotmail.com", 
+            'name_first': 'cari', 
+            'name_last': 'coleman', 
+            'handle_str': 'caricoleman0'
+            }
+    }
+
+    assert user_profile_v2(token1, 0) == { 
+        'user':
+            {
+            'u_id': 0, 
+            'email': "caricoleman@gmail.com", 
+            'name_first': 'cari', 
+            'name_last': 'coleman', 
+            'handle_str': 'caricoleman'
+            }
+    }
 
 def test_auth_register_valid_same_name_multiple():
     clear_v1()
