@@ -155,9 +155,7 @@ def test_dm_create_errors(user1):
     with pytest.raises(InputError):
         dm_create_v1(user1[token], [invalid_u_id])
 
-
-
-
+#Test for function which removes a dm from all dm's
 def test_dm_remove(user1, user2, invalid_dm):
     #Create two dm's: one which we will remove and one we will keep
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
@@ -174,6 +172,7 @@ def test_dm_remove(user1, user2, invalid_dm):
     return_dict = dm_list_v1(user1[token])
     assert len(return_dict['dms']) == 1
 
+#Test that a user can be invited to a DM
 def test_dm_invite(user1, user2, user3, invalid_dm):
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     #Test for input error, when dm input is invalid 
@@ -189,6 +188,7 @@ def test_dm_invite(user1, user2, user3, invalid_dm):
         'name': 'user1, user2',
     }]}
 
+#Test that a user within a DM can leave that DM
 def test_dm_leave(user1, user2, user3, invalid_dm):
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     #InputError when dm input is not a valid dm 
