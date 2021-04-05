@@ -2,8 +2,7 @@ import pytest
 import requests
 import json
 from src.error import AccessError, InputError
-from src.auth import auth_login_v2, auth_register_v2
-from src.other import clear_v1, check_session, SECRET
+from src.other import check_session, SECRET
 from src.config import url
 from jwt import encode
 from src.other import check_session, SECRET

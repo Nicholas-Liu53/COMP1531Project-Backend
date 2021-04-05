@@ -1,5 +1,4 @@
 from flask import Flask, request
-import src.data
 from src.error import AccessError, InputError
 from src.other import decode, get_user, get_dm, message_count, get_user_from_handlestring, push_added_notifications, check_removed
 import src.auth
@@ -218,7 +217,7 @@ def dm_invite_v1(token, dm_id, u_id):
                 raise AccessError
             else:
                 #If no errors found can add dm to list
-                items['all_members'].append(u_id)
+                items['all_members'].append(u_id) if u_id not in items["all_members"] else None
                 with open('data.json', 'w') as FILE:
                     json.dump(data, FILE)
                 push_added_notifications(auth_user_ID, u_id, -1, dm_id)
@@ -253,7 +252,9 @@ def dm_leave_v1(token, dm_id):
         #Loop for input errors:
         if dm_id == items['dm_id']:
             input_error = False
-            if auth_user_ID not in items['all_members']:
+            if auth_user_ID is items['creator_id']:
+                return {}
+            elif auth_user_ID not in items['all_members']:
                 raise AccessError
             else:
                 #If error not found remove dm from list 

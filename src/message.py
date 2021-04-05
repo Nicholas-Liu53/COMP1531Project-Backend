@@ -1,4 +1,3 @@
-import src.data
 from src.error import AccessError, InputError
 import src.auth
 from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications
@@ -25,7 +24,7 @@ def message_send_v1(token, channel_id, message):
     --> Note: Messages cannot be more 1000 chars
 
     Arguments:
-        token        (str) - The JWT containing user_id and session_id of the user that is sending the message
+        token        (str) - The JWT containing user_id and session_id of the user that is to send the message
         channel_id   (int) - The id of the channel that the message is being sent to
         message      (str) - The string of the message being sent
 
@@ -148,7 +147,7 @@ def message_edit_v1(token, message_id, message):
         --> Note: When the message is an empty string, the message is removed
 
     Arguments:
-        token        (str) - The JWT containing user_id and session_id of the user that is editing the message
+        token        (str) - The JWT containing user_id and session_id of the user that is to edit the message
         message_id   (int) - The id of the message that is to be removed
         message      (str) - The string for the message that will replace the old message
 

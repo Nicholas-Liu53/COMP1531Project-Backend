@@ -1,4 +1,3 @@
-import src.data
 from src.error import AccessError, InputError
 import jwt
 import json

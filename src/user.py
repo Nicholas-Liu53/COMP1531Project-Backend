@@ -1,4 +1,3 @@
-import src.data
 from src.error import AccessError, InputError
 import re
 from src.other import decode, check_session, get_user
@@ -158,12 +157,8 @@ def users_all(token):
             token (str): The token containing the user_id and session_id of user that called the function
         
         Exceptions:
-            InputError : occurs when the inputted handle string has a length that is not between 3 and 20 
-                         characters inclusively
-            InputError : occurs when the inputted handle string has already been used by another user
-            AccessError : occurs when the session_id or u_id provided within the token does not 
-                          correspond to a valid u_id and session_id
-            
+            None
+
         Return Value:
             Returns (dict) containing a list of all users which contains dictionaries of information on each user
             The information provided is the user_id, email, first name, last name and handle string of each user 

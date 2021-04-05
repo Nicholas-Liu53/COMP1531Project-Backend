@@ -1,4 +1,3 @@
-import src.data
 import jwt
 import json
 from src.error import AccessError, InputError
@@ -38,12 +37,6 @@ def clear_v1():
             'messages_log': [],
             'notifs': {}
         }, FILE)
-
-    src.data.users = []
-    src.data.channels = []
-    src.data.dms = []
-    src.data.messages_log = []
-    src.data.notifs = {}
 
 def search_v1(token, query_str):
     '''

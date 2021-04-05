@@ -1,4 +1,3 @@
-import src.data
 from src.error import AccessError, InputError
 import re
 from jwt import encode, decode

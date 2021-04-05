@@ -1,4 +1,3 @@
-import src.data
 from src.other import decode
 import json
 
