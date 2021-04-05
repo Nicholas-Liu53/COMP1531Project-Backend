@@ -50,6 +50,33 @@ def auth_login():
     payload = request.get_json()
     return src.auth.auth_login_v2(payload['email'], payload['password'])
 
+@APP.route("/auth/logout/v1", methods=['DELETE'])
+def auth_logout():
+    payload = request.get_json()
+    return src.auth.auth_logout_v1(payload['token'])
+    
+
+#* ********************************************DM ROUTES*****************************************************
+@APP.route("/dm/details/v1", methods=['GET'])
+def dm_details():
+    token, dm_id = request.args.get('token'), request.args.get('dm_id')
+    return src.dm.dm_details_v1(token, int(dm_id))
+
+@APP.route("/dm/list/v1", methods=['GET'])
+def dm_list():
+    token = request.args.get('token')
+    return src.dm.dm_list_v1(token)
+
+@APP.route("/dm/create/v1", methods=['POST'])
+def dm_create():
+    payload = request.get_json()
+    return src.dm.dm_create_v1(payload.get('token'), payload.get('u_ids'))
+
+@APP.route("/dm/remove/v1", methods=['DELETE'])
+def dm_remove():
+    payload = request.get_json()
+    return src.dm.dm_remove_v1(payload.get('token'), payload.get('dm_id'))
+
 @APP.route("/auth/logout/v1", methods=['POST'])
 def auth_logout():
     payload = request.get_json()
