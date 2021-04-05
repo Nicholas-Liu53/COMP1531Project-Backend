@@ -30,7 +30,7 @@ def user_profile_v2(token, u_id):
     }
 
 def user_setname_v2(token, name_first, name_last):
-     """ Provided with a valid token, the first and last names of the user corresponding to the payload of the token are
+    """ Provided with a valid token, the first and last names of the user corresponding to the payload of the token are
         changed to the provided first and last name
 
         Arguments:

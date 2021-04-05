@@ -1,7 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 import re
-from jwt import encode
+from jwt import encode, decode
 import json
 from src.other import SECRET
 import hashlib
@@ -218,3 +218,25 @@ def auth_register_v2(email, password, name_first, name_last):
         'token': token,
         'auth_user_id': auth_user_id
     }
+
+def auth_logout_v1(token):
+    data = json.load(open('data.json', 'r'))
+
+    payload = decode(token, SECRET, algorithms='HS256')
+    auth_user_id, session_id = payload.get('user_id'), payload.get('session_id')
+
+    for user in data['users']:
+        if user['u_id'] == auth_user_id:
+            if session_id in user['session_id']:
+                user['session_id'].remove(session_id)
+                with open('data.json', 'w') as FILE:
+                    json.dump(data, FILE)
+                return {'is_success': True}
+
+    return {'is_success': False}
+
+
+
+
+
+
