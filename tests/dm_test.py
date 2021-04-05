@@ -24,10 +24,6 @@ handle  = 'handle_str'
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
-#* Fixture that returns an invalid dm_id 
-@pytest.fixture 
-def invalid_dm():
-    return -1
 
 #* Fixture that clears and registers the first user
 @pytest.fixture
@@ -156,12 +152,13 @@ def test_dm_create_errors(user1):
         dm_create_v1(user1[token], [invalid_u_id])
 
 #Test for function which removes a dm from all dm's
-def test_dm_remove(user1, user2, invalid_dm):
+def test_dm_remove(user1, user2):
     #Create two dm's: one which we will remove and one we will keep
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     #This second dm will have dm_id 1 
     dm_create_v1(user1[token], [user2[AuID]])
     #Test for input error, when dm input is invalid 
+    invalid_dm = -2
     with pytest.raises(InputError):
         dm_remove_v1(user1[token], invalid_dm)
     #Test for access error, when user requesting remove is not original creator 
@@ -173,9 +170,10 @@ def test_dm_remove(user1, user2, invalid_dm):
     assert len(return_dict['dms']) == 1
 
 #Test that a user can be invited to a DM
-def test_dm_invite(user1, user2, user3, invalid_dm):
+def test_dm_invite(user1, user2, user3):
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     #Test for input error, when dm input is invalid 
+    invalid_dm = -1
     with pytest.raises(InputError):
         dm_invite_v1(user1[token], invalid_dm, user3[AuID])
     #AccessError when user who is not in DM tries to invite 
@@ -189,9 +187,10 @@ def test_dm_invite(user1, user2, user3, invalid_dm):
     }]}
 
 #Test that a user within a DM can leave that DM
-def test_dm_leave(user1, user2, user3, invalid_dm):
+def test_dm_leave(user1, user2, user3):
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     #InputError when dm input is not a valid dm 
+    invalid_dm = -1
     with pytest.raises(InputError):
         dm_leave_v1(user1[token], invalid_dm)
     #AccessError when user not in DM tries to leave 
@@ -203,14 +202,17 @@ def test_dm_leave(user1, user2, user3, invalid_dm):
     assert {dmID: dm_0[dmID], Name: 'user1, user2'} in dm_list_v1(user1[token])['dms']
     #User 2 has no more dms
     assert dm_list_v1(user2[token]) == {'dms': []}
-
-def test_dm_messages(user1, user2, user3, invalid_dm):
+    
+#Test that up to 50 dms can be displayed 
+def test_dm_messages(user1, user2, user3):
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     dm_1 = dm_create_v1(user2[token], [user3[AuID]])
     #Input error when DM ID not valid or start is greater than # of messages in DM
     with pytest.raises(InputError):
         #Start greater than # of messages in DM
         dm_messages_v1(user1[token], dm_0['dm_id'], 1)
+    
+    invalid_dm = -1
     with pytest.raises(InputError):
         #DM ID not valid
         dm_messages_v1(user1[token], invalid_dm, 0)
