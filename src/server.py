@@ -50,9 +50,14 @@ def auth_register():
 def auth_login():
     payload = request.get_json()
     return src.auth.auth_login_v2(payload['email'], payload['password'])
+
+@APP.route("/auth/logout/v1", methods=['DELETE'])
+def auth_logout():
+    payload = request.get_json()
+    return src.auth.auth_logout_v1(payload['token'])
     
 
-#* DM ROUTES
+#* ********************************************DM ROUTES*****************************************************
 @APP.route("/dm/details/v1", methods=['GET'])
 def dm_details():
     token, dm_id = request.args.get('token'), request.args.get('dm_id')
