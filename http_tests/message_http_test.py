@@ -333,13 +333,65 @@ def test_http_message_remove(user1, user2, user3, user4):
     }).status_code == 400
 
 def test_http_message_share_todm(user1, user2, user3, user4):
-    pass
 
-def test_http_message_share_tochannel(user1, user2, user3, user4):
-    pass
+    #* Test 1: create a channel and dm and share a channel message to the dm
+    responseChannel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Channel',
+        "is_public": True}
+    )
+    channel = responseChannel.json()
+    requests.post(f"{url}channel/invite/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "u_id": user2[AuID]}
+    )
+    dmresponse = requests.post(f"{url}dm/create/v1", json={
+        "token": user2[token],
+        "u_ids": [user3[AuID],user4[AuID]]}
+    )
+    dm = dmresponse.json()
+    ogmsg = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel['channel_id'],
+        "message": 'hi'}
+    )
+    ogMessage = ogmsg.json()
+    user2[token], ogMessage['message_id'],'', -1, dm[dmID]
+    response = requests.post(f"{url}message/share/v1", json={
+        "token": user2[token],
+        "og_message_id": ogMessage['message_id'],
+        "message": '',
+        "channel_id": -1,
+        dmID: dm[dmID] 
+        })
+    shared = response.json()
 
-def test_http_message_share_dmtodm(user1, user2, user3, user4):
-    pass
+    check = requests.get(f"{url}dm/messages/v1", params={
+        "token": user2[token],
+        dmID: dm[dmID],
+        'start' : 0,}
+    )
+
+    # verify message has been sent
+    checklog = check.json()
+    messageFound = False
+    for messageDict in checklog['messages']:
+        if shared['message_id'] == messageDict['message_id']:
+            messageFound = True
+            break
+    assert messageFound is True 
+
+    #* Test 2: if user1 is not in dmTest, raise access error
+    
+    response5 = requests.post(f"{url}message/share/v1", json={
+        "token":user1[token],
+        "og_message_id": ogMessage['message_id'],
+        "message": '',
+        "channel_id": -1,
+        dmID: dm[dmID] 
+        })
+    assert response5.status_code == 403
 
 def test_http_senddm_access_error(user1, user2, user3):
     dmResponse = requests.post(f"{url}dm/create/v1", json={
