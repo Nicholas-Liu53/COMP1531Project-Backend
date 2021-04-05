@@ -219,6 +219,18 @@ def auth_register_v2(email, password, name_first, name_last):
     }
 
 def auth_logout_v1(token):
+    """ Provided a valid token, logs out the corresponding user session (invalidates session id and token) 
+
+        Arguments:
+            token (str): The token containing the user_id and session_id of user that called the function
+            
+        Exceptions:
+
+        Return Value:
+            Returns (dict) containing an 'is_success' key which contains true when the provided token 
+            has been successfully logged out otherwise false
+
+    """
     data = json.load(open('data.json', 'r'))
 
     payload = decode(token, SECRET, algorithms='HS256')
