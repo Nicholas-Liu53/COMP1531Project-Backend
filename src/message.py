@@ -212,6 +212,28 @@ def message_edit_v1(token, message_id, message):
     }
 
 def message_senddm_v1(token, dm_id, message):
+    '''
+    Takes in a user's token, a dm_id and a string and sends a message 
+    from that user into the dm.
+    --> Note: Messages cannot be more 1000 chars
+
+    Arguments:
+        token        (str) - The JWT containing user_id and session_id of the user that is sending the message
+        dm_id        (int) - The id of the dm that the message is being sent to
+        message      (str) - The string of the message being sent
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When the user id doesn't belong to any user
+                            2) The dm_id doesn't belong to any dm
+                            3) The message is too long (exceeds 1000 chars)
+        AccessError - Occurs when:
+                            1) When the user's token is invalid
+                            2) The token doesn't belong to a member of the dm
+
+    Return Value:
+        Returns a dictionary with key 'message_id' to the new message's message_id
+    '''
     auth_user_id, _ = decode(token)
     dmMembers = get_dm(dm_id)[allMems]
     if auth_user_id not in dmMembers:
