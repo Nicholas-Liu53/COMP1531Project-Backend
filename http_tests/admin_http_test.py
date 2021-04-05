@@ -73,13 +73,13 @@ def test_http_admin_user_remove_valid(user1, user2):
     message = msg.json()
 
     #* User not an owner
-    response_1 = requests.post(f"{url}admin/user/removing/v2", json={
+    response_1 = requests.delete(f"{url}admin/user/remove/v1", json={
         "token": user2[token],
         "u_id": user1[AuID]
     })    
     assert response_1.status_code == 403
 
-    requests.post(f"{url}admin/user/removing/v2", json={
+    requests.delete(f"{url}admin/user/remove/v1", json={
         "token": user1[token],
         "u_id": user2[AuID]
     })    
@@ -119,14 +119,14 @@ def test_http_admin_user_remove_valid(user1, user2):
     } 
 
     #* Test: u_id does not refer to a valid user
-    response_2 = requests.post(f"{url}admin/user/removing/v2", json={
+    response_2 = requests.delete(f"{url}admin/user/remove/v1", json={
         "token": user1[token],
         "u_id": -1
     })    
     assert response_2.status_code == 400
 
     #* Test: the user is currently only owner    
-    response_3 = requests.post(f"{url}admin/user/removing/v2", json={
+    response_3 = requests.delete(f"{url}admin/user/remove/v1", json={
         "token": user1[token],
         "u_id": user1[AuID]
     })    
@@ -205,7 +205,7 @@ def test_http_userpermissions_change(user1, user2, user3):
     
     assert response3.status_code == 400
 
-    #* Test 4: Raise Access Error when a non- Dreams owner is changing permissions
+    #* Test 4: Raise Access Error when a non- Dreams owner is change permissions
 
     response4 = requests.post(f"{url}admin/userpermission/change/v1", json={
         "token": user3[token],
