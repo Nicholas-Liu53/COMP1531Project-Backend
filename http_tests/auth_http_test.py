@@ -3,13 +3,12 @@ import requests
 import json
 from src.config import url
 from jwt import encode
-
+from src.error import AccessError, InputError
 import src.data
+from src.other import check_session, SECRET
 
 #400 for InputError    
 #403 for AccessError
-
-SECRET = "MENG"
 
 def test_http_auth_login_valid():
     requests.delete(f"{url}clear/v1")
@@ -89,16 +88,16 @@ def test_http_auth_logout_valid():
     response_2 = requests.post(f"{url}auth/login/v2", json={"email": "caricoleman@gmail.com", "password": "1234567"})
     payload_2 = response_2.json()
     
-    reponse_3 = requests.delete(f"{url}auth/logout/v1", json={'token': payload_1['token']})
+    response_3 = requests.delete(f"{url}auth/logout/v1", json={'token': payload_1['token']})
     payload_3 = response_3.json()
-    assert payload_3['is_success'] = True
+    assert payload_3['is_success'] == True
 
     with pytest.raises(AccessError):
         check_session(0, 0)
 
-    reponse_4 = requests.delete(f"{url}auth/logout/v1", json={'token': payload_2['token']})
+    response_4 = requests.delete(f"{url}auth/logout/v1", json={'token': payload_2['token']})
     payload_4 = response_4.json()
-    assert payload_4['is_success'] = True
+    assert payload_4['is_success'] == True
 
     with pytest.raises(AccessError):
         check_session(0, 1)
@@ -109,7 +108,7 @@ def test_http_auth_logout_v1_invalid():
 
     token_1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
 
-    reponse_3 = requests.delete(f"{url}auth/logout/v1", json={'token': token_1})
+    response_3 = requests.delete(f"{url}auth/logout/v1", json={'token': token_1})
     payload_3 = response_3.json()
-    assert payload_3['is_success'] = False
+    assert payload_3['is_success'] == False
     
