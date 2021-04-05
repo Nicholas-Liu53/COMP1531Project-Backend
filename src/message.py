@@ -214,7 +214,6 @@ def message_edit_v1(token, message_id, message):
 
 def message_senddm_v1(token, dm_id, message):
     auth_user_id, _ = decode(token)
-    print(get_dm(dm_id))
     dmMembers = get_dm(dm_id)[allMems]
     if auth_user_id not in dmMembers:
         raise AccessError
