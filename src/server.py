@@ -4,7 +4,6 @@ from flask import Flask, request
 from flask_cors import CORS
 from src.error import InputError
 from src import config
-import src.data
 import src.auth, src.admin, src.other, src.dm, src.notifications, src.channel, src.channels, src.message, src.user
 
 def defaultHandler(err):
@@ -51,11 +50,11 @@ def auth_login():
     payload = request.get_json()
     return src.auth.auth_login_v2(payload['email'], payload['password'])
 
-@APP.route("/auth/logout/v1", methods=['POST'])
+@APP.route("/auth/logout/v1", methods=['DELETE'])
 def auth_logout():
     payload = request.get_json()
     return src.auth.auth_logout_v1(payload['token'])
-    
+
 #* *************************************************ADMIN ROUTES******************************************
 @APP.route("/admin/userpermission/change/v1", methods=['POST'])
 def userpermission_change():

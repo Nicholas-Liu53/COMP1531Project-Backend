@@ -1,4 +1,3 @@
-import src.data
 import jwt
 import json
 from src.error import AccessError, InputError
@@ -38,12 +37,6 @@ def clear_v1():
             'messages_log': [],
             'notifs': {}
         }, FILE)
-
-    src.data.users = []
-    src.data.channels = []
-    src.data.dms = []
-    src.data.messages_log = []
-    src.data.notifs = {}
 
 def search_v1(token, query_str):
     '''
@@ -206,7 +199,6 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
     for word in messageWords:
         if word.startswith('@') and word != '@':
             atHandlesList.append(word[1:])
-    print(atHandlesList)
     taggedUsersList = []
     for atHandle in atHandlesList:
         try:
@@ -218,7 +210,6 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
                     taggedUsersList.append(get_user_from_handlestring(atHandle)[uID])
         except:
             pass
-    print(taggedUsersList)
     notification = {
         'channel_id': channel_id,
         'dm_id': dm_id,
