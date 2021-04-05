@@ -373,6 +373,7 @@ def test_http_message_share_todm(user1, user2, user3, user4):
         'start' : 0,}
     )
 
+    # verify message has been sent
     checklog = check.json()
     messageFound = False
     for messageDict in checklog['messages']:
