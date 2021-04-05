@@ -69,6 +69,7 @@ def user4():
     return response.json()
 
 def test_http_channels_create(user1, user2):
+    #* This test is structured identically to test_channels_create in tests/channels_test.py
     cResponse = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
         "name": "Oogway",

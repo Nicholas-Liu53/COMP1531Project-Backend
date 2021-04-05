@@ -67,6 +67,7 @@ def invalid_dmID():
 def invalid_u_id():
     return -1 
 
+#* Test that dm_details behaves correctly when given valid inputs
 def test_http_dm_details_valid(user1, user2):
     dmResponse = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
@@ -96,11 +97,13 @@ def test_http_dm_details_valid(user1, user2):
     assert responseUser1.json() == expected
     assert responseUser2.json() == expected
 
+#* Test that when trying to view details for an invalid dm_id, an InputError is raised (status code 400)
 def test_http_dm_details_invalid_dm_id(user1):
     invalid_dmID = -2
     response = requests.get(f"{url}dm/details/v1", params = {'token': user1[token], 'dm_id': invalid_dmID})
     assert response.status_code == 400
 
+#* Test that when users who are not in the DM try to view details of the DM, an AccessError is raised (status code 403)
 def test_http_dm_details_not_in_dm(user1, user2, user3):
     responseDM = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
@@ -111,10 +114,12 @@ def test_http_dm_details_not_in_dm(user1, user2, user3):
     
     assert response.status_code == 403
 
+#* Test that dm_list returns no dms when the user is not part of any
 def test_http_dm_list_none(user1):
     response = requests.get(f"{url}dm/list/v1", params = {'token': user1[token]})
     assert response.json() == {'dms': []}
 
+#* Test that dm_list only returns dms that the user is part of
 def test_http_dm_list(user1, user2, user3):
     requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
@@ -132,6 +137,7 @@ def test_http_dm_list(user1, user2, user3):
         Name: 'user1, user3'
     }]}
 
+#* Test that dm_create with valid inputs behaves correctly
 def test_http_dm_create(user1, user2):
     dmResponse = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
@@ -143,6 +149,7 @@ def test_http_dm_create(user1, user2):
         'dm_name': 'user1, user2',
     }
 
+#* Test that when trying to create a DM with invalid u_ids, an InputError is raised (status code 400)
 def test_http_dm_create_invalid_u_ids(user1):
     invalid_u_id = -1
     dmResponse = requests.post(f"{url}dm/create/v1", json={
@@ -152,7 +159,7 @@ def test_http_dm_create_invalid_u_ids(user1):
 
     assert dmResponse.status_code == 400
 
-
+#* Tests that when trying to remove an invalid dm_id, an InputError is raised (status code 400)
 def test_http_dm_remove_invalid_DM(user1):
     invalid_dm_id = -1
     dmResponse = requests.delete(f"{url}dm/remove/v1", json={
@@ -198,7 +205,7 @@ def test_http_dm_remove_success(user1, user2):
     expected = {'dms': []}
     assert responseUser1.json() == expected
 
-
+#* Tests that when trying to invite with an invalid dm_id, an InputError is raised (status code 400)
 def test_http_dm_invite_invalid_dm(user1, user2):
     invalid_dm_id = -1 
     invalid_dm = requests.post(f"{url}dm/invite/v1", json={
@@ -408,7 +415,4 @@ def test_http_dm_messages(user1, user2, user3):
     assert len(response_2['messages']) == expected_2['len_messages']
     assert response_2['start'] == expected_2['start']
     assert response_2['end'] == expected_2['end']
-          
 
-def test_http_dm_invalid_user(invalid_token):
-    pass
