@@ -145,8 +145,58 @@ def test_http_notifications_get_in_channels(user1, user2, user3, user4):
     assert notifFound is False
 
 def test_http_notifications_dms_added(user1, user2, user3):
-    pass
 
+    #Create two dm's 
+    result = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm_0 = result.json()
+    
+    result_2 = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user3[AuID]]
+    })
+    dm_1 = result_2.json()
+    
+    #Test 1: Notif is received when dm is initially created 
+    response = requests.get(f"{url}notifications/get/v1", params={
+        "token": user2[token]
+    })
+    notifs0 = response.json() 
+    
+    assert {
+        cID : -1,
+        dmID: dm_0[dmID],
+        nMess : f"user1 added you to user1, user2",
+    } in notifs0['notifications']
+
+    #Test 2: Notif is received when user3 is invited to dm_0 
+    requests.post(f"{url}dm/invite/v1", json={
+        "token": user1[token],
+        dmID: dm_0[dmID],
+        uID: user3[AuID],
+    })
+    
+    #Check user 3 notifs 
+    response_2 = requests.get(f"{url}notifications/get/v1", params={
+        "token": user3[token]
+    })
+    notifs1 = response_2.json() 
+    
+    assert {
+        cID : -1,
+        dmID: dm_0[dmID],
+        nMess : f"user1 added you to user1, user2",
+    } in notifs1['notifications']
+    
+    #Test 3: Check that user 3 still has dm_1 notif still in after being invited 
+    assert {
+        cID : -1,
+        dmID: dm_1[dmID],
+        nMess : f"user1 added you to user1, user3",
+    } in notifs1['notifications']
+    
 def test_http_valid_dm_tag(user1, user2):
     dmResponse = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],

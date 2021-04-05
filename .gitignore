@@ -9,6 +9,9 @@ __pycache__/
 # Data files
 data.json
 
+# Misc Files
+.idea
+
 # Distribution / packaging
 .Python
 build/
@@ -29,7 +32,6 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-data.json
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

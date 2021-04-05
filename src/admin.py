@@ -29,8 +29,6 @@ def user_remove_v1(token, u_id):
     for users in data['users']:
         if users['permission_id'] == 1:
             dream_owner += 1
-    print(dream_owner)
-    print(get_user_permissions(u_id))
 
     auth_user_id, _ = decode(token)
 
