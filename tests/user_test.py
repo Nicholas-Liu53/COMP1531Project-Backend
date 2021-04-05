@@ -32,6 +32,7 @@ def user4():
 def user5():
     return auth_register_v2("claudiamarley@gmail.com", "1234567", "claudia", "marley")
 
+# tests the return value when user profile is called from a valid user 
 def test_user_profile_valid(user1,user2):
     token = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
     assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
@@ -47,6 +48,7 @@ def test_user_profile_valid(user1,user2):
             }
     }
 
+# tests the return value when user profile is called from a valid user by multiple users
 def test_user_profile_valid_multiple(user1,user2):
 
     token1 = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
@@ -79,12 +81,15 @@ def test_user_profile_valid_multiple(user1,user2):
     }
     
 
+# tests the case when the provided token contains an invalid user id
 def test_user_profile_invalid_user_id(user1):
     with pytest.raises(InputError):
         token = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
         assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
         user_profile_v2(token, 1)
 
+# tests that set name changes the users first and last names to the inputted first and last names
+# where only the first name is being changed
 def test_user_setname_valid_first_name(user1):
     token = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
     assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
@@ -102,6 +107,8 @@ def test_user_setname_valid_first_name(user1):
             }
     }
 
+# tests that set name changes the users first and last names to the inputted first and last names 
+# where only the last name is being changed
 def test_user_setname_valid_last_name(user1):
     token = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
     assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
@@ -119,6 +126,8 @@ def test_user_setname_valid_last_name(user1):
             }
     }
 
+# tests that set name changes the users first and last names to the inputted first and last names 
+# where both the first and last names are being changed
 def test_user_setname_valid_both_names(user1):
     token = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
     assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
@@ -136,6 +145,9 @@ def test_user_setname_valid_both_names(user1):
             }
     }
 
+# tests that set name changes the users first and last names to the inputted first and last names 
+# where both the first and last names are being changed
+# for multiple users
 def test_user_setname_valid_multiple(user1,user2):
     token1 = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
     assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
@@ -170,6 +182,7 @@ def test_user_setname_valid_multiple(user1,user2):
         }
     }
 
+# tests for the case where the inputted first name exceeds the 50 character limit
 def test_user_setname_invalid_long_first_name(user1):
     with pytest.raises(InputError):
         token = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
@@ -177,6 +190,7 @@ def test_user_setname_invalid_long_first_name(user1):
 
         user_setname_v2(token, 'kariiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii', 'koleman') 
 
+# tests for the case where the inputted first name is empty
 def test_user_setname_invalid_no_first_name(user1):
     with pytest.raises(InputError):
         token = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
@@ -184,12 +198,14 @@ def test_user_setname_invalid_no_first_name(user1):
 
         user_setname_v2(token, '', 'koleman') 
 
+# tests for the case where the inputted last name exceeds the 50 character limit
 def test_user_setname_invalid_long_last_name(user1):
     with pytest.raises(InputError):
         token = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
         assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
         user_setname_v2(token, 'kari', 'kolemaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaan')           
 
+# tests for the case where the inputted last name is empty
 def test_user_setname_invalid_no_last_name(user1):
     with pytest.raises(InputError):
         token = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
@@ -197,6 +213,7 @@ def test_user_setname_invalid_no_last_name(user1):
 
         user_setname_v2(token, 'kari', '') 
 
+# tests that set email changes the users email to the inputted email
 def test_user_setemail_valid(user1):
     token = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
     assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
@@ -214,6 +231,7 @@ def test_user_setemail_valid(user1):
         }
     }
 
+# tests that set email changes the users email to the inputted email for multiple users
 def test_user_setemail_valid_multiple(user1,user2):
     token1 = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
     assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
@@ -248,6 +266,7 @@ def test_user_setemail_valid_multiple(user1,user2):
         }
     }
 
+# tests the case where the inputted email is of invalid format
 def test_user_setemail_invalid_email(user1):
     with pytest.raises(InputError):
         token = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
@@ -255,6 +274,7 @@ def test_user_setemail_invalid_email(user1):
 
         user_setemail_v2(token, 'karicoleman.com')
 
+# tests the case where the inputted email is already being used by another registerd user
 def test_user_setemail_invalid_email_in_use(user1,user2):
     with pytest.raises(InputError):
         token1 = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
@@ -279,6 +299,7 @@ def test_user_setemail_invalid_email_in_use(user1,user2):
         
         user_setemail_v2(token2, 'karicoleman@gmail.com') 
 
+# tests that set handle changes the users handle string to the inputted handle string
 def test_user_sethandle_valid(user1):
     token = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
     assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
@@ -296,6 +317,7 @@ def test_user_sethandle_valid(user1):
         }
     }
 
+# tests that set handle changes the users handle string to the inputted handle string for multiple users
 def test_user_sethandle_valid_multiple(user1,user2):
     token1 = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
     assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
@@ -330,6 +352,7 @@ def test_user_sethandle_valid_multiple(user1,user2):
         }
     }
 
+# tests for the case when the inputted handle string has less than 3 characters
 def test_user_sethandle_invalid_short_handle(user1):
     with pytest.raises(InputError):
         token = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
@@ -337,6 +360,7 @@ def test_user_sethandle_invalid_short_handle(user1):
 
         user_sethandle_v2(token, 'cc')
 
+# tests for the case when the inputted handle string exceeds the 20 character limit
 def test_user_sethandle_invalid_long_handle(user1):
     with pytest.raises(InputError):
         token = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
@@ -344,6 +368,7 @@ def test_user_sethandle_invalid_long_handle(user1):
 
         user_sethandle_v2(token, 'cariiiiiiiiiiiiiiiiii')
 
+# tests for the case when the inputted handle string is already being used by another user
 def test_user_sethandle_invalid_handle_in_use(user1,user2):
     with pytest.raises(InputError):
         token1 = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
@@ -368,6 +393,7 @@ def test_user_sethandle_invalid_handle_in_use(user1,user2):
         
         user_sethandle_v2(token2, 'kari') 
 
+# tests the return value of users_all for when only one user is registered
 def test_users_all_v1_one(user1):
     token = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
     assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token, 'auth_user_id': 0,}
@@ -383,7 +409,7 @@ def test_users_all_v1_one(user1):
             }]
     }
 
-
+# tests the return value of users_all for when two users are registered
 def test_users_all_v1_two(user1,user2):
     token1 = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
     assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
@@ -409,7 +435,7 @@ def test_users_all_v1_two(user1,user2):
             }]
     } 
     
-
+# tests the return value of users_all for when multiple users are registered
 def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
     token1 = jwt.encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
     assert auth_login_v2("caricoleman@gmail.com", "1234567") == {'token': token1, 'auth_user_id': 0,}
