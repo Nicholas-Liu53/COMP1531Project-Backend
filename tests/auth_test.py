@@ -4,10 +4,8 @@ import pytest
 from src.auth import auth_login_v2, auth_register_v2
 from src.user import user_profile_v2
 import src.channel, src.channels
-from src.other import clear_v1
+from src.other import clear_v1, SECRET
 from jwt import encode
-
-SECRET = 'MENG'
 
 def test_auth_login_valid():
     clear_v1()
@@ -208,3 +206,24 @@ def test_auth_register_invalid_no_last_name():
     clear_v1()
     with pytest.raises(InputError):
         auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "") 
+
+def test_auth_logout_v1_valid():
+    clear_v1()
+    token_1 = auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    token_2 = auth_login_v2("caricoleman@gmail.com", "1234567")
+    assert auth_logout(token1) == {'is_success': True}
+    
+    with pytest.raises(AccessError):
+        check_session(0, 0)
+
+    assert auth_logout(token2) == {'is_success': True}
+    
+    with pytest.raises(AccessError):
+        check_session(0, 1)
+
+def test_auth_logout_v1_invalid():    
+    clear_v1()
+    token_1 = auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    token_2 = encode({'session_id': 0, 'user_id': 0}, SECRET, algorithm='HS256')
+    assert auth_logout(token2) == {'is_success': False}
+    

@@ -53,7 +53,7 @@ def user3():
 
 def test_http_admin_user_remove_valid(user1, user2):
 
-chan = requests.post(f"{url}channels/create/v2", json={
+    chan = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
         "name": "Channel",
         "is_public": True
