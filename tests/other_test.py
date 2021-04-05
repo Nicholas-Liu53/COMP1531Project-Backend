@@ -129,6 +129,9 @@ def test_search_channels(user1, user2, user3, user4, user5, channel1, channel2):
     clear_v1()
 
 def test_search_dms(user1, user2, user3):
+    # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    #   Note: This test has white-box testing involved  #
+    # # # # # # # # # # # # # # # # # # # # # # # # # # #
     # Create dm
     dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
     #* Test if search comes up in dms for user2 (who is in dm)

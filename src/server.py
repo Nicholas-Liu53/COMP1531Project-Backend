@@ -5,7 +5,7 @@ from flask_cors import CORS
 from src.error import InputError
 from src import config
 import src.data
-import src.auth, src.other, src.dm, src.notifications, src.channel, src.channels, src.message, src.user
+import src.auth, src.admin, src.other, src.dm, src.notifications, src.channel, src.channels, src.message, src.user
 
 def defaultHandler(err):
     response = err.get_response()
@@ -34,11 +34,13 @@ def echo():
         'data': data
     })
 
+
 @APP.route("/clear/v1", methods=['DELETE'])
 def clear():
     src.other.clear_v1()
     return {}
 
+#* *********************************************AUTH ROUTES**************************************************
 @APP.route("/auth/register/v2", methods=['POST'])
 def auth_register():
     payload = request.get_json()
@@ -48,7 +50,9 @@ def auth_register():
 def auth_login():
     payload = request.get_json()
     return src.auth.auth_login_v2(payload['email'], payload['password'])
+    
 
+#* DM ROUTES
 @APP.route("/dm/details/v1", methods=['GET'])
 def dm_details():
     token, dm_id = request.args.get('token'), request.args.get('dm_id')
@@ -66,20 +70,36 @@ def dm_create():
 
 @APP.route("/dm/remove/v1", methods=['DELETE'])
 def dm_remove():
-    pass
+    payload = request.get_json()
+    return src.dm.dm_remove_v1(payload.get('token'), payload.get('dm_id'))
 
 @APP.route("/dm/invite/v1", methods=['POST'])
 def dm_invite():
-    pass
+    payload = request.get_json()
+    return src.dm.dm_invite_v1(payload.get('token'), payload.get('dm_id'), payload.get('u_id'))
 
 @APP.route("/dm/leave/v1", methods=['POST'])
 def dm_leave():
-    pass
-
+    payload = request.get_json()
+    return src.dm.dm_leave_v1(payload.get('token'), payload.get('dm_id'))
+    
 @APP.route("/dm/messages/v1", methods=['GET'])
 def dm_messages():
-    pass
+    token, dm_id, start = request.args.get('token'), request.args.get('dm_id'), request.args.get('start')
+    return src.dm.dm_messages_v1(token, int(dm_id), int(start))
 
+#* *************************************************ADMIN ROUTES******************************************
+@APP.route("/admin/userpermission/change/v1", methods=['POST'])
+def userpermission_change():
+    payload = request.get_json()
+    return src.admin.userpermission_change_v1(payload.get('token'),payload.get('u_id'),payload.get('permission_id'))
+
+@APP.route("/admin/user/remove/v1", methods=['DELETE'])
+def user_remove():
+    payload = request.get_json()
+    return src.admin.user_remove_v1(payload.get('token'), payload.get('u_id'))
+
+#* ****************************************************CHANNEL ROUTES***********************************************
 @APP.route("/channel/join/v2", methods=['POST'])
 def channel_join():
     payload = request.get_json()
@@ -90,6 +110,33 @@ def channel_leave():
     payload = request.get_json()
     return src.channel.channel_leave_v1(payload['token'], payload['channel_id'])
 
+@APP.route("/channel/invite/v2", methods=['POST'])
+def channel_invite():
+    payload = request.get_json()
+    return src.channel.channel_invite_v1(payload.get('token'), payload.get('channel_id'), payload.get('u_id'))
+
+@APP.route("/channel/details/v2", methods=['GET'])
+def channel_detail():
+    token, channel_id = request.args.get('token'), request.args.get('channel_id')
+    return src.channel.channel_details_v1(token, int(channel_id))
+
+@APP.route("/channel/messages/v2", methods=['GET'])
+def channel_messages():
+    token, channel_id, start = request.args.get('token'), request.args.get('channel_id'), request.args.get('start')
+    return src.channel.channel_messages_v1(token, int(channel_id), int(start))
+
+@APP.route("/channel/addowner/v1", methods=['POST'])
+def channel_addowner():
+    payload = request.get_json()
+    return src.channel.channel_addowner_v1(payload.get('token'), payload.get('channel_id'), payload.get('u_id'))
+    
+@APP.route("/channel/removeowner/v1", methods= ['POST'])
+def channel_removeowner():
+    payload = request.get_json()
+    return src.channel.channel_removeowner_v1(payload.get('token'), payload.get('channel_id'), payload.get('u_id'))
+
+
+#* ****************************************************CHANNELS ROUTES*********************************************
 @APP.route("/channels/create/v2", methods=['POST'])
 def channels_create():
     payload = request.get_json()
@@ -105,6 +152,7 @@ def channels_listall():
     token = request.args.get('token')
     return src.channels.channels_listall_v2(token)
 
+#* MESSAGE ROUTES
 @APP.route("/message/send/v2", methods=['POST'])
 def message_send():
     payload = request.get_json()
@@ -130,6 +178,18 @@ def search():
     token, query_str = request.args.get('token'), request.args.get('query_str')
     return src.other.search_v1(token, query_str)
 
+@APP.route("/message/share/v1", methods=['POST'])
+def message_share():
+    payload = request.get_json()
+    return src.message.message_share_v1(payload.get('token'), payload.get('og_message_id'), payload.get('message'), payload.get('channel_id'), payload.get('dm_id'))
+
+@APP.route("/message/senddm/v1", methods=['POST'])
+def message_senddm():
+    payload = request.get_json()
+    return src.message.message_senddm_v1(payload['token'], payload['dm_id'], payload['message'])
+
+
+#* ***************************************************USER ROUTES***********************************************
 @APP.route("/user/profile/v2", methods=['GET'])
 def user_profile():
     token, u_id = request.args.get('token'), request.args.get('u_id')
@@ -158,5 +218,10 @@ def users_all():
     return src.user.users_all(token)
 
 
+
+
+#* ------------------------------------------------------------------------------------
+
+#* SERVER RUN
 if __name__ == "__main__":
     APP.run(port=config.port) # Do not edit this port

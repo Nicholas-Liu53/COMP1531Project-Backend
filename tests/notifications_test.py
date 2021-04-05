@@ -106,16 +106,16 @@ def test_notifications_get_in_channels(user1, user2, user3):
     } in notifications_get_v1(user2[token])[notifs]
     
     #* Test if @ without a valid handle string won't raise an error nor tag anyone
-    message7 = src.message.message_send_v1(user1[token], channel1[cID], "@Joe_Biden")
+    src.message.message_send_v1(user1[token], channel1[cID], "@Joe_Biden")
     assert {
         cID    : channel1[cID],
         'dm_id': -1,
-        nMess  : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: @Joe_Biden",
+        nMess  : f"{get_user(user1[AuID])['handle_str']} tagged you in {get_channel(channel1[cID])['name']}: @Joe_Biden",
     } not in notifications_get_v1(user2[token])[notifs]
     assert {
         cID    : channel1[cID],
         'dm_id': -1,
-        nMess  : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_channel(channel1[cID])['name']}: @Joe_Biden",
+        nMess  : f"{get_user(user1[AuID])['handle_str']} tagged you in {get_channel(channel1[cID])['name']}: @Joe_Biden",
     } not in notifications_get_v1(user3[token])[notifs]
     
 
@@ -125,7 +125,6 @@ def test_notifications_dms_added(user1, user2, user3):
 
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     dm_1 = dm_create_v1(user1[token], [user3[AuID]])
-
 
     #Test 1: for initial creation of DM
     assert {
@@ -202,10 +201,10 @@ def test_dm_edit_notif(user1, user2):
     assert {
         cID : -1,
         dmID: dm1[dmID],
-        nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm1['dm_id'])['name']}: {tagMessage}",
+        nMess : f"{get_user(user1[AuID])['handle_str']} tagged you in {get_dm(dm1['dm_id'])['name']}: {tagMessage}",
     } in notifications_get_v1(user2[token])[notifs]
     assert {
         cID : -1,
         dmID: dm1[dmID],
-        nMess : f"{get_user(user1[AuID])['handle_string']} tagged you in {get_dm(dm1['dm_id'])['name']}: Yo {tagMessage}",
+        nMess : f"{get_user(user1[AuID])['handle_str']} tagged you in {get_dm(dm1['dm_id'])['name']}: Yo {tagMessage}",
     } in notifications_get_v1(user2[token])[notifs]

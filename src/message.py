@@ -1,7 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
 import src.auth
-from src.other import decode, get_channel, get_members, get_user, get_dm, get_user_permissions, push_tagged_notifications
+from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications
 from datetime import timezone, datetime
 import json
 
@@ -57,7 +57,10 @@ def message_send_v1(token, channel_id, message):
 
     now = datetime.now()
     time_created = int(now.strftime("%s"))
-    newID = len(data['messages_log'])
+    if len(data['messages_log']) > 0:
+        newID = data['messages_log'][-1]['message_id'] + 1
+    else:
+        newID = 0
 
     # User is in the channel (which exists) & message is appropriate length
     #* Time to send a message
@@ -170,55 +173,61 @@ def message_edit_v1(token, message_id, message):
 
     #* Get message dictionary in data
     messageFound = False
-    messageDict = {}
-    for message in data['messages_log']:
-        if message['message_id'] == message_id:
-            messageDict = message
+    i = 0
+    while not messageFound:
+        if i >= len(data['messages_log']):
+            raise InputError
+        elif data['messages_log'][i]['message_id'] == message_id:
             messageFound = True
-    if not messageFound:
-        raise InputError
+        i += 1
+
+    i -= 1          # Undo extra increment
 
     #* Check if the user is the writer, channel owner or owner of Dreams
     # Get the channel the message belongs to
-    if messageDict[cID] != -1:
-        channel = get_channel(messageDict['channel_id'])
-        if auth_user_id is not messageDict['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
+    if data['messages_log'][i][cID] != -1:
+        channel = get_channel(data['messages_log'][i]['channel_id'])
+        if auth_user_id is not data['messages_log'][i]['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
             raise AccessError
     else:
-        dm = get_dm(messageDict['dm_id'])
-        if auth_user_id is not messageDict['u_id']:
+        get_dm(data['messages_log'][i]['dm_id'])
+        if auth_user_id is not data['messages_log'][i]['u_id']:
             raise AccessError
 
     if len(message) > 1000:  # If the message is too long, raise InputError
         raise InputError
     elif message == '':      #* If new message is empty string --> remove message
-        message_remove_v1(token, message_id)
+        data['messages_log'].remove(data['messages_log'][i])
     else:                       # Else 
-        messageDict['message'] = message
-
+        data['messages_log'][i]['message'] = message
+    
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
 
-    if messageDict['channel_id'] != -1:     #* If message is in a channel
-        push_tagged_notifications(auth_user_id, message['channel_id'], -1, message)
+    if data['messages_log'][i]['channel_id'] != -1:     #* If message is in a channel
+        push_tagged_notifications(auth_user_id, data['messages_log'][i]['channel_id'], -1, message)
     else:
-        push_tagged_notifications(auth_user_id, -1, message['dm_id'], message)
+        push_tagged_notifications(auth_user_id, -1, data['messages_log'][i]['dm_id'], message)
 
     return {
     }
 
 def message_senddm_v1(token, dm_id, message):
-    data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
-    _, dmMembers = get_members(-1, dm_id)
+    print(get_dm(dm_id))
+    dmMembers = get_dm(dm_id)[allMems]
     if auth_user_id not in dmMembers:
         raise AccessError
     if len(message) > 1000:
         raise InputError
-    message_id = len(data['messages_log'])
+    data = json.load(open('data.json', 'r'))
+    if len(data['messages_log']) > 0:
+        message_id = data['messages_log'][-1]['message_id'] + 1
+    else:
+        message_id = 0
     now = datetime.now()
     time_created = int(now.strftime("%s"))
-    
+
     data['messages_log'].append({
         cID: -1,
         dmID: dm_id,
@@ -277,9 +286,10 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
                         userAuth = True
                 if not userAuth:
                     raise AccessError
+        with open('data.json', 'w') as FILE:
+            json.dump(data, FILE)
         shared_message_id = message_send_v1(token, channel_id, newMessage)
-        push_tagged_notifications(auth_user_id, channel_id, -1, newMessage)
-
+        
     if channel_id == -1:
         for dm in data['dms']:
             if dm['dm_id'] == dm_id:
@@ -289,13 +299,14 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
                         userAuth = True
                 if not userAuth:
                     raise AccessError
+        with open('data.json', 'w') as FILE:
+            json.dump(data, FILE)
         shared_message_id = message_senddm_v1(token, dm_id, newMessage)
+        
+
+    if dm_id == -1:
+        push_tagged_notifications(auth_user_id, channel_id, -1, newMessage)
+    else: 
         push_tagged_notifications(auth_user_id, -1, dm_id, newMessage)
-    else:
-        # not an error in the spec sheet but if neither channel_id nor dm_id is not -1 or is both -1 probably raise inputerror
-        pass 
-    
-    with open('data.json', 'w') as FILE:
-        json.dump(data, FILE)
 
     return shared_message_id
