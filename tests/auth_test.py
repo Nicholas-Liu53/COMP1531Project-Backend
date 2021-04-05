@@ -1,12 +1,11 @@
 # File to test functions in src/auth.py
 from src.error import AccessError, InputError
 import pytest
-from src.auth import auth_login_v2, auth_register_v2
+from src.auth import auth_login_v2, auth_register_v2, auth_logout_v1
+from src.user import user_profile_v2
 import src.channel, src.channels
-from src.other import clear_v1
+from src.other import clear_v1, SECRET, check_session
 from jwt import encode
-
-SECRET = 'MENG'
 
 def test_auth_login_valid():
     clear_v1()
@@ -99,6 +98,28 @@ def test_auth_register_valid_same_name():
     assert auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman") == {'token': token1, 'auth_user_id': 0,}
     assert auth_register_v2("caricoleman@hotmail.com", "1234567", "cari", "coleman") == {'token': token2, 'auth_user_id': 1,}
 
+    assert user_profile_v2(token2, 1) == { 
+        'user':
+            {
+            'u_id': 1, 
+            'email': "caricoleman@hotmail.com", 
+            'name_first': 'cari', 
+            'name_last': 'coleman', 
+            'handle_str': 'caricoleman0'
+            }
+    }
+
+    assert user_profile_v2(token1, 0) == { 
+        'user':
+            {
+            'u_id': 0, 
+            'email': "caricoleman@gmail.com", 
+            'name_first': 'cari', 
+            'name_last': 'coleman', 
+            'handle_str': 'caricoleman'
+            }
+    }
+
 def test_auth_register_valid_same_name_multiple():
     clear_v1()
     token1 = encode({'session_id': 0, 'user_id': 0}, SECRET, algorithm='HS256')
@@ -185,3 +206,27 @@ def test_auth_register_invalid_no_last_name():
     clear_v1()
     with pytest.raises(InputError):
         auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "") 
+
+def test_auth_logout_v1_valid():
+    clear_v1()
+    user_data_1 = auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    token_1 = user_data_1['token']
+    user_data_2 = auth_login_v2("caricoleman@gmail.com", "1234567")
+    token_2 = user_data_2['token']
+    
+    assert auth_logout_v1(token_1) == {'is_success': True}
+    
+    with pytest.raises(AccessError):
+        check_session(0, 0)
+
+    assert auth_logout_v1(token_2) == {'is_success': True}
+    
+    with pytest.raises(AccessError):
+        check_session(0, 1)
+
+def test_auth_logout_v1_invalid():    
+    clear_v1()
+    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    token_1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+    assert auth_logout_v1(token_1) == {'is_success': False}
+    

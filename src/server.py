@@ -4,7 +4,6 @@ from flask import Flask, request
 from flask_cors import CORS
 from src.error import InputError
 from src import config
-import src.data
 import src.auth, src.admin, src.other, src.dm, src.notifications, src.channel, src.channels, src.message, src.user
 
 def defaultHandler(err):
@@ -50,43 +49,11 @@ def auth_register():
 def auth_login():
     payload = request.get_json()
     return src.auth.auth_login_v2(payload['email'], payload['password'])
-    
 
-#* DM ROUTES
-@APP.route("/dm/details/v1", methods=['GET'])
-def dm_details():
-    token, dm_id = request.args.get('token'), request.args.get('dm_id')
-    return src.dm.dm_details_v1(token, int(dm_id))
-
-@APP.route("/dm/list/v1", methods=['GET'])
-def dm_list():
-    token = request.args.get('token')
-    return src.dm.dm_list_v1(token)
-
-@APP.route("/dm/create/v1", methods=['POST'])
-def dm_create():
+@APP.route("/auth/logout/v1", methods=['DELETE'])
+def auth_logout():
     payload = request.get_json()
-    return src.dm.dm_create_v1(payload.get('token'), payload.get('u_ids'))
-
-@APP.route("/dm/remove/v1", methods=['DELETE'])
-def dm_remove():
-    payload = request.get_json()
-    return src.dm.dm_remove_v1(payload.get('token'), payload.get('dm_id'))
-
-@APP.route("/dm/invite/v1", methods=['POST'])
-def dm_invite():
-    payload = request.get_json()
-    return src.dm.dm_invite_v1(payload.get('token'), payload.get('dm_id'), payload.get('u_id'))
-
-@APP.route("/dm/leave/v1", methods=['POST'])
-def dm_leave():
-    payload = request.get_json()
-    return src.dm.dm_leave_v1(payload.get('token'), payload.get('dm_id'))
-    
-@APP.route("/dm/messages/v1", methods=['GET'])
-def dm_messages():
-    token, dm_id, start = request.args.get('token'), request.args.get('dm_id'), request.args.get('start')
-    return src.dm.dm_messages_v1(token, int(dm_id), int(start))
+    return src.auth.auth_logout_v1(payload['token'])
 
 #* *************************************************ADMIN ROUTES******************************************
 @APP.route("/admin/userpermission/change/v1", methods=['POST'])
@@ -188,6 +155,41 @@ def message_senddm():
     payload = request.get_json()
     return src.message.message_senddm_v1(payload['token'], payload['dm_id'], payload['message'])
 
+#* *********************************************DM ROUTES*****************************************
+@APP.route("/dm/details/v1", methods=['GET'])
+def dm_details():
+    token, dm_id = request.args.get('token'), request.args.get('dm_id')
+    return src.dm.dm_details_v1(token, int(dm_id))
+
+@APP.route("/dm/list/v1", methods=['GET'])
+def dm_list():
+    token = request.args.get('token')
+    return src.dm.dm_list_v1(token)
+
+@APP.route("/dm/create/v1", methods=['POST'])
+def dm_create():
+    payload = request.get_json()
+    return src.dm.dm_create_v1(payload.get('token'), payload.get('u_ids'))
+
+@APP.route("/dm/remove/v1", methods=['DELETE'])
+def dm_remove():
+    payload = request.get_json()
+    return src.dm.dm_remove_v1(payload.get('token'), payload.get('dm_id'))
+
+@APP.route("/dm/invite/v1", methods=['POST'])
+def dm_invite():
+    payload = request.get_json()
+    return src.dm.dm_invite_v1(payload.get('token'), payload.get('dm_id'), payload.get('u_id'))
+
+@APP.route("/dm/leave/v1", methods=['POST'])
+def dm_leave():
+    payload = request.get_json()
+    return src.dm.dm_leave_v1(payload.get('token'), payload.get('dm_id'))
+    
+@APP.route("/dm/messages/v1", methods=['GET'])
+def dm_messages():
+    token, dm_id, start = request.args.get('token'), request.args.get('dm_id'), request.args.get('start')
+    return src.dm.dm_messages_v1(token, int(dm_id), int(start))
 
 #* ***************************************************USER ROUTES***********************************************
 @APP.route("/user/profile/v2", methods=['GET'])

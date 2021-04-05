@@ -122,7 +122,6 @@ def test_notifications_get_in_channels(user1, user2, user3):
 def test_notifications_dms_added(user1, user2, user3):
     #Test that a notif is sent to user when they are added to dm with channel id = -1
     #Ordered from most to least recent
-
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     dm_1 = dm_create_v1(user1[token], [user3[AuID]])
 
@@ -142,14 +141,12 @@ def test_notifications_dms_added(user1, user2, user3):
         nMess : f"{get_user(user1[AuID])['handle_str']} added you to {get_dm(dm_0['dm_id'])['name']}",
     } in notifications_get_v1(user3[token])[notifs]
 
-    #Test 3: being added to multiple dms
+    #Test 3: if being added to another dm the old dm is still there 
     assert {
         cID : -1,
         'dm_id': 1,
         nMess : f"{get_user(user1[AuID])['handle_str']} added you to {get_dm(dm_1['dm_id'])['name']}",
     } in notifications_get_v1(user3[token])[notifs]
-
-    #Test 4: Make sure ordered from most to least recent
 
 #* When tagged, correct amount of tags come up
 def test_valid_dm_tag(user1, user2):
@@ -176,7 +173,7 @@ def test_valid_dm_20_chars(user1, user2):
 def test_dm_no_tag(user1, user2, user3):
     dm1= dm_create_v1(user1[token], [user2[AuID]])
     message_senddm_v1(user1[token], dm1[dmID], f"Hi @{get_user(user3[AuID])[handle]}")
-    assert notifications_get_v1(user1[token])[notifs] == []
+    assert notifications_get_v1(user3[token])[notifs] == []
 
 #* When tagged >20 times, only 20 tags come up (and oldest ones dont show up)
 def test_dm_20_notifs(user1, user2):

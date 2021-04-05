@@ -151,6 +151,7 @@ def test_dm_name(user1, user2, user3):
     
     assert result2[Name] == 'user1, user2'
 
+#* Test that trying to create a dm with an invalid u_id raises an InputError
 def test_dm_create_errors(user1):
     invalid_u_id = -1
     

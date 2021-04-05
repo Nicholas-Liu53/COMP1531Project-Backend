@@ -1,4 +1,3 @@
-import src.data
 import jwt
 import json
 from src.error import AccessError, InputError
@@ -38,12 +37,6 @@ def clear_v1():
             'messages_log': [],
             'notifs': {}
         }, FILE)
-
-    src.data.users = []
-    src.data.channels = []
-    src.data.dms = []
-    src.data.messages_log = []
-    src.data.notifs = {}
 
 def search_v1(token, query_str):
     '''
@@ -138,8 +131,6 @@ def get_user(user_id):
     data = json.load(open('data.json', 'r'))
     for user in data['users']:
         if user_id == user[uID]:
-            with open('data.json', 'w') as FILE:
-                json.dump(data, FILE)
             return {
                 uID: user[uID],
                 'email': user['email'],
@@ -167,8 +158,6 @@ def get_user_permissions(user_id):
     data = json.load(open('data.json', 'r'))
     for user in data['users']:
         if user_id == user[uID]:
-            with open('data.json', 'w') as FILE:
-                json.dump(data, FILE)
             return user['permission_id']
     # raise InputError
 
@@ -176,8 +165,6 @@ def get_user_from_handlestring(handlestring):
     data = json.load(open('data.json', 'r'))
     for user in data['users']:
         if handlestring == user['handle_str']:
-            with open('data.json', 'w') as FILE:
-                json.dump(data, FILE)
             return {
                 uID: user[uID],
                 'email': user['email'],
@@ -191,8 +178,6 @@ def get_message(message_id):
     data = json.load(open('data.json', 'r'))
     for message in data['messages_log']:
         if message_id == message['message_id']:
-            with open('data.json', 'w') as FILE:
-                json.dump(data, FILE)
             return message
     # raise InputError
 
@@ -200,8 +185,6 @@ def get_dm(dm_id):
     data = json.load(open('data.json', 'r'))
     for dm in data['dms']:
         if dm_id == dm['dm_id']:
-            # with open('data.json', 'w') as FILE:
-            #     json.dump(data, FILE)
             return dm
     raise InputError
 
@@ -219,7 +202,12 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
     taggedUsersList = []
     for atHandle in atHandlesList:
         try:
-            taggedUsersList.append(get_user_from_handlestring(atHandle)[uID])
+            if channel_id != -1:
+                if get_user_from_handlestring(atHandle)[uID] in get_channel(channel_id)[allMems]:
+                    taggedUsersList.append(get_user_from_handlestring(atHandle)[uID])
+            else:
+                if get_user_from_handlestring(atHandle)[uID] in get_dm(dm_id)[allMems]:
+                    taggedUsersList.append(get_user_from_handlestring(atHandle)[uID])
         except:
             pass
     notification = {
@@ -256,3 +244,5 @@ def check_removed(u_id):
         if user["u_id"] == u_id:
             if user['permission_id'] == 0:
                 raise InputError
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)

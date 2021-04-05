@@ -408,9 +408,7 @@ def test_http_dm_messages(user1, user2, user3):
     assert len(response_2['messages']) == expected_2['len_messages']
     assert response_2['start'] == expected_2['start']
     assert response_2['end'] == expected_2['end']
-   
-    
-    
+          
 
 def test_http_dm_invalid_user(invalid_token):
     pass
