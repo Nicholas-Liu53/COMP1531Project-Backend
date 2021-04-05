@@ -5,10 +5,8 @@ from src.config import url
 from src.error import AccessError, InputError
 from src.user import user_profile_v2, user_setname_v2, user_setemail_v2, user_sethandle_v2, users_all
 from src.auth import auth_register_v2, auth_login_v2
-from src.other import clear_v1
+from src.other import clear_v1, SECRET
 from jwt import encode
-
-SECRET = "MENG"
 
 def test_http_user_profile_valid():
     requests.delete(f"{url}clear/v1")
