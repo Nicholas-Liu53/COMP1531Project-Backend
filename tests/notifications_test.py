@@ -176,7 +176,7 @@ def test_valid_dm_20_chars(user1, user2):
 def test_dm_no_tag(user1, user2, user3):
     dm1= dm_create_v1(user1[token], [user2[AuID]])
     message_senddm_v1(user1[token], dm1[dmID], f"Hi @{get_user(user3[AuID])[handle]}")
-    assert notifications_get_v1(user1[token])[notifs] == []
+    assert notifications_get_v1(user3[token])[notifs] == []
 
 #* When tagged >20 times, only 20 tags come up (and oldest ones dont show up)
 def test_dm_20_notifs(user1, user2):

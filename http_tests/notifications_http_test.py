@@ -148,13 +148,77 @@ def test_http_notifications_dms_added(user1, user2, user3):
     pass
 
 def test_http_valid_dm_tag(user1, user2):
-    pass
+    dmResponse = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm1 = dmResponse.json()
+
+    requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm1[dmID],
+        'message': 'Hi @user2'
+    })
+
+    requests.post(f"{url}message/senddm/v1", json={
+        token: user2[token],
+        dmID: dm1[dmID],
+        'message': 'Hi @user1'
+    })
+
+    response0 = requests.get(f"{url}notifications/get/v1", params={
+        "token": user1[token]
+    })
+    notifs0 = response0.json()
+    response1 = requests.get(f"{url}notifications/get/v1", params={
+        "token": user2[token]
+    })
+    notifs1 = response1.json()
+
+    assert len(notifs0['notifications']) == 1
+    assert len(notifs1['notifications']) == 2
 
 def test_http_valid_dm_20_chars(user1, user2):
-    pass
+    dmResponse = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm1 = dmResponse.json()
+    message = '@user2' + ' ' + f"{'a'*25}"
+    requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm1[dmID],
+        'message': message
+    })
+    response1 = requests.get(f"{url}notifications/get/v1", params={
+        "token": user2[token]
+    })
+    notifs = response1.json()
+
+    assert {
+        cID : -1,
+        dmID: dm1[dmID],
+        nMess : f"user1 tagged you in user1, user2: {message[0:20]}",
+    } in notifs['notifications']
+
 
 def test_http_dm_no_tag(user1, user2, user3):
-    pass
+    dmResponse = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm1 = dmResponse.json()
+    requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm1[dmID],
+        'message': 'Hi @user3'
+    })
+    response1 = requests.get(f"{url}notifications/get/v1", params={
+        "token": user3[token]
+    })
+    notifs = response1.json()
+
+    assert notifs['notifications'] == []
 
 def test_http_dm_20_notifs(user1, user2):
     pass
