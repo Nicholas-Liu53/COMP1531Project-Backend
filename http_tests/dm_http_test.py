@@ -161,8 +161,8 @@ def test_http_dm_remove_invalid_DM(user1):
     })
     assert dmResponse.status_code == 400
 
-def test_http_dm_remove(user1, user2, invalid_dmID):
- 
+def test_http_dm_remove_fail(user1, user2, invalid_dmID):
+
     #Create dm with dm_id 0 
     response = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
@@ -179,7 +179,7 @@ def test_http_dm_remove(user1, user2, invalid_dmID):
     assert access_error.status_code == 403
 
 
-def test_http_dm_remove(user1, user2):
+def test_http_dm_remove_success(user1, user2):
     #Create dm with dm_id 0 
     response = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
@@ -208,7 +208,7 @@ def test_http_dm_invite_invalid_dm(user1, user2):
     })
     assert invalid_dm.status_code == 400
 
-def test_http_dm_invite(user1, user2, user3, invalid_dmID, invalid_u_id):
+def test_http_dm_invite_fail(user1, user2, user3, invalid_dmID, invalid_u_id):
 
     #Create dm with dm_id 0 containing user1 and user2 
     response = requests.post(f"{url}dm/create/v1", json={
@@ -243,7 +243,7 @@ def test_http_dm_invite_access_error(user1, user2, user3):
     assert access_error.status_code == 403
     
 
-def test_http_dm_invite(user1, user2, user3):
+def test_http_dm_invite_success(user1, user2, user3):
     #Create dm with dm_id 0 containing user1 and user2 
     response = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],

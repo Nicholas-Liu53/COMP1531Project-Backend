@@ -234,7 +234,7 @@ def test_http_search_channels(user1, user2, user3, user4, user5, channel1, chann
     assert messageFound
 
 def test_http_search_dms(user1, user2, user3, dm1):
-    dmMessage = requests.post(f"{url}message/senddm/v1", json={
+    requests.post(f"{url}message/senddm/v1", json={
         "token": user1[token],
         "dm_id": dm1[dmID],
         "message": "Biden Harris 2020"
