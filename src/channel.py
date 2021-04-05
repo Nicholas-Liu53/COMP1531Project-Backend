@@ -1,4 +1,3 @@
-import src.data
 from src.error import AccessError, InputError 
 from src.channels import channels_listall_v2, channels_list_v2
 from src.other import decode, get_channel, get_user, message_count, push_added_notifications, check_removed
@@ -170,7 +169,7 @@ def channel_messages_v1(token, channel_id, start):
     #Input error: Channel ID is not a valid channel 
     #This is the case
     channelFound = False 
-    for channel in src.channels.channels_listall_v2(token)["channels"]:
+    for channel in channels_listall_v2(token)["channels"]:
         if channel_id == channel["channel_id"]:
             channelFound = True
     
@@ -183,7 +182,7 @@ def channel_messages_v1(token, channel_id, start):
     
     #Access error: When auth_user_id is not a member of channel with channel_id 
     userFound = False 
-    for channel in src.channels.channels_list_v2(token)["channels"]:
+    for channel in channels_list_v2(token)["channels"]:
         if channel_id == channel["channel_id"]:
             userFound = True
     

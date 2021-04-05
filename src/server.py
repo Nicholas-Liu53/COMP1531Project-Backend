@@ -4,7 +4,6 @@ from flask import Flask, request
 from flask_cors import CORS
 from src.error import InputError
 from src import config
-import src.data
 import src.auth, src.admin, src.other, src.dm, src.notifications, src.channel, src.channels, src.message, src.user
 
 def defaultHandler(err):

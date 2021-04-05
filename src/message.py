@@ -1,4 +1,3 @@
-import src.data
 from src.error import AccessError, InputError
 import src.auth
 from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications
