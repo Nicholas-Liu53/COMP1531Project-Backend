@@ -1,7 +1,8 @@
 import src.data
 from src.error import AccessError, InputError
 import jwt
-from src.other import decode, get_channel, get_members, get_user
+import json
+from src.other import decode, get_channel, get_user, get_user_permissions, check_removed
 
 
 AuID      = 'auth_user_id'
@@ -18,8 +19,42 @@ dmID      = 'dm_id'
 seshID    = 'session_id'
 
 
-def user_remove_v1():
-    pass
+def user_remove_v1(token, u_id):
+
+    get_user(u_id)
+
+    data = json.load(open('data.json', 'r'))
+
+    dream_owner = 0
+    for users in data['users']:
+        if users['permission_id'] == 1:
+            dream_owner += 1
+    print(dream_owner)
+    print(get_user_permissions(u_id))
+
+    auth_user_id, _ = decode(token)
+
+    if not get_user_permissions(auth_user_id) == 1:
+        raise AccessError
+
+    if dream_owner == 1 and get_user_permissions(u_id) == 1:   
+        raise InputError
+    
+    for users in data['users']:
+        if users['u_id'] == u_id:
+            users['name_first'] = 'Removed'
+            users['name_last'] = 'User'
+            users['permission_id'] = 0
+
+    for messages in data['messages_log']:
+        if messages['u_id'] == u_id:
+            messages['message'] = 'Removed User'
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+    
+    return {
+    }
 
 def userpermission_change_v1(token, u_id, permission_id):
     '''
@@ -38,11 +73,14 @@ def userpermission_change_v1(token, u_id, permission_id):
     Return Value:
         Empty dictionary
     '''
+
+    data = json.load(open('data.json', 'r'))
+
     auth_user_id, _ = decode(token)
 
     validUser = False
     validOwner = False
-    for user in src.data.users:
+    for user in data['users']:
         if user[uID] == u_id:
             validUser = True
         if user[uID] == auth_user_id:
@@ -52,16 +90,26 @@ def userpermission_change_v1(token, u_id, permission_id):
         raise AccessError
     if not validUser:
         raise InputError
+    check_removed(u_id)
 
     if permission_id != 1 and permission_id != 2:
         raise InputError
 
-    for user in src.data.users:
+    for user in data['users']:
         if user[uID] == u_id:
             user['permission_id'] = permission_id
+    
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     return {
     }
 
-def notifications_get_v1():
-    pass
+
+
+
+
+
+
+
+

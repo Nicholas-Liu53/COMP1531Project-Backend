@@ -203,6 +203,18 @@ def test_channel_leave(user1, user2, user3, user4):
         'handle_str': "user4",
     } not in channel_details_v1(user1[token], firstChannel[cID])[allMems]
 
+    #* Test if the only owner cannot leave the channel
+    with pytest.raises(InputError):
+        channel_leave_v1(user1[token], firstChannel[cID])
+
+    #* Test if someone not in the group cannot 'leave' the group
+    with pytest.raises(AccessError):
+        channel_leave_v1(user3[token], firstChannel[cID])
+
+    #* Test you cannot leave a channel that doesn't exist
+    with pytest.raises(InputError):
+        channel_leave_v1(user3[token], -1)
+
     #* Finished testing for this function
     #! Clearing data
     src.other.clear_v1()
@@ -241,17 +253,11 @@ def test_channel_join(user1, user2, user3, user4):
     with pytest.raises(InputError):                         
         channel_join_v1(user1[token], firstChannel[cID])   # user1 tries to join the non-existent channel
 
-    #* Test 4: Check if InputError is raised when channel does not exist
-    #! Clearing data
-    src.other.clear_v1()                                    # Channel is deleted
-    with pytest.raises(InputError):                         
-        channel_join_v1(user1[token], firstChannel[cID])   # user1 tries to join the non-existent channel
-
     #* Finished testing for this function
     #! Clearing data
     #   src.other.clear_v1()
 
-def test_channel_addowner(user1, user2,user3,user4, user5):
+def test_channel_addowner(user1,user2,user3,user4,user5):
 
     channelTest = src.channels.channels_create_v1(user2[token], 'Channel', False)
 

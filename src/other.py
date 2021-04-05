@@ -1,5 +1,6 @@
 import src.data
 import jwt
+import json
 from src.error import AccessError, InputError
 
 AuID      = 'auth_user_id'
@@ -29,6 +30,15 @@ def clear_v1():
     Return value:
         None
     '''
+    with open('data.json', 'w') as FILE:
+        json.dump({
+            'users': [],
+            'channels': [],
+            'dms': [],
+            'messages_log': [],
+            'notifs': {}
+        }, FILE)
+
     src.data.users = []
     src.data.channels = []
     src.data.dms = []
@@ -55,6 +65,9 @@ def search_v1(token, query_str):
                 message string, and
                 time_created.
     '''
+
+    data = json.load(open('data.json', 'r'))
+
     #* Decode the token
     auth_user_id, _ = decode(token)
 
@@ -64,20 +77,20 @@ def search_v1(token, query_str):
 
     channelList = []
     #* Check which channels the user is in
-    for channel in src.data.channels:
+    for channel in data['channels']:
         if auth_user_id in channel[allMems]:
             channelList.append(channel[cID])
     
     DMList = []
     #* Check which DMs the user is in
-    for dm in src.data.dms:
+    for dm in data['dms']:
         if auth_user_id in dm[allMems]:
             DMList.append(dm['dm_id'])
 
     messages = []
 
     #* Add in every message in the channel/DM that contains query_str
-    for message in src.data.messages_log:
+    for message in data['messages_log']:
         if (message[cID] in channelList or message['dm_id'] in DMList) and query_str.lower() in message['message'].lower():
             messages.append(
                 {
@@ -105,21 +118,28 @@ def decode(token):
     return auth_user_id, session_id
 
 def check_session(auth_user_id, session_id):
-    for user in src.data.users:
+    data = json.load(open('data.json', 'r'))
+    for user in data['users']:
         if auth_user_id == user[uID]:
             if session_id in user['session_id']:
                 return
     raise AccessError
 
 def get_channel(channel_id):
-    for channel in src.data.channels:
+    data = json.load(open('data.json', 'r'))
+    for channel in data['channels']:
         if channel_id == channel['channel_id']:
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)
             return channel
-    raise InputError
+    # raise InputError
 
 def get_user(user_id):
-    for user in src.data.users:
+    data = json.load(open('data.json', 'r'))
+    for user in data['users']:
         if user_id == user[uID]:
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)
             return {
                 uID: user[uID],
                 'email': user['email'],
@@ -129,40 +149,35 @@ def get_user(user_id):
             }
     raise InputError
 
-def get_members(channel_id, dm_id):
-    if dm_id == -1:
-        for chanDetails in src.data.channels:
-            if channel_id == chanDetails[cID]:
-                return chanDetails[Name], chanDetails[allMems]
-        raise InputError
-    else:
-        for dmDetails in src.data.dms:
-            if dm_id == dmDetails[dmID]:
-                return dmDetails[Name], dmDetails[allMems]
-        raise InputError
-
 def message_count(channel_id, dm_id):
     counter = 0
+    data = json.load(open('data.json', 'r'))
     if dm_id == -1:
-        for message in src.data.messages_log:
+        for message in data['messages_log']:
             if channel_id == message[cID]:
                 counter += 1
     else:
-        for message in src.data.messages_log:
+        for message in data['messages_log']:
             if dm_id == message[dmID]:
                 counter += 1
     
     return counter
 
 def get_user_permissions(user_id):
-    for user in src.data.users:
+    data = json.load(open('data.json', 'r'))
+    for user in data['users']:
         if user_id == user[uID]:
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)
             return user['permission_id']
-    raise InputError
+    # raise InputError
 
 def get_user_from_handlestring(handlestring):
-    for user in src.data.users:
+    data = json.load(open('data.json', 'r'))
+    for user in data['users']:
         if handlestring == user['handle_str']:
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)
             return {
                 uID: user[uID],
                 'email': user['email'],
@@ -170,25 +185,27 @@ def get_user_from_handlestring(handlestring):
                 'name_last': user['name_last'],
                 'handle_str': user['handle_str'],
             }
-    raise InputError
+    # raise InputError
 
 def get_message(message_id):
-    for message in src.data.messages_log:
+    data = json.load(open('data.json', 'r'))
+    for message in data['messages_log']:
         if message_id == message['message_id']:
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)
             return message
-    raise InputError
+    # raise InputError
 
 def get_dm(dm_id):
-    for dm in src.data.dms:
+    data = json.load(open('data.json', 'r'))
+    for dm in data['dms']:
         if dm_id == dm['dm_id']:
+            # with open('data.json', 'w') as FILE:
+            #     json.dump(data, FILE)
             return dm
     raise InputError
 
 def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
-    if channel_id == -1 and dm_id == -1:
-        raise InputError
-    elif channel_id != -1 and dm_id != -1:
-        raise InputError
     taggerHandle = get_user(auth_user_id)['handle_str']
     if channel_id != -1:
         channelDMname = get_channel(channel_id)['name']
@@ -210,18 +227,13 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
         'dm_id': dm_id,
         'notification_message': f"{taggerHandle} tagged you in {channelDMname}: {message[0:20]}"
     }
+    data = json.load(open('data.json', 'r'))
     for taggedUser in taggedUsersList:
-        try:
-            src.data.notifs[taggedUser].insert(0, notification)
-        except:
-            src.data.notifs[taggedUser] = []
-            src.data.notifs[taggedUser].append(notification)
+        data['notifs'][f"{taggedUser}"].insert(0, notification)
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
 def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
-    if channel_id == -1 and dm_id == -1:
-        raise InputError
-    elif channel_id != -1 and dm_id != -1:
-        raise InputError
     taggerHandle = get_user(auth_user_id)['handle_str']
     if channel_id != -1:
         channelDMname = get_channel(channel_id)['name']
@@ -233,8 +245,14 @@ def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
         'dm_id': dm_id,
         'notification_message': f"{taggerHandle} added you to {channelDMname}"
     }
-    try:
-        src.data.notifs[user_id].insert(0, notification)
-    except:
-        src.data.notifs[user_id] = []
-        src.data.notifs[user_id].append(notification)
+    data = json.load(open('data.json', 'r'))
+    data['notifs'][f"{user_id}"].insert(0, notification)
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+
+def check_removed(u_id):
+    data = json.load(open('data.json', 'r'))
+    for user in data["users"]:
+        if user["u_id"] == u_id:
+            if user['permission_id'] == 0:
+                raise InputError

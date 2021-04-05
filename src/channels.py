@@ -1,6 +1,7 @@
 import src.data
 from src.error import AccessError, InputError
-from src.other import decode, get_channel, get_members, get_user
+from src.other import decode, get_channel, get_user
+import json
 import jwt
 
 AuID    = 'auth_user_id'
@@ -27,9 +28,10 @@ def channels_list_v2(token):
         Returns dictionary of a list of channels mapped to the key string 'channels'
         Each channel is represented by a dictionary containing types { channel_id, name }
     '''
+    data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
     output = []
-    for chanD in src.data.channels:
+    for chanD in data['channels']:
         if auth_user_id in chanD['all_members']:
             channel = {}
             channel[cID] = chanD[cID]
@@ -56,9 +58,10 @@ def channels_listall_v2(token):
         Returns dictionary of a list of channels mapped to the key string 'channels'
         Each channel is represented by a dictionary containing types { channel_id, name }
     '''
+    data = json.load(open('data.json', 'r'))
     decode(token)
     output = []
-    for d in src.data.channels:
+    for d in data['channels']:
         channel = {}
         channel[cID] = d[cID]
         channel[Name] = d[Name]
@@ -85,7 +88,11 @@ def channels_create_v1(token, name, is_public):
     Return Value:
         Returns a dictionary with the key being 'channel_id' and the value of the newly created channel's id
     '''
+    
+    data = json.load(open('data.json', 'r'))
+
     auth_user_id, _ = decode(token)
+    
     # Ensure an InputError when the channel name is 
     # more than 20 characters long
     if len(name) > 20:
@@ -95,10 +102,7 @@ def channels_create_v1(token, name, is_public):
     userFound = False
     j = 0
     while not userFound:
-        if j >= len(src.data.users):
-            # If user doesn't exist in database, AccessError
-            raise AccessError
-        elif src.data.users[j][uID] == auth_user_id:
+        if data['users'][j][uID] == auth_user_id:
             userFound = True
         j += 1
 
@@ -106,23 +110,26 @@ def channels_create_v1(token, name, is_public):
 
     # Identify the new channel ID
     # Which is an increment of the most recent channel id
-    if not len(src.data.channels):
-        newID = len(src.data.channels)
+    if not len(data['channels']):
+        newID = len(data['channels'])
     else:
-        newID = src.data.channels[-1][cID] + 1
+        newID = data['channels'][-1][cID] + 1
 
 
     # Add this new channel into the channels data list
     # The only member is the auth user that created this channel
-    src.data.channels.append(
+    data['channels'].append(
         {
             'channel_id': newID,
             'is_public': is_public,
             'name': name,
-            'owner_members': [src.data.users[j][uID]],
-            'all_members': [src.data.users[j][uID]],
+            'owner_members': [data['users'][j][uID]],
+            'all_members': [data['users'][j][uID]],
         }
     )
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     # Return a dictionary containing the new channel ID 
     return {
