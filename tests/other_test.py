@@ -1,5 +1,5 @@
 import pytest
-import src.data, src.channel, src.channels, src.message, src.dm
+import src.channel, src.channels, src.message, src.dm
 import jwt
 from src.other import clear_v1, search_v1, get_channel, get_user, get_message
 from src.error import AccessError, InputError

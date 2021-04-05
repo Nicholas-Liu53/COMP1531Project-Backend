@@ -1,7 +1,4 @@
-from typing import Any
-
 import pytest
-import src.data
 from src.dm import dm_details_v1, dm_list_v1, dm_create_v1, dm_remove_v1, dm_invite_v1, dm_leave_v1, dm_messages_v1
 from src.error import AccessError, InputError
 from src.message import message_senddm_v1
