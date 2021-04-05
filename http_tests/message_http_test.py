@@ -69,6 +69,7 @@ def user4():
 def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
+#* Test if message_send is behaving according to spec
 def test_http_message_send(user1, user2, user3, user4):
     c1 = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
@@ -112,6 +113,7 @@ def test_http_message_send(user1, user2, user3, user4):
             break
     assert messageFound is True
 
+#* Test if message_edit is behaving according to spec
 def test_http_message_edit(user1, user2, user3, user4):
     c1 = requests.post(f"{url}channels/create/v2", json={
         "token": user2[token],
@@ -243,6 +245,7 @@ def test_http_message_edit(user1, user2, user3, user4):
         "message": "Jeffrey Meng"
     }).status_code == 403
 
+#* Test if message_remove is behaving according to spec
 def test_http_message_remove(user1, user2, user3, user4):
     c1 = requests.post(f"{url}channels/create/v2", json={
         "token": user2[token],
@@ -393,6 +396,7 @@ def test_http_message_share_todm(user1, user2, user3, user4):
         })
     assert response5.status_code == 403
 
+#* When sending a message in a dm the user is not in, an AccessError is raised (403 response code)
 def test_http_senddm_access_error(user1, user2, user3):
     dmResponse = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
@@ -407,6 +411,7 @@ def test_http_senddm_access_error(user1, user2, user3):
 
     assert response.status_code == 403
 
+#* When sending a message that is more than 1000 characters, an InputError is raised (400 response code)
 def test_http_senddm_long(user1, user2):
     dmResponse = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
@@ -422,6 +427,7 @@ def test_http_senddm_long(user1, user2):
 
     assert response.status_code == 400
 
+#* Asserts that when sending multiple dm messages, the message_id is increasing as expected
 def test_http_senddm_multiple(user1, user2):
     dmResponse = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
