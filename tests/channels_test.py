@@ -40,87 +40,65 @@ def user4():
 def user5():
     return src.auth.auth_register_v2("fifth@gmail.com", "password", "User", "5")
 
+#* Test that for invalid tokens, an AccessError is raised
 def test_channels_unauthorised_user(invalid_token):
     with pytest.raises(AccessError):
         channels_list_v2(invalid_token)
+
+    with pytest.raises(AccessError):
         channels_listall_v2(invalid_token)
 
-def test_channels_list_valid():
-    clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
-    channels_create_v1(user1[token], 'Oogway', True)
+#* Test that running channels_list with valid inputs has the correct returns
+def test_channels_list_none(user1, user2):
+    channel = channels_create_v1(user1[token], 'Oogway', True)
+
+    assert channels_list_v2(user1[token]) == {
+        'channels': [{cID: channel[cID], Name: 'Oogway'}]
+    }
     
     assert channels_list_v2(user2[token]) == {
         'channels': []
     }
-    
-    clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
-    firstChannel = channels_create_v1(user1[token], 'Oogway', True)
-    secondChannel = channels_create_v1(user2[token], 'NEZ', True)
-    assert channels_list_v2(user1[token]) == {
-        'channels': [{cID: firstChannel[cID], Name: 'Oogway'}]
-    }
+
+#* Test that when users are join and leave channels, their channels_list change
+def test_channels_list_join_leave(user1, user2, user3):
+    channel = channels_create_v1(user1[token], 'Oogway', True)
+
     assert channels_list_v2(user2[token]) == {
-        'channels': [{cID: secondChannel[cID], Name: 'NEZ'}]
+        'channels': []
     }
     
-    clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    firstChannel = channels_create_v1(user1[token], 'Oogway', True)
-    assert channels_list_v2(user1[token]) == {
-        'channels': [{cID: firstChannel[cID], Name: 'Oogway'}]
+    src.channel.channel_join_v1(user2[token], channel[cID])
+
+    assert channels_list_v2(user2[token]) == {
+        'channels': [{cID: channel[cID], Name: 'Oogway'}]
     }
-    
-    clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
-    firstChannel = channels_create_v1(user1[token], 'Oogway', True)
-    
-    src.channel.channel_join_v1(user2[token], firstChannel[cID])
-    assert channels_list_v2(user2[token]) == {  
-        'channels': [{cID: firstChannel[cID], Name: 'Oogway'}]
-    }
-    src.channel.channel_leave_v1(user2[token], firstChannel[cID])
+
+    src.channel.channel_leave_v1(user2[token], channel[cID])
+
     assert channels_list_v2(user2[token]) == {
         'channels': []
     }
 
-    clear_v1()
-
-def test_channels_listall_valid():
-    clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
-    firstChannel = channels_create_v1(user1[token], 'Oogway', True)
-    secondChannel = channels_create_v1(user1[token], 'NEZ', False)
-    assert channels_listall_v2(user2[token]) == {
-        'channels': [
-            {cID: firstChannel[cID], Name: 'Oogway'},
-            {cID: secondChannel[cID], Name: 'NEZ'},
-        ]
-    }
+#* Test that the function outputs as expected
+def test_channels_listall_valid(user1, user2):
+    channel = channels_create_v1(user1[token], 'Oogway', True)
     
-    clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
-    firstChannel = channels_create_v1(user1[token], 'Oogway', True)
-    assert channels_listall_v2(user2[token]) == {
-        'channels': [{cID: firstChannel[cID], Name: 'Oogway'},]
-    }
-    src.channel.channel_join_v1(user2[token], firstChannel[cID])
-    assert channels_listall_v2(user2[token]) == {
-        'channels': [{cID: firstChannel[cID], Name: 'Oogway'},]
+    assert channels_listall_v2(user1[token]) == {
+        'channels': [{cID: channel[cID], Name: 'Oogway'}]
     }
 
-    clear_v1()
-    user1 = src.auth.auth_register_v2("first@gmail.com", "password", "Steve", "Irwin")
-    user2 = src.auth.auth_register_v2("second@gmail.com", "password", "Jonah", "from Tonga")
-    firstChannel = channels_create_v1(user1[token], 'Oogway', True)
-    secondChannel = channels_create_v1(user2[token], 'NEZ', False)
-    assert channels_listall_v2(user1[token]) == channels_listall_v2(user2[token])
+    assert channels_listall_v2(user2[token]) == {
+        'channels': [{cID: channel[cID], Name: 'Oogway'}]
+    }
+
+#* Test that private channels are also displayed
+def test_channels_listall_private(user1, user2):
+    channel = channels_create_v1(user1[token], 'NEZ', False)
+    
+    assert channels_listall_v2(user2[token]) == {
+        'channels': [{cID: channel[cID], Name: 'NEZ'}]
+    }
 
 def test_channels_create(user1, user2):
 
