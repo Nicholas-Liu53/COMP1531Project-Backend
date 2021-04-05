@@ -197,6 +197,7 @@ def test_http_notifications_dms_added(user1, user2, user3):
         nMess : f"user1 added you to user1, user3",
     } in notifs1['notifications']
     
+#* Tests that people can be tagged in messages in DMs
 def test_http_valid_dm_tag(user1, user2):
     dmResponse = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
@@ -228,6 +229,7 @@ def test_http_valid_dm_tag(user1, user2):
     assert len(notifs0['notifications']) == 1
     assert len(notifs1['notifications']) == 2
 
+#* Test that the notification message displayed when being tagged in a dm is only the first 20 characters
 def test_http_valid_dm_20_chars(user1, user2):
     dmResponse = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
@@ -251,7 +253,7 @@ def test_http_valid_dm_20_chars(user1, user2):
         nMess : f"user1 tagged you in user1, user2: {message[0:20]}",
     } in notifs['notifications']
 
-
+#* Assert that users cannot be tagged in dms they are not in
 def test_http_dm_no_tag(user1, user2, user3):
     dmResponse = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
@@ -270,6 +272,7 @@ def test_http_dm_no_tag(user1, user2, user3):
 
     assert notifs['notifications'] == []
 
+#* When getting more than 20 notifs, check if only 20 of the most recent ones are displayed
 def test_http_dm_20_notifs(user1, user2):
     dmResponse = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
@@ -297,6 +300,7 @@ def test_http_dm_20_notifs(user1, user2):
         nMess : "user1 tagged you in user1, user2: 0 @user2" 
     } not in notifs['notifications']
 
+#* When editing a dm message, the user is tagged
 def test_http_dm_edit_notif(user1, user2):
     dmResponse = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
