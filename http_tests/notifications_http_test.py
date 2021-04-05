@@ -72,6 +72,7 @@ def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
 def test_http_notifications_get_in_channels(user1, user2, user3, user4):
+    #* This test is structured identically to test_notifications_get_in_channels in tests/notifications_test.py
     c1 = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
         "name": "TrumpPence",
@@ -145,7 +146,6 @@ def test_http_notifications_get_in_channels(user1, user2, user3, user4):
     assert notifFound is False
 
 def test_http_notifications_dms_added(user1, user2, user3):
-
     #Create two dm's 
     result = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],

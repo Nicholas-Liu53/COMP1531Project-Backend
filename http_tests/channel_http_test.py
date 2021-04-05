@@ -169,11 +169,13 @@ def test_http_channel_details(user1, user2):
 
 
 def test_http_channel_leave(user1, user2, user3, user4):
+    #* Public channel is created by user1
     c1 = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
         "name": "TrumpPence",
         "is_public": True
     })
+    #* Users 2, 3 and 4 join this channel
     requests.post(f"{url}channel/join/v2", json={
         "token": user2[token],
         "channel_id": c1.json()['channel_id']
@@ -186,6 +188,7 @@ def test_http_channel_leave(user1, user2, user3, user4):
         "token": user4[token],
         "channel_id": c1.json()['channel_id']
     })
+    #* Make sure they joined
     assert {
         uID: user2[AuID],
         fName: 'User',
@@ -216,7 +219,7 @@ def test_http_channel_leave(user1, user2, user3, user4):
         'token': user3[token], 
         'channel_id': c1.json()['channel_id']
     }).json()[allMems]
-    
+    #* User 4 leaves and make sure he left
     requests.post(f"{url}channel/leave/v1", json={
         "token": user4[token],
         "channel_id": c1.json()['channel_id']
@@ -231,6 +234,7 @@ def test_http_channel_leave(user1, user2, user3, user4):
         'token': user1[token], 
         'channel_id': c1.json()['channel_id']
     }).json()[allMems]
+    #* User 3 leaves and make sure he left
     requests.post(f"{url}channel/leave/v1", json={
         "token": user3[token],
         "channel_id": c1.json()['channel_id']
@@ -245,20 +249,24 @@ def test_http_channel_leave(user1, user2, user3, user4):
         'token': user1[token], 
         'channel_id': c1.json()['channel_id']
     }).json()[allMems]
+    #* Make sure User 1 (the only user) cannot leave
     assert requests.post(f"{url}channel/leave/v1", json={
         "token": user1[token],
         "channel_id": c1.json()['channel_id']
     }).status_code == 400
+    #* Make sure User 3 cannot leave (already left)
     assert requests.post(f"{url}channel/leave/v1", json={
         "token": user3[token],
         "channel_id": c1.json()['channel_id']
     }).status_code == 403
+    #* Make sure cannot leave a channel that doesn't exist
     assert requests.post(f"{url}channel/leave/v1", json={
         "token": user3[token],
         "channel_id": -1
     }).status_code == 400
 
 def test_http_channel_join(user1, user2, user3, user4):
+    #* This test is structured identically to test_channel_join in tests/channel_test.py
     c1 = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
         "name": "TrumpPence",

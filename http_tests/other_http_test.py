@@ -111,6 +111,7 @@ def invalid_token():
     return jwt.encode({'session_id': -1, 'user_id': -1}, SECRET, algorithm='HS256')
 
 def test_http_search_channels(user1, user2, user3, user4, user5, channel1, channel2):
+    #* This test is structured identically to test_search_channels in tests/other_test.py
     assert requests.get(f"{url}search/v2", params={
         "token": user5[token],
         "query_str": "om"
@@ -234,6 +235,7 @@ def test_http_search_channels(user1, user2, user3, user4, user5, channel1, chann
     assert messageFound
 
 def test_http_search_dms(user1, user2, user3, dm1):
+    #* This test is structured identically to test_search_dms in tests/other_test.py
     requests.post(f"{url}message/senddm/v1", json={
         "token": user1[token],
         "dm_id": dm1[dmID],
