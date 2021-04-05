@@ -1,15 +1,13 @@
 import pytest
 import requests
 import json
+from src.error import AccessError, InputError
+from src.auth import auth_login_v2, auth_register_v2
+from src.other import clear_v1, check_session, SECRET
 from src.config import url
 from jwt import encode
 from src.other import check_session, SECRET
 from src.error import AccessError, InputError
-
-import src.data
-
-#400 for InputError    
-#403 for AccessError
 
 def test_http_auth_login_valid():
     requests.delete(f"{url}clear/v1")
