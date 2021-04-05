@@ -38,12 +38,6 @@ def clear_v1():
             'notifs': {}
         }, FILE)
 
-    src.data.users = []
-    src.data.channels = []
-    src.data.dms = []
-    src.data.messages_log = []
-    src.data.notifs = {}
-
 def search_v1(token, query_str):
     '''
     Takes in a user's token and query string to return a list of messages that contains details about the message
