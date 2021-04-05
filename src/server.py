@@ -5,7 +5,7 @@ from flask_cors import CORS
 from src.error import InputError
 from src import config
 import src.data
-import src.auth, src.other, src.dm, src.notifications, src.channel, src.channels, src.message, src.user
+import src.auth, src.admin, src.other, src.dm, src.notifications, src.channel, src.channels, src.message, src.user
 
 def defaultHandler(err):
     response = err.get_response()
@@ -70,8 +70,8 @@ def dm_create():
 
 @APP.route("/dm/remove/v1", methods=['DELETE'])
 def dm_remove():
-   payload = request.get_json()
-   return src.dm.dm_remove_v1(payload.get('token'), payload.get('dm_id'))
+    payload = request.get_json()
+    return src.dm.dm_remove_v1(payload.get('token'), payload.get('dm_id'))
 
 @APP.route("/dm/invite/v1", methods=['POST'])
 def dm_invite():
@@ -96,9 +96,9 @@ def userpermission_change():
 
 @APP.route("/admin/user/remove/v1", methods=['DELETE'])
 def user_remove():
-   payload = request.get_json()
-   return src.admin.user_remove_v1(payload.get('token'), payload.get('u_id'))
-   
+    payload = request.get_json()
+    return src.admin.user_remove_v1(payload.get('token'), payload.get('u_id'))
+
 #* ****************************************************CHANNEL ROUTES***********************************************
 @APP.route("/channel/join/v2", methods=['POST'])
 def channel_join():

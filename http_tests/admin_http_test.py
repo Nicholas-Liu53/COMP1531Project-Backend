@@ -55,47 +55,47 @@ def user3():
     })
     return response.json()
 
-def test_http_admin_user_remove_valid(user1, user2):
+# def test_http_admin_user_remove_valid(user1, user2):
 
-    channelTest = src.channels.channels_create_v1(user1[token], 'Channel', True)
-    src.channel.channel_join_v1(user2[token], channelTest[cID])
-    message = src.message.message_send_v1(user2[token], channelTest[cID], 'Hello')
+#     channelTest = src.channels.channels_create_v1(user1[token], 'Channel', True)
+#     src.channel.channel_join_v1(user2[token], channelTest[cID])
+#     message = src.message.message_send_v1(user2[token], channelTest[cID], 'Hello')
 
-    #* User not an owner
-    with pytest.raises(AccessError): 
-        user_remove_v1(user2[token], user1[AuID])
+#     #* User not an owner
+#     with pytest.raises(AccessError): 
+#         user_remove_v1(user2[token], user1[AuID])
     
-    user_remove_v1(user1[token], user2[AuID])
-    for dictionary in (src.channel.channel_messages_v1(user1[token], channelTest[cID], 0)['messages']):
-        if dictionary['message_id'] == message['message_id']:
-            assert 'Removed User' in dictionary['message']
+#     user_remove_v1(user1[token], user2[AuID])
+#     for dictionary in (src.channel.channel_messages_v1(user1[token], channelTest[cID], 0)['messages']):
+#         if dictionary['message_id'] == message['message_id']:
+#             assert 'Removed User' in dictionary['message']
 
-    users = src.user.users_all(user1[token])
-    assert users == {
-            'users':
-            [{
-            'u_id': 0, 
-            'email': "first@gmail.com", 
-            'name_first': 'User', 
-            'name_last': '1', 
-            'handle_str': 'user1'
-            },
-            {
-            'u_id': 1, 
-            'email': "second@gmail.com", 
-            'name_first': 'Removed', 
-            'name_last': 'User', 
-            'handle_str': 'user2'
-            },]
-    } 
+#     users = src.user.users_all(user1[token])
+#     assert users == {
+#             'users':
+#             [{
+#             'u_id': 0, 
+#             'email': "first@gmail.com", 
+#             'name_first': 'User', 
+#             'name_last': '1', 
+#             'handle_str': 'user1'
+#             },
+#             {
+#             'u_id': 1, 
+#             'email': "second@gmail.com", 
+#             'name_first': 'Removed', 
+#             'name_last': 'User', 
+#             'handle_str': 'user2'
+#             },]
+#     } 
 
-    #* Test: u_id does not refer to a valid user
-    with pytest.raises(InputError):
-        user_remove_v1(user1[token], -1)
+#     #* Test: u_id does not refer to a valid user
+#     with pytest.raises(InputError):
+#         user_remove_v1(user1[token], -1)
 
-    #* Test: the user is currently only owner
-    with pytest.raises(InputError): 
-        user_remove_v1(user1[token], user1[AuID])
+#     #* Test: the user is currently only owner
+#     with pytest.raises(InputError): 
+#         user_remove_v1(user1[token], user1[AuID])
 
 def test_http_userpermissions_change(user1, user2, user3):
 
