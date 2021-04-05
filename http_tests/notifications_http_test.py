@@ -221,7 +221,59 @@ def test_http_dm_no_tag(user1, user2, user3):
     assert notifs['notifications'] == []
 
 def test_http_dm_20_notifs(user1, user2):
-    pass
+    dmResponse = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm1 = dmResponse.json()
+    tagMessage = '@user2'
+    for nNum in range(21):
+        message = str(nNum) + ' ' + tagMessage
+        requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm1[dmID],
+        'message': message
+    })
+
+    response = requests.get(f"{url}notifications/get/v1", params={
+        "token": user2[token]
+    })
+    notifs = response.json()
+
+    assert len(notifs['notifications']) == 20
+    assert {
+        cID : -1,
+        dmID: dm1[dmID],
+        nMess : "user1 tagged you in user1, user2: 0 @user2" 
+    } not in notifs['notifications']
 
 def test_http_dm_edit_notif(user1, user2):
-    pass
+    dmResponse = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm1 = dmResponse.json()
+
+    mResponse = requests.post(f"{url}message/senddm/v1", json={
+        token: user2[token],
+        dmID: dm1[dmID],
+        'message': 'Hi'
+    })
+    message = mResponse.json()
+
+    requests.put(f"{url}message/edit/v2", json={
+        "token": user2[token],
+        "message_id": message['message_id'],
+        "message": "Hi @user1"
+    })
+
+    nResponse = requests.get(f"{url}notifications/get/v1", params={
+        "token": user1[token]
+    })
+    notifs = nResponse.json()
+
+    assert {
+        cID : -1,
+        dmID: dm1[dmID],
+        nMess : f"user2 tagged you in user1, user2: Hi @user1",
+    } in notifs['notifications']
