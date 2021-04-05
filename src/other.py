@@ -206,7 +206,6 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
     for word in messageWords:
         if word.startswith('@') and word != '@':
             atHandlesList.append(word[1:])
-    print(atHandlesList)
     taggedUsersList = []
     for atHandle in atHandlesList:
         try:
@@ -218,7 +217,6 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
                     taggedUsersList.append(get_user_from_handlestring(atHandle)[uID])
         except:
             pass
-    print(taggedUsersList)
     notification = {
         'channel_id': channel_id,
         'dm_id': dm_id,
