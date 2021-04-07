@@ -16,6 +16,7 @@ chans     = 'channels'
 handle    = 'handle_string'
 dmID      = 'dm_id'
 seshID    = 'session_id'
+mID       = 'message_id'
 
 def message_send_v1(token, channel_id, message):
     '''
@@ -332,7 +333,7 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
     return shared_message_id
 
 def message_pin_v1(token, message_id):
-    pass
+    auth_user_id, _ = decode(token)
 
 def message_unpin_v1(token, message_id):
-    pass
+    auth_user_id, _ = decode(token)

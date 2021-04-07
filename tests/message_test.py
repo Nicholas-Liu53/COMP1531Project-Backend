@@ -355,7 +355,7 @@ def test_message_pin_valid_channel(user1):
     not_pinned = src.channel.channel_messages_v1(user1[token], channel[cID], 0)
     
     mID_found = False
-    for message in not_pinned:
+    for message in not_pinned['messages']:
         if target[mID] == message[mID]:
             mID_found = True
         assert message['is_pinned'] is False
@@ -365,7 +365,7 @@ def test_message_pin_valid_channel(user1):
     pinned = src.channel.channel_messages_v1(user1[token], channel[cID], 0)
     
     mID_found = False
-    for message in pinned:
+    for message in pinned['messages']:
         if target[mID] == message[mID]:
             mID_found = True
             assert message['is_pinned'] is True
@@ -381,7 +381,7 @@ def test_message_pin_valid_dm(user1, user2):
     not_pinned = src.dm.dm_messages_v1(user1[token], dm[dmID], 0)
     
     mID_found = False
-    for message in not_pinned:
+    for message in not_pinned['messages']:
         if target[mID] == message[mID]:
             mID_found = True
         assert message['is_pinned'] is False
@@ -391,7 +391,7 @@ def test_message_pin_valid_dm(user1, user2):
     pinned = src.dm.dm_messages_v1(user1[token], dm[dmID], 0)
     
     mID_found = False
-    for message in pinned:
+    for message in pinned['messages']:
         if target[mID] == message[mID]:
             mID_found = True
             assert message['is_pinned'] is True
@@ -406,7 +406,7 @@ def test_message_pin_invalid_mID(user1):
         message_pin_v1(user1[token], invalid_mID)
 
 #* Test that an InputError is raised when trying to pin a pinned message
-def test_message_pin_pinned_(user1, user2):
+def test_message_pin_pinned(user1, user2):
     channel = src.channels.channels_create_v1(user1[token], 'CJWY', True)
     m1 = message_send_v1(user1[token], channel[cID], 'We got a number one victory royale')
     message_pin_v1(user1[token], m1[mID])
@@ -447,7 +447,7 @@ def test_message_unpin_valid_channel(user1):
     pinned = src.channel.channel_messages_v1(user1[token], channel[cID], 0)
     
     mID_found = False
-    for message in pinned:
+    for message in pinned['messages']:
         if target[mID] == message[mID]:
             mID_found = True
             assert message['is_pinned'] is True
@@ -459,7 +459,7 @@ def test_message_unpin_valid_channel(user1):
     not_pinned = src.channel.channel_messages_v1(user1[token], channel[cID], 0)
 
     mID_found = False
-    for message in not_pinned:
+    for message in not_pinned['messages']:
         if target[mID] == message[mID]:
             mID_found = True
         assert message['is_pinned'] is False
@@ -475,7 +475,7 @@ def test_message_unpin_valid_dm(user1, user2):
     pinned = src.dm.dm_messages_v1(user1[token], dm[dmID], 0)
     
     mID_found = False
-    for message in pinned:
+    for message in pinned['messages']:
         if target[mID] == message[mID]:
             mID_found = True
             assert message['is_pinned'] is True
@@ -487,7 +487,7 @@ def test_message_unpin_valid_dm(user1, user2):
     not_pinned = src.dm.dm_messages_v1(user1[token], dm[dmID], 0)
     
     mID_found = False
-    for message in not_pinned:
+    for message in not_pinned['messages']:
         if target[mID] == message[mID]:
             mID_found = True
         assert message['is_pinned'] is False
@@ -551,8 +551,8 @@ def test_message_pin_unauthorised_user(user1, invalid_token):
     m2 = message_send_v1(user1[token], channel[cID], 'Bois')
     message_pin_v1(user1[token], m1[mID])
     
-    with pytest.raises(InputError):
+    with pytest.raises(AccessError):
         message_unpin_v1(invalid_token, m1[mID])
     
-    with pytest.raises(InputError):
+    with pytest.raises(AccessError):
         message_pin_v1(invalid_token, m2[mID])
