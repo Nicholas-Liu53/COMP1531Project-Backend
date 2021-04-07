@@ -348,13 +348,6 @@ def test_dm_unauthorised_user(user1, user2, invalid_token):
         message_senddm_v1(invalid_token, dm1[dmID], '')
 
 #* Testing that a valid message is pinned for channel
-'''
-< Register a user >
-< Create a channel >
-< Send 2 messages >
-< Pin 1 message >
-< Assert >
-'''
 def test_message_pin_valid_channel(user1):
     channel = src.channels.channels_create_v1(user1[token], 'Midsummer Madness', True)
     message_send_v1(user1[token], channel[cID], 'Thumb it to summit')
@@ -381,13 +374,6 @@ def test_message_pin_valid_channel(user1):
     assert mID_found is True
 
 #* Testing that a valid message is pinned for DM
-'''
-< Register 2 users >
-< Create a DM >
-< Send 2 messages >
-< Pin 1 message >
-< Assert >
-'''
 def test_message_pin_valid_dm(user1, user2):
     dm = src.dm.dm_create_v1(user1[token], [user2[AuID]])
     message_senddm_v1(user1[token], dm[dmID], 'Thumb it to summit')
@@ -414,28 +400,12 @@ def test_message_pin_valid_dm(user1, user2):
     assert mID_found is True
 
 #* Test that an InputError is raised when the message_id is invalid
-'''
-< Register a user >
-< Try to run function >
-'''
 def test_message_pin_invalid_mID(user1):
     invalid_mID = -1
     with pytest.raises(InputError):
         message_pin_v1(user1[token], invalid_mID)
 
 #* Test that an InputError is raised when trying to pin a pinned message
-'''
-< Register 2 users >
-< Create a channel >
-< Send 1 messages >
-< Pin 1 message >
-< Try to pin again >
-
-< Create a DM >
-< Send 1 messages >
-< Pin 1 message >
-< Try to pin again >
-'''
 def test_message_pin_pinned_(user1, user2):
     channel = src.channels.channels_create_v1(user1[token], 'CJWY', True)
     m1 = message_send_v1(user1[token], channel[cID], 'We got a number one victory royale')
@@ -452,17 +422,6 @@ def test_message_pin_pinned_(user1, user2):
         message_pin_v1(user1[token], m2[mID])
 
 #* Test that an AccessError is raised when trying to pin a message inside a channel/DM that they are not in
-'''
-< Register 2 users >
-< Create a channel >
-< Send 1 messages >
-< Try to pin >
-
-< Register 3 users >
-< Create a DM >
-< Send 1 messages >
-< Try to pin >
-'''
 def test_message_pin_not_member(user1, user2, user3):
     channel = src.channels.channels_create_v1(user1[token], 'Still CJWY', True)
     m1 = message_send_v1(user1[token], channel[cID], 'Ten kills on the board right now')
@@ -480,15 +439,6 @@ def test_message_pin_not_member(user1, user2, user3):
         message_pin_v1(user3[token], m2[mID])
 
 #* Testing that a valid message is unpinned for channel
-'''
-< Register a user >
-< Create a channel >
-< Send 1 message >
-< Pin 1 message >
-< Assert is pinned>
-< Unpin >
-< Assert is unpinned >
-'''
 def test_message_unpin_valid_channel(user1):
     channel = src.channels.channels_create_v1(user1[token], 'Scissor Salad', True)
     message_send_v1(user1[token], channel[cID], 'Le from downtown')
@@ -517,15 +467,6 @@ def test_message_unpin_valid_channel(user1):
 
 
 #* Testing that a valid message is unpinned for DM
-'''
-< Register 2 users >
-< Create a DM >
-< Send 1 message >
-< Pin 1 message >
-< Assert is pinned >
-< Unpin >
-< Assert is unpinned >
-'''
 def test_message_unpin_valid_dm(user1, user2):
     dm = src.dm.dm_create_v1(user1[token], [user2[AuID]])
     message_senddm_v1(user1[token], dm[dmID], 'Thumb it to summit')
@@ -553,20 +494,6 @@ def test_message_unpin_valid_dm(user1, user2):
     assert mID_found is True
     
 #* Test that an InputError is raised when the message_id is invalid
-'''
-< Register 2 users >
-< Create a channel >
-< Send 1 messages >
-< Pin 1 message >
-< Remove message >
-< Try to unpin >
-
-< Create a DM >
-< Send 1 messages >
-< Pin 1 message >
-< Remove message >
-< Try to unpin >
-'''
 def test_message_unpin_invalid_mID(user1, user2):
     channel = src.channels.channels_create_v1(user1[token], 'telepatia', True)
     m1 = message_send_v1(user1[token], channel[cID], 'Harry Houdini')
@@ -585,16 +512,6 @@ def test_message_unpin_invalid_mID(user1, user2):
         message_unpin_v1(user1[token], m2[mID])
 
 #* Test that an InputError is raised when trying to unpin an unpinned message
-'''
-< Register 2 users >
-< Create a channel >
-< Send 1 messages >
-< Try to unpin >
-
-< Create a DM >
-< Send 1 messages >
-< Try to unpin >
-'''
 def test_message_unpin_unpinned_(user1, user2):
     channel = src.channels.channels_create_v1(user1[token], 'Vincent Le', True)
     m1 = message_send_v1(user1[token], channel[cID], 'Noted')
@@ -607,8 +524,6 @@ def test_message_unpin_unpinned_(user1, user2):
 
     with pytest.raises(InputError):
         message_unpin_v1(user1[token], m2[mID])
-
-#* Test that an AccessError is raised when trying to unpin a message inside a channel that are not in
 
 #* Test that an AccessError is raised when trying to unpin a message inside a channel/DM that are not in
 def test_message_unpin_not_member(user1, user2, user3):
