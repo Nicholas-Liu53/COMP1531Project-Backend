@@ -346,3 +346,130 @@ def test_dm_unauthorised_user(user1, user2, invalid_token):
     
     with pytest.raises(AccessError):
         message_senddm_v1(invalid_token, dm1[dmID], '')
+
+#* Testing that a valid message is pinned for channel
+'''
+< Register a user >
+< Create a channel >
+< Send 2 messages >
+< Pin 1 message >
+< Assert >
+'''
+
+#* Testing that a valid message is pinned for DM
+'''
+< Register 2 users >
+< Create a DM >
+< Send 2 messages >
+< Pin 1 message >
+< Assert >
+'''
+
+#* Test that an InputError is raised when the message_id is invalid
+'''
+< Register a user >
+< Try to run function >
+'''
+
+#* Test that an InputError is raised when trying to pin a pinned message
+'''
+< Register 2 users >
+< Create a channel >
+< Send 1 messages >
+< Pin 1 message >
+< Try to pin again >
+
+< Create a DM >
+< Send 1 messages >
+< Pin 1 message >
+< Try to pin again >
+'''
+
+#* Test that an AccessError is raised when trying to pin a message inside a channel that are not in
+'''
+< Register 2 users >
+< Create a channel >
+< Send 1 messages >
+< Try to pin >
+'''
+
+#* Test that an AccessError is raised when trying to pin a message inside a DM that are not in
+'''
+< Register 3 users >
+< Create a DM >
+< Send 1 messages >
+< Try to pin >
+'''
+
+#* Testing that a valid message is unpinned for channel
+'''
+< Register a user >
+< Create a channel >
+< Send 1 message >
+< Pin 1 message >
+< Assert is pinned>
+< Unpin >
+< Assert is unpinned >
+'''
+
+#* Testing that a valid message is unpinned for DM
+'''
+< Register 2 users >
+< Create a DM >
+< Send 1 message >
+< Pin 1 message >
+< Assert is pinned >
+< Unpin >
+< Assert is unpinned >
+'''
+#* Test that an InputError is raised when the message_id is invalid
+'''
+< Register 2 users >
+< Create a channel >
+< Send 1 messages >
+< Pin 1 message >
+< Remove message >
+< Try to unpin >
+
+< Create a DM >
+< Send 1 messages >
+< Pin 1 message >
+< Remove message >
+< Try to unpin >
+'''
+
+#* Test that an InputError is raised when trying to unpin an unpinned message
+'''
+< Register 2 users >
+< Create a channel >
+< Send 1 messages >
+< Try to unpin >
+
+< Create a DM >
+< Send 1 messages >
+< Try to unpin >
+'''
+
+#* Test that an AccessError is raised when trying to unpin a message inside a channel that are not in
+'''
+< Register 2 users >
+< Create a channel >
+< Send 1 messages >
+< Pin message >
+< Try to unpin with other user >
+'''
+#* Test that an AccessError is raised when trying to unpin a message inside a DM that are not in
+'''
+< Register 3 users >
+< Create a DM >
+< Send 1 messages >
+< Pin message >
+< Try to unpin with other user >
+'''
+
+#! Assumptions can do with the order of error raising
+
+#* Testing that for an invalid token, an AccessError is raised for 'pin' functions
+'''
+< The usual invalid token fixture >
+'''
