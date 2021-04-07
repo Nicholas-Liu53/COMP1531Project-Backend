@@ -609,21 +609,8 @@ def test_message_unpin_unpinned_(user1, user2):
         message_unpin_v1(user1[token], m2[mID])
 
 #* Test that an AccessError is raised when trying to unpin a message inside a channel that are not in
-'''
-< Register 2 users >
-< Create a channel >
-< Send 1 messages >
-< Pin message >
-< Try to unpin with other user >
-'''
-#* Test that an AccessError is raised when trying to unpin a message inside a DM that are not in
-'''
-< Register 3 users >
-< Create a DM >
-< Send 1 messages >
-< Pin message >
-< Try to unpin with other user >
-'''
+
+#* Test that an AccessError is raised when trying to unpin a message inside a channel/DM that are not in
 def test_message_unpin_not_member(user1, user2, user3):
     channel = src.channels.channels_create_v1(user1[token], 'Run outta', True)
     m1 = message_send_v1(user1[token], channel[cID], 'messages')
@@ -642,12 +629,7 @@ def test_message_unpin_not_member(user1, user2, user3):
     with pytest.raises(AccessError):
         message_unpin_v1(user3[token], m2[mID])
 
-#! Assumptions can do with the order of error raising
-
 #* Testing that for an invalid token, an AccessError is raised for 'pin' functions
-'''
-< The usual invalid token fixture >
-'''
 def test_message_pin_unauthorised_user(user1, invalid_token):
     channel = src.channels.channels_create_v1(user1[token], 'Last', True)
     m1 = message_send_v1(user1[token], channel[cID], 'One')
