@@ -1,6 +1,6 @@
 # file to test functions in src/message.py
 import pytest
-from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_share_v1, message_senddm_v1
+from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_share_v1, message_senddm_v1, message_pin_v1, message_unpin_v1
 from src.error import InputError, AccessError
 import src.channel, src.channels, src.auth, src.dm
 from src.other import clear_v1, SECRET
