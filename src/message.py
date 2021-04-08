@@ -256,6 +256,8 @@ def message_senddm_v1(token, dm_id, message):
         uID: auth_user_id,
         'message': message, 
         'time_created': time_created,
+        'reacts': [],
+        'is_pinned': False
     })
 
     with open('data.json', 'w') as FILE:
