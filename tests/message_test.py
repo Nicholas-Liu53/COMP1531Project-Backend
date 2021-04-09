@@ -557,3 +557,83 @@ def test_message_pin_unauthorised_user(user1, invalid_token):
     
     with pytest.raises(AccessError):
         message_pin_v1(invalid_token, m2[mID])
+
+#* Testing a message that is to be sent later isn't prematurely sent
+def test_message_sendlater_is_sent_later(user1, user2):
+    # User1 creates channel
+    channel1 = src.channels.channels_create_v1(user1[token], 'Dominic Torreto', True)
+    # User2 joins channel
+    src.channel.channel_join_v1(user2[token], channel1[cID])
+    # Test for m1, sent by user1
+    sendTime = int(datetime.now().replace(tzinfo=timezone.utc).timestamp()) + 10
+    m1 = src.message.message_sendlater_v1(user1[token], channel1[cID], "You know what matters more than American Muscle?", sendTime)
+    #* Make sure message isn't sent prematurely
+    while int(datetime.now().replace(tzinfo=timezone.utc).timestamp()) < sendTime:
+        messageFound = False
+        for message in src.channel.channel_messages_v1(user2[token], channel1[cID], 0)['messages']:
+            if m1[mID] == message[mID]:
+                messageFound = True
+        assert not messageFound
+    #* Make sure the message is sent and the timestamp is correct
+    for message in src.channel.channel_messages_v1(user2[token], channel1[cID], 0)['messages']:
+        if m1[mID] == message[mID]:
+            mTime = message['time_created']
+            messageFound = True
+    assert messageFound
+    assert mTime == sendTime
+    # Test for m2, sent by user2
+    sendTime = int(datetime.now().replace(tzinfo=timezone.utc).timestamp()) + 10
+    m2 = src.message.message_sendlater_v1(user2[token], channel1[cID], "Family.", sendTime)
+    #* Make sure message isn't sent prematurely
+    while int(datetime.now().replace(tzinfo=timezone.utc).timestamp()) < sendTime:
+        messageFound = False
+        for message in src.channel.channel_messages_v1(user2[token], channel1[cID], 0)['messages']:
+            if m2[mID] == message[mID]:
+                messageFound = True
+        assert not messageFound
+    #* Make sure the message is sent and the timestamp is correct
+    for message in src.channel.channel_messages_v1(user2[token], channel1[cID], 0)['messages']:
+        if m2[mID] == message[mID]:
+            mTime = message['time_created']
+            messageFound = True
+    assert messageFound
+    assert mTime == sendTime
+
+#* Testing a message that is to be sent later isn't prematurely sent
+def test_message_sendlaterdm_is_sent_later(user1, user2):
+    # User1 creates dm, invites user2
+    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    # Test for m1, sent by user1
+    sendTime = int(datetime.now().replace(tzinfo=timezone.utc).timestamp()) + 10
+    m1 = src.message.message_sendlaterdm_v1(user1[token], dm1[dmID], "You know what matters more than American Muscle?", sendTime)
+    #* Make sure message isn't sent prematurely
+    while int(datetime.now().replace(tzinfo=timezone.utc).timestamp()) < sendTime:
+        messageFound = False
+        for message in src.dm.dm_messages_v1(user2[token], dm1[dmID], 0)['messages']:
+            if m1[mID] == message[mID]:
+                messageFound = True
+        assert not messageFound
+    #* Make sure the message is sent and the timestamp is correct
+    for message in src.dm.dm_messages_v1(user2[token], dm1[dmID], 0)['messages']:
+        if m1[mID] == message[mID]:
+            mTime = message['time_created']
+            messageFound = True
+    assert messageFound
+    assert mTime == sendTime
+    # Test for m2, sent by user2
+    sendTime = int(datetime.now().replace(tzinfo=timezone.utc).timestamp()) + 10
+    m2 = src.message.message_sendlaterdm_v1(user2[token], dm1[dnID], "Family.", sendTime)
+    #* Make sure message isn't sent prematurely
+    while int(datetime.now().replace(tzinfo=timezone.utc).timestamp()) < sendTime:
+        messageFound = False
+        for message in src.dm.dm_messages_v1(user2[token], dm1[dmID], 0)['messages']:
+            if m2[mID] == message[mID]:
+                messageFound = True
+        assert not messageFound
+    #* Make sure the message is sent and the timestamp is correct
+    for message in src.dm.dm_messages_v1(user2[token], dm1[dmID], 0)['messages']:
+        if m2[mID] == message[mID]:
+            mTime = message['time_created']
+            messageFound = True
+    assert messageFound
+    assert mTime == sendTime

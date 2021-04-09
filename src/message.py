@@ -375,3 +375,13 @@ def message_unpin_v1(token, message_id):
                     json.dump(data, FILE)
                 return {}
     raise InputError
+
+def message_sendlater_v1(token, channel_id, message, time_sent):
+    return {
+        'message_id': None,
+    }
+
+def message_sendlaterdm_v1(token, dm_id, message, time_sent):
+    return {
+        'message_id': None,
+    }
