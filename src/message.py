@@ -17,7 +17,8 @@ handle    = 'handle_string'
 dmID      = 'dm_id'
 seshID    = 'session_id'
 mID       = 'message_id'
-reactID   = 'react_id'
+rID       = 'react_id'
+thumbsUp  = 1 
 
 def message_send_v1(token, channel_id, message):
     '''
@@ -379,29 +380,65 @@ def message_unpin_v1(token, message_id):
 
 #Iteration 3    
 def message_react_v1(token, message_id, react_id):
-        
-    #Omit errors 
-    #Input error 1: message_id not a valid message within channel or dm 
-    message_found_in_channel = False
-    message_found_in_dm = False
-    
-    #Go through message_log 
-    
-    
-    
-    if message_found_in_channel == False and message_found_in_dm == False:
-        return InputError    
+
     #Input error 2: react_id not a valid react_id 
     #Assumption: Only react ID that is valid is 1 
+    if reactID != thumbsUp:
+        return InputError
         
-    #Input error 3: message with message_id already contains a react from user 
+    auth_user_id, _ = decode(token)
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+    
+    #Go through message_log 
+    for message in data['messages_log']: 
+        if message[mID] == message_id:
+            #Access error 1: Authorised user not a member of channel or DM that message is a part of 
+            #If cID is -1 then it is in a dm however if user not found within the dm then is access error and vice versa if dmID is -1 
+            if message[cID] == -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
+                raise AccessError
+            
+            elif message[dmID] == -1 and auth_user_id not in get_dm(message[cID])[allMems]:
+            #Input error 3: message with message_id already contains a react from user
+            elif auth_user_id in message['reacts']['u_ids']: 
+                raise InputError
+
+            #If gets to here means that all errors have been omitted and desired message to react to has been found, need to add dictionary to list of reacts 
+            
+            '''
+            
+            FIX UP PYLINT FOR NEXT PART TOO MANY IFS 
+            
+            
+            '''
+            
+            #Case 1: First react to message 
+            if len(message['reacts']) = 0
+                result = {
+                    'react_id': thumbsUp
+                    'u_ids': [auth_user_id]
+                
+                
+                    #NOT TOO SURE WHAT IS THIS USER REACTED MEANS 
+                    'is_this_user_reacted': True
+                
+                
+                    }
+                message['reacts'].append(result)
+            
+            #Case 2: Not first react
+            #LIST FOR REACTS WILL ONLY BE 0 or 1, BECAUSE ONLY HAVE 1 REACT 
+            elif len(message['reacts']) = 1:
+                message[reacts]['u_ids'].append(auth_user_id)
+
+    #If gets to end of messages log without finding message with same mID then mID not valid  
+        raise InputError
         
-    #Access error 1: Authorised user not a member of channel or DM that message is a part of 
+        
+        
+
     
     
-    
-    #Given a message within a channel or DM the authorised user is part of, add a "react" to that particular message
-        
         
         
 
