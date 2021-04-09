@@ -16,6 +16,8 @@ chans     = 'channels'
 handle    = 'handle_string'
 dmID      = 'dm_id'
 seshID    = 'session_id'
+mID       = 'message_id'
+reactID   = 'react_id'
 
 def message_send_v1(token, channel_id, message):
     '''
@@ -330,3 +332,36 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
         push_tagged_notifications(auth_user_id, -1, dm_id, newMessage)
 
     return shared_message_id
+    
+    
+    
+    
+#Iteration 3    
+def message_react_v1(token, message_id, react_id):
+        
+    #Omit errors 
+    #Input error 1: message_id not a valid message within channel or dm 
+    message_found_in_channel = False
+    message_found_in_dm = False
+    
+    #Go through message_log 
+    
+    
+    
+    if message_found_in_channel == False and message_found_in_dm == False:
+        return InputError    
+    #Input error 2: react_id not a valid react_id 
+    #Assumption: Only react ID that is valid is 1 
+        
+    #Input error 3: message with message_id already contains a react from user 
+        
+    #Access error 1: Authorised user not a member of channel or DM that message is a part of 
+    
+    
+    
+    #Given a message within a channel or DM the authorised user is part of, add a "react" to that particular message
+        
+        
+        
+
+

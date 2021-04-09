@@ -434,7 +434,7 @@ def test_message_react_v1_valid_channel(user1, user2):
     
     #Create for loop that finds message looking for 
     for current_message in range(len(result[messages])): 
-        if result['messages'][mID] == message_1[mID]]: 
+        if result['messages'][mID] == message_1[mID]: 
             #Now that the message is found, can assert that our user has reacted to it
             assert user1[uID] in result['messages'][current_message]['reacts']['u_ids'] 
     
@@ -451,7 +451,7 @@ def test_message_react_v1_valid_dm(user1, user2):
     result = src.dm.dm_messages_v1(user1[token], dm_1[dmID], 0)
     #Create for loop that finds message looking for 
     for current_message in range(len(result[messages])): 
-        if result['messages'][mID] == message_1[mID]]: 
+        if result['messages'][mID] == message_1[mID]: 
             #Now that the message is found, can assert that our user has reacted to it
             assert user1[uID] in result['messages'][current_message]['reacts']['u_ids'] 
     
@@ -526,7 +526,7 @@ def test_message_uncreact_v1_valid_channel():
     result = src.channel.channel_messages_v1(user1[token], channel_1[cID], 0)
     #Create for loop that finds message looking for 
     for current_message in range(len(result[messages])): 
-        if result['messages'][mID] == message_1[mID]]: 
+        if result['messages'][mID] == message_1[mID]: 
             #Now that the message is found, can assert that our user has reacted to it
             assert user1[uID] not in result['messages'][current_message]['reacts']['u_ids'] 
     
@@ -543,7 +543,7 @@ def test_message_uncreact_v1_valid_dm():
     result = src.dm.dm_messages_v1(user1[token], dm_1[dmID], 0)
     #Create for loop that finds message looking for 
     for current_message in range(len(result[messages])): 
-        if result['messages'][mID] == message_1[mID]]: 
+        if result['messages'][mID] == message_1[mID]: 
             #Now that the message is found, can assert that our user has reacted to it
             assert user1[uID] not in result['messages'][current_message]['reacts']['u_ids'] 
     
