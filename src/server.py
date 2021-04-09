@@ -155,6 +155,16 @@ def message_senddm():
     payload = request.get_json()
     return src.message.message_senddm_v1(payload['token'], payload['dm_id'], payload['message'])
 
+@APP.route("/message/pin/v1", methods=['POST'])
+def message_pin():
+    payload = request.get_json()
+    return src.message.message_pin_v1(payload['token'], payload['message_id'])
+
+@APP.route("/message/unpin/v1", methods=['POST'])
+def message_unpin():
+    payload = request.get_json()
+    return src.message.message_unpin_v1(payload['token'], payload['message_id'])
+
 #* *********************************************DM ROUTES*****************************************
 @APP.route("/dm/details/v1", methods=['GET'])
 def dm_details():

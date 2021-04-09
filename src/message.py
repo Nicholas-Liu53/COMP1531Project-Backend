@@ -73,6 +73,8 @@ def message_send_v1(token, channel_id, message):
             'time_created'  : time_created,
             'message_id'    : newID,
             'message'       : message,
+            'reacts': [],
+            'is_pinned': False,
         }
     )
 
@@ -257,6 +259,8 @@ def message_senddm_v1(token, dm_id, message):
         uID: auth_user_id,
         'message': message, 
         'time_created': time_created,
+        'reacts': [],
+        'is_pinned': False
     })
 
     with open('data.json', 'w') as FILE:
@@ -333,9 +337,46 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
 
     return shared_message_id
     
-    
-    
-    
+def message_pin_v1(token, message_id):
+    auth_user_id, _ = decode(token)
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+
+    for message in data['messages_log']:
+        if message[mID] == message_id:
+            if message[dmID] == -1 and auth_user_id not in get_channel(message[cID])[allMems]:
+                raise AccessError
+            elif message[cID] == -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
+                raise AccessError
+            elif message['is_pinned']:
+                raise InputError
+            else:
+                message['is_pinned'] = True
+                with open('data.json', 'w') as FILE:
+                    json.dump(data, FILE)
+                return {}
+    raise InputError
+
+def message_unpin_v1(token, message_id):
+    auth_user_id, _ = decode(token)
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+
+    for message in data['messages_log']:
+        if message[mID] == message_id:
+            if message[dmID] == -1 and auth_user_id not in get_channel(message[cID])[allMems]:
+                raise AccessError
+            elif message[cID] == -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
+                raise AccessError
+            elif not message['is_pinned']:
+                raise InputError
+            else:
+                message['is_pinned'] = False
+                with open('data.json', 'w') as FILE:
+                    json.dump(data, FILE)
+                return {}
+    raise InputError
+
 #Iteration 3    
 def message_react_v1(token, message_id, react_id):
         
@@ -363,5 +404,6 @@ def message_react_v1(token, message_id, react_id):
         
         
         
+
 
 

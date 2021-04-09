@@ -5,7 +5,10 @@ from src.error import AccessError, InputError
 from src.other import check_session, SECRET
 from src.config import url
 from jwt import encode
+from src.other import check_session, SECRET
+from src.error import AccessError, InputError
 
+# tests the return value of the auth login of a valid user
 def test_http_auth_login_valid():
     requests.delete(f"{url}clear/v1")
     requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
@@ -15,24 +18,29 @@ def test_http_auth_login_valid():
     assert payload['token'] == token
     assert payload['auth_user_id'] == 0
 
+# tests the case when the inputted email is of invalid format
 def test_http_auth_login_invalid_email():
     requests.delete(f"{url}clear/v1")
     requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
     response = requests.post(f"{url}auth/login/v2", json={"email": "caricoleman.com", "password": "1234567"})
     assert response.status_code == 400
 
+# tests the case when the inputted email does not correspond to a registerd user
 def test_http_auth_login_invalid_not_registered_email():
     requests.delete(f"{url}clear/v1")
     requests.post(f"{url}auth/login/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
     response = requests.post(f"{url}auth/login/v2", json={"email": "caricoleman@yahoo.com", "password": "1234567"})
     assert response.status_code == 400
 
+# tests the case when the inputted password does not match the password of the user corresponding to 
+# the inputted email
 def test_http_auth_login_invalid_incorrect_password():
     requests.delete(f"{url}clear/v1")
     requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
     response = requests.post(f"{url}auth/login/v2", json={"email": "caricoleman@gmail.com", "password": "789101112"})
     assert response.status_code == 400
 
+# tests the return value of an auth_register with valid input (email, password, first name, last name)
 def test_http_auth_register_valid():
     requests.delete(f"{url}clear/v1")
     r = requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
@@ -41,42 +49,50 @@ def test_http_auth_register_valid():
     assert payload["token"] == token
     assert payload['auth_user_id'] == 0
 
+# tests the case when the inputted email is of invalid format 
 def test_http_auth_register_invalid_email():
     requests.delete(f"{url}clear/v1")
     response = requests.post(f"{url}auth/register/v2", json={"email": "caricoleman.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
     assert response.status_code == 400
 
+# tests the case when the inputted email is already used by a registered user  
 def test_http_auth_register_invalid_email_in_use():
     requests.delete(f"{url}clear/v1")
     requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
     response = requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "erica", "name_last": "mondy"})
     assert response.status_code == 400
 
+# tests the case when the inputted password has less than 6 characters
 def test_http_auth_register_invalid_password():
     requests.delete(f"{url}clear/v1")
     response = requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "123", "name_first": "cari", "name_last": "coleman"})
     assert response.status_code == 400
 
+# tests the case when the inputted first name is empty
 def test_http_auth_register_invalid_empty_first_name():
     requests.delete(f"{url}clear/v1")
     response = requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "", "name_last": "coleman"})
     assert response.status_code == 400
 
+# tests the case when the inputted first name exceeds the 50 character limit
 def test_http_auth_register_invalid_long_first_name():
     requests.delete(f"{url}clear/v1")
     response = requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cariiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", "name_last": "coleman"})
     assert response.status_code == 400
 
+# tests the case when the inputted last name is empty
 def test_http_auth_register_invalid_empty_last_name():
     requests.delete(f"{url}clear/v1")
     response = requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "", "name_last": ""})
     assert response.status_code == 400
 
+# tests the case when the inputted last name exceeds the 50 character limit
 def test_http_auth_register_invalid_long_last_name():
     requests.delete(f"{url}clear/v1")
     response = requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "", "name_last": "colemaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaan"})
     assert response.status_code == 400
 
+# tests for the existence of session ids and validity of tokens after a logout is called by a user
 def test_http_auth_logout_valid():
     requests.delete(f"{url}clear/v1")
     response_1 = requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
@@ -98,6 +114,7 @@ def test_http_auth_logout_valid():
     with pytest.raises(AccessError):
         check_session(0, 1)
 
+# tests for the case when a token with an invalid session_id is inputted
 def test_http_auth_logout_v1_invalid():   
     requests.delete(f"{url}clear/v1")
     requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
