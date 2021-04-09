@@ -72,6 +72,8 @@ def message_send_v1(token, channel_id, message):
             'time_created'  : time_created,
             'message_id'    : newID,
             'message'       : message,
+            'reacts': [],
+            'is_pinned': False,
         }
     )
 

@@ -198,10 +198,10 @@ def channel_messages_v1(token, channel_id, start):
 
     for objects in data['messages_log']:
         if channel_id == objects['channel_id']:
-            current_DM = objects.copy()
-            del current_DM['channel_id']
-            del current_DM['dm_id']
-            messages.insert(0,current_DM)
+            current_message = objects.copy()
+            del current_message['channel_id']
+            del current_message['dm_id']
+            messages.insert(0,current_message)
 
     #Reverse list such that the we have the newest messages at the start and oldest at the end 
     reversed(messages)        
