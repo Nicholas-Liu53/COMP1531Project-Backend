@@ -109,7 +109,7 @@ def test_http_message_send(user1, user2, user3, user4):
         "channel_id": c1.json()['channel_id'],
         "start": 0
     }).json()['messages']:
-        if m1['message_id'] == messageDict['message_id']:
+        if m1[mID] == messageDict[mID]:
             messageFound = True
             break
     assert messageFound is True
@@ -155,7 +155,7 @@ def test_http_message_edit(user1, user2, user3, user4):
     }).json()
     requests.put(f"{url}message/edit/v2", json={
         "token": user1[token],
-        "message_id": m1['message_id'],
+        "message_id": m1[mID],
         "message": "Jeffrey Meng"
     })
     editedMessage = {}
@@ -164,13 +164,13 @@ def test_http_message_edit(user1, user2, user3, user4):
         "channel_id": c1.json()['channel_id'],
         "start": 0
     }).json()['messages']:
-        if m1['message_id'] == messageDict['message_id']:
+        if m1[mID] == messageDict[mID]:
             editedMessage = messageDict
             break
     assert editedMessage['message'] == 'Jeffrey Meng'
     requests.put(f"{url}message/edit/v2", json={
         "token": user2[token],
-        "message_id": m2['message_id'],
+        "message_id": m2[mID],
         "message": "Jeffrey Meng"
     })
     editedMessage = {}
@@ -179,13 +179,13 @@ def test_http_message_edit(user1, user2, user3, user4):
         "channel_id": c1.json()['channel_id'],
         "start": 0
     }).json()['messages']:
-        if m2['message_id'] == messageDict['message_id']:
+        if m2[mID] == messageDict[mID]:
             editedMessage = messageDict
             break
     assert editedMessage['message'] == 'Jeffrey Meng'
     requests.put(f"{url}message/edit/v2", json={
         "token": user3[token],
-        "message_id": m3['message_id'],
+        "message_id": m3[mID],
         "message": "Jeffrey Meng"
     })
     editedMessage = {}
@@ -194,18 +194,18 @@ def test_http_message_edit(user1, user2, user3, user4):
         "channel_id": c1.json()['channel_id'],
         "start": 0
     }).json()['messages']:
-        if m3['message_id'] == messageDict['message_id']:
+        if m3[mID] == messageDict[mID]:
             editedMessage = messageDict
             break
     assert editedMessage['message'] == 'Jeffrey Meng'
     requests.put(f"{url}message/edit/v2", json={
         "token": user4[token],
-        "message_id": m4['message_id'],
+        "message_id": m4[mID],
         "message": "Jeffrey Meng"
     }).status_code == 403
     requests.put(f"{url}message/edit/v2", json={
         "token": user3[token],
-        "message_id": m3['message_id'],
+        "message_id": m3[mID],
         "message": ""
     })
     messageFound = False
@@ -214,7 +214,7 @@ def test_http_message_edit(user1, user2, user3, user4):
         "channel_id": c1.json()['channel_id'],
         "start": 0
     }).json()['messages']:
-        if m3['message_id'] == messageDict['message_id']:
+        if m3[mID] == messageDict[mID]:
             messageFound = True
             break
     assert messageFound is False
@@ -228,7 +228,7 @@ def test_http_message_edit(user1, user2, user3, user4):
         tooLong += "?"
     requests.put(f"{url}message/edit/v2", json={
         "token": user2[token],
-        "message_id": m4['message_id'],
+        "message_id": m4[mID],
         "message": tooLong
     }).status_code == 400
     d1 = requests.post(f"{url}dm/create/v1", json={
@@ -242,7 +242,7 @@ def test_http_message_edit(user1, user2, user3, user4):
     }).json()
     requests.put(f"{url}message/edit/v2", json={
         "token": user2[token],
-        "message_id": dM1['message_id'],
+        "message_id": dM1[mID],
         "message": "Jeffrey Meng"
     }).status_code == 403
 
@@ -287,7 +287,7 @@ def test_http_message_remove(user1, user2, user3, user4):
     }).json()
     requests.delete(f"{url}message/remove/v1", json={
         "token": user1[token],
-        "message_id": m1['message_id']
+        "message_id": m1[mID]
     })
     messageFound = False
     for messageDict in requests.get(f"{url}channel/messages/v2", params={
@@ -295,13 +295,13 @@ def test_http_message_remove(user1, user2, user3, user4):
         "channel_id": c1.json()['channel_id'],
         "start": 0
     }).json()['messages']:
-        if m1['message_id'] == messageDict['message_id']:
+        if m1[mID] == messageDict[mID]:
             messageFound = True
             break
     assert messageFound is False
     requests.delete(f"{url}message/remove/v1", json={
         "token": user2[token],
-        "message_id": m2['message_id']
+        "message_id": m2[mID]
     })
     messageFound = False
     for messageDict in requests.get(f"{url}channel/messages/v2", params={
@@ -309,13 +309,13 @@ def test_http_message_remove(user1, user2, user3, user4):
         "channel_id": c1.json()['channel_id'],
         "start": 0
     }).json()['messages']:
-        if m2['message_id'] == messageDict['message_id']:
+        if m2[mID] == messageDict[mID]:
             messageFound = True
             break
     assert messageFound is False
     requests.delete(f"{url}message/remove/v1", json={
         "token": user3[token],
-        "message_id": m3['message_id']
+        "message_id": m3[mID]
     })
     messageFound = False
     for messageDict in requests.get(f"{url}channel/messages/v2", params={
@@ -323,13 +323,13 @@ def test_http_message_remove(user1, user2, user3, user4):
         "channel_id": c1.json()['channel_id'],
         "start": 0
     }).json()['messages']:
-        if m3['message_id'] == messageDict['message_id']:
+        if m3[mID] == messageDict[mID]:
             messageFound = True
             break
     assert messageFound is False
     assert requests.delete(f"{url}message/remove/v1", json={
         "token": user4[token],
-        "message_id": m4['message_id']
+        "message_id": m4[mID]
     }).status_code == 403
     assert requests.delete(f"{url}message/remove/v1", json={
         "token": user4[token],
@@ -361,10 +361,10 @@ def test_http_message_share_todm(user1, user2, user3, user4):
         "message": 'hi'}
     )
     ogMessage = ogmsg.json()
-    user2[token], ogMessage['message_id'],'', -1, dm[dmID]
+    user2[token], ogMessage[mID],'', -1, dm[dmID]
     response = requests.post(f"{url}message/share/v1", json={
         "token": user2[token],
-        "og_message_id": ogMessage['message_id'],
+        "og_message_id": ogMessage[mID],
         "message": '',
         "channel_id": -1,
         dmID: dm[dmID] 
@@ -381,7 +381,7 @@ def test_http_message_share_todm(user1, user2, user3, user4):
     checklog = check.json()
     messageFound = False
     for messageDict in checklog['messages']:
-        if shared['message_id'] == messageDict['message_id']:
+        if shared[mID] == messageDict[mID]:
             messageFound = True
             break
     assert messageFound is True 
@@ -390,7 +390,7 @@ def test_http_message_share_todm(user1, user2, user3, user4):
     
     response5 = requests.post(f"{url}message/share/v1", json={
         "token":user1[token],
-        "og_message_id": ogMessage['message_id'],
+        "og_message_id": ogMessage[mID],
         "message": '',
         "channel_id": -1,
         dmID: dm[dmID] 
@@ -442,7 +442,7 @@ def test_http_senddm_multiple(user1, user2):
         'message': ''
     })
     message0 = response0.json()
-    assert message0 == {'message_id': 0}
+    assert message0 == {mID: 0}
     response1 = requests.post(f"{url}message/senddm/v1", json={
         token: user1[token],
         dmID: dm1[dmID],
@@ -450,7 +450,7 @@ def test_http_senddm_multiple(user1, user2):
     })
 
     message1 = response1.json()
-    assert message1 == {'message_id': 1}
+    assert message1 == {mID: 1}
 
     response2 = requests.post(f"{url}message/senddm/v1", json={
         token: user1[token],
@@ -459,7 +459,7 @@ def test_http_senddm_multiple(user1, user2):
     })
 
     message2 = response2.json()
-    assert message2 == {'message_id': 2}
+    assert message2 == {mID: 2}
     
     response3 = requests.post(f"{url}message/senddm/v1", json={
         token: user1[token],
@@ -468,7 +468,7 @@ def test_http_senddm_multiple(user1, user2):
     })
 
     message3 = response3.json()
-    assert message3 == {'message_id': 3}
+    assert message3 == {mID: 3}
 
 #* Testing that a valid message is pinned for channel
 def test_http_message_pin_valid_channel(user1):
@@ -530,7 +530,6 @@ def test_http_message_pin_valid_channel(user1):
 
 #* Testing that a valid message is pinned for DM
 def test_http_message_pin_valid_dm(user1, user2):
-
     dmResponse = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
         "u_ids": [user2[AuID]]
@@ -595,7 +594,7 @@ def test_http_message_pin_invalid_mID(user1):
     })
     assert pResponse.status_code == 400
 
-#* Test that an InputError is raised when trying to pin a pinned message
+#* Test that an InputError is raised when trying to pin a pinned message (error code 400)
 def test_http_message_pin_pinned(user1, user2):
     cResponse = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
@@ -646,7 +645,7 @@ def test_http_message_pin_pinned(user1, user2):
     })
     assert e2Response.status_code == 400
 
-    #* Test that an AccessError is raised when trying to pin a message inside a channel/DM that they are not in
+#* Test that an AccessError is raised when trying to pin a message inside a channel/DM that they are not in (error code 403)
 def test_http_message_pin_not_member(user1, user2, user3):
     cResponse = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
@@ -686,3 +685,325 @@ def test_http_message_pin_not_member(user1, user2, user3):
         mID: m2[mID]
     })
     assert e2Response.status_code == 403
+
+#* Testing that a valid message is unpinned for channel
+def test_http_message_unpin_valid_channel(user1):
+    cResponse = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Scissor Salad',
+        "is_public": True
+    })
+    channel = cResponse.json()
+
+    requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'Le from downtown'
+    })
+
+    mResponse = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'AIRBALL'
+    })
+    target = mResponse.json()
+
+    requests.post(f"{url}message/pin/v1", json={
+        "token": user1[token],
+        mID: target[mID]
+    })
+
+    pResponse = requests.get(f"{url}channel/messages/v2", params={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "start": 0
+    })
+    pinned = pResponse.json()
+
+    mID_found = False
+    for message in pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+            print(message)
+            assert message['is_pinned'] is True
+        else:
+            assert message['is_pinned'] is False
+    assert mID_found is True
+    
+    requests.post(f"{url}message/unpin/v1", json={
+        "token": user1[token],
+        mID: target[mID]
+    })
+
+    npResponse = requests.get(f"{url}channel/messages/v2", params={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "start": 0
+    })
+    not_pinned = npResponse.json()
+
+    mID_found = False
+    for message in not_pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+        assert message['is_pinned'] is False
+    assert mID_found is True
+
+#* Testing that a valid message is unpinned for DM
+def test_http_message_unpin_valid_dm(user1, user2):
+    dmResponse = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm = dmResponse.json()
+
+    requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'Thumb it to summit'
+    })
+
+    mResponse = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'Pin it to win it'
+    })
+    target = mResponse.json()
+
+    requests.post(f"{url}message/pin/v1", json={
+        token: user1[token],
+        mID: target[mID]
+    })
+
+    pResponse = requests.get(f"{url}dm/messages/v1", params={
+        token: user1[token],
+        dmID: dm[dmID],
+        "start": 0
+    })
+    pinned = pResponse.json()
+
+    mID_found = False
+    for message in pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+            print(message)
+            assert message['is_pinned'] is True
+        else:
+            assert message['is_pinned'] is False
+    assert mID_found is True
+
+    requests.post(f"{url}message/unpin/v1", json={
+        token: user1[token],
+        mID: target[mID]
+    })
+
+    npResponse = requests.get(f"{url}dm/messages/v1", params={
+        token: user2[token],
+        dmID: dm[dmID],
+        'start' : 0,
+    })
+    not_pinned = npResponse.json()
+
+    mID_found = False
+    for message in not_pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+        assert message['is_pinned'] is False
+    assert mID_found is True
+
+#* Test that an InputError is raised when the message_id is invalid (error code 400)
+def test_http_test_message_unpin_invalid_mID(user1, user2):
+    cResponse = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'telepatia',
+        "is_public": True
+    })
+    channel = cResponse.json()
+
+    m1Response = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'Harry Houdini'
+    })
+    m1 = m1Response.json()
+
+    requests.post(f"{url}message/pin/v1", json={
+        token: user1[token],
+        mID: m1[mID]
+    })
+    requests.delete(f"{url}message/remove/v1", json={
+        "token": user1[token],
+        "message_id": m1[mID]
+    })
+
+    e1Response = requests.post(f"{url}message/unpin/v1", json={
+        token: user1[token],
+        mID: m1[mID]
+    })
+    assert e1Response.status_code == 400
+
+    dmResponse = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm = dmResponse.json()
+
+    m2Response = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'He gone'
+    })
+    m2 = m2Response.json()
+
+    requests.post(f"{url}message/pin/v1", json={
+        token: user1[token],
+        mID: m2[mID]
+    })
+    requests.delete(f"{url}message/remove/v1", json={
+        "token": user1[token],
+        "message_id": m2[mID]
+    })
+
+    e2Response = requests.post(f"{url}message/unpin/v1", json={
+        token: user1[token],
+        mID: m2[mID]
+    })
+    assert e2Response.status_code == 400
+
+#* Test that an InputError is raised when trying to unpin an unpinned message (error code 400)
+def test_message_unpin_unpinned_(user1, user2):
+    cResponse = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Vincent Le',
+        "is_public": True
+    })
+    channel = cResponse.json()
+
+    m1Response = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'Noted'
+    })
+    m1 = m1Response.json()
+
+    e1Response = requests.post(f"{url}message/unpin/v1", json={
+        token: user1[token],
+        mID: m1[mID]
+    })
+    assert e1Response.status_code == 400
+
+    dmResponse = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm = dmResponse.json()
+
+    m2Response = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'Noted'
+    })
+    m2 = m2Response.json()
+
+    e2Response = requests.post(f"{url}message/unpin/v1", json={
+        token: user1[token],
+        mID: m2[mID]
+    })
+    assert e2Response.status_code == 400
+
+#* Test that an AccessError is raised when trying to unpin a message inside a channel/DM that are not in (error code 403)
+def test_message_unpin_not_member(user1, user2, user3):
+    cResponse = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Should really',
+        "is_public": True
+    })
+    channel = cResponse.json()
+
+    m1Response = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'fixture these'
+    })
+    m1 = m1Response.json()
+
+    requests.post(f"{url}message/pin/v1", json={
+        token: user1[token],
+        mID: m1[mID]
+    })
+
+    e1Response = requests.post(f"{url}message/unpin/v1", json={
+        token: user2[token],
+        mID: m1[mID]
+    })
+    assert e1Response.status_code == 403
+
+    e2Response = requests.post(f"{url}message/unpin/v1", json={
+        token: user3[token],
+        mID: m1[mID]
+    })
+    assert e2Response.status_code == 403
+
+    dmResponse = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm = dmResponse.json()
+
+    m2Response = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'ASAP'
+    })
+    m2 = m2Response.json()
+
+    requests.post(f"{url}message/pin/v1", json={
+        token: user1[token],
+        mID: m2[mID]
+    })
+
+    e3Response = requests.post(f"{url}message/unpin/v1", json={
+        token: user3[token],
+        mID: m1[mID]
+    })
+    assert e3Response.status_code == 403
+
+#* Testing that for an invalid token, an AccessError is raised for 'pin' functions (error code 403)
+def test_message_pin_unauthorised_user(user1, invalid_token):
+    cResponse = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Iteration 3',
+        "is_public": True
+    })
+    channel = cResponse.json()
+
+    m1Response = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'Last one'
+    })
+    m1 = m1Response.json()
+
+    m2Response = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'and we outta here'
+    })
+    m2 = m2Response.json()
+
+    requests.post(f"{url}message/pin/v1", json={
+        token: user1[token],
+        mID: m2[mID]
+    })
+
+    e1Response = requests.post(f"{url}message/pin/v1", json={
+        token: invalid_token,
+        mID: m1[mID]
+    })
+    assert e1Response.status_code == 403
+
+    e1Response = requests.post(f"{url}message/unpin/v1", json={
+        token: invalid_token,
+        mID: m2[mID]
+    })
+    assert e1Response.status_code == 403
