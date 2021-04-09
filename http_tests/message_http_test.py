@@ -18,6 +18,7 @@ token   = 'token'
 dmID    = 'dm_id'
 handle  = 'handle_string'
 ownMems = 'owner_members'
+mID     = 'message_id'
 
 #* Fixture that clears and registers the first user
 @pytest.fixture
@@ -468,3 +469,220 @@ def test_http_senddm_multiple(user1, user2):
 
     message3 = response3.json()
     assert message3 == {'message_id': 3}
+
+#* Testing that a valid message is pinned for channel
+def test_http_message_pin_valid_channel(user1):
+    cResponse = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": "Midsummer Madness",
+        "is_public": True
+    })
+    channel = cResponse.json()
+
+    requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'Thumb it to summit'
+    })
+
+    mResponse = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'Pin it to win it'
+    })
+    target = mResponse.json()
+
+    npResponse = requests.get(f"{url}channel/messages/v2", params={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "start": 0
+    })
+    not_pinned = npResponse.json()
+    
+    mID_found = False
+    for message in not_pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+        assert message['is_pinned'] is False
+    assert mID_found is True
+    
+    requests.post(f"{url}message/pin/v1", json={
+        "token": user1[token],
+        mID: target[mID]
+    })
+    
+    pResponse = requests.get(f"{url}channel/messages/v2", params={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "start": 0
+    })
+    pinned = pResponse.json()
+
+    mID_found = False
+    for message in pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+            print(message)
+            assert message['is_pinned'] is True
+        else:
+            assert message['is_pinned'] is False
+    assert mID_found is True
+
+#* Testing that a valid message is pinned for DM
+def test_http_message_pin_valid_dm(user1, user2):
+
+    dmResponse = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm = dmResponse.json()
+
+    requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'Thumb it to summit'
+    })
+
+    mResponse = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'Pin it to win it'
+    })
+    target = mResponse.json()
+
+    npResponse = requests.get(f"{url}dm/messages/v1", params={
+        token: user2[token],
+        dmID: dm[dmID],
+        'start' : 0,
+    })
+    not_pinned = npResponse.json()
+
+    mID_found = False
+    for message in not_pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+        assert message['is_pinned'] is False
+    assert mID_found is True
+
+    requests.post(f"{url}message/pin/v1", json={
+        token: user1[token],
+        mID: target[mID]
+    })
+    
+    pResponse = requests.get(f"{url}dm/messages/v1", params={
+        token: user1[token],
+        dmID: dm[dmID],
+        "start": 0
+    })
+    pinned = pResponse.json()
+
+    mID_found = False
+    for message in pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+            print(message)
+            assert message['is_pinned'] is True
+        else:
+            assert message['is_pinned'] is False
+    assert mID_found is True
+
+#* Test that an InputError is raised when the message_id is invalid (error code 400)
+def test_http_message_pin_invalid_mID(user1):
+    invalid_mID = -1
+    pResponse = requests.post(f"{url}message/pin/v1", json={
+        token: user1[token],
+        mID: invalid_mID
+    })
+    assert pResponse.status_code == 400
+
+#* Test that an InputError is raised when trying to pin a pinned message
+def test_http_message_pin_pinned(user1, user2):
+    cResponse = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": "CJWY",
+        "is_public": True
+    })
+    channel = cResponse.json()
+
+    m1Response = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'We got a number one victory royale'
+    })
+    m1 = m1Response.json()
+
+    requests.post(f"{url}message/pin/v1", json={
+        token: user1[token],
+        mID: m1[mID]
+    })
+
+    e1Response = requests.post(f"{url}message/pin/v1", json={
+        token: user1[token],
+        mID: m1[mID]
+    })
+    assert e1Response.status_code == 400
+
+    dmResponse = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm = dmResponse.json()
+
+    m2Response = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'Yeah, Fortnite, we bout to get down'
+    })
+    m2 = m2Response.json()
+
+    requests.post(f"{url}message/pin/v1", json={
+        token: user1[token],
+        mID: m2[mID]
+    })
+
+    e2Response = requests.post(f"{url}message/pin/v1", json={
+        token: user1[token],
+        mID: m2[mID]
+    })
+    assert e2Response.status_code == 400
+
+    #* Test that an AccessError is raised when trying to pin a message inside a channel/DM that they are not in
+def test_http_message_pin_not_member(user1, user2, user3):
+    cResponse = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Still CJWY',
+        "is_public": True
+    })
+    channel = cResponse.json()
+    
+    m1Response = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'Ten kills on the board right now'
+    })
+    m1 = m1Response.json()
+
+    e1Response = requests.post(f"{url}message/pin/v1", json={
+        token: user3[token],
+        mID: m1[mID]
+    })
+    assert e1Response.status_code == 403
+
+    dmResponse = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm = dmResponse.json()
+
+    m2Response = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'Pin it to win it'
+    })
+    m2 = m2Response.json()
+
+    e2Response = requests.post(f"{url}message/pin/v1", json={
+        token: user3[token],
+        mID: m2[mID]
+    })
+    assert e2Response.status_code == 403
