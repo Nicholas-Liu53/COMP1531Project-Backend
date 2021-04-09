@@ -1,6 +1,6 @@
 # file to test functions in src/message.py
 import pytest
-from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_share_v1, message_senddm_v1
+from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_share_v1, message_senddm_v1, message_pin_v1, message_unpin_v1
 from src.error import InputError, AccessError
 import src.channel, src.channels, src.auth, src.dm
 from src.other import clear_v1, SECRET
@@ -346,3 +346,213 @@ def test_dm_unauthorised_user(user1, user2, invalid_token):
     
     with pytest.raises(AccessError):
         message_senddm_v1(invalid_token, dm1[dmID], '')
+
+#* Testing that a valid message is pinned for channel
+def test_message_pin_valid_channel(user1):
+    channel = src.channels.channels_create_v1(user1[token], 'Midsummer Madness', True)
+    message_send_v1(user1[token], channel[cID], 'Thumb it to summit')
+    target = message_send_v1(user1[token], channel[cID], 'Pin it to win it')
+    not_pinned = src.channel.channel_messages_v1(user1[token], channel[cID], 0)
+    
+    mID_found = False
+    for message in not_pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+        assert message['is_pinned'] is False
+    assert mID_found is True
+    
+    message_pin_v1(user1[token], target[mID])
+    pinned = src.channel.channel_messages_v1(user1[token], channel[cID], 0)
+    
+    mID_found = False
+    for message in pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+            assert message['is_pinned'] is True
+        else:
+            assert message['is_pinned'] is False
+    assert mID_found is True
+
+#* Testing that a valid message is pinned for DM
+def test_message_pin_valid_dm(user1, user2):
+    dm = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    message_senddm_v1(user1[token], dm[dmID], 'Thumb it to summit')
+    target = message_senddm_v1(user1[token], dm[dmID], 'Pin it to win it')
+    not_pinned = src.dm.dm_messages_v1(user1[token], dm[dmID], 0)
+    
+    mID_found = False
+    for message in not_pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+        assert message['is_pinned'] is False
+    assert mID_found is True
+    
+    message_pin_v1(user1[token], target[mID])
+    pinned = src.dm.dm_messages_v1(user1[token], dm[dmID], 0)
+    
+    mID_found = False
+    for message in pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+            assert message['is_pinned'] is True
+        else:
+            assert message['is_pinned'] is False
+    assert mID_found is True
+
+#* Test that an InputError is raised when the message_id is invalid
+def test_message_pin_invalid_mID(user1):
+    invalid_mID = -1
+    with pytest.raises(InputError):
+        message_pin_v1(user1[token], invalid_mID)
+
+#* Test that an InputError is raised when trying to pin a pinned message
+def test_message_pin_pinned(user1, user2):
+    channel = src.channels.channels_create_v1(user1[token], 'CJWY', True)
+    m1 = message_send_v1(user1[token], channel[cID], 'We got a number one victory royale')
+    message_pin_v1(user1[token], m1[mID])
+    
+    with pytest.raises(InputError):
+        message_pin_v1(user1[token], m1[mID])
+
+    dm = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    m2 = message_senddm_v1(user1[token], dm[dmID], 'Yeah, Fortnite, we bout to get down')
+    message_pin_v1(user1[token], m2[mID])
+
+    with pytest.raises(InputError):
+        message_pin_v1(user1[token], m2[mID])
+
+#* Test that an AccessError is raised when trying to pin a message inside a channel/DM that they are not in
+def test_message_pin_not_member(user1, user2, user3):
+    channel = src.channels.channels_create_v1(user1[token], 'Still CJWY', True)
+    m1 = message_send_v1(user1[token], channel[cID], 'Ten kills on the board right now')
+
+    with pytest.raises(AccessError):
+        message_pin_v1(user2[token], m1[mID])
+    
+    with pytest.raises(AccessError):
+        message_pin_v1(user3[token], m1[mID])
+
+    dm = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    m2 = message_senddm_v1(user1[token], dm[dmID], 'Just wiped out Tomato Town')
+
+    with pytest.raises(AccessError):
+        message_pin_v1(user3[token], m2[mID])
+
+#* Testing that a valid message is unpinned for channel
+def test_message_unpin_valid_channel(user1):
+    channel = src.channels.channels_create_v1(user1[token], 'Scissor Salad', True)
+    message_send_v1(user1[token], channel[cID], 'Le from downtown')
+    target = message_send_v1(user1[token], channel[cID], 'AIRBALL')
+    message_pin_v1(user1[token], target[mID])
+    pinned = src.channel.channel_messages_v1(user1[token], channel[cID], 0)
+    
+    mID_found = False
+    for message in pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+            assert message['is_pinned'] is True
+        else:
+            assert message['is_pinned'] is False
+    assert mID_found is True
+    
+    message_unpin_v1(user1[token], target[mID])
+    not_pinned = src.channel.channel_messages_v1(user1[token], channel[cID], 0)
+
+    mID_found = False
+    for message in not_pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+        assert message['is_pinned'] is False
+    assert mID_found is True
+
+
+#* Testing that a valid message is unpinned for DM
+def test_message_unpin_valid_dm(user1, user2):
+    dm = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    message_senddm_v1(user1[token], dm[dmID], 'Thumb it to summit')
+    target = message_senddm_v1(user1[token], dm[dmID], 'Pin it to win it')
+    message_pin_v1(user1[token], target[mID])
+    pinned = src.dm.dm_messages_v1(user1[token], dm[dmID], 0)
+    
+    mID_found = False
+    for message in pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+            assert message['is_pinned'] is True
+        else:
+            assert message['is_pinned'] is False
+    assert mID_found is True
+
+    message_unpin_v1(user1[token], target[mID])
+    not_pinned = src.dm.dm_messages_v1(user1[token], dm[dmID], 0)
+    
+    mID_found = False
+    for message in not_pinned['messages']:
+        if target[mID] == message[mID]:
+            mID_found = True
+        assert message['is_pinned'] is False
+    assert mID_found is True
+    
+#* Test that an InputError is raised when the message_id is invalid
+def test_message_unpin_invalid_mID(user1, user2):
+    channel = src.channels.channels_create_v1(user1[token], 'telepatia', True)
+    m1 = message_send_v1(user1[token], channel[cID], 'Harry Houdini')
+    message_pin_v1(user1[token], m1[mID])
+    message_remove_v1(user1[token], m1[mID])
+
+    with pytest.raises(InputError):
+        message_unpin_v1(user1[token], m1[mID])
+
+    dm = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    m2 = message_senddm_v1(user1[token], dm[dmID], 'He gone')
+    message_pin_v1(user1[token], m2[mID])
+    message_remove_v1(user1[token], m2[mID])
+
+    with pytest.raises(InputError):
+        message_unpin_v1(user1[token], m2[mID])
+
+#* Test that an InputError is raised when trying to unpin an unpinned message
+def test_message_unpin_unpinned_(user1, user2):
+    channel = src.channels.channels_create_v1(user1[token], 'Vincent Le', True)
+    m1 = message_send_v1(user1[token], channel[cID], 'Noted')
+    
+    with pytest.raises(InputError):
+        message_unpin_v1(user1[token], m1[mID])
+
+    dm = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    m2 = message_senddm_v1(user1[token], dm[dmID], 'Noted')
+
+    with pytest.raises(InputError):
+        message_unpin_v1(user1[token], m2[mID])
+
+#* Test that an AccessError is raised when trying to unpin a message inside a channel/DM that are not in
+def test_message_unpin_not_member(user1, user2, user3):
+    channel = src.channels.channels_create_v1(user1[token], 'Run outta', True)
+    m1 = message_send_v1(user1[token], channel[cID], 'messages')
+    message_pin_v1(user1[token], m1[mID])
+
+    with pytest.raises(AccessError):
+        message_unpin_v1(user2[token], m1[mID])
+    
+    with pytest.raises(AccessError):
+        message_unpin_v1(user3[token], m1[mID])
+
+    dm = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    m2 = message_senddm_v1(user1[token], dm[dmID], 'to type')
+    message_pin_v1(user1[token], m2[mID])
+
+    with pytest.raises(AccessError):
+        message_unpin_v1(user3[token], m2[mID])
+
+#* Testing that for an invalid token, an AccessError is raised for 'pin' functions
+def test_message_pin_unauthorised_user(user1, invalid_token):
+    channel = src.channels.channels_create_v1(user1[token], 'Last', True)
+    m1 = message_send_v1(user1[token], channel[cID], 'One')
+    m2 = message_send_v1(user1[token], channel[cID], 'Bois')
+    message_pin_v1(user1[token], m1[mID])
+    
+    with pytest.raises(AccessError):
+        message_unpin_v1(invalid_token, m1[mID])
+    
+    with pytest.raises(AccessError):
+        message_pin_v1(invalid_token, m2[mID])
