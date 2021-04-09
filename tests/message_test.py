@@ -368,6 +368,7 @@ def test_message_pin_valid_channel(user1):
     for message in pinned['messages']:
         if target[mID] == message[mID]:
             mID_found = True
+            print(message)
             assert message['is_pinned'] is True
         else:
             assert message['is_pinned'] is False
