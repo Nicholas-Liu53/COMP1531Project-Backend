@@ -345,7 +345,7 @@ def message_pin_v1(token, message_id):
         if message[mID] == message_id:
             if message[dmID] == -1 and auth_user_id not in get_channel(message[cID])[allMems]:
                 raise AccessError
-            elif message[dmID] != -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
+            elif message[cID] == -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
                 raise AccessError
             elif message['is_pinned']:
                 raise InputError
@@ -355,7 +355,7 @@ def message_pin_v1(token, message_id):
                     json.dump(data, FILE)
                 return {}
     raise InputError
-    
+
 def message_unpin_v1(token, message_id):
     auth_user_id, _ = decode(token)
     with open('data.json', 'r') as FILE:
@@ -365,7 +365,7 @@ def message_unpin_v1(token, message_id):
         if message[mID] == message_id:
             if message[dmID] == -1 and auth_user_id not in get_channel(message[cID])[allMems]:
                 raise AccessError
-            elif message[dmID] != -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
+            elif message[cID] == -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
                 raise AccessError
             elif not message['is_pinned']:
                 raise InputError
