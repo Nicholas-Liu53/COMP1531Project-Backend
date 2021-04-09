@@ -380,47 +380,50 @@ def message_unpin_v1(token, message_id):
 
 #Iteration 3    
 def message_react_v1(token, message_id, react_id):
-
-    #Input error 2: react_id not a valid react_id 
     #Assumption: Only react ID that is valid is 1 
-    if reactID != thumbsUp:
-        return InputError
-        
+    
     auth_user_id, _ = decode(token)
     with open('data.json', 'r') as FILE:
         data = json.load(FILE)
     
-    #Go through message_log 
+    if react_id != thumbsUp:
+        raise InputError
+        
     for message in data['messages_log']: 
         if message[mID] == message_id:
-            #Access error 1: Authorised user not a member of channel or DM that message is a part of 
-            #If cID is -1 then it is in a dm however if user not found within the dm then is access error and vice versa if dmID is -1 
-            if message[cID] == -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
+            if message[dmID] == -1 and auth_user_id not in get_channel(message[cID])[allMems]:
+                raise AccessError
+            elif message[cID] == -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
                 raise AccessError
             
-            elif message[dmID] == -1 and auth_user_id not in get_dm(message[cID])[allMems]:
+            print(auth_user_id)
+            print(message['reacts'])
+
+        
             #Input error 3: message with message_id already contains a react from user
-            elif auth_user_id in message['reacts']['u_ids']: 
+            if auth_user_id in message['reacts'][1]: 
+            
+                print("ACTIVE REACT HAS BEEN FOUND")
+            
                 raise InputError
 
-            #If gets to here means that all errors have been omitted and desired message to react to has been found, need to add dictionary to list of reacts 
-            
-            '''
-            
-            FIX UP PYLINT FOR NEXT PART TOO MANY IFS 
-            
-            
-            '''
-            
+   
+        '''
+        
+        FIX UP PYLINT FOR NEXT PART TOO MANY IFS 
+        
+        
+        '''
+            #Now can do success case: appending a react to list of dictionaries
+            #If can get to here that means the message has been found   
             #Case 1: First react to message 
-            if len(message['reacts']) = 0
+            if len(message['reacts']) == 0:
                 result = {
-                    'react_id': thumbsUp
-                    'u_ids': [auth_user_id]
-                
+                    'react_id': thumbsUp,
+                    'u_ids': [auth_user_id],
                 
                     #NOT TOO SURE WHAT IS THIS USER REACTED MEANS 
-                    'is_this_user_reacted': True
+                    'is_this_user_reacted': True,
                 
                 
                     }
@@ -428,19 +431,25 @@ def message_react_v1(token, message_id, react_id):
             
             #Case 2: Not first react
             #LIST FOR REACTS WILL ONLY BE 0 or 1, BECAUSE ONLY HAVE 1 REACT 
-            elif len(message['reacts']) = 1:
+            elif len(message['reacts']) == 1:
                 message[reacts]['u_ids'].append(auth_user_id)
+                
+            print("REACT HAS BEEN APPENDED")    
+            print(message['reacts'])
 
-    #If gets to end of messages log without finding message with same mID then mID not valid  
+        
+        #If gets to end of messages log without finding message with same mID then mID not valid  
         raise InputError
         
-        
-        
+
+'''
+is_this_user_reacted will depend on current auth_user_id, but when initially doing it set it to true and then when viewing notifs must loop through u_ids list 
+
+'''
+
+def message_unreact_v1():
+    pass
+
+
 
     
-    
-        
-        
-
-
-
