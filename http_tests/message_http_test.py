@@ -871,7 +871,7 @@ def test_http_test_message_unpin_invalid_mID(user1, user2):
     assert e2Response.status_code == 400
 
 #* Test that an InputError is raised when trying to unpin an unpinned message (error code 400)
-def test_message_unpin_unpinned_(user1, user2):
+def test_http_message_unpin_unpinned_(user1, user2):
     cResponse = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
         "name": 'Vincent Le',
@@ -912,7 +912,7 @@ def test_message_unpin_unpinned_(user1, user2):
     assert e2Response.status_code == 400
 
 #* Test that an AccessError is raised when trying to unpin a message inside a channel/DM that are not in (error code 403)
-def test_message_unpin_not_member(user1, user2, user3):
+def test_http_message_unpin_not_member(user1, user2, user3):
     cResponse = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
         "name": 'Should really',
@@ -969,7 +969,7 @@ def test_message_unpin_not_member(user1, user2, user3):
     assert e3Response.status_code == 403
 
 #* Testing that for an invalid token, an AccessError is raised for 'pin' functions (error code 403)
-def test_message_pin_unauthorised_user(user1, invalid_token):
+def test_http_message_pin_unauthorised_user(user1, invalid_token):
     cResponse = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
         "name": 'Iteration 3',
