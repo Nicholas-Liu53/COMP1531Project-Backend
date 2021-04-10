@@ -378,6 +378,8 @@ def message_unpin_v1(token, message_id):
                 return {}
     raise InputError
 
+
+
 #Iteration 3    
 def message_react_v1(token, message_id, react_id):
     #Assumption: Only react ID that is valid is 1 
@@ -389,35 +391,36 @@ def message_react_v1(token, message_id, react_id):
     if react_id != thumbsUp:
         raise InputError
         
+    message_found = False 
+    
     for message in data['messages_log']: 
         if message[mID] == message_id:
+            #AccessError if user not a part of channel or DM
             if message[dmID] == -1 and auth_user_id not in get_channel(message[cID])[allMems]:
                 raise AccessError
             elif message[cID] == -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
                 raise AccessError
-            
-            print(auth_user_id)
-            print(message['reacts'])
+            message_found = True 
 
+                        
+            '''
         
-            #Input error 3: message with message_id already contains a react from user
-            if auth_user_id in message['reacts'][1]: 
+            FIX UP PYLINT FOR NEXT PART TOO MANY IFS 
+        
+        
+            '''
             
-                print("ACTIVE REACT HAS BEEN FOUND")
-            
-                raise InputError
-
-   
-        '''
-        
-        FIX UP PYLINT FOR NEXT PART TOO MANY IFS 
-        
-        
-        '''
+            #Case 1: Reacting to a message which already has a react 
+            if len(message['reacts']) == 1:
+                for reacts in message['reacts']:
+                    if auth_user_id in reacts['u_ids']:
+                        raise InputError
+                message[reacts]['u_ids'].append(auth_user_id)
+                
             #Now can do success case: appending a react to list of dictionaries
             #If can get to here that means the message has been found   
             #Case 1: First react to message 
-            if len(message['reacts']) == 0:
+            elif len(message['reacts']) == 0:
                 result = {
                     'react_id': thumbsUp,
                     'u_ids': [auth_user_id],
@@ -428,19 +431,17 @@ def message_react_v1(token, message_id, react_id):
                 
                     }
                 message['reacts'].append(result)
-            
-            #Case 2: Not first react
-            #LIST FOR REACTS WILL ONLY BE 0 or 1, BECAUSE ONLY HAVE 1 REACT 
-            elif len(message['reacts']) == 1:
-                message[reacts]['u_ids'].append(auth_user_id)
-                
-            print("REACT HAS BEEN APPENDED")    
-            print(message['reacts'])
+           
 
         
         #If gets to end of messages log without finding message with same mID then mID not valid  
+    if message_found == False:
         raise InputError
+       
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)     
         
+    return {}
 
 '''
 is_this_user_reacted will depend on current auth_user_id, but when initially doing it set it to true and then when viewing notifs must loop through u_ids list 
