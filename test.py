@@ -8,3 +8,8 @@ f =5
 var = sum(a)/sum(d)
 
 print (var)
+
+
+testlist = ["hi"]
+
+print(testlist[-1])

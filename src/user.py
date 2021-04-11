@@ -190,7 +190,8 @@ def user_stats_v1(token):
     # noChannels = userstat["channels_joined"][-1]["num_channels_joined"]
     # noDms = userstat["dms_joined"][-1]["num_dms_joined"]
     # noMessages = userstat["messages_sent"][-1]["num_dms_joined"]
-    userInvolvement = (userstat["channels_joined"][-1]["num_channels_joined"],userstat["dms_joined"][-1]["num_dms_joined"],userstat["messages_sent"][-1]["num_dms_joined"])
+
+    userInvolvement = (userstat["channels_joined"][-1]["num_channels_joined"],userstat["dms_joined"][-1]["num_dms_joined"],userstat["messages_sent"][-1]["num_messages_sent"])
 
     dreamsNumbers = (len(data["channels"]), len(data["dms"]), len(data["messages_log"]))
 

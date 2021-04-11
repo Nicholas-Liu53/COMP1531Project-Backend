@@ -2,7 +2,7 @@ from src.error import AccessError, InputError
 from src.other import decode, get_channel, get_user
 import json
 import jwt
-
+from datetime import datetime
 AuID    = 'auth_user_id'
 uID     = 'u_id'
 cID     = 'channel_id'
@@ -126,6 +126,17 @@ def channels_create_v1(token, name, is_public):
             'all_members': [data['users'][j][uID]],
         }
     )
+
+    #* update analytics
+    now = datetime.now()
+    time_created = int(now.strftime("%s"))
+    channelsJoinedPrev = data["user_analytics"][f"{auth_user_id}"]['channels_joined'][-1]["num_channels_joined"]
+    data["user_analytics"][f"{auth_user_id}"]['channels_joined'].append(
+        {
+            "num_channels_joined": channelsJoinedPrev + 1,
+            "time_stamp": time_created
+        }
+    )   
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)

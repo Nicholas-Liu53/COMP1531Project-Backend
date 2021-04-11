@@ -4,7 +4,7 @@ import pytest
 from src.user import user_profile_v2, user_setname_v2, user_setemail_v2, user_sethandle_v2, users_all, user_stats_v1
 from src.auth import auth_register_v2, auth_login_v2
 from src.other import clear_v1, SECRET
-import src.channels, src.dm, src.message
+import src.channels, src.dm, src.message, src.channel
 import jwt
 
 AuID    = 'auth_user_id'
@@ -504,31 +504,58 @@ def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
             },]
         } 
     
-def test_users_stats_v1(user1,user2):
+def test_user_stats_v1(user1,user2):
     channel1 = src.channels.channels_create_v1(user1[tok], 'Channel1', True)
     src.channel.channel_join_v1(user2[tok], channel1[cID])
     src.dm.dm_create_v1(user1[tok], [user2[AuID]])
     src.message.message_send_v1(user1[tok], channel1[cID], "Sup")
+    
+    output = user_stats_v1(user1[tok])
+    assert len(output["user_stats"]['channels_joined']) == 2
+    assert len(output["user_stats"]['dms_joined']) == 2
+    assert len(output["user_stats"]['messages_sent']) == 2
+    assert output["user_stats"]["involvement_rate"] == 1
+
+
+    message = src.message.message_send_v1(user2[tok], channel1[cID], "hi")
+
+    output2 = user_stats_v1(user1[tok])
+
+    assert len(output2["user_stats"]['channels_joined']) == 2
+    assert len(output2["user_stats"]['dms_joined']) == 2
+    assert len(output2["user_stats"]['messages_sent']) == 2
+    assert output2["user_stats"]["involvement_rate"] == 0.75
+
+
+    src.message.message_remove_v1(user1[tok], message['message_id'])
+
+    output3 = user_stats_v1(user1[tok])
+
+    assert output3["user_stats"]["involvement_rate"] ==  0.6666666666666666
+
+    src.message.message_send_v1(user2[tok], channel1[cID], "hi")
+    src.message.message_send_v1(user2[tok], channel1[cID], "hi")
+
+    output4 = user_stats_v1(user1[tok])
+
+    
+    assert output4["user_stats"]["involvement_rate"] == 0.5
+
+def test_user_stats_v1(user1,user2, user3):
+    dm = src.dm.dm_create_v1(user1[tok], [user2[AuID]])
+    message = src.message.message_senddm_v1(user1[tok], dm[dmID], 'hello meng')
 
     output = user_stats_v1(user1[tok])
 
-    assert len(output['channels_joined']) == 2
-    assert len(output['dms_joined']) == 2
-    assert len(output['messages_sent']) == 2
-    assert output["involvement_rate"] == 2
+    assert len(output["user_stats"]['channels_joined']) == 1
+    assert len(output["user_stats"]['dms_joined']) == 2
+    assert len(output["user_stats"]['messages_sent']) == 2
+    assert output["user_stats"]["involvement_rate"] == 1
 
+    output = user_stats_v1(user2[tok])
 
-    src.message.message_send_v1(user2[tok], channel1[cID], "hi")
+    assert output["user_stats"]["involvement_rate"] == 0.5
 
-    output2 = user_stats_v1(user1[tok])
-    assert len(output2['channels_joined']) == 3
-    assert len(output2['dms_joined']) == 3
-    assert len(output2['messages_sent']) == 3
-    assert output2["involvement_rate"] == 0.75
-
-    src.message.message_send_v1(user2[tok], channel1[cID], "hi")
-    src.message.message_send_v1(user2[tok], channel1[cID], "hi")
-
-    output3 = user_stats_v1(user1[tok])
-    
-    assert output3["involvement_rate"] == 0.5
+    src.dm.dm_invite_v1(user1[tok], dm[dmID], user3[AuID])
+    output2 = user_stats_v1(user3[tok])
+    assert len(output2["user_stats"]['messages_sent']) == 1
