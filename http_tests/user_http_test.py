@@ -283,7 +283,7 @@ def test_http_users_stats_v1(user1, user2, user3, user4):
         "message": "Hi"
     }).json()
 
-    requests.delete(f"{url}message/remove/v1", json={'token' = user1[tok], 'message_id' = output4[mID]})
+    requests.delete(f"{url}message/remove/v1", json={'token': user1[tok], 'message_id': output4[mID]})
     
     output5 = requests.get(f"{url}users/stats/v1", params={'token': user1[tok]}).json()
 
