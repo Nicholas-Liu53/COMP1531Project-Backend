@@ -195,5 +195,5 @@ def test_http_users_all_valid(user1,user2):
             }]
     } 
     
-
+def test_http_users_stats_v1(user1, user2, user3, user4):
 

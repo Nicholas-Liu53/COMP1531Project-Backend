@@ -190,7 +190,7 @@ def users_stats_v1(token):
                 active_users[member] = 1
 
     for dm in data['dms']:
-        for member in channel['all_members']:
+        for member in dm['all_members']:
             if member not in active_users:
                 active_users[member] = 1
 

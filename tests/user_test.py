@@ -497,13 +497,12 @@ def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
     
 def test_users_stats_v1(user1, user2, user3, user4):
     channel1 = channels_create_v1(user1['token'], 'Channel1', True)
-    dm_create_v1(user1['token'], [user2['auth_user_id']])
     message_send_v1(user1['token'], channel1['channel_id'], "Heyyyy")
 
     output1 = users_stats_v1(user1['token'])
 
     assert len(output1['dreams_analytics']['channels_exist']) == 2
-    assert len(output1['dreams_analytics']['dms_exist']) == 2
+    assert len(output1['dreams_analytics']['dms_exist']) == 1
     assert len(output1['dreams_analytics']['messages_exist']) == 2
     assert output1['dreams_analytics']['utilization_rate'] == 0.25
 
@@ -515,7 +514,7 @@ def test_users_stats_v1(user1, user2, user3, user4):
     output2 = users_stats_v1(user1['token'])
 
     assert len(output2['dreams_analytics']['channels_exist']) == 3
-    assert len(output2['dreams_analytics']['dms_exist']) == 3
+    assert len(output2['dreams_analytics']['dms_exist']) == 2
     assert len(output2['dreams_analytics']['messages_exist']) == 3
     assert output2['dreams_analytics']['utilization_rate'] == 0.5
 
@@ -525,7 +524,7 @@ def test_users_stats_v1(user1, user2, user3, user4):
     output3 = users_stats_v1(user1['token'])
 
     assert len(output3['dreams_analytics']['channels_exist']) == 3
-    assert len(output3['dreams_analytics']['dms_exist']) == 3
+    assert len(output3['dreams_analytics']['dms_exist']) == 2
     assert len(output3['dreams_analytics']['messages_exist']) == 3
     assert output3['dreams_analytics']['utilization_rate'] == 0.75
 
@@ -533,12 +532,19 @@ def test_users_stats_v1(user1, user2, user3, user4):
     message_remove_v1(user1['token'], output4['message_id'])
 
     output5 = users_stats_v1(user1['token'])
-    
+
     assert len(output5['dreams_analytics']['channels_exist']) == 3
-    assert len(output5['dreams_analytics']['dms_exist']) == 3
+    assert len(output5['dreams_analytics']['dms_exist']) == 2
     assert len(output5['dreams_analytics']['messages_exist']) == 5
     assert output5['dreams_analytics']['utilization_rate'] == 0.75
 
+    dm_create_v1(user4['token'], [user1['auth_user_id']])
+    output6 = users_stats_v1(user1['token'])
+
+    assert len(output6['dreams_analytics']['channels_exist']) == 3
+    assert len(output6['dreams_analytics']['dms_exist']) == 3
+    assert len(output6['dreams_analytics']['messages_exist']) == 5
+    assert output6['dreams_analytics']['utilization_rate'] == 1
 
 
     
