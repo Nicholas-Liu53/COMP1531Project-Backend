@@ -4,8 +4,6 @@ from src.other import decode, get_user, get_dm, message_count, get_user_from_han
 import src.auth
 import json
 import jwt
-from datetime import datetime
-
 
 APP = Flask(__name__)
 
@@ -111,33 +109,16 @@ def dm_create_v1(token, u_ids):
         dm_ID = data['dms'][-1][dmID] + 1
 
     dmUsers = [creator_id]
-
-
-
     for user_id in u_ids:
         dmUsers.append(user_id)
-
-    now = datetime.now()
-    time_created = int(now.strftime("%s"))
 
     handles = []
     for user in dmUsers:
         
         userInfo = get_user(user)
         handles.append(userInfo[handle])
-        handles.sort()
-        dm_name = ', '.join(handles)
-
-        #* update analytics
-
-        dmJoinedPrev = data["user_analytics"][f"{user}"]['dms_joined'][-1]["num_dms_joined"]
-        data["user_analytics"][f"{user}"]['dms_joined'].append(
-            {
-                "num_dms_joined": dmJoinedPrev + 1,
-                "time_stamp": time_created
-            }
-        )  
-
+    handles.sort()
+    dm_name = ', '.join(handles)
 
     for user_id in u_ids:
         check_removed(user_id)
@@ -149,19 +130,11 @@ def dm_create_v1(token, u_ids):
         'all_members': dmUsers,
     })
 
-    updated_num_dms = data['dreams_analytics']['dms_exist'][-1]['num_dms_exist'] + 1
-    data['dreams_analytics']['dms_exist'].append({
-        'num_dms_exist': updated_num_dms,
-        'time_stamp': int(datetime.now().strftime("%s"))
-    })
-
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
-    
 
     for user in u_ids:
         push_added_notifications(creator_id, user, -1, dm_ID)
-
 
     return {
         'dm_id': dm_ID,
@@ -203,30 +176,10 @@ def dm_remove_v1(token, dm_id):
 
     #Now that errors are fixed, can remove the existing DM with dm_id
     #Loop through dm_list, once dm_id is found remove it
-
-    now = datetime.now()
-    time_created = int(now.strftime("%s"))
-
     for objects in data['dms']:
         if objects['dm_id'] == dm_id:
-            dmMems = get_dm(dm_id)[allMems]
-            for user_id in dmMems:
-                dmJoinedPrev = data["user_analytics"][f"{user_id}"]['dms_joined'][-1]["num_dms_joined"]
-                data["user_analytics"][f"{user_id}"]['dms_joined'].append(
-                    {
-                    "num_dms_joined": dmJoinedPrev - 1,
-                    "time_stamp": time_created
-                    }
-                )  
-            
             data['dms'].remove(objects)
 
-    updated_num_dms = data['dreams_analytics']['dms_exist'][-1]['num_dms_exist'] - 1
-    data['dreams_analytics']['dms_exist'].append({
-        'num_dms_exist': updated_num_dms,
-        'time_stamp': int(datetime.now().strftime("%s"))
-    })
-    
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
 
@@ -256,9 +209,6 @@ def dm_invite_v1(token, dm_id, u_id):
     check_removed(u_id)
     auth_user_ID, _ = decode(token)
     input_error = True
-
-    now = datetime.now()
-    time_created = int(now.strftime("%s"))
     for items in data['dms']:
         #Loop for input errors:
         if dm_id == items['dm_id']:
@@ -268,16 +218,6 @@ def dm_invite_v1(token, dm_id, u_id):
             else:
                 #If no errors found can add dm to list
                 items['all_members'].append(u_id) if u_id not in items["all_members"] else None
-                
-                #* update analytics
-
-                dmJoinedPrev = data["user_analytics"][f"{u_id}"]['dms_joined'][-1]["num_dms_joined"]
-                data["user_analytics"][f"{u_id}"]['dms_joined'].append(
-                    {
-                    "num_dms_joined": dmJoinedPrev + 1,
-                    "time_stamp": time_created
-                    }
-                )  
                 with open('data.json', 'w') as FILE:
                     json.dump(data, FILE)
                 push_added_notifications(auth_user_ID, u_id, -1, dm_id)
@@ -308,9 +248,6 @@ def dm_leave_v1(token, dm_id):
     auth_user_ID, _ = decode(token)
     input_error = True
     data = json.load(open('data.json', 'r'))
-
-    now = datetime.now()
-    time_created = int(now.strftime("%s"))
     for items in data['dms']:
         #Loop for input errors:
         if dm_id == items['dm_id']:
@@ -322,16 +259,6 @@ def dm_leave_v1(token, dm_id):
             else:
                 #If error not found remove dm from list 
                 items['all_members'].remove(auth_user_ID)
-
-                #* user analytics
-
-                dmJoinedPrev = data["user_analytics"][f"{auth_user_ID}"]['dms_joined'][-1]["num_dms_joined"]
-                data["user_analytics"][f"{auth_user_ID}"]['dms_joined'].append(
-                    {
-                    "num_dms_joined": dmJoinedPrev - 1,
-                    "time_stamp": time_created
-                    }
-                )  
 
     if input_error:
         raise InputError
