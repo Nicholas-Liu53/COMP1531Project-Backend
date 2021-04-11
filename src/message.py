@@ -379,26 +379,26 @@ def message_unpin_v1(token, message_id):
 
 def message_sendlater_v1(token, channel_id, message, time_sent):
     timeTillSend = time_sent - int(datetime.now().replace(tzinfo=timezone.utc).timestamp())
-    threading.Timer(timeTillSend, message_send_v1).start()
+    threading.Timer(timeTillSend, message_send_v1, args=(token, channel_id, message)).start()
     with open('data.json', 'r') as FILE:
         data = json.load(FILE)
-    # if len(data['messages_log']) == 0:
-    #     return {
-    #         'message_id': 0,
-    #     }
+    if len(data['messages_log']) == 0:
+        return {
+            'message_id': 0,
+        }
     return {
         'message_id': data['messages_log'][-1][mID],
     }
 
 def message_sendlaterdm_v1(token, dm_id, message, time_sent):
     timeTillSend = time_sent - int(datetime.now().replace(tzinfo=timezone.utc).timestamp())
-    threading.Timer(timeTillSend, message_senddm_v1).start()
+    threading.Timer(timeTillSend, message_senddm_v1, args=(token, dm_id, message)).start()
     with open('data.json', 'r') as FILE:
         data = json.load(FILE)
-    # if len(data['messages_log']) == 0:
-    #     return {
-    #         'message_id': 0,
-    #     }
+    if len(data['messages_log']) == 0:
+        return {
+            'message_id': 0,
+        }
     return {
         'message_id': data['messages_log'][-1][mID],
     }
