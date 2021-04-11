@@ -8,6 +8,20 @@ from src.auth import auth_register_v2, auth_login_v2
 from src.other import clear_v1, SECRET
 from jwt import encode
 
+AuID    = 'auth_user_id'
+uID     = 'u_id'
+cID     = 'channel_id'
+allMems = 'all_members'
+Name    = 'name'
+dmName  = 'dm_name'
+fName   = 'name_first'
+lName   = 'name_last'
+chans   = 'channels'
+tok   = 'token'
+dmID    = 'dm_id'
+handle  = 'handle_str'
+ownMems = 'owner_members'
+mID     = 'message_id'
 
 @pytest.fixture
 def user1():
@@ -195,5 +209,56 @@ def test_http_users_all_valid(user1,user2):
             }]
     } 
     
+def test_http_user_stat(user1,user2):
+    responseChannel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[tok],
+        "name": 'Channel1',
+        "is_public": True}
+    )
+    channel1 = responseChannel.json()
+    requests.post(f"{url}channel/join/v2", json={
+        "token": user2[tok],
+        "channel_id": channel1[cID]
+    })
 
+    requests.post(f"{url}dm/create/v1", json={
+        "token": user1[tok],
+        "u_ids": [user2[AuID]]
+    })
+
+    requests.post(f"{url}message/send/v2", json={
+        "token": user1[tok],
+        "channel_id": channel1[cID],
+        "message": "Sup?"
+    })
+    
+    output = requests.get(f"{url}user/stats/v1", params={'token': user1[tok]}).json()
+
+    assert len(output["user_stats"]['channels_joined']) == 2
+    assert len(output["user_stats"]['dms_joined']) == 2
+    assert len(output["user_stats"]['messages_sent']) == 2
+    assert output["user_stats"]["involvement_rate"] == 1
+
+    message = requests.post(f"{url}message/send/v2", json={
+        "token": user2[tok],
+        "channel_id": channel1[cID],
+        "message": "hi"
+    }).json()
+
+    output2 = requests.get(f"{url}user/stats/v1", params={'token': user1[tok]}).json()
+
+    assert len(output2["user_stats"]['channels_joined']) == 2
+    assert len(output2["user_stats"]['dms_joined']) == 2
+    assert len(output2["user_stats"]['messages_sent']) == 2
+    assert output2["user_stats"]["involvement_rate"] == 0.75
+
+
+    requests.delete(f"{url}message/remove/v1", json={
+        "token": user1[tok],
+        "message_id": message[mID]
+    })
+
+    output3 = requests.get(f"{url}user/stats/v1", params={'token': user1[tok]}).json()
+
+    assert output3["user_stats"]["involvement_rate"] ==  0.6666666666666666
 
