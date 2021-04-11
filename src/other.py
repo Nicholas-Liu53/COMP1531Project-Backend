@@ -35,14 +35,7 @@ def clear_v1():
             'channels': [],
             'dms': [],
             'messages_log': [],
-            'notifs': {},
-            'user_stats': {},
-            'dream_stats': {
-                'channels': 0,
-                'dms': 0,
-                'messages': 0,
-                'utilisation': 0
-            }
+            'notifs': {}
         }, FILE)
 
 def search_v1(token, query_str):
