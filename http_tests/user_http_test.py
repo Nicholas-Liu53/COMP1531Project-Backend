@@ -45,6 +45,28 @@ def user2():
     })
     return response.json()
 
+#* Fixture that registers a third user
+@pytest.fixture
+def user3():
+    response = requests.post(f"{url}auth/register/v2", json={
+        "email": "hilarybently@gmail.com",
+        "password": "1234567",
+        "name_first": "hilary",
+        "name_last": "bently"
+    })
+    return response.json()
+
+#* Fixture that registers a fourth user
+@pytest.fixture
+def user4():
+    response = requests.post(f"{url}auth/register/v2", json={
+        "email": "kentonwatkins@gmail.com",
+        "password": "1234567",
+        "name_first": "kenton",
+        "name_last": "watkins"
+    })
+    return response.json()
+
 # tests the case when the provided token contains an invalid user id    
 def test_http_user_profile_invalid_uid(user1):
     requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
