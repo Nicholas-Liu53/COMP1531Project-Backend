@@ -8,6 +8,20 @@ from src.auth import auth_register_v2, auth_login_v2
 from src.other import clear_v1, SECRET
 from jwt import encode
 
+AuID    = 'auth_user_id'
+uID     = 'u_id'
+cID     = 'channel_id'
+allMems = 'all_members'
+Name    = 'name'
+dmName  = 'dm_name'
+fName   = 'name_first'
+lName   = 'name_last'
+chans   = 'channels'
+tok   = 'token'
+dmID    = 'dm_id'
+handle  = 'handle_str'
+ownMems = 'owner_members'
+mID     = 'message_id'
 
 @pytest.fixture
 def user1():
@@ -196,4 +210,97 @@ def test_http_users_all_valid(user1,user2):
     } 
     
 def test_http_users_stats_v1(user1, user2, user3, user4):
+    responseChannel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[tok],
+        "name": 'Channel1',
+        "is_public": True}
+    )
+    channel1 = responseChannel.json()
+
+    requests.post(f"{url}message/send/v2", json={
+        "token": user1[tok],
+        "channel_id": channel1[cID],
+        "message": "Heyyyy"
+    })
+
+    output1 = requests.get(f"{url}users/stats/v1", params={'token': user1[tok]}).json()
+
+    assert len(output1['dreams_analytics']['channels_exist']) == 2
+    assert len(output1['dreams_analytics']['dms_exist']) == 1
+    assert len(output1['dreams_analytics']['messages_exist']) == 2
+    assert output1['dreams_analytics']['utilization_rate'] == 0.25
+
+    requests.post(f"{url}channel/join/v2", json={
+        "token": user2[tok],
+        "channel_id": channel1[cID]
+    })
+
+    responseChannel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[tok],
+        "name": 'Channel2',
+        "is_public": True}
+    )
+    channel2 = responseChannel.json()
+
+    requests.post(f"{url}dm/create/v1", json={
+        "token": user1[tok],
+        "u_ids": [user2[AuID]]
+    })
+
+    requests.post(f"{url}message/send/v2", json={
+        "token": user1[tok],
+        "channel_id": channel1[cID],
+        "message": "Yo Wassup"
+    })
+
+    output2 = requests.get(f"{url}users/stats/v1", params={'token': user1[tok]}).json()
+
+    assert len(output2['dreams_analytics']['channels_exist']) == 3
+    assert len(output2['dreams_analytics']['dms_exist']) == 2
+    assert len(output2['dreams_analytics']['messages_exist']) == 3
+    assert output2['dreams_analytics']['utilization_rate'] == 0.5
+
+    requests.post(f"{url}channel/join/v2", json={
+        "token": user1[tok],
+        "channel_id": channel2[cID]
+    })
+
+    requests.post(f"{url}channel/join/v2", json={
+        "token": user3[tok],
+        "channel_id": channel1[cID]
+    })
+    
+    output3 = requests.get(f"{url}users/stats/v1", params={'token': user1[tok]}).json()
+
+    assert len(output3['dreams_analytics']['channels_exist']) == 3
+    assert len(output3['dreams_analytics']['dms_exist']) == 2
+    assert len(output3['dreams_analytics']['messages_exist']) == 3
+    assert output3['dreams_analytics']['utilization_rate'] == 0.75
+
+    output4 = requests.post(f"{url}message/send/v2", json={
+        "token": user1[tok],
+        "channel_id": channel1[cID],
+        "message": "Hi"
+    }).json()
+
+    requests.delete(f"{url}message/remove/v1", json={'token' = user1[tok], 'message_id' = output4[mID]})
+    
+    output5 = requests.get(f"{url}users/stats/v1", params={'token': user1[tok]}).json()
+
+    assert len(output5['dreams_analytics']['channels_exist']) == 3
+    assert len(output5['dreams_analytics']['dms_exist']) == 2
+    assert len(output5['dreams_analytics']['messages_exist']) == 5
+    assert output5['dreams_analytics']['utilization_rate'] == 0.75
+
+    requests.post(f"{url}dm/create/v1", json={
+        "token": user4[tok],
+        "u_ids": [user1[AuID]]
+    })
+
+    output6 = requests.get(f"{url}users/stats/v1", params={'token': user1[tok]}).json()
+
+    assert len(output6['dreams_analytics']['channels_exist']) == 3
+    assert len(output6['dreams_analytics']['dms_exist']) == 3
+    assert len(output6['dreams_analytics']['messages_exist']) == 5
+    assert output6['dreams_analytics']['utilization_rate'] == 1
 
