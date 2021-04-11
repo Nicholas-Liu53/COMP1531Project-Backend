@@ -1,9 +1,12 @@
+from datetime import datetime
 from src.error import AccessError, InputError
 import re
 from jwt import encode, decode
 import json
 from src.other import SECRET
 import hashlib
+from datetime import datetime
+from src.user import users_stats_v1
 
 def auth_register_v1(email, password, name_first, name_last):
     """ With the inputted data (email, password, name_first, name_last), checks whether the format of the data are valid. 
@@ -104,6 +107,27 @@ def auth_register_v1(email, password, name_first, name_last):
     permissionID = 2
     if len(data['users']) == 0:
         permissionID = 1
+        data['dreams_analytics'] = {
+            'channels_exist': [
+                {
+                    'num_channels_exist': 0,
+                    'time_stamp': int(datetime.now().strftime("%s"))
+                },
+            ],
+            'dms_exist': [
+                {
+                    'num_dms_exist': 0,
+                    'time_stamp': int(datetime.now().strftime("%s"))
+                },
+            ],
+            'messages_exist': [
+                {
+                    'num_messages_exist': 0,
+                    'time_stamp': int(datetime.now().strftime("%s"))
+                },
+            ],
+        }
+
 
     #* appending the user dictionary into the users list
     data['users'].append({
@@ -119,6 +143,30 @@ def auth_register_v1(email, password, name_first, name_last):
 
     #* create an empty notification list
     data['notifs'][f"{user_id}"] = [] 
+
+    now = datetime.now()
+    time_created = int(now.strftime("%s"))
+    #* create an empty user_analytics
+    data['user_analytics'][f"{user_id}"] = {
+        "channels_joined" : [
+            {
+                "num_channels_joined" : 0,
+                "time_stamp" : time_created
+            }
+        ],
+        "dms_joined" : [
+            {
+                "num_dms_joined" : 0,
+                "time_stamp" : time_created
+            }
+        ],
+        "messages_sent" : [
+            {
+                "num_messages_sent" : 0,
+                "time_stamp" : time_created
+            }
+        ]
+    }
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
