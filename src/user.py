@@ -188,21 +188,20 @@ def users_stats_v1(token):
         for member in channel['all_members']:
             if member not in active_users:
                 active_users[member] = 1
-    
-    for dm in data['dm']:
+
+    for dm in data['dms']:
         for member in channel['all_members']:
             if member not in active_users:
                 active_users[member] = 1
 
     num_active_users = len(active_users)
     num_users = len(data['users'])
-
     utilization_rate = num_active_users / num_users
     dream_stats = data['dreams_analytics'].copy()
     dream_stats.update({'utilization_rate': utilization_rate})
     
     return { 
-        "dream_stats": dream_stats
+        "dreams_analytics": dream_stats
     }
     
     

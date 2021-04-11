@@ -4,6 +4,8 @@ from src.other import decode, get_user, get_dm, message_count, get_user_from_han
 import src.auth
 import json
 import jwt
+from datetime import datetime
+from src.user import users_stats_v1
 
 APP = Flask(__name__)
 
@@ -130,6 +132,12 @@ def dm_create_v1(token, u_ids):
         'all_members': dmUsers,
     })
 
+    updated_num_dms = data['dreams_analytics']['dms_exist'][-1]['num_dms_exist'] + 1
+    data['dreams_analytics']['dms_exist'].append({
+        'num_dms_exist': updated_num_dms,
+        'time_stamp': int(datetime.now().strftime("%s"))
+    })
+
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
 
@@ -179,6 +187,12 @@ def dm_remove_v1(token, dm_id):
     for objects in data['dms']:
         if objects['dm_id'] == dm_id:
             data['dms'].remove(objects)
+
+    updated_num_dms = data['dreams_analytics']['dms_exist'][-1]['num_dms_exist'] - 1
+    data['dreams_analytics']['dms_exist'].append({
+        'num_dms_exist': updated_num_dms,
+        'time_stamp': int(datetime.now().strftime("%s"))
+    })
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)

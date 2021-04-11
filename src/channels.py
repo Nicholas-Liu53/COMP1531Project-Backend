@@ -2,6 +2,8 @@ from src.error import AccessError, InputError
 from src.other import decode, get_channel, get_user
 import json
 import jwt
+from datetime import datetime
+from src.user import users_stats_v1
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
@@ -126,6 +128,12 @@ def channels_create_v1(token, name, is_public):
             'all_members': [data['users'][j][uID]],
         }
     )
+
+    updated_num_channels = data['dreams_analytics']['channels_exist'][-1]['num_channels_exist'] + 1
+    data['dreams_analytics']['channels_exist'].append({
+        'num_channels_exist': updated_num_channels,
+        'time_stamp': int(datetime.now().strftime("%s"))
+    })
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)

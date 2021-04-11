@@ -5,6 +5,7 @@ import json
 from src.other import SECRET
 import hashlib
 from datetime import datetime
+from src.user import users_stats_v1
 
 def auth_register_v1(email, password, name_first, name_last):
     """ With the inputted data (email, password, name_first, name_last), checks whether the format of the data are valid. 
@@ -116,7 +117,7 @@ def auth_register_v1(email, password, name_first, name_last):
                 {
                     'num_dms_exist': 0,
                     'time_stamp': int(datetime.now().strftime("%s"))
-                }
+                },
             ],
             'messages_exist': [
                 {
