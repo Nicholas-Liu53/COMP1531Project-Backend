@@ -435,7 +435,6 @@ def message_react_v1(token, message_id, react_id):
        
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)     
-        
     return {}
 
 '''
@@ -452,62 +451,25 @@ def message_unreact_v1(token, message_id, react_id):
     
     if react_id != thumbsUp:
         raise InputError
-        
-    message_found = False 
-    
+            
     for message in data['messages_log']: 
         if message[mID] == message_id:
             #AccessError if user not a part of channel or DM
             if message[dmID] == -1 and auth_user_id not in get_channel(message[cID])[allMems]:
                 raise AccessError
             elif message[cID] == -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
-                raise AccessError
-            message_found = True 
+                raise AccessError           
+           
+            #For unreact, delete the list with same react_id, if its not found then the message doesn't have a react and thus raises InputError
+            for react in range(len(message['reacts'])):
+                if message['reacts'][react]['react_id'] == react_id:
+                    message['reacts'].pop(react)
+                    with open('data.json', 'w') as FILE:
+                        json.dump(data, FILE)     
+                    return {} 
             
-
-            '''
-        
-            FIX UP PYLINT FOR NEXT PART TOO MANY IFS 
-        
-        
-            '''
+    #If gets to here means message not found or react not found 
+    raise InputError
             
-            
-            
-#FIX UP THIS NEXT PART FOR UNREACT
-            
-            
-            
-'''            
-            #Case 1: First react for that message 
-            if len(message['reacts']) == 0:
-                result = {
-                    'react_id': react_id,
-                    'u_ids': [auth_user_id],
-                
-                    #NOT TOO SURE WHAT IS THIS USER REACTED MEANS 
-                    'is_this_user_reacted': True,
-                
-                    }
-                message['reacts'].append(result)
-            #Case 2: Reacting to a message which already has a react 
-            elif len(message['reacts']) == 1:
-                for current_react in message['reacts']:
-                    if current_react[rID] == react_id: 
-                        if auth_user_id in current_react['u_ids']:
-                            raise InputError
-                        else:
-                            current_react['u_ids'].append(auth_user_id)
-
-
-        #If gets to end of messages log without finding message with same mID then mID not valid  
-    if message_found == False:
-        raise InputError
-       
-    with open('data.json', 'w') as FILE:
-        json.dump(data, FILE)     
-        
-    return {}
-
 
     
