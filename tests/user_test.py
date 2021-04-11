@@ -1,11 +1,24 @@
 # File to test functions in src/user.py
 from src.error import AccessError, InputError
 import pytest
-from src.user import user_profile_v2, user_setname_v2, user_setemail_v2, user_sethandle_v2, users_all
+from src.user import user_profile_v2, user_setname_v2, user_setemail_v2, user_sethandle_v2, users_all, user_stats_v1
 from src.auth import auth_register_v2, auth_login_v2
 from src.other import clear_v1, SECRET
+import src.channels, src.dm, src.message
 import jwt
 
+AuID    = 'auth_user_id'
+uID     = 'u_id'
+cID     = 'channel_id'
+chans   = 'channels'
+allMems = 'all_members'
+ownMems = 'owner_members'
+fName   = 'name_first'
+lName   = 'name_last'
+tok   = 'token'
+mID     = 'message_id'
+dmID    = 'dm_id'
+Name    = 'name'
 
 @pytest.fixture
 def invalid_token():
@@ -491,4 +504,31 @@ def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
             },]
         } 
     
+def test_users_stats_v1(user1,user2):
+    channel1 = src.channels.channels_create_v1(user1[tok], 'Channel1', True)
+    src.channel.channel_join_v1(user2[tok], channel1[cID])
+    src.dm.dm_create_v1(user1[tok], [user2[AuID]])
+    src.message.message_send_v1(user1[tok], channel1[cID], "Sup")
 
+    output = user_stats_v1(user1[tok])
+
+    assert len(output['channels_joined']) == 2
+    assert len(output['dms_joined']) == 2
+    assert len(output['messages_sent']) == 2
+    assert output["involvement_rate"] == 2
+
+
+    src.message.message_send_v1(user2[tok], channel1[cID], "hi")
+
+    output2 = user_stats_v1(user1[tok])
+    assert len(output2['channels_joined']) == 3
+    assert len(output2['dms_joined']) == 3
+    assert len(output2['messages_sent']) == 3
+    assert output2["involvement_rate"] == 0.75
+
+    src.message.message_send_v1(user2[tok], channel1[cID], "hi")
+    src.message.message_send_v1(user2[tok], channel1[cID], "hi")
+
+    output3 = user_stats_v1(user1[tok])
+    
+    assert output3["involvement_rate"] == 0.5
