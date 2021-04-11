@@ -4,6 +4,7 @@ from jwt import encode, decode
 import json
 from src.other import SECRET
 import hashlib
+from datetime import datetime
 
 def auth_register_v1(email, password, name_first, name_last):
     """ With the inputted data (email, password, name_first, name_last), checks whether the format of the data are valid. 
@@ -104,6 +105,27 @@ def auth_register_v1(email, password, name_first, name_last):
     permissionID = 2
     if len(data['users']) == 0:
         permissionID = 1
+        data['dreams_analytics'] = {
+            'channels_exist': [
+                {
+                    'num_channels_exist': 0,
+                    'time_stamp': int(datetime.now().strftime("%s"))
+                },
+            ],
+            'dms_exist': [
+                {
+                    'num_dms_exist': 0,
+                    'time_stamp': int(datetime.now().strftime("%s"))
+                }
+            ],
+            'messages_exist': [
+                {
+                    'num_messages_exist': 0,
+                    'time_stamp': int(datetime.now().strftime("%s"))
+                },
+            ],
+        }
+
 
     #* appending the user dictionary into the users list
     data['users'].append({
