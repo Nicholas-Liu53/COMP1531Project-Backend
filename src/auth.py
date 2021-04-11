@@ -1,3 +1,4 @@
+from datetime import datetime
 from src.error import AccessError, InputError
 import re
 from jwt import encode, decode
@@ -142,6 +143,30 @@ def auth_register_v1(email, password, name_first, name_last):
 
     #* create an empty notification list
     data['notifs'][f"{user_id}"] = [] 
+
+    now = datetime.now()
+    time_created = int(now.strftime("%s"))
+    #* create an empty user_analytics
+    data['user_analytics'][f"{user_id}"] = {
+        "channels_joined" : [
+            {
+                "num_channels_joined" : 0,
+                "time_stamp" : time_created
+            }
+        ],
+        "dms_joined" : [
+            {
+                "num_dms_joined" : 0,
+                "time_stamp" : time_created
+            }
+        ],
+        "messages_sent" : [
+            {
+                "num_messages_sent" : 0,
+                "time_stamp" : time_created
+            }
+        ]
+    }
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)

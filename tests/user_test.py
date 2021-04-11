@@ -1,15 +1,27 @@
 # File to test functions in src/user.py
 from src.error import AccessError, InputError
 import pytest
-from src.user import user_profile_v2, user_setname_v2, user_setemail_v2, user_sethandle_v2, users_all, users_stats_v1
+from src.user import user_profile_v2, user_setname_v2, user_setemail_v2, user_sethandle_v2, users_all, users_stats_v1, user_stats_v1
 from src.auth import auth_register_v2, auth_login_v2
 from src.other import clear_v1, SECRET
 from src.channel import channel_join_v1
 from src.channels import channels_create_v1
-from src.dm import dm_create_v1
-from src.message import message_send_v1, message_remove_v1
+from src.dm import dm_create_v1, dm_invite_v1
+from src.message import message_send_v1, message_remove_v1, message_senddm_v1
 import jwt
 
+AuID    = 'auth_user_id'
+uID     = 'u_id'
+cID     = 'channel_id'
+chans   = 'channels'
+allMems = 'all_members'
+ownMems = 'owner_members'
+fName   = 'name_first'
+lName   = 'name_last'
+tok   = 'token'
+mID     = 'message_id'
+dmID    = 'dm_id'
+Name    = 'name'
 
 @pytest.fixture
 def invalid_token():
@@ -546,15 +558,58 @@ def test_users_stats_v1(user1, user2, user3, user4):
     assert len(output6['dreams_analytics']['messages_exist']) == 5
     assert output6['dreams_analytics']['utilization_rate'] == 1
 
+def test_user_stats_v1(user1,user2):
+    channel1 = channels_create_v1(user1[tok], 'Channel1', True)
+    channel_join_v1(user2[tok], channel1[cID])
+    dm_create_v1(user1[tok], [user2[AuID]])
+    message_send_v1(user1[tok], channel1[cID], "Sup")
+    
+    output = user_stats_v1(user1[tok])
+    assert len(output["user_stats"]['channels_joined']) == 2
+    assert len(output["user_stats"]['dms_joined']) == 2
+    assert len(output["user_stats"]['messages_sent']) == 2
+    assert output["user_stats"]["involvement_rate"] == 1
+
+
+    message = message_send_v1(user2[tok], channel1[cID], "hi")
+
+    output2 = user_stats_v1(user1[tok])
+
+    assert len(output2["user_stats"]['channels_joined']) == 2
+    assert len(output2["user_stats"]['dms_joined']) == 2
+    assert len(output2["user_stats"]['messages_sent']) == 2
+    assert output2["user_stats"]["involvement_rate"] == 0.75
+
+
+    message_remove_v1(user1[tok], message['message_id'])
+
+    output3 = user_stats_v1(user1[tok])
+
+    assert output3["user_stats"]["involvement_rate"] ==  0.6666666666666666
+
+    message_send_v1(user2[tok], channel1[cID], "hi")
+    message_send_v1(user2[tok], channel1[cID], "hi")
+
+    output4 = user_stats_v1(user1[tok])
 
     
+    assert output4["user_stats"]["involvement_rate"] == 0.5
 
+def test_user_stats_v1(user1,user2, user3):
+    dm = dm_create_v1(user1[tok], [user2[AuID]])
+    message_senddm_v1(user1[tok], dm[dmID], 'hello meng')
 
+    output = user_stats_v1(user1[tok])
 
+    assert len(output["user_stats"]['channels_joined']) == 1
+    assert len(output["user_stats"]['dms_joined']) == 2
+    assert len(output["user_stats"]['messages_sent']) == 2
+    assert output["user_stats"]["involvement_rate"] == 1
 
+    output = user_stats_v1(user2[tok])
 
+    assert output["user_stats"]["involvement_rate"] == 0.5
 
-
-
-
-
+    dm_invite_v1(user1[tok], dm[dmID], user3[AuID])
+    output2 = user_stats_v1(user3[tok])
+    assert len(output2["user_stats"]['messages_sent']) == 1

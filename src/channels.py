@@ -3,7 +3,6 @@ from src.other import decode, get_channel, get_user
 import json
 import jwt
 from datetime import datetime
-from src.user import users_stats_v1
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
@@ -134,6 +133,16 @@ def channels_create_v1(token, name, is_public):
         'num_channels_exist': updated_num_channels,
         'time_stamp': int(datetime.now().strftime("%s"))
     })
+    
+    #* update analytics
+
+    channelsJoinedPrev = data["user_analytics"][f"{auth_user_id}"]['channels_joined'][-1]["num_channels_joined"]
+    data["user_analytics"][f"{auth_user_id}"]['channels_joined'].append(
+        {
+            "num_channels_joined": channelsJoinedPrev + 1,
+            "time_stamp": int(datetime.now().strftime("%s"))
+        }
+    )   
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)

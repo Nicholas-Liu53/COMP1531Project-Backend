@@ -233,6 +233,11 @@ def users_all():
 def users_stats():
     token = request.args.get('token')
     return src.user.users_stats_v1(token)
+    
+@APP.route("/user/stats/v1", methods=['GET'])
+def user_stats():
+    token = request.args.get('token')
+    return src.user.user_stats_v1(token)
 
 
 

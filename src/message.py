@@ -83,6 +83,14 @@ def message_send_v1(token, channel_id, message):
         'num_messages_exist': updated_num_message,
         'time_stamp': int(datetime.now().strftime("%s"))
     })
+    #* update analytics
+    messageSentPrev = data["user_analytics"][f"{auth_user_id}"]['messages_sent'][-1]["num_messages_sent"]
+    data["user_analytics"][f"{auth_user_id}"]['messages_sent'].append(
+        {
+            "num_messages_sent": messageSentPrev + 1,
+            "time_stamp": int(datetime.now().strftime("%s"))
+        }
+    )   
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
@@ -149,6 +157,14 @@ def message_remove_v1(token, message_id):
         'num_messages_exist': updated_num_message,
         'time_stamp': int(datetime.now().strftime("%s"))
     })
+    #* update analytics
+    messageSentPrev = data["user_analytics"][f"{auth_user_id}"]['messages_sent'][-1]["num_messages_sent"]
+    data["user_analytics"][f"{auth_user_id}"]['messages_sent'].append(
+        {
+            "num_messages_sent": messageSentPrev - 1,
+            "time_stamp": int(datetime.now().strftime("%s"))
+        }
+    )   
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
@@ -280,6 +296,15 @@ def message_senddm_v1(token, dm_id, message):
         'num_messages_exist': updated_num_message,
         'time_stamp': int(datetime.now().strftime("%s"))
     })
+    #* update analytics
+
+    messageSentPrev = data["user_analytics"][f"{auth_user_id}"]['messages_sent'][-1]["num_messages_sent"]
+    data["user_analytics"][f"{auth_user_id}"]['messages_sent'].append(
+        {
+            "num_messages_sent": messageSentPrev + 1,
+            "time_stamp": int(datetime.now().strftime("%s"))
+        }
+    )  
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
