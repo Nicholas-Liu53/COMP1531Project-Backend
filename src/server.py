@@ -231,7 +231,7 @@ def users_all():
 
 @APP.route("/users/stats/v1", methods=['GET'])
 def users_stats():
-    token = requests.args.get('token')
+    token = request.args.get('token')
     return src.user.users_stats_v1(token)
 
 
