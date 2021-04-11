@@ -558,7 +558,7 @@ def test_users_stats_v1(user1, user2, user3, user4):
     assert len(output6['dreams_analytics']['messages_exist']) == 5
     assert output6['dreams_analytics']['utilization_rate'] == 1
 
-def test_user_stats_v1(user1,user2):
+def test_user_stats1_v1(user1,user2):
     channel1 = channels_create_v1(user1[tok], 'Channel1', True)
     channel_join_v1(user2[tok], channel1[cID])
     dm_create_v1(user1[tok], [user2[AuID]])
@@ -593,9 +593,9 @@ def test_user_stats_v1(user1,user2):
     output4 = user_stats_v1(user1[tok])
 
     
-    assert output4["user_stats"]["involvement_rate"] == 0.5
+    assert output4["user_stats"]["involvement_rate"] == 0.4
 
-def test_user_stats_v1(user1,user2, user3):
+def test_user_stats2_v1(user1,user2, user3):
     dm = dm_create_v1(user1[tok], [user2[AuID]])
     message_senddm_v1(user1[tok], dm[dmID], 'hello meng')
 
