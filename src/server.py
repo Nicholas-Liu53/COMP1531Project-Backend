@@ -171,9 +171,10 @@ def message_react():
     return src.message.message_react_v1(payload['token'], payload['message_id'], payload['react_id'])
     
 @APP.route("/message/unreact/v1", methods=['POST'])
-def message_react():
+def message_unreact():
     payload = request.get_json()
     return src.message.message_unreact_v1(payload['token'], payload['message_id'], payload['react_id'])
+    
 
 #* *********************************************DM ROUTES*****************************************
 @APP.route("/dm/details/v1", methods=['GET'])
@@ -238,8 +239,6 @@ def user_sethandle():
 def users_all():
     token = request.args.get('token')
     return src.user.users_all(token)
-
-
 
 
 #* ------------------------------------------------------------------------------------
