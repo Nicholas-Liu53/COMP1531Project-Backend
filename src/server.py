@@ -165,6 +165,15 @@ def message_unpin():
     payload = request.get_json()
     return src.message.message_unpin_v1(payload['token'], payload['message_id'])
     
+@APP.route("/message/react/v1", methods=['POST'])
+def message_react():
+    payload = request.get_json()
+    return src.message.message_react_v1(payload['token'], payload['message_id'], payload['react_id'])
+    
+@APP.route("/message/unreact/v1", methods=['POST'])
+def message_react():
+    payload = request.get_json()
+    return src.message.message_unreact_v1(payload['token'], payload['message_id'], payload['react_id'])
 
 #* *********************************************DM ROUTES*****************************************
 @APP.route("/dm/details/v1", methods=['GET'])
