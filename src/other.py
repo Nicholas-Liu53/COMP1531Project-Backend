@@ -35,8 +35,7 @@ def clear_v1():
             'channels': [],
             'dms': [],
             'messages_log': [],
-            'notifs': {},
-            'user_analytics': {}
+            'notifs': {}
         }, FILE)
 
 def search_v1(token, query_str):
