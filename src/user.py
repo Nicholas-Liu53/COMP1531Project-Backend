@@ -2,6 +2,7 @@ from src.error import AccessError, InputError
 import re
 from src.other import decode, check_session, get_user
 import json
+from datetime import timezone, datetime
 
 def user_profile_v2(token, u_id):
     """ Provided the u_id of an existing user with a valid token, returns information about the user 
@@ -179,22 +180,6 @@ def users_all(token):
 
 def user_stats_v1(token):
 
-    """ Provided with a valid token, returns a dictionary containing information on the user's involvement in Dreams.
-
-        Arguments:
-            token (str): The token containing the user_id and session_id of user that called the function
-        
-        Exceptions:
-            None
-
-        Return Value:
-            Returns (dict) containing all of the analytics of user stats including a list of channels and DMS the user has joined
-            and messages they have sent, all with the time that information was updated. Also returns a key with the user's
-            involvement rate defined by the sum of all the count of the info listed above divided by the total no. of channels, dms and messages sent
-            in Dreams.
-
-    """ 
-
     data = json.load(open('data.json', 'r'))
 
     auth_user_id, _ = decode(token)
@@ -234,6 +219,6 @@ def users_stats_v1(token):
     dream_stats = data['dreams_analytics'].copy()
     dream_stats.update({'utilization_rate': utilization_rate})
     
-    
-    
-    
+    return { 
+        "dreams_analytics": dream_stats
+    }
