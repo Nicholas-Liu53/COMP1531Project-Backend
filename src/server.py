@@ -229,6 +229,15 @@ def users_all():
     token = request.args.get('token')
     return src.user.users_all(token)
 
+@APP.route("/users/stats/v1", methods=['GET'])
+def users_stats():
+    token = request.args.get('token')
+    return src.user.users_stats_v1(token)
+    
+@APP.route("/user/stats/v1", methods=['GET'])
+def user_stats():
+    token = request.args.get('token')
+    return src.user.user_stats_v1(token)
 
 
 
