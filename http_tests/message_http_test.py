@@ -1007,3 +1007,35 @@ def test_http_message_pin_unauthorised_user(user1, invalid_token):
         mID: m2[mID]
     })
     assert e1Response.status_code == 403
+    
+    
+    
+    #Message_react
+    #Input Error test for invalid message id for message_react
+    def test_http_message_react_v1_errors_invalid_mID(user1, user2):
+    #Input error test for invalid react id for message_react 
+    def test_http_message_react_v1_errors_invalid_rID(user1, user2):
+    #Test that already contains an active react raises input error
+    def test_http_message_react_v1_active_react(user1, user2):
+    #Test that authorised user not a member of channel or dm raises access error for message_react 
+    def test_http_message_react_v1_invalid_user(user1, user2, user3): 
+    #Test that message_react works for a message in a channel
+    def test_http_message_react_v1_valid_channel(user1, user2):
+    #Test that message_react works for a dm 
+    def test_http_message_react_v1_valid_dm(user1, user2):
+    
+    
+    
+    #Message_unreact
+    #Input Error test for invalid message id for message_unreact
+    def test_http_message_unreact_v1_errors_invalid_mID(user1, user2):
+    #Input error test for invalid react id for message_unreact 
+    def test_http_message_unreact_v1_errors_invalid_rID(user1, user2): 
+    #Test that doesn't contain react raises input error for message_unreact
+    def test_http_message_unreact_v1_active_react(user1, user2):
+    #Test that authorised user not a member of channel or dm raises access error for message_react 
+    def test_http_message_unreact_v1_invalid_user(user1, user2, user3): 
+    #Test that message_unreact works for a message in a channel
+    def test_http_message_unreact_v1_valid_channel(user1, user2):
+    #Test that message_unreact works for a dm 
+    def test_http_message_unreact_v1_valid_dm(user1, user2):
