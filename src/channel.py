@@ -214,6 +214,18 @@ def channel_messages_v1(token, channel_id, start):
     while len(messages) > 50:
         messages.pop(-1)
         
+    '''    
+    #For message_react and message_unreact 
+    #Go through messages 
+    for current_message in messages:
+        #If user requesting this is in the list of u_ids which have reacted to this message set is_user_reacted to true 
+        if decode(token) in current_message['reacts']['u_ids']:
+            current_message['reacts']['is_this_user_reacted'] = True 
+        else:
+            current_message['reacts']['is_this_user_reacted'] = False
+    '''
+    
+        
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
     

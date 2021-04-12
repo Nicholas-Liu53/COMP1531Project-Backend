@@ -1255,8 +1255,6 @@ def test_http_message_react_v1_valid_dm(user1, user2):
                 if react[rID] == r1[rID]:
                     assert user1[AuID] == react['u_ids'] 
                     
-    
-    
 '''
 
 #Message_unreact

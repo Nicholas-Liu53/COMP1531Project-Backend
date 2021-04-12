@@ -415,11 +415,11 @@ def message_react_v1(token, message_id, react_id):
                     'u_ids': [auth_user_id],
                 
                     #NOT TOO SURE WHAT IS THIS USER REACTED MEANS 
-                    'is_this_user_reacted': None,
+                    'is_this_user_reacted': False,
                 
                     }
                 message['reacts'].append(result)
-            #Case 2: Reacting to a message which already has a react 
+            #Case 2: Reacting to a message which already has a react
             elif len(message['reacts']) == 1:
                 for current_react in message['reacts']:
                     if current_react[rID] == react_id: 
@@ -427,7 +427,6 @@ def message_react_v1(token, message_id, react_id):
                             raise InputError
                         else:
                             current_react['u_ids'].append(auth_user_id)
-
 
         #If gets to end of messages log without finding message with same mID then mID not valid  
     if message_found == False:
