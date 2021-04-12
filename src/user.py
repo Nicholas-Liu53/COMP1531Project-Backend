@@ -176,62 +176,6 @@ def users_all(token):
     return { 'users': user_list
     
     }
-
-def user_stats_v1(token):
-
-    """ Provided with a valid token, returns a dictionary containing information on the user's involvement in Dreams.
-
-        Arguments:
-            token (str): The token containing the user_id and session_id of user that called the function
-        
-        Exceptions:
-            None
-
-        Return Value:
-            Returns (dict) containing all of the analytics of user stats including a list of channels and DMS the user has joined
-            and messages they have sent, all with the time that information was updated. Also returns a key with the user's
-            involvement rate defined by the sum of all the count of the info listed above divided by the total no. of channels, dms and messages sent
-            in Dreams.
-
-    """ 
-    data = json.load(open('data.json', 'r'))
-
-    auth_user_id, _ = decode(token)
-
-    userstat = data["user_analytics"][f"{auth_user_id}"].copy()
-
-    userInvolvement = (userstat["channels_joined"][-1]["num_channels_joined"],userstat["dms_joined"][-1]["num_dms_joined"],userstat["messages_sent"][-1]["num_messages_sent"])
-    dreamsNumbers = (len(data["channels"]), len(data["dms"]), len(data["messages_log"]))
-
-    involvementRate = sum(userInvolvement)/sum(dreamsNumbers)
-
-    userstat.update({"involvement_rate": involvementRate})
-
-    return {
-        "user_stats": userstat
-    }
-
-def users_stats_v1(token):
-    data = json.load(open('data.json', 'r'))
-
-    decode(token)
-
-    active_users = {}
-    for channel in data['channels']:
-        for member in channel['all_members']:
-            if member not in active_users:
-                active_users[member] = 1
-
-    for dm in data['dms']:
-        for member in dm['all_members']:
-            if member not in active_users:
-                active_users[member] = 1
-
-    num_active_users = len(active_users)
-    num_users = len(data['users'])
-    utilization_rate = num_active_users / num_users
-    dream_stats = data['dreams_analytics'].copy()
-    dream_stats.update({'utilization_rate': utilization_rate})
     
     
     
