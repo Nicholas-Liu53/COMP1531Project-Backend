@@ -2,7 +2,6 @@ from src.error import AccessError, InputError
 import re
 from src.other import decode, check_session, get_user
 import json
-from datetime import timezone, datetime
 
 def user_profile_v2(token, u_id):
     """ Provided the u_id of an existing user with a valid token, returns information about the user 
@@ -234,9 +233,6 @@ def users_stats_v1(token):
     dream_stats = data['dreams_analytics'].copy()
     dream_stats.update({'utilization_rate': utilization_rate})
     
-    return { 
-        "dreams_analytics": dream_stats
-    }
     
     
     
