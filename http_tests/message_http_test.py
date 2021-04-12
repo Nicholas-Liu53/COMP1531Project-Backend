@@ -1176,11 +1176,12 @@ def test_http_message_react_v1_invalid_user(user1, user2, user3):
 #Test that message_react works for a message in a channel
 def test_http_message_react_v1_valid_channel(user1, user2):
     react_found = False
-        channel = requests.post(f"{url}channels/create/v2", json={
+    channel = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
         "name": 'Iteration 3',
         "is_public": True
     }).json()
+    
     result = requests.post(f"{url}message/send/v2", json={
         "token": user1[token],
         "channel_id": channel[cID],
@@ -1203,19 +1204,56 @@ def test_http_message_react_v1_valid_channel(user1, user2):
         'start' : 0,}
     )
 
+    #Instead of this, can assert that is_this_user reacted is true
+    '''
     checklog = check.json()
     for messageDict in checklog['messages']:
-        if m1[mID] == messageDict[mID]:
-            for react in messageDict[mID]['reacts']:
-                if current_react[rID] == r1[rID]:
-                    assert     
+        if messageDict[mID] == m1[mID]:
+            #Message has been found 
+            for react in messageDict[mID]:
+                if react[rID] == r1[rID]:
+                    assert user1[AuID] == react['u_ids'] 
+                    
+    '''
 
-'''
 #Test that message_react works for a dm 
 def test_http_message_react_v1_valid_dm(user1, user2):
+    dm = requests.post(f"{url}dm/create/v1", json={
+        token: user1[token],
+        "u_ids": [user2[AuID]]
+    }).json()
+    
+    result = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'First one'
+    })
+    m1 = result.json()
+    
+    response2 = requests.post(f"{url}message/react/v1", json= {
+        token: user1[token],
+        mID: m1[mID],
+        rID: thumbsUp,
+    })
+    
+    #Assert that is_this_user reacted is true when dm_messages is called for that message with message_id 
+    check = requests.get(f"{url}dm/messages/v1", params={
+        token: user1[token],
+        dmID: dm[dmID] ,
+        'start' : 0,}
+    )
+    '''
+    checklog = check.json()
+    for messageDict in checklog['messages']:
+        if messageDict[mID] == m1[mID]:
+            #Message has been found 
+            for react in messageDict[mID]:
+                if react[rID] == r1[rID]:
+                    assert user1[AuID] == react['u_ids'] 
+                    
+    '''
 
-
-
+'''
 #Message_unreact
 #Input Error test for invalid message id for message_unreact
 def test_http_message_unreact_v1_errors_invalid_mID(user1, user2):
