@@ -1,4 +1,4 @@
-from src.error import AccessError, InputError
+sfrom src.error import AccessError, InputError
 import src.auth
 from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications
 from datetime import timezone, datetime
@@ -415,7 +415,7 @@ def message_react_v1(token, message_id, react_id):
                     'u_ids': [auth_user_id],
                 
                     #NOT TOO SURE WHAT IS THIS USER REACTED MEANS 
-                    'is_this_user_reacted': True,
+                    'is_this_user_reacted': None,
                 
                     }
                 message['reacts'].append(result)

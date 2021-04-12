@@ -639,7 +639,7 @@ def test_message_react_v1_valid_channel(user1, user2):
     #Create for loop that finds message looking for 
     for current_message in result['messages']: 
         if current_message[mID] == message_1[mID]: 
-            #Now that the message is found, can assert that our user has reacted to it       s
+            #Now that the message is found, can assert that our user has reacted to it    
             for current_react in current_message['reacts']: 
                 if current_react['react_id'] == thumbsUp:
                     assert user1[AuID] in current_react['u_ids'] 
