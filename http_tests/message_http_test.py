@@ -1192,14 +1192,12 @@ def test_http_message_react_v1_valid_channel(user1, user2):
     })
     m1 = result.json()
     
-    react = requests.post(f"{url}message/react/v1", json= {
+    requests.post(f"{url}message/react/v1", json= {
         token: user1[token],
         mID: m1[mID],
         rID: thumbsUp,
     })
-    
-    r1 = react.json()
-    
+
     #Find the message and look in its reacts['u_ids'] to find user_1[AuID]
     check = requests.get(f"{url}channel/messages/v2", params={
         token: user1[token],
@@ -1232,13 +1230,11 @@ def test_http_message_react_v1_valid_dm(user1, user2):
     })
     m1 = result.json()
     
-    result2 = requests.post(f"{url}message/react/v1", json= {
+    requests.post(f"{url}message/react/v1", json= {
         token: user1[token],
         mID: m1[mID],
         rID: thumbsUp,
     })
-    
-    r1 = result2.json()
     
     #Assert that is_this_user reacted is true when dm_messages is called for that message with message_id and same rID
     check = requests.get(f"{url}dm/messages/v1", params={
@@ -1459,12 +1455,11 @@ def test_http_message_unreact_v1_valid_dm(user1, user2):
     })
     m1 = result.json()
     
-    result2 = requests.post(f"{url}message/react/v1", json= {
+    requests.post(f"{url}message/react/v1", json= {
         token: user1[token],
         mID: m1[mID],
         rID: thumbsUp,
     })
-    r1 = result2.json()
     requests.post(f"{url}message/unreact/v1", json= {
         token: user1[token],
         mID: m1[mID],
