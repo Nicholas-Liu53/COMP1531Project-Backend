@@ -315,6 +315,15 @@ def dm_messages_v1(token, dm_id, start):
             current_DM = objects.copy()
             del current_DM[cID]
             del current_DM['dm_id']
+            
+            print(current_DM)
+            
+            for current_react in current_DM['reacts']: 
+                if auth_user_id in current_react['u_ids']:
+                    current_react['is_this_user_reacted'] = True 
+                else:
+                    current_react['is_this_user_reacted'] = False
+            
             messages.insert(0,current_DM)
 
     #Reverse list such that the we have the newest messages at the start and oldest at the end 
@@ -327,18 +336,6 @@ def dm_messages_v1(token, dm_id, start):
     
     while len(messages) > 50:
         messages.pop(-1)
-        
-    '''    
-    #For message_react and message_unreact 
-    #Go through messages 
-    for current_message in messages:
-        #If user requesting this is in the list of u_ids which have reacted to this message set is_user_reacted to true 
-        if decode(token) in current_message['reacts']['u_ids']:
-            current_message['reacts']['is_this_user_reacted'] = True 
-        else:
-            current_message['reacts']['is_this_user_reacted'] = False
-    '''
-        
     
     return {
         'messages': messages,

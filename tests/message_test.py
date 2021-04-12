@@ -636,6 +636,7 @@ def test_message_react_v1_valid_channel(user1, user2):
     #Test 1: check that react_1 comes up in "messages"
     result = src.channel.channel_messages_v1(user1[token], channel_1[cID], 0)
     
+
     #Create for loop that finds message looking for 
     for current_message in result['messages']: 
         if current_message[mID] == message_1[mID]: 
@@ -643,7 +644,7 @@ def test_message_react_v1_valid_channel(user1, user2):
             for current_react in current_message['reacts']: 
                 if current_react['react_id'] == thumbsUp:
                     assert user1[AuID] in current_react['u_ids'] 
-    
+                assert current_react['is_this_user_reacted'] == True 
     
     #Test 2: check that is given a notification for "reacted message"
 
@@ -656,14 +657,13 @@ def test_message_react_v1_valid_dm(user1, user2):
     #Test 1: check that reacts comes up in "messages"
     result = src.dm.dm_messages_v1(user1[token], dm_1[dmID], 0)
     #Create for loop that finds message looking for 
-    #Create for loop that finds message looking for 
     for current_message in result['messages']: 
         if current_message[mID] == message_1[mID]: 
             #Now that the message is found, can assert that our user has reacted to it       
             for current_react in current_message['reacts']: 
                 if current_react['react_id'] == thumbsUp:
                     assert user1[AuID] in current_react['u_ids'] 
-    
+                assert current_react['is_this_user_reacted'] == True 
     #Test 2: check that is given a notification for "reacted message"
 
 
@@ -736,8 +736,6 @@ def test_message_unreact_v1_valid_channel(user1, user2):
     src.channel.channel_invite_v1(user1[token], channel_1[cID], user2[AuID])
     message_1 = message_send_v1(user1[token], channel_1[cID], "Hello")
     message_react_v1(user1[token], message_1[mID], thumbsUp)
-    
-    
     message_unreact_v1(user1[token], message_1[mID], thumbsUp)
     
     #Test 1: check that react_1 no longer comes up in "messages"
@@ -749,7 +747,8 @@ def test_message_unreact_v1_valid_channel(user1, user2):
             #Now that the message is found, can assert that our user has reacted to it  
             for current_react in current_message['reacts']: 
                 if current_react['react_id'] == thumbsUp:
-                    assert user1[AuID] not in current_react['u_ids'] 
+                    assert user1[AuID] not in current_react['u_ids']
+                assert current_react['is_this_user_reacted'] == False 
     
     
     #Test 2: check that is given a notification for "reacted message"
@@ -759,7 +758,6 @@ def test_message_unreact_v1_valid_dm(user1, user2):
     dm_1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
     message_1 = message_senddm_v1(user1[token], dm_1[dmID], "Goodbye")
     message_react_v1(user1[token], message_1[mID], thumbsUp)
-    
     message_unreact_v1(user1[token], message_1[mID], thumbsUp)
     
     #Test 1: check that react no longer comes up in "messages"
@@ -771,6 +769,7 @@ def test_message_unreact_v1_valid_dm(user1, user2):
             for current_react in current_message['reacts']: 
                 if current_react['react_id'] == thumbsUp:
                     assert user1[AuID] not in current_react['u_ids'] 
+                assert current_react['is_this_user_reacted'] == False
     
     #Test 2: check that is given a notification for "reacted message"
 

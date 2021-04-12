@@ -415,7 +415,7 @@ def message_react_v1(token, message_id, react_id):
                     'u_ids': [auth_user_id],
                 
                     #NOT TOO SURE WHAT IS THIS USER REACTED MEANS 
-                    'is_this_user_reacted': False,
+                    'is_this_user_reacted': None,
                 
                     }
                 message['reacts'].append(result)

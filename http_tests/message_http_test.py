@@ -1173,7 +1173,7 @@ def test_http_message_react_v1_invalid_user(user1, user2, user3):
     
     assert response2.status_code == 403
 
-'''
+
 #Test that message_react works for a message in a channel
 def test_http_message_react_v1_valid_channel(user1, user2):
 
@@ -1209,14 +1209,14 @@ def test_http_message_react_v1_valid_channel(user1, user2):
 
     #Instead of this, can assert that is_this_user reacted is true for message with same message id and react ID
     checklog = check.json()
-    for messageDict in checklog['messages']:
-        if messageDict[mID] == m1[mID]:
-            #Message has been found 
-            for react in messageDict[mID]:
-                if react[rID] == r1[rID]:
-                    assert user1[AuID] == react['u_ids'] 
-                    
     
+    for current_message in checklog['messages']: 
+        if current_message[mID] == m1[mID]: 
+            #Now that the message is found, can assert that our user has reacted to it    
+            for current_react in current_message['reacts']: 
+                if current_react['react_id'] == thumbsUp:
+                    assert user1[AuID] in current_react['u_ids'] 
+                assert current_react['is_this_user_reacted'] == True 
 
 #Test that message_react works for a dm 
 def test_http_message_react_v1_valid_dm(user1, user2):
@@ -1248,15 +1248,14 @@ def test_http_message_react_v1_valid_dm(user1, user2):
     )
     
     checklog = check.json()
-    for messageDict in checklog['messages']:
-        if messageDict[mID] == m1[mID]:
-            #Message has been found 
-            for react in messageDict[mID]:
-                if react[rID] == r1[rID]:
-                    assert user1[AuID] == react['u_ids'] 
+    for current_message in checklog['messages']: 
+        if current_message[mID] == m1[mID]: 
+            #Now that the message is found, can assert that our user has reacted to it       
+            for current_react in current_message['reacts']: 
+                if current_react['react_id'] == thumbsUp:
+                    assert user1[AuID] in current_react['u_ids'] 
+                assert current_react['is_this_user_reacted'] == True 
                     
-'''
-
 #Message_unreact
 #Input Error test for invalid message id for message_unreact
 def test_http_message_unreact_v1_errors_invalid_mID(user1, user2):
@@ -1402,7 +1401,7 @@ def test_http_message_unreact_v1_invalid_user(user1, user2, user3):
     
     assert response2.status_code == 403
 
-'''
+
 #Test that message_unreact works for a message in a channel
 def test_http_message_unreact_v1_valid_channel(user1, user2):
     channel = requests.post(f"{url}channels/create/v2", json={
@@ -1418,18 +1417,16 @@ def test_http_message_unreact_v1_valid_channel(user1, user2):
     })
     m1 = result.json()
     
-    react = requests.post(f"{url}message/react/v1", json= {
+    requests.post(f"{url}message/react/v1", json= {
         token: user1[token],
         mID: m1[mID],
         rID: thumbsUp,
     })
     
-    r1 = react.json()
-    
     requests.post(f"{url}message/unreact/v1", json= {
         token: user1[token],
         mID: m1[mID],
-        rID: r1[rID],
+        rID: thumbsUp,
     })
     
     check = requests.get(f"{url}channel/messages/v2", params={
@@ -1440,7 +1437,13 @@ def test_http_message_unreact_v1_valid_channel(user1, user2):
     
     message_log = check.json()
     #Go through check and find that is this user for messages is False 
-    
+    for current_message in message_log['messages']: 
+        if current_message[mID] == m1[mID]: 
+            #Now that the message is found, can assert that our user has reacted to it  
+            for current_react in current_message['reacts']: 
+                if current_react['react_id'] == thumbsUp:
+                    assert user1[AuID] not in current_react['u_ids']
+                assert current_react['is_this_user_reacted'] == False 
     
 #Test that message_unreact works for a dm 
 def test_http_message_unreact_v1_valid_dm(user1, user2):
@@ -1465,7 +1468,7 @@ def test_http_message_unreact_v1_valid_dm(user1, user2):
     requests.post(f"{url}message/unreact/v1", json= {
         token: user1[token],
         mID: m1[mID],
-        rID: r1[rID],
+        rID: thumbsUp,
     })
     
     #Assert that is_this_user reacted is true when dm_messages is called for that message with message_id and same rID
@@ -1476,6 +1479,12 @@ def test_http_message_unreact_v1_valid_dm(user1, user2):
     )
     
     message_log = check.json()
-   
+    for current_message in message_log['messages']: 
+        if current_message[mID] == m1[mID]: 
+            #Now that the message is found, can assert that our user has reacted to it       
+            for current_react in current_message['reacts']: 
+                if current_react['react_id'] == thumbsUp:
+                    assert user1[AuID] not in current_react['u_ids'] 
+                assert current_react['is_this_user_reacted'] == False
     
-'''
+
