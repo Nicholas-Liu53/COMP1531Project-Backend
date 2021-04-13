@@ -261,7 +261,7 @@ def test_message_share_todm(user1, user2, user3, user4):
 
     messageFound = False
     for messageDict in src.dm.dm_messages_v1(user2[token],dmTest[dmID],0)['messages']:
-        if sharedMessage['message_id'] == messageDict['message_id']:
+        if sharedMessage['shared_message_id'] == messageDict['message_id']:
             messageFound = True
             break
     assert messageFound is True 
@@ -284,7 +284,7 @@ def test_message_share_tochannel(user1, user2, user3):
 
     messageFound = False
     for messageDict in src.channel.channel_messages_v1(user2[token],channelTest2[cID],0)['messages']:
-        if sharedMessage['message_id'] == messageDict['message_id']:
+        if sharedMessage['shared_message_id'] == messageDict['message_id']:
             messageFound = True
     assert messageFound is True 
 
@@ -301,7 +301,7 @@ def test_message_share_dmtodm(user1,user2,user3,user4):
     sharedMessage = message_share_v1(user2[token], ogMessage[mID],'wow', -1, dmTest[dmID])
     messageFound = False
     for messageDict in src.dm.dm_messages_v1(user4[token],dmTest[dmID],0)['messages']:
-        if sharedMessage['message_id'] == messageDict['message_id']:
+        if sharedMessage['shared_message_id'] == messageDict['message_id']:
             messageFound = True
 
     assert messageFound is True 

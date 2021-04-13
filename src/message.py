@@ -380,7 +380,7 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
     else: 
         push_tagged_notifications(auth_user_id, -1, dm_id, newMessage)
 
-    return shared_message_id
+    return {"shared_message_id" : shared_message_id["message_id"]}
 
 def message_pin_v1(token, message_id):
     auth_user_id, _ = decode(token)

@@ -381,7 +381,7 @@ def test_http_message_share_todm(user1, user2, user3, user4):
     checklog = check.json()
     messageFound = False
     for messageDict in checklog['messages']:
-        if shared[mID] == messageDict[mID]:
+        if shared["shared_message_id"] == messageDict[mID]:
             messageFound = True
             break
     assert messageFound is True 
