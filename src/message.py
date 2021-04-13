@@ -1,6 +1,6 @@
 from src.error import AccessError, InputError
 import src.auth
-from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications
+from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications, push_reacted_notifications
 from datetime import timezone, datetime
 import json
 
@@ -432,15 +432,13 @@ def message_react_v1(token, message_id, react_id):
     #If message is in channel 
     for message in data['messages_log']:
         if message['channel_id'] != -1:   
-        
-        CHANGE MESSAGE TO MATCH WHAT THEY WANT FOR REACT 
-        
-            push_tagged_notifications(auth_user_id, message[cID], -1, message)
+            push_reacted_notifications(auth_user_id, message[cID], -1, message)
         #If message is in DM
         else: 
-            push_tagged_notifications(auth_user_id, -1, message[dmID], message) 
-    '''
+            push_reacted_notifications(auth_user_id, -1, message[dmID], message) 
+    
     return {}
+    '''
 
 def message_unreact_v1(token, message_id, react_id):
 #Assumption: Only react ID that is valid is 1 
