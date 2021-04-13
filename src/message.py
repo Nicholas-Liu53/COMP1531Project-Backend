@@ -401,20 +401,11 @@ def message_react_v1(token, message_id, react_id):
             elif message[cID] == -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
                 raise AccessError
             message_found = True 
-
-            '''
-        
-            FIX UP PYLINT FOR NEXT PART TOO MANY IFS 
-        
-        
-            '''
             #Case 1: First react for that message 
             if len(message['reacts']) == 0:
                 result = {
                     'react_id': react_id,
                     'u_ids': [auth_user_id],
-                
-                    #NOT TOO SURE WHAT IS THIS USER REACTED MEANS 
                     'is_this_user_reacted': None,
                 
                     }
@@ -427,22 +418,33 @@ def message_react_v1(token, message_id, react_id):
                             raise InputError
                         else:
                             current_react['u_ids'].append(auth_user_id)
+        
 
-        #If gets to end of messages log without finding message with same mID then mID not valid  
+    #If gets to end of messages log without finding message with same mID then mID not valid  
     if message_found == False:
         raise InputError
        
     with open('data.json', 'w') as FILE:
-        json.dump(data, FILE)     
+        json.dump(data, FILE)  
+        
+    '''
+    #For notifs 
+    #If message is in channel 
+    for message in data['messages_log']:
+        if message['channel_id'] != -1:   
+        
+        CHANGE MESSAGE TO MATCH WHAT THEY WANT FOR REACT 
+        
+            push_tagged_notifications(auth_user_id, message[cID], -1, message)
+        #If message is in DM
+        else: 
+            push_tagged_notifications(auth_user_id, -1, message[dmID], message) 
+    '''
     return {}
-
-'''
-is_this_user_reacted will depend on current auth_user_id, but when initially doing it set it to true and then when viewing notifs must loop through u_ids list 
-
-'''
 
 def message_unreact_v1(token, message_id, react_id):
 #Assumption: Only react ID that is valid is 1 
+#And getting rid of unreact will not get rid of notif 
     
     auth_user_id, _ = decode(token)
     with open('data.json', 'r') as FILE:
