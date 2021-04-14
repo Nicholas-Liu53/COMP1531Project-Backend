@@ -155,6 +155,20 @@ def message_remove_v1(token, message_id):
     #* Remove the message
     data['messages_log'].remove(data['messages_log'][i])
 
+    updated_num_message = data['dreams_analytics']['messages_exist'][-1]['num_messages_exist'] - 1
+    data['dreams_analytics']['messages_exist'].append({
+        'num_messages_exist': updated_num_message,
+        'time_stamp': int(datetime.now().strftime("%s"))
+    })
+    #* update analytics
+    messageSentPrev = data["user_analytics"][f"{auth_user_id}"]['messages_sent'][-1]["num_messages_sent"]
+    data["user_analytics"][f"{auth_user_id}"]['messages_sent'].append(
+        {
+            "num_messages_sent": messageSentPrev - 1,
+            "time_stamp": int(datetime.now().strftime("%s"))
+        }
+    )
+    
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
 
