@@ -249,11 +249,7 @@ def test_http_channel_leave(user1, user2, user3, user4):
         'token': user1[token], 
         'channel_id': c1.json()['channel_id']
     }).json()[allMems]
-    #* Make sure User 1 (the only user) cannot leave
-    assert requests.post(f"{url}channel/leave/v1", json={
-        "token": user1[token],
-        "channel_id": c1.json()['channel_id']
-    }).status_code == 400
+
     #* Make sure User 3 cannot leave (already left)
     assert requests.post(f"{url}channel/leave/v1", json={
         "token": user3[token],

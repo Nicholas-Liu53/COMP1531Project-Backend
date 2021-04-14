@@ -271,7 +271,7 @@ def channel_leave_v1(token, channel_id):
 
     # If the user is an owner
     if auth_user_id in channelData['owner_members']:
-        channel_removeowner_v1(token, channel_id, auth_user_id)
+        channelData['owner_members'].remove(auth_user_id) 
 
     # Check if user is in the channel
     if auth_user_id not in channelData['all_members']:
@@ -354,6 +354,9 @@ def channel_join_v1(token, channel_id):
 
     # Time to add the user into the channel
     data['channels'][i]['all_members'].append(data['users'][j]['u_id'])
+
+    if get_user_permissions(auth_user_id) == 1:
+        data['channels'][i]['owner_members'].append(data['users'][j]['u_id'])
 
     #* update analytics
     now = datetime.now()
