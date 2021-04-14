@@ -238,15 +238,14 @@ def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
         
-        
-'''    
 def push_reacted_notifications(auth_user_id, user_id, channel_id, dm_id):
     users_handle = get_user(auth_user_id)['handle_str']
     if channel_id != -1:
         channelDMname = get_channel(channel_id)['name']
     else:
         channelDMname = get_dm(dm_id)['name']
-    get_user(user_id)       # Checking if user_id is valid
+    #Checking if user_id is valid
+    get_user(user_id)
     notification = {
         'channel_id': channel_id,
         'dm_id': dm_id,
@@ -256,9 +255,7 @@ def push_reacted_notifications(auth_user_id, user_id, channel_id, dm_id):
     data['notifs'][f"{user_id}"].insert(0, notification)
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
-'''
-
-
+        
 
 def check_removed(u_id):
     data = json.load(open('data.json', 'r'))
