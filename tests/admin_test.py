@@ -94,8 +94,6 @@ def test_userpermissions_change(user1, user2, user3):
         'handle_str': 'user2',
     } in src.channel.channel_details_v1(user2[token], channelTest[cID])[allMems]
 
-    src.channel.channel_addowner_v1(user2[token], channelTest[cID], user2[AuID])
-
     #* Test 3: adding owner when user is not an owner of the channel but has dreams permissions
     assert {
         uID: user2[AuID],        
