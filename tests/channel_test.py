@@ -353,7 +353,7 @@ def test_channel_removeowner(user1, user2, user3, user4):
     
     # Test 4: With only one member in owner left, does not remove them, raising input error
     with pytest.raises(InputError):
-        channel_removeowner_v1(user1[token], channelTest2[cID], user3[AuID])
+        channel_removeowner_v1(user3[token], channelTest2[cID], user3[AuID])
 
     # Test 5: Non-owner trying to remove, raising access Error
     channel_addowner_v1(user3[token], channelTest2[cID], user4[AuID])

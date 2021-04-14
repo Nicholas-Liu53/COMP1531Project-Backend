@@ -164,7 +164,7 @@ def test_http_user_setemail_invalid_email_in_use(user1,user2):
 def test_http_user_sethandle_valid(user1):
     requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
     token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    response_1 = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token, 'handle_str': 'karikoleman'})
+    response_1 = requests.put(f"{url}user/profile/sethandle/v1", json={'token': token, 'handle_str': 'karikoleman'})
     payload_1 = response_1.json()
     assert payload_1 == {}
     response_2 = requests.get(f"{url}user/profile/v2", params={'token': token, 'u_id': 0})
@@ -184,26 +184,26 @@ def test_http_user_sethandle_valid(user1):
 def test_http_user_sethandle_invalid_short_handle(user1):
     requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
     token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    response = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token, 'handle_str': 'cc'})
+    response = requests.put(f"{url}user/profile/sethandle/v1", json={'token': token, 'handle_str': 'cc'})
     assert response.status_code == 400    
 
 # tests for the case when the inputted handle string exceeds the 20 character limit
 def test_http_user_sethandle_invalid_long_handle(user1):
     requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
     token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    response = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token, 'handle_str': 'cariiiiiiiiiiiiiiiiii'})
+    response = requests.put(f"{url}user/profile/sethandle/v1", json={'token': token, 'handle_str': 'cariiiiiiiiiiiiiiiiii'})
     assert response.status_code == 400    
 
 # tests for the case when the inputted handle string is already being used by another user
 def test_http_user_sethandle_invalid_handle_in_use(user1,user2):
     requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
     token_1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    response_1 = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token_1, 'handle_str': 'kari'})
+    response_1 = requests.put(f"{url}user/profile/sethandle/v1", json={'token': token_1, 'handle_str': 'kari'})
     payload_1 = response_1.json()
     assert payload_1 == {}
     requests.post(f"{url}auth/login/v2", json={'email': "ericamondy@gmail.com", "password": "1234567"})
     token_2 = encode({'session_id': 1, 'user_id': 1}, SECRET, algorithm='HS256')
-    response_2 = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token_2, 'handle_str': 'kari'})
+    response_2 = requests.put(f"{url}user/profile/sethandle/v1", json={'token': token_2, 'handle_str': 'kari'})
     assert response_2.status_code == 400
 
 # tests the return value of users_all for when two users are registered

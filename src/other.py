@@ -126,7 +126,7 @@ def get_channel(channel_id):
             with open('data.json', 'w') as FILE:
                 json.dump(data, FILE)
             return channel
-    # raise InputError
+    raise InputError
 
 def get_user(user_id):
     data = json.load(open('data.json', 'r'))

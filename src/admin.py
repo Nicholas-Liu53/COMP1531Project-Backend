@@ -39,13 +39,27 @@ def user_remove_v1(token, u_id):
     
     for users in data['users']:
         if users['u_id'] == u_id:
-            users['name_first'] = 'Removed'
-            users['name_last'] = 'User'
+            users['name_first'] = 'Removed '
+            users['name_last'] = 'user'
             users['permission_id'] = 0
 
     for messages in data['messages_log']:
         if messages['u_id'] == u_id:
-            messages['message'] = 'Removed User'
+            messages['message'] = 'Removed user'
+
+    for channel in data['channels']:
+        try:       
+            channel['all_member'].remove(u_id)
+            channel['owner_members'].remove(u_id)
+        except:
+            pass
+
+    for dm in data['dms']:
+        try:
+            dm['all_members'].remove(u_id)
+            dm['creator_id'].remove(u_id)
+        except:
+            pass
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)

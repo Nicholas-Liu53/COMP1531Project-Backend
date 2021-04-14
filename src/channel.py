@@ -1,9 +1,8 @@
 from src.error import AccessError, InputError 
 from src.channels import channels_listall_v2, channels_list_v2
-from src.other import decode, get_channel, get_user, message_count, push_added_notifications, check_removed
+from src.other import decode, get_channel, get_user, message_count, push_added_notifications, check_removed, SECRET, get_user_permissions
 import jwt
 import json
-from src.other import SECRET
 from datetime import datetime
 
 AuID      = 'auth_user_id'
@@ -92,7 +91,6 @@ def channel_invite_v1(token, channel_id, u_id):
 
     return {   
     }
-
 
 def channel_details_v1(token, channel_id):
     '''
@@ -446,11 +444,12 @@ def channel_addowner_v1(token, channel_id, u_id):
                 ) 
                 
             chan["owner_members"].append(u_id) if u_id not in chan["owner_members"] else None
-    push_added_notifications(auth_user_id, u_id, channel_id,-1)
-    
+ 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
 
+    push_added_notifications(auth_user_id, u_id, channel_id,-1)
+    
     return {
     }
 
@@ -474,39 +473,12 @@ def channel_removeowner_v1(token, channel_id, u_id):
     '''
     data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
-    
-    passed = False
-    for check in data['channels']:
-        if check['channel_id'] == channel_id:
-            passed = True
-    if not passed:
-        raise InputError
-    for chans in data['channels']:
-        if chans["channel_id"] == channel_id:
-            userisOwner = False
-            for users in chans["owner_members"]:
-                if users == u_id:
-                    if len(chans["owner_members"]) == 1:
-                        raise InputError
-                    userisOwner = True             
-    if not userisOwner:
-        raise InputError
-        
-    dreamsOwner = False
-    for users in data['users']:
-        if users['u_id'] == auth_user_id:
-            if users['permission_id'] == 1:
-                dreamsOwner = True
-    
-    for chans in data['channels']:
-        if chans["channel_id"] == channel_id:
-            userAuth = False
-            for users in chans["owner_members"]:
-                if users == auth_user_id:
-                    userAuth = True
 
-    if dreamsOwner == False and userAuth == False:
+    channel_deets = get_channel(channel_id)
+    if auth_user_id not in channel_deets['all_members'] and get_user_permissions(u_id) != 1:
         raise AccessError
+    elif auth_user_id not in channel_deets['owner_members'] or len(channel_deets['owner_members']) == 1 or u_id not in channel_deets['owner_members']:
+        raise InputError
 
     for chan in data['channels']:
         if chan["channel_id"] == channel_id:

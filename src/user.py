@@ -173,7 +173,8 @@ def users_all(token):
     user_list = []
     
     for user in data['users']:
-        user_list.append(get_user(user['u_id']))
+        if user['permission_id'] != 0:
+            user_list.append(get_user(user['u_id']))
         
     return { 'users': user_list
     

@@ -294,12 +294,12 @@ def test_auth_logout_v1_valid():
     assert auth_logout_v1(token_1) == {'is_success': True}
     
     with pytest.raises(AccessError):
-        check_session(0, 0)
+        check_session(user_data_1['auth_user_id'], 0)
 
     assert auth_logout_v1(token_2) == {'is_success': True}
     
     with pytest.raises(AccessError):
-        check_session(0, 1)
+        check_session(user_data_1['auth_user_id'], 1)
 
 # tests for the case when a token with an invalid session_id is inputted
 def test_auth_logout_v1_invalid():    
