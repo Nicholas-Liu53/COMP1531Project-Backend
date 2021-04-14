@@ -561,8 +561,6 @@ def test_message_pin_unauthorised_user(user1, invalid_token):
     with pytest.raises(AccessError):
         message_pin_v1(invalid_token, m2[mID])
 
-
-
 #Input Error test for invalid message id for message_react
 def test_message_react_v1_errors_invalid_mID(user1, user2):
     invalid_message_id = -1 
@@ -606,8 +604,6 @@ def test_message_react_v1_active_react(user1, user2):
     #Already contains react in DM error
     with pytest.raises(InputError):
         message_react_v1(user1[token], message_2[mID], thumbsUp)
-    
-
    
 #Test that authorised user not a member of channel or dm raises access error for message_react 
 def test_message_react_v1_invalid_user(user1, user2, user3): 
@@ -645,8 +641,6 @@ def test_message_react_v1_valid_channel(user1, user2):
                 if current_react['react_id'] == thumbsUp:
                     assert user1[AuID] in current_react['u_ids'] 
                 assert current_react['is_this_user_reacted'] == True 
-    
-    #Test 2: check that is given a notification for "reacted message"
 
 #Test that message_react works for a dm 
 def test_message_react_v1_valid_dm(user1, user2):
@@ -664,11 +658,6 @@ def test_message_react_v1_valid_dm(user1, user2):
                 if current_react['react_id'] == thumbsUp:
                     assert user1[AuID] in current_react['u_ids'] 
                 assert current_react['is_this_user_reacted'] == True 
-    #Test 2: check that is given a notification for "reacted message"
-
-
-
-
 
 #Input Error test for invalid message id for message_unreact
 def test_message_unreact_v1_errors_invalid_mID(user1, user2):
@@ -749,10 +738,7 @@ def test_message_unreact_v1_valid_channel(user1, user2):
                 if current_react['react_id'] == thumbsUp:
                     assert user1[AuID] not in current_react['u_ids']
                 assert current_react['is_this_user_reacted'] == False 
-    
-    
-    #Test 2: check that is given a notification for "reacted message"
-
+                
 #Test that message_unreact works for a dm 
 def test_message_unreact_v1_valid_dm(user1, user2):
     dm_1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
@@ -770,6 +756,3 @@ def test_message_unreact_v1_valid_dm(user1, user2):
                 if current_react['react_id'] == thumbsUp:
                     assert user1[AuID] not in current_react['u_ids'] 
                 assert current_react['is_this_user_reacted'] == False
-    
-    #Test 2: check that is given a notification for "reacted message"
-
