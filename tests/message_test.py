@@ -604,7 +604,6 @@ def test_message_sendlater_is_sent_later(user1, user2):
         if m1[mID] == message[mID]:
             mTime = message['time_created']
             messageFound = True
-    print(src.channel.channel_messages_v1(user2[token], channel1[cID], 0)['messages'])
     assert messageFound
     assert mTime == sendTime
     # Test for m2, sent by user2
