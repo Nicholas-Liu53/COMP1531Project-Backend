@@ -419,21 +419,20 @@ def message_react_v1(token, message_id, react_id):
                         else:
                             current_react['u_ids'].append(auth_user_id)
         
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)  
             #Now can push to notifs 
             #If message in channel 
             if message['channel_id'] != -1:  
-                push_reacted_notifications(auth_user_id, message['u_id'], message[cID], -1)   
+                push_reacted_notifications(auth_user_id, message['u_id'], message[cID], -1)
             #If message is in DM
             else: 
-                push_reacted_notifications(auth_user_id, message['u_id'], -1, message[dmID]) 
+                push_reacted_notifications(auth_user_id, message['u_id'], -1, message[dmID])
     
     #If gets to end of messages log without finding message with same mID then mID not valid  
     if message_found == False:
         raise InputError
     
-    with open('data.json', 'w') as FILE:
-        json.dump(data, FILE)  
-
     return {}
 
 
