@@ -423,7 +423,13 @@ def message_react_v1(token, message_id, react_id):
     #If gets to end of messages log without finding message with same mID then mID not valid  
     if message_found == False:
         raise InputError
-       
+
+    # Parameters: auth_user_id, user_id, channel_id, dm_id
+    # auth_user_id: person who reacted
+    # user_id: person who wrote the message
+    #   - Need to find the person who wrote the message and then push notifs TO the that user
+    # channel_id, dm_id follows the ids given in the message
+
     #For notifs 
     #If message is in channel 
     for message in data['messages_log']:
@@ -435,7 +441,7 @@ def message_react_v1(token, message_id, react_id):
     
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)  
-        
+
     return {}
 
 
