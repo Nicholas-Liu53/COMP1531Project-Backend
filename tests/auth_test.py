@@ -304,7 +304,8 @@ def test_auth_logout_v1_valid():
 # tests for the case when a token with an invalid session_id is inputted
 def test_auth_logout_v1_invalid():    
     clear_v1()
-    auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
-    token_1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-    assert auth_logout_v1(token_1) == {'is_success': False}
+    with pytest.raises(AccessError):
+        user_data_1 = auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
+        auth_logout_v1(user_data_1['token'])
+        auth_logout_v1(user_data_1['token'])
     
