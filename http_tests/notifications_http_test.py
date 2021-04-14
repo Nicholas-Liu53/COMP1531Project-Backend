@@ -21,6 +21,7 @@ ownMems = 'owner_members'
 notifs  = 'notifications'
 nMess   = 'notification_message'
 thumbsUp = 1
+mID = 'message_id'
 
 #* Fixture that clears and registers the first user
 @pytest.fixture
@@ -333,49 +334,46 @@ def test_http_dm_edit_notif(user1, user2):
         nMess : f"user2 tagged you in user1, user2: Hi @user1",
     } in notifs['notifications']
 
+
 #Test that people in a channel who have a message reacted to will get a notif 
 def test_http_channel_react_notif(user1, user2):
-     channelResponse = requests.post(f"{url}channels/create/v2", json={
+    channelResponse = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
         "name": "Hello",
         "is_public": True
     })
-
+    c1 = channelResponse.json()
+    
     requests.post(f"{url}channel/invite/v2", json={
         "token": user1[token],
-        "channel_id": channelResponse.json()[cID],
+        "channel_id": c1[cID],
         "u_id": user2[AuID],
     })
     
-'''
-
-    
-
-    messageResponse = requests.post(f"{url}message/send/v1", json={
+    messageResponse = requests.post(f"{url}message/send/v2", json={
         token: user1[token],
         cID: c1[cID],
         'message': 'Hi @user2'
     })
     m1 = messageResponse.json()
-    
+
     requests.post(f"{url}message/react/v1", json={
         token: user2[token],
-        'message_id': m1['message_id'],
+        mID: m1[mID],
         'react_id': thumbsUp
     })
     
-    response0 = requests.get(f"{url}notifications/get/v1", params={
+    response = requests.get(f"{url}notifications/get/v1", params={
         "token": user1[token]
     })
     
-    notifs0 = response0.json()
+    notifs = response.json()
     assert {
-        cID : -1,
-        dmID: dm1[dmID],
-        nMess : f"user2 tagged you in user1, user2: Hi @user1",
-    } in notifs0['notifications']
-    
-    assert len(notifs0['notifications']) == 1
+        cID: c1[cID],
+        dmID: -1, 
+        nMess: "user2 reacted to your message in Hello"
+    } in notifs['notifications']
+    assert len(notifs['notifications']) == 1
     
 
 #Test that people in a DM who get their message reacted to will get a notif 
@@ -392,7 +390,7 @@ def test_http_dm_react_notif(user1,user2):
         dmID: dm1[dmID],
         'message': 'Hi @user2'
     })
-    m1 = messageResponse.json()s
+    m1 = messageResponse.json()
     
     requests.post(f"{url}message/react/v1", json={
         token: user2[token],
@@ -400,10 +398,14 @@ def test_http_dm_react_notif(user1,user2):
         'react_id': thumbsUp
     })
 
-    response0 = requests.get(f"{url}notifications/get/v1", params={
+    response = requests.get(f"{url}notifications/get/v1", params={
         "token": user1[token]
     })
     
-    notifs0 = response0.json()
-    assert len(notifs0['notifications']) == 1
-'''
+    notifs = response.json()
+    assert {
+        cID: -1,
+        dmID: dm1[dmID], 
+        nMess: "user2 reacted to your message in user1, user2"
+    } in notifs['notifications']
+    assert len(notifs['notifications']) == 1
