@@ -51,7 +51,7 @@ def test_user_remove(user1, user2):
     user_remove_v1(user1[token], user2[AuID])
     for dictionary in (src.channel.channel_messages_v1(user1[token], channelTest[cID], 0)['messages']):
         if dictionary['message_id'] == message['message_id']:
-            assert 'Removed User' in dictionary['message']
+            assert 'Removed user' in dictionary['message']
 
     users = src.user.users_all(user1[token])
     assert users == {
@@ -62,13 +62,6 @@ def test_user_remove(user1, user2):
             'name_first': 'User', 
             'name_last': '1', 
             'handle_str': 'user1'
-            },
-            {
-            'u_id': 1, 
-            'email': "second@gmail.com", 
-            'name_first': 'Removed', 
-            'name_last': 'User', 
-            'handle_str': 'user2'
             },]
     } 
     with pytest.raises(InputError):
