@@ -122,6 +122,6 @@ def test_http_auth_logout_v1_invalid():
     token_1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
 
     response_3 = requests.delete(f"{url}auth/logout/v1", json={'token': token_1})
-    payload_3 = response_3.json()
-    assert payload_3['is_success'] == False
+    assert response_3.status_code == 403
+    
     
