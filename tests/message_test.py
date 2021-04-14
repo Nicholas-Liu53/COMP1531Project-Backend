@@ -245,6 +245,30 @@ def test_message_remove(user1, user2, user3, user4):
     with pytest.raises(InputError):
         message_remove_v1(user4[token], -1)
 
+    #* Test for dm
+    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID], user3[AuID]])
+    dmMessage1 = message_senddm_v1(user2[token], dm1[dmID], "Trigger")
+    dmMessage2 = message_senddm_v1(user2[token], dm1[dmID], "Happy")
+    #* User 3 cannot remove messages it didn't send
+    with pytest.raises(AccessError):
+        message_remove_v1(user3[token], dmMessage1[mID])
+    #* Dreams owner can remove message
+    message_remove_v1(user1[token], dmMessage1[mID])
+    messageFound = False
+    for messageDict in src.dm.dm_messages_v1(user3[token], dm1[dmID], 0)['messages']:
+        if message3['message_id'] == messageDict['message_id']:
+            messageFound = True
+            break
+    assert messageFound is False
+    #* User can remove own message
+    message_remove_v1(user2[token], dmMessage2[mID])
+    messageFound = False
+    for messageDict in src.dm.dm_messages_v1(user3[token], dm1[dmID], 0)['messages']:
+        if message3['message_id'] == messageDict['message_id']:
+            messageFound = True
+            break
+    assert messageFound is False
+
     #* All tests passed
     #! Clearing data
     clear_v1()
