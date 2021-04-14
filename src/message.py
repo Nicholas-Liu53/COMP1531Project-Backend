@@ -424,10 +424,6 @@ def message_react_v1(token, message_id, react_id):
     if message_found == False:
         raise InputError
        
-    with open('data.json', 'w') as FILE:
-        json.dump(data, FILE)  
-        
-    '''
     #For notifs 
     #If message is in channel 
     for message in data['messages_log']:
@@ -437,8 +433,11 @@ def message_react_v1(token, message_id, react_id):
         else: 
             push_reacted_notifications(auth_user_id, -1, message[dmID], message) 
     
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)  
+        
     return {}
-    '''
+
 
 def message_unreact_v1(token, message_id, react_id):
 #Assumption: Only react ID that is valid is 1 

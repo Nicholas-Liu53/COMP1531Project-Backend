@@ -208,9 +208,6 @@ def test_dm_edit_notif(user1, user2):
         nMess : f"{get_user(user1[AuID])['handle_str']} tagged you in {get_dm(dm1['dm_id'])['name']}: Yo {tagMessage}",
     } in notifications_get_v1(user2[token])[notifs]
     
-
-
-'''
 #Test that notification is received when there is a react to a message in a channel 
 def test_react_notif_in_channel(user1, user2):
     channel1 = src.channels.channels_create_v1(user1[token], 'Hello', True)
@@ -234,5 +231,5 @@ def test_react_notif_in_dm(user1, user2):
         dmID: dm1[dmID],
         nMess: f"{get_user(user2[AuID])['handle_str']} reacted to your message in {get_dm(dm1['dm_id'])['name']}",
     } in notifications_get_v1(user1[token])[notifs]
-'''
+
 
