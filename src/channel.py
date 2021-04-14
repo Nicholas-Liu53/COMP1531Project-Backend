@@ -74,6 +74,8 @@ def channel_invite_v1(token, channel_id, u_id):
     for chan in data['channels']:
         if chan["channel_id"] == channel_id:
             # ensure no duplicates
+            if get_user_permissions(u_id) == 1 :
+                chan["owner_members"].append(u_id) if u_id not in chan["owner_members"] else None
             chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
             
             #* update analytics
