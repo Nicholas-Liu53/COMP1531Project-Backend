@@ -63,6 +63,8 @@ def message_send_v1(token, channel_id, message):
     else:
         newID = 0
 
+    print("This message is indeed sending")
+
     # User is in the channel (which exists) & message is appropriate length
     #* Time to send a message
     data['messages_log'].append(
@@ -381,27 +383,38 @@ def message_unpin_v1(token, message_id):
     raise InputError
 
 def message_sendlater_v1(token, channel_id, message, time_sent):
-    timeTillSend = time_sent - int(datetime.now().replace(tzinfo=timezone.utc).timestamp())
+    print(datetime.utcfromtimestamp(datetime.now().replace(tzinfo=timezone.utc).timestamp()).strftime('%Y-%m-%d %H:%M:%S'))
+    print(datetime.utcfromtimestamp(time_sent).strftime('%Y-%m-%d %H:%M:%S'))
+    timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
+    print(timeTillSend)
     threading.Timer(timeTillSend, message_send_v1, args=(token, channel_id, message)).start()
     with open('data.json', 'r') as FILE:
         data = json.load(FILE)
-    # if len(data['messages_log']) == 0:
-    #     return {
-    #         'message_id': 0,
-    #     }
+    if len(data['messages_log']) == 0:
+        with open('data.json', 'w') as FILE:
+            json.dump(data, FILE)
+        return {
+            'message_id': 0,
+        }
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
     return {
         'message_id': data['messages_log'][-1][mID],
     }
 
 def message_sendlaterdm_v1(token, dm_id, message, time_sent):
-    timeTillSend = time_sent - int(datetime.now().replace(tzinfo=timezone.utc).timestamp())
-    threading.Timer(timeTillSend, message_senddm_v1, args=(token, dm_id, message)).start()
+    timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
+    threading.Timer(timeTillSend, message_senddm_v1, args=(token, dm_id, message),).start()
     with open('data.json', 'r') as FILE:
         data = json.load(FILE)
-    # if len(data['messages_log']) == 0:
-    #     return {
-    #         'message_id': 0,
-    #     }
+    if len(data['messages_log']) == 0:
+        with open('data.json', 'w') as FILE:
+            json.dump(data, FILE)
+        return {
+            'message_id': 0,
+        }
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
     return {
         'message_id': data['messages_log'][-1][mID],
     }
