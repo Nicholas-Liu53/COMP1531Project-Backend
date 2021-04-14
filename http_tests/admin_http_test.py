@@ -93,7 +93,7 @@ def test_http_admin_user_remove_valid(user1, user2):
 
     for dictionary in (message_data['messages']):
         if dictionary['message_id'] == message['message_id']:
-            assert 'Removed User' in dictionary['message']
+            assert 'Removed user' in dictionary['message']
 
     users_data = requests.get(f"{url}users/all/v1", params={
         "token": user1[token]
