@@ -252,14 +252,7 @@ def push_reacted_notifications(auth_user_id, user_id, channel_id, dm_id):
         'notification_message': f"{users_handle} reacted to your message in {channelDMname}",
     }
     data = json.load(open('data.json', 'r'))
-    
-    print(data['notifs'][f"{user_id}"])
-    print(notification)
-    
     data['notifs'][f"{user_id}"].insert(0, notification)
-    
-    print(data['notifs'][f"{user_id}"])
-    
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
         

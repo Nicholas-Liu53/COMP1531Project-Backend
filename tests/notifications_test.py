@@ -215,9 +215,6 @@ def test_react_notif_in_channel(user1, user2):
     message1 =  message_send_v1(user1[token], channel1[cID], "Good-bye")
     message_react_v1(user2[token], message1[mID], thumbsUp)
     
-    print(notifications_get_v1(user2[token])[notifs])
-    print(notifications_get_v1(user1[token])[notifs])
-    
     assert {
         cID: channel1[cID],
         dmID: -1, 
