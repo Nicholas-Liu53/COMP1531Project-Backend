@@ -108,14 +108,7 @@ def test_http_admin_user_remove_valid(user1, user2):
             'name_first': 'User', 
             'name_last': '1', 
             'handle_str': 'user1'
-            },
-            {
-            'u_id': 1, 
-            'email': "second@gmail.com", 
-            'name_first': 'Removed', 
-            'name_last': 'User', 
-            'handle_str': 'user2'
-            },]
+            }]
     } 
 
     #* Test: u_id does not refer to a valid user
