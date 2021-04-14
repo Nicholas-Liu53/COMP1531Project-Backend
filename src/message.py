@@ -105,8 +105,6 @@ def message_send_v1(token, channel_id, message):
 def message_remove_v1(token, message_id):
     '''
     Takes in a user's token and a message's id and removes that message.
-        --> Note: The message dictionary isn't removed, but rather the message is 
-                    replaced with "### Message Removed ###"
 
     Arguments:
         token        (str) - The JWT containing user_id and session_id of the user that is to remove the message
@@ -143,28 +141,19 @@ def message_remove_v1(token, message_id):
 
     i -= 1              # Remove extra increment
 
-    #* Check if the user is the writer, channel owner or owner of Dreams
-    # Get the channel the message belongs to
-    channel = get_channel(data['messages_log'][i]['channel_id'])
-    if auth_user_id is not data['messages_log'][i]['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
-        raise AccessError
+    if data['messages_log'][i][cID] != -1:
+        #* If message is in a channel
+        #* Check if the user is the writer, channel owner or owner of Dreams
+        # Get the channel the message belongs to
+        channel = get_channel(data['messages_log'][i]['channel_id'])
+        if auth_user_id is not data['messages_log'][i]['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
+            raise AccessError
+    else:
+        if auth_user_id is not data['messages_log'][i]['u_id'] and get_user_permissions(auth_user_id) != 1:
+            raise AccessError
 
     #* Remove the message
     data['messages_log'].remove(data['messages_log'][i])
-
-    updated_num_message = data['dreams_analytics']['messages_exist'][-1]['num_messages_exist'] - 1
-    data['dreams_analytics']['messages_exist'].append({
-        'num_messages_exist': updated_num_message,
-        'time_stamp': int(datetime.now().strftime("%s"))
-    })
-    #* update analytics
-    messageSentPrev = data["user_analytics"][f"{auth_user_id}"]['messages_sent'][-1]["num_messages_sent"]
-    data["user_analytics"][f"{auth_user_id}"]['messages_sent'].append(
-        {
-            "num_messages_sent": messageSentPrev - 1,
-            "time_stamp": int(datetime.now().strftime("%s"))
-        }
-    )   
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
