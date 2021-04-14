@@ -429,15 +429,13 @@ def message_react_v1(token, message_id, react_id):
     # user_id: person who wrote the message
     #   - Need to find the person who wrote the message and then push notifs TO the that user
     # channel_id, dm_id follows the ids given in the message
-
-    #For notifs 
-    #If message is in channel 
     for message in data['messages_log']:
         if message['channel_id'] != -1:   
-            push_reacted_notifications(auth_user_id, message[cID], -1, message)
+            #Find u_id of person who wrote message in channel 
+            push_reacted_notifications(auth_user_id, message['u_id'], message[cID], -1)            
         #If message is in DM
         else: 
-            push_reacted_notifications(auth_user_id, -1, message[dmID], message) 
+            push_reacted_notifications(auth_user_id, message['u_id'], -1, message[dmID]) 
     
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)  
