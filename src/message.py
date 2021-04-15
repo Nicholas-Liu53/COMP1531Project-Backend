@@ -145,7 +145,9 @@ def message_remove_v1(token, message_id):
 
     #* Check if the user is the writer, channel owner or owner of Dreams
     # Get the channel the message belongs to
-    channel = get_channel(data['messages_log'][i]['channel_id'])
+
+    if data['messages_log'][i]['dm_id'] == -1 :
+        channel = get_channel(data['messages_log'][i]['channel_id'])
     if auth_user_id is not data['messages_log'][i]['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
         raise AccessError
 
