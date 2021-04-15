@@ -379,7 +379,7 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
 
     if dm_id == -1:
         push_tagged_notifications(auth_user_id, channel_id, -1, newMessage)
-    else: 
+    elif channel_id == -1: 
         push_tagged_notifications(auth_user_id, -1, dm_id, newMessage)
 
     return {"shared_message_id" : shared_message_id["message_id"]}
