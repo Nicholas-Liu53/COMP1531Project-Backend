@@ -143,9 +143,10 @@ def test_http_dm_create(user1, user2):
         "token": user1[token],
         "u_ids": [user2[AuID]]
     })
+    dm = dmResponse.json()
 
     assert dmResponse.json() == {
-        dmID: 0,
+        dmID: dm[dmID],
         'dm_name': 'user1, user2',
     }
 
