@@ -335,29 +335,26 @@ def test_http_dm_edit_notif(user1, user2):
 
 #Test that people in a channel who have a message reacted to will get a notif 
 def test_http_channel_react_notif(user1, user2):
-     channelResponse = requests.post(f"{url}channels/create/v2", json={
+    channelResponse = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
         "name": "Hello",
         "is_public": True
     })
+    c1 = channelResponse.json()
 
     requests.post(f"{url}channel/invite/v2", json={
         "token": user1[token],
         "channel_id": channelResponse.json()[cID],
         "u_id": user2[AuID],
     })
-    
-'''
 
-    
-
-    messageResponse = requests.post(f"{url}message/send/v1", json={
+    messageResponse = requests.post(f"{url}message/send/v2", json={
         token: user1[token],
         cID: c1[cID],
         'message': 'Hi @user2'
     })
     m1 = messageResponse.json()
-    
+
     requests.post(f"{url}message/react/v1", json={
         token: user2[token],
         'message_id': m1['message_id'],
@@ -392,7 +389,7 @@ def test_http_dm_react_notif(user1,user2):
         dmID: dm1[dmID],
         'message': 'Hi @user2'
     })
-    m1 = messageResponse.json()s
+    m1 = messageResponse.json()
     
     requests.post(f"{url}message/react/v1", json={
         token: user2[token],
@@ -406,4 +403,3 @@ def test_http_dm_react_notif(user1,user2):
     
     notifs0 = response0.json()
     assert len(notifs0['notifications']) == 1
-'''
