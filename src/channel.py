@@ -2,7 +2,7 @@ from src.error import AccessError, InputError
 from src.channels import channels_listall_v2, channels_list_v2
 from src.other import decode, get_channel, get_user, message_count, push_added_notifications, check_removed
 import jwt
-import json
+import json, time
 from src.other import SECRET
 from datetime import datetime
 
@@ -176,7 +176,6 @@ def channel_messages_v1(token, channel_id, start):
     Return Value:
         Returns up to 50 messages alongside a start and and end value.
     '''
-    data = json.load(open('data.json', 'r'))
     
     #Handling of input and access errors 
     #Input error: Channel ID is not a valid channel 
@@ -188,10 +187,6 @@ def channel_messages_v1(token, channel_id, start):
     
     if not channelFound:
         raise InputError
-
-    #Input error: Start is greater than total number of messages in list 
-    if start > len(data['messages_log']):
-        raise InputError
     
     #Access error: When auth_user_id is not a member of channel with channel_id 
     userFound = False 
@@ -201,10 +196,20 @@ def channel_messages_v1(token, channel_id, start):
     
     if not userFound:
         raise AccessError
-    
+
     desired_end = start + 50
     num_of_messages = message_count(channel_id, -1)
-        
+
+    try:
+        data = json.load(open('data.json', 'r'))
+    except json.JSONDecodeError:
+        time.sleep(0.1)
+        data = json.load(open('data.json', 'r'))
+
+    #Input error: Start is greater than total number of messages in list 
+    if start > len(data['messages_log']):
+        raise InputError
+
     if num_of_messages < desired_end:
         desired_end = -1
     messages = []
