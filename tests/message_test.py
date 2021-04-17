@@ -641,3 +641,50 @@ def test_message_sendlaterdm_is_sent_later(user1, user2):
             messageFound = True
     assert messageFound
     assert mTime == sendTime
+
+#* Testing a message that is to be sent later isn't too long
+def test_message_sendlater_long_messages(user1, user2):
+    # User1 creates channel
+    channel1 = src.channels.channels_create_v1(user1[token], 'Dominic Torreto', True)
+    # User2 joins channel
+    src.channel.channel_join_v1(user2[token], channel1[cID])
+    # Test for m1, sent by user1
+    sendTime = datetime.now().replace(tzinfo=timezone.utc).timestamp() + 3
+    tooLong = ""
+    for _ in range(501):
+        tooLong += ":("
+    with pytest.raises(InputError):
+        src.message.message_sendlater_v1(user1[token], channel1[cID], tooLong, sendTime)
+
+
+#* Testing a message that is to be sent later isn't too long
+def test_message_sendlaterdm_long_messages(user1, user2):
+    # User1 creates dm, invites user2
+    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    # Test for m1, sent by user1
+    sendTime = datetime.now().replace(tzinfo=timezone.utc).timestamp() + 3
+    tooLong = ""
+    for _ in range(501):
+        tooLong += ":("
+    with pytest.raises(InputError):
+        src.message.message_sendlaterdm_v1(user1[token], dm1[dmID], tooLong, sendTime)
+
+def test_message_sendlater_other_user(user1, user2, user3):
+    # User1 creates channel
+    channel1 = src.channels.channels_create_v1(user1[token], 'Dominic Torreto', True)
+    # User2 joins channel
+    src.channel.channel_join_v1(user2[token], channel1[cID])
+    # Test for m1, sent by user3
+    sendTime = datetime.now().replace(tzinfo=timezone.utc).timestamp() + 3
+    messageToSend = "Quack"
+    with pytest.raises(AccessError):
+        src.message.message_sendlater_v1(user3[token], channel1[cID], messageToSend, sendTime)
+
+def test_message_sendlaterdm_other_user(user1, user2, user3):
+    # User1 creates dm, invites user2
+    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    # Test for m1, sent by user3
+    sendTime = datetime.now().replace(tzinfo=timezone.utc).timestamp() + 3
+    messageToSend = "Quack quack"
+    with pytest.raises(AccessError):
+        src.message.message_sendlaterdm_v1(user3[token], dm1[dmID], messageToSend, sendTime)
