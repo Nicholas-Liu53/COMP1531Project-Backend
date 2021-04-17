@@ -246,7 +246,7 @@ def user_uploadphoto():
 
 @APP.route("/static/<path:path>")
 def send_js(path):
-    return send_from_directory('',path)
+    return send_from_directory('',f'static/{path}')
 #* ------------------------------------------------------------------------------------
 
 #* SERVER RUN

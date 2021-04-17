@@ -6,6 +6,7 @@ from datetime import timezone, datetime
 import urllib.request
 import requests
 from PIL import Image
+from src.config import url
 
 
 
@@ -269,13 +270,11 @@ def user_profile_uploadphoto_v1(token, img_url,x_start,y_start,x_end,y_end):
     imageObject.crop((x_start, y_start, x_end, y_end)).save(f"static/{auth_user_id}.jpg")
 
     data = json.load(open('data.json', 'r'))
+    for user in data['users']:
+        if user['u_id'] == auth_user_id:
+            user['profile_img_url'] = f"{url}static/{auth_user_id}.jpg"
 
-    
-
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
 
     return {}
-
-
-
-    # Call back into 
-

@@ -138,6 +138,7 @@ def get_user(user_id):
                 'name_first': user['name_first'],
                 'name_last': user['name_last'],
                 'handle_str': user['handle_str'],
+                'profile_img_url': user['profile_img_url'],
             }
     raise InputError
 
@@ -172,6 +173,7 @@ def get_user_from_handlestring(handlestring):
                 'name_first': user['name_first'],
                 'name_last': user['name_last'],
                 'handle_str': user['handle_str'],
+                'profile_img_url': user['profile_img_url'],
             }
     # raise InputError
 
