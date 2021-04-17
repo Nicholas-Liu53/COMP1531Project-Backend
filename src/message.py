@@ -432,8 +432,18 @@ def message_sendlater_v1(token, channel_id, message, time_sent):
     }
 
 def message_sendlaterdm_v1(token, dm_id, message, time_sent):
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    # Decode the token
+    auth_user_id, _ = decode(token)
+
+    # If the message is too long, raise InputError
+    if len(message) > 1000:
+        raise InputError
+
+    # Check if user is in channel
+    if auth_user_id not in get_dm(dm_id)['all_members']:
+        raise AccessError
+
+    data = json.load(open('data.json', 'r'))
     newID = getrandbits(32)
     uniqueMessageID = False
     foundIdenticalID = False
@@ -449,9 +459,10 @@ def message_sendlaterdm_v1(token, dm_id, message, time_sent):
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
     timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
-    threading.Timer(timeTillSend, message_senddm_v1, args=(token, dm_id, message),).start()
+    newID = 0
+    threading.Timer(timeTillSend, sendlaterdm_send, args=(token, dm_id, message, time_sent, newID)).start()
     return {
-        'message_id': newID,
+        'message_id': newID
     }
 
 def sendlater_send(token, channel_id, message, time_sent, newID):
@@ -482,3 +493,32 @@ def sendlater_send(token, channel_id, message, time_sent, newID):
 
     #* Push notifications if anyone is tagged
     push_tagged_notifications(auth_user_id, channel_id, -1, message)
+
+def sendlaterdm_send(token, dm_id, message, time_sent, newID):
+    # Decode the token
+    auth_user_id, _ = decode(token)
+
+    data = json.load(open('data.json', 'r'))
+
+    print("This message is indeed sending")
+
+    # User is in the dm (which exists) & message is appropriate length
+    #* Time to send a message
+    data['messages_log'].append(
+        {
+            'channel_id'    : -1,
+            'dm_id'         : dm_id,
+            'u_id'          : auth_user_id,
+            'time_created'  : time_sent,
+            'message_id'    : newID,
+            'message'       : message,
+            'reacts': [],
+            'is_pinned': False,
+        }
+    )
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+
+    #* Push notifications if anyone is tagged
+    push_tagged_notifications(auth_user_id, -1, dm_id, message)
