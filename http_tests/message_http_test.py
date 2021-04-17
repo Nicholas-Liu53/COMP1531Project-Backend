@@ -441,7 +441,7 @@ def test_http_senddm_multiple(user1, user2):
         'message': ''
     })
     message0 = response0.json()
-    assert message0 == {'message_id': 0}
+    assert message0 == {'message_id': message0['message_id']}
     response1 = requests.post(f"{url}message/senddm/v1", json={
         token: user1[token],
         dmID: dm1[dmID],
@@ -449,7 +449,7 @@ def test_http_senddm_multiple(user1, user2):
     })
 
     message1 = response1.json()
-    assert message1 == {'message_id': 1}
+    assert message1 == {'message_id': message1['message_id']}
 
     response2 = requests.post(f"{url}message/senddm/v1", json={
         token: user1[token],
@@ -458,7 +458,7 @@ def test_http_senddm_multiple(user1, user2):
     })
 
     message2 = response2.json()
-    assert message2 == {'message_id': 2}
+    assert message2 == {'message_id': message2['message_id']}
     
     response3 = requests.post(f"{url}message/senddm/v1", json={
         token: user1[token],
@@ -467,4 +467,4 @@ def test_http_senddm_multiple(user1, user2):
     })
 
     message3 = response3.json()
-    assert message3 == {'message_id': 3}
+    assert message3 == {'message_id': message3['message_id']}
