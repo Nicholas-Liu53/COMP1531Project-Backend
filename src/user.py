@@ -251,10 +251,10 @@ def user_profile_uploadphoto_v1(token, img_url,x_start,y_start,x_end,y_end):
     if requests.head(img_url).headers["content-type"] not in image_formats:
         raise InputError
         
-    urllib.request.urlretrieve(img_url, f"static/{auth_user_id}.jpg")
+    urllib.request.urlretrieve(img_url, f"src/static/{auth_user_id}.jpg")
 
     # Cropping image
-    imageObject = Image.open(f"static/{auth_user_id}.jpg")
+    imageObject = Image.open(f"src/static/{auth_user_id}.jpg")
 
     width, height = imageObject.size
 
@@ -267,7 +267,7 @@ def user_profile_uploadphoto_v1(token, img_url,x_start,y_start,x_end,y_end):
     elif x_end < 0 or y_end < 0 or  x_end > width or  y_end > height:
         raise InputError
     
-    imageObject.crop((x_start, y_start, x_end, y_end)).save(f"static/{auth_user_id}.jpg")
+    imageObject.crop((x_start, y_start, x_end, y_end)).save(f"src/static/{auth_user_id}.jpg")
 
     data = json.load(open('data.json', 'r'))
     for user in data['users']:
