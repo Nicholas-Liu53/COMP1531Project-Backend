@@ -212,7 +212,7 @@ def test_http_dm_invite_invalid_dm(user1, user2):
     invalid_dm = requests.post(f"{url}dm/invite/v1", json={
         "token": user1[token],
         dmID: invalid_dm_id,
-        uID: [user2[AuID]],
+        uID: user2[AuID],
     })
     assert invalid_dm.status_code == 400
 
