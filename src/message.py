@@ -471,8 +471,6 @@ def sendlater_send(token, channel_id, message, time_sent, newID):
 
     data = json.load(open('data.json', 'r'))
 
-    print("This message is indeed sending")
-
     # User is in the channel (which exists) & message is appropriate length
     #* Time to send a message
     data['messages_log'].append(
@@ -499,8 +497,6 @@ def sendlaterdm_send(token, dm_id, message, time_sent, newID):
     auth_user_id, _ = decode(token)
 
     data = json.load(open('data.json', 'r'))
-
-    print("This message is indeed sending")
 
     # User is in the dm (which exists) & message is appropriate length
     #* Time to send a message

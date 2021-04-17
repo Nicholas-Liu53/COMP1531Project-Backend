@@ -398,7 +398,6 @@ def test_message_pin_valid_channel(user1):
     for message in pinned['messages']:
         if target[mID] == message[mID]:
             mID_found = True
-            print(message)
             assert message['is_pinned'] is True
         else:
             assert message['is_pinned'] is False
@@ -606,7 +605,7 @@ def test_message_sendlater_is_sent_later(user1, user2):
     assert not messageFound
 
     #* Sleep for now
-    time.sleep(5)
+    time.sleep(4)
     
     #* Make sure the message is sent and the timestamp is correct
     for message in src.channel.channel_messages_v1(user2[token], channel1[cID], 0)['messages']:
@@ -633,7 +632,7 @@ def test_message_sendlaterdm_is_sent_later(user1, user2):
     assert not messageFound
 
     #* Sleep for now
-    time.sleep(5)
+    time.sleep(4)
     
     #* Make sure the message is sent and the timestamp is correct
     for message in src.dm.dm_messages_v1(user2[token], dm1[dmID], 0)['messages']:
