@@ -6,6 +6,8 @@ from src.other import SECRET
 import jwt
 from src.channels import channels_create_v1
 from src.message import message_send_v1
+from src.config import url
+
 AuID    = 'auth_user_id'
 uID     = 'u_id'
 cID     = 'channel_id'
@@ -96,6 +98,7 @@ def test_http_channel_invite(user1, user2, user3):
         'email': "second@gmail.com", 
         'handle_str': "user2",
         uID: user2[AuID],
+        'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
     } in details[allMems]
 
     #* Test 2: Channel id not valid raises inputerror
@@ -143,6 +146,7 @@ def test_http_channel_details(user1, user2):
             'name_last': '1',
             'email': 'first@gmail.com',
             'handle_str': 'user1',
+            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
         }],
         'all_members':[{
             'u_id': user1[AuID], 
@@ -150,6 +154,7 @@ def test_http_channel_details(user1, user2):
             'name_last': '1',
             'email': 'first@gmail.com',
             'handle_str': 'user1',
+            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
         }]
     }
 
@@ -195,6 +200,7 @@ def test_http_channel_leave(user1, user2, user3, user4):
         lName: "2",
         'email': "second@gmail.com",
         'handle_str': "user2",
+        'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
     } in requests.get(f"{url}channel/details/v2", params={
         'token': user3[token], 
         'channel_id': c1.json()['channel_id']
@@ -205,6 +211,7 @@ def test_http_channel_leave(user1, user2, user3, user4):
         lName: "3",
         'email': "third@gmail.com",
         'handle_str': "user3",
+        'profile_img_url': f"{url}static/{user3[AuID]}.jpg"
     } in requests.get(f"{url}channel/details/v2", params={
         'token': user3[token], 
         'channel_id': c1.json()['channel_id']
@@ -215,6 +222,7 @@ def test_http_channel_leave(user1, user2, user3, user4):
         lName: "4",
         'email': "fourth@gmail.com",
         'handle_str': "user4",
+        'profile_img_url': f"{url}static/{user4[AuID]}.jpg"
     } in requests.get(f"{url}channel/details/v2", params={
         'token': user3[token], 
         'channel_id': c1.json()['channel_id']
@@ -229,7 +237,8 @@ def test_http_channel_leave(user1, user2, user3, user4):
         fName: 'User',
         lName: "4",
         'email': "fourth@gmail.com",
-        'handle_str': "user4"
+        'handle_str': "user4",
+        'profile_img_url': f"{url}static/{user4[AuID]}.jpg"
     } not in requests.get(f"{url}channel/details/v2", params={
         'token': user1[token], 
         'channel_id': c1.json()['channel_id']
@@ -245,6 +254,7 @@ def test_http_channel_leave(user1, user2, user3, user4):
         lName: "3",
         'email': "third@gmail.com",
         'handle_str': "user3",
+        'profile_img_url': f"{url}static/{user3[AuID]}.jpg"
     } not in requests.get(f"{url}channel/details/v2", params={
         'token': user1[token], 
         'channel_id': c1.json()['channel_id']
@@ -289,7 +299,8 @@ def test_http_channel_join(user1, user2, user3, user4):
                 'email': "first@gmail.com",
                 fName: "User",
                 lName: "1",
-                'handle_str': "user1"
+                'handle_str': "user1",
+                'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }
         ],
         "all_members": [
@@ -298,14 +309,16 @@ def test_http_channel_join(user1, user2, user3, user4):
                 'email': "first@gmail.com",
                 fName: "User",
                 lName: "1",
-                'handle_str': "user1"
+                'handle_str': "user1",
+                'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             },
             {
                 uID: user3[AuID],
                 'email': "third@gmail.com",
                 fName: "User",
                 lName: "3",
-                'handle_str': "user3"
+                'handle_str': "user3",
+                'profile_img_url': f"{url}static/{user3[AuID]}.jpg"
             }
         ]
     }
@@ -355,6 +368,7 @@ def test_http_channel_addowner(user1, user2, user3, user4):
         lName: '2',
         'email': 'second@gmail.com',
         'handle_str': 'user2',
+        'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
     } in details[allMems]
     assert {
         uID: user2[AuID],
@@ -362,6 +376,7 @@ def test_http_channel_addowner(user1, user2, user3, user4):
         lName: '2',
         'email': 'second@gmail.com',
         'handle_str': 'user2',
+        'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
     } in details[ownMems]
 
     #* Test 2: Input error for invalid Channel iD
@@ -426,6 +441,7 @@ def test_http_channel_removeowner(user1, user2, user3, user4):
         lName: '1',
         'email': 'first@gmail.com',
         'handle_str': 'user1',
+        'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
     } not in details[ownMems]
     assert {
         uID: user1[AuID],
@@ -433,6 +449,7 @@ def test_http_channel_removeowner(user1, user2, user3, user4):
         lName: '1',
         'email': 'first@gmail.com',
         'handle_str': 'user1',
+        'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
     } in details[allMems]
 
     #* Test 2: Input Error for channel ID not valid

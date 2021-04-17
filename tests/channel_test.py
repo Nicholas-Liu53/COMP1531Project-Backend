@@ -52,7 +52,7 @@ def test_channel_invite(user1, user2, user3):
         lName: '2', 
         'email': "second@gmail.com", 
         'handle_str': "user2",
-        'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
+        'profile_img_url': f"{url}static/{user2[AuID]}.jpg",
         uID: user2[AuID],
     } in channel_details_v1(user1[token], privateChannel[cID])[allMems]
     
@@ -240,7 +240,7 @@ def test_channel_join(user1, user2, user3, user4):
         'email': "third@gmail.com",
         fName: "User",
         lName: "3",
-        'handle_str': 'user3'
+        'handle_str': 'user3',
         'profile_img_url': f"{url}static/{user3[AuID]}.jpg"
     } in channel_details_v1(user3[token], firstChannel[cID])[allMems]
 

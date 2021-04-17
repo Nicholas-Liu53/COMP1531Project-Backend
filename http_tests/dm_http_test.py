@@ -82,12 +82,14 @@ def test_http_dm_details_valid(user1, user2):
             lName: '1',
             'email': 'first@gmail.com',
             handle: 'user1',
+            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
         }, {
             uID: user2[AuID], 
             fName: "User",
             lName: '2',
             'email': 'second@gmail.com',
             handle: 'user2',
+            'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
         }
         ]
     }

@@ -5,6 +5,7 @@ from src.message import message_senddm_v1
 from src.other import SECRET
 import src.auth, src.channel, src.other
 import jwt
+from src.config import url
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'

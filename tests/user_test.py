@@ -8,6 +8,7 @@ from src.channels import channels_create_v1
 from src.dm import dm_create_v1, dm_invite_v1
 from src.message import message_send_v1, message_remove_v1, message_senddm_v1
 import jwt
+from src.config import url
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
@@ -58,7 +59,7 @@ def test_user_profile_valid(user1,user2):
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
             'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }
     }
@@ -77,7 +78,7 @@ def test_user_profile_valid_multiple(user1,user2):
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
             'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }
     }
@@ -89,7 +90,7 @@ def test_user_profile_valid_multiple(user1,user2):
             'email': "ericamondy@gmail.com", 
             'name_first': 'erica', 
             'name_last': 'mondy', 
-            'handle_str': 'ericamondy'
+            'handle_str': 'ericamondy',
             'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
             }
     }
@@ -115,7 +116,7 @@ def test_user_setname_valid_first_name(user1):
             'email': "caricoleman@gmail.com", 
             'name_first': 'kari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
             'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }
     }
@@ -134,7 +135,7 @@ def test_user_setname_valid_last_name(user1):
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'koleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
             'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }
     }
@@ -153,7 +154,7 @@ def test_user_setname_valid_both_names(user1):
             'email': "caricoleman@gmail.com", 
             'name_first': 'kari', 
             'name_last': 'koleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
             'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }
     }
@@ -175,7 +176,7 @@ def test_user_setname_valid_multiple(user1,user2):
         'email': "caricoleman@gmail.com", 
         'name_first': 'kari', 
         'name_last': 'koleman', 
-        'handle_str': 'caricoleman'
+        'handle_str': 'caricoleman',
         'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
         }
     }
@@ -189,7 +190,7 @@ def test_user_setname_valid_multiple(user1,user2):
         'email': "ericamondy@gmail.com", 
         'name_first': 'erika', 
         'name_last': 'money', 
-        'handle_str': 'ericamondy'
+        'handle_str': 'ericamondy',
         'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
         }
     }
@@ -233,7 +234,7 @@ def test_user_setemail_valid(user1):
         'email': "karicoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_str': 'caricoleman'
+        'handle_str': 'caricoleman',
         'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
         }
     }
@@ -253,7 +254,7 @@ def test_user_setemail_valid_multiple(user1,user2):
         'email': "karicoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_str': 'caricoleman'
+        'handle_str': 'caricoleman',
         'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
         }
     }
@@ -267,7 +268,7 @@ def test_user_setemail_valid_multiple(user1,user2):
         'email': "erikamoney@gmail.com", 
         'name_first': 'erica', 
         'name_last': 'mondy', 
-        'handle_str': 'ericamondy'
+        'handle_str': 'ericamondy',
         'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
         }
     }
@@ -296,7 +297,7 @@ def test_user_setemail_invalid_email_in_use(user1,user2):
             'email': "karicoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
             'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }
         }
@@ -316,7 +317,7 @@ def test_user_sethandle_valid(user1):
         'email': "caricoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_str': 'karikoleman'
+        'handle_str': 'karikoleman',
         'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
         }
     }
@@ -337,7 +338,7 @@ def test_user_sethandle_valid_multiple(user1,user2):
         'email': "caricoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_str': 'karikoleman'
+        'handle_str': 'karikoleman',
         'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
         }
     }
@@ -351,7 +352,7 @@ def test_user_sethandle_valid_multiple(user1,user2):
         'email': "ericamondy@gmail.com", 
         'name_first': 'erica', 
         'name_last': 'mondy', 
-        'handle_str': 'erikamoney'
+        'handle_str': 'erikamoney',
         'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
         }
     }
@@ -387,7 +388,7 @@ def test_user_sethandle_invalid_handle_in_use(user1,user2):
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'kari'
+            'handle_str': 'kari',
             'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }
         }
@@ -406,7 +407,7 @@ def test_users_all_v1_one(user1):
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
             'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }]
     }
@@ -422,7 +423,7 @@ def test_users_all_v1_two(user1,user2):
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
             'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             },
             {
@@ -430,7 +431,7 @@ def test_users_all_v1_two(user1,user2):
             'email': "ericamondy@gmail.com", 
             'name_first': 'erica', 
             'name_last': 'mondy', 
-            'handle_str': 'ericamondy'
+            'handle_str': 'ericamondy',
             'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
             }]
     } 
@@ -444,7 +445,7 @@ def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
             'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             },
             {
@@ -452,7 +453,7 @@ def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
             'email': "ericamondy@gmail.com", 
             'name_first': 'erica', 
             'name_last': 'mondy', 
-            'handle_str': 'ericamondy'
+            'handle_str': 'ericamondy',
             'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
             },
             {
@@ -460,7 +461,7 @@ def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
             'email': "hilarybently@gmail.com", 
             'name_first': 'hillary', 
             'name_last': 'bently', 
-            'handle_str': 'hillarybently'
+            'handle_str': 'hillarybently',
             'profile_img_url': f"{url}static/{user3[AuID]}.jpg"
             },
             {
@@ -468,7 +469,7 @@ def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
             'email': "kentonwatkins@gmail.com", 
             'name_first': 'kenton', 
             'name_last': 'watkins', 
-            'handle_str': 'kentonwatkins'
+            'handle_str': 'kentonwatkins',
             'profile_img_url': f"{url}static/{user4[AuID]}.jpg"
             },
             {
@@ -476,7 +477,7 @@ def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
             'email': "claudiamarley@gmail.com", 
             'name_first': 'claudia', 
             'name_last': 'marley', 
-            'handle_str': 'claudiamarley'
+            'handle_str': 'claudiamarley',
             'profile_img_url': f"{url}static/{user5[AuID]}.jpg"
             },]
         } 
