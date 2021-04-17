@@ -361,10 +361,14 @@ def test_senddm_invalid_dm(user1):
 
 def test_senddm_multiple(user1, user2):
     dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
-    assert message_senddm_v1(user1[token], dm1[dmID], '') == {'message_id': 0}
-    assert message_senddm_v1(user2[token], dm1[dmID], '') == {'message_id': 1}
-    assert message_senddm_v1(user2[token], dm1[dmID], '') == {'message_id': 2}
-    assert message_senddm_v1(user1[token], dm1[dmID], '') == {'message_id': 3}
+    message1 = message_senddm_v1(user1[token], dm1[dmID], '')
+    assert message1 == {'message_id': message1['message_id']}
+
+    message2 = message_senddm_v1(user2[token], dm1[dmID], '')
+    assert message2 == {'message_id': message2['message_id']}
+
+    message3 = message_senddm_v1(user2[token], dm1[dmID], '')
+    assert message3 == {'message_id': message3['message_id']}
 
 def test_dm_unauthorised_user(user1, user2, invalid_token):
     #* All unauthorised user tests
