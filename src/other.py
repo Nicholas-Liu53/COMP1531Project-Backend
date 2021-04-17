@@ -115,7 +115,7 @@ def decode(token):
 def check_session(auth_user_id, session_id):
     data = json.load(open('data.json', 'r'))
     for user in data['users']:
-        if auth_user_id == user[uID]:
+        if auth_user_id == user[uID] and user['permission_id'] != 0:
             if session_id in user['session_id']:
                 return
     raise AccessError
