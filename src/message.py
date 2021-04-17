@@ -422,7 +422,8 @@ def message_sendlater_v1(token, channel_id, message, time_sent):
             newID = getrandbits(32)
         else:
             uniqueMessageID = True
-
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
     timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
     newID = 0
     threading.Timer(timeTillSend, sendlater_send, args=(token, channel_id, message, time_sent, newID)).start()
@@ -445,12 +446,12 @@ def message_sendlaterdm_v1(token, dm_id, message, time_sent):
             newID = getrandbits(32)
         else:
             uniqueMessageID = True
-    timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
-    threading.Timer(timeTillSend, message_senddm_v1, args=(token, dm_id, message),).start()
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
+    timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
+    threading.Timer(timeTillSend, message_senddm_v1, args=(token, dm_id, message),).start()
     return {
-        'message_id': data['messages_log'][-1][mID],
+        'message_id': newID,
     }
 
 def sendlater_send(token, channel_id, message, time_sent, newID):
@@ -467,7 +468,7 @@ def sendlater_send(token, channel_id, message, time_sent, newID):
         {
             'channel_id'    : channel_id,
             'dm_id'         : -1,
-            'u_id'          : get_user(auth_user_id)['u_id'],
+            'u_id'          : auth_user_id,
             'time_created'  : time_sent,
             'message_id'    : newID,
             'message'       : message,
