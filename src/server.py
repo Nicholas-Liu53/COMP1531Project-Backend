@@ -164,6 +164,15 @@ def message_sendlater():
 def message_sendlaterdm():
     payload = request.get_json()
     return src.message.message_sendlaterdm_v1(payload['token'], payload['dm_id'], payload['message'], payload['time_sent'])
+@APP.route("/message/pin/v1", methods=['POST'])
+def message_pin():
+    payload = request.get_json()
+    return src.message.message_pin_v1(payload['token'], payload['message_id'])
+
+@APP.route("/message/unpin/v1", methods=['POST'])
+def message_unpin():
+    payload = request.get_json()
+    return src.message.message_unpin_v1(payload['token'], payload['message_id'])
 
 #* *********************************************DM ROUTES*****************************************
 @APP.route("/dm/details/v1", methods=['GET'])
@@ -229,6 +238,15 @@ def users_all():
     token = request.args.get('token')
     return src.user.users_all(token)
 
+@APP.route("/users/stats/v1", methods=['GET'])
+def users_stats():
+    token = request.args.get('token')
+    return src.user.users_stats_v1(token)
+    
+@APP.route("/user/stats/v1", methods=['GET'])
+def user_stats():
+    token = request.args.get('token')
+    return src.user.user_stats_v1(token)
 
 
 
