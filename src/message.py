@@ -4,6 +4,7 @@ from src.other import decode, get_channel, get_user, get_dm, get_user_permission
 from datetime import timezone, datetime
 import json
 import threading, time
+from random import getrandbits
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -58,10 +59,18 @@ def message_send_v1(token, channel_id, message):
 
     now = datetime.now()
     time_created = int(now.strftime("%s"))
-    if len(data['messages_log']) > 0:
-        newID = data['messages_log'][-1]['message_id'] + 1
-    else:
-        newID = 0
+    newID = getrandbits(32)
+    uniqueMessageID = False
+    foundIdenticalID = False
+    while not uniqueMessageID:
+        for messageDict in data['messages_log']:
+            if newID == messageDict['message_id']:
+                foundIdenticalID = True
+                break
+        if foundIdenticalID:
+            newID = getrandbits(32)
+        else:
+            uniqueMessageID = True
 
     # User is in the channel (which exists) & message is appropriate length
     #* Time to send a message
@@ -248,10 +257,18 @@ def message_senddm_v1(token, dm_id, message):
     if len(message) > 1000:
         raise InputError
     data = json.load(open('data.json', 'r'))
-    if len(data['messages_log']) > 0:
-        message_id = data['messages_log'][-1]['message_id'] + 1
-    else:
-        message_id = 0
+    message_id = getrandbits(32)
+    uniqueMessageID = False
+    foundIdenticalID = False
+    while not uniqueMessageID:
+        for messageDict in data['messages_log']:
+            if message_id == messageDict['message_id']:
+                foundIdenticalID = True
+                break
+        if foundIdenticalID:
+            message_id = getrandbits(32)
+        else:
+            uniqueMessageID = True
     now = datetime.now()
     time_created = int(now.strftime("%s"))
 
@@ -393,10 +410,18 @@ def message_sendlater_v1(token, channel_id, message, time_sent):
         raise AccessError
 
     data = json.load(open('data.json', 'r'))
-    if len(data['messages_log']) > 0:
-        newID = data['messages_log'][-1]['message_id'] + 1
-    else:
-        newID = 0
+    newID = getrandbits(32)
+    uniqueMessageID = False
+    foundIdenticalID = False
+    while not uniqueMessageID:
+        for messageDict in data['messages_log']:
+            if newID == messageDict['message_id']:
+                foundIdenticalID = True
+                break
+        if foundIdenticalID:
+            newID = getrandbits(32)
+        else:
+            uniqueMessageID = True
 
     timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
     newID = 0
@@ -406,16 +431,22 @@ def message_sendlater_v1(token, channel_id, message, time_sent):
     }
 
 def message_sendlaterdm_v1(token, dm_id, message, time_sent):
-    timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
-    threading.Timer(timeTillSend, message_senddm_v1, args=(token, dm_id, message),).start()
     with open('data.json', 'r') as FILE:
         data = json.load(FILE)
-    if len(data['messages_log']) == 0:
-        with open('data.json', 'w') as FILE:
-            json.dump(data, FILE)
-        return {
-            'message_id': 0,
-        }
+    newID = getrandbits(32)
+    uniqueMessageID = False
+    foundIdenticalID = False
+    while not uniqueMessageID:
+        for messageDict in data['messages_log']:
+            if newID == messageDict['message_id']:
+                foundIdenticalID = True
+                break
+        if foundIdenticalID:
+            newID = getrandbits(32)
+        else:
+            uniqueMessageID = True
+    timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
+    threading.Timer(timeTillSend, message_senddm_v1, args=(token, dm_id, message),).start()
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
     return {
