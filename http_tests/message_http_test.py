@@ -3,7 +3,9 @@ import requests
 import json
 from src.config import url
 from src.other import SECRET
+from datetime import timezone, datetime
 import jwt
+import time
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
@@ -468,3 +470,84 @@ def test_http_senddm_multiple(user1, user2):
 
     message3 = response3.json()
     assert message3 == {'message_id': message3['message_id']}
+
+#* Testing a message that is to be sent later isn't prematurely sent
+#* And is actually sent in the end with correct timestamp
+def test_http_message_sendlater(user1, user2):
+    c1 = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": "TrumpPence",
+        "is_public": True
+    })
+    requests.post(f"{url}channel/join/v2", json={
+        "token": user2[token],
+        "channel_id": c1.json()['channel_id']
+    })
+    sendTime = datetime.now().replace(tzinfo=timezone.utc).timestamp() + 3
+    m1 = requests.post(f"{url}message/sendlater/v1", json={
+        "token": user1[token],
+        "channel_id": c1.json()['channel_id'],
+        "message": "You know what matters more than American Muscle?",
+        "time_sent": sendTime
+    })
+    messageFound = False
+    for message in requests.get(f"{url}channel/messages/v2", params={
+        "token": user2[token],
+        "channel_id": c1.json()[cID],
+        "start": 0
+    }).json()['messages']:
+        if m1.json()['message_id'] == message['message_id']:
+            messageFound = True
+    assert not messageFound
+
+    #* Sleep for now
+    time.sleep(4)
+
+    for message in requests.get(f"{url}channel/messages/v2", params={
+        "token": user2[token],
+        "channel_id": c1.json()[cID],
+        "start": 0
+    }).json()['messages']:
+        if m1.json()['message_id'] == message['message_id']:
+            mTime = message['time_created']
+            messageFound = True
+    assert messageFound
+    assert mTime == sendTime
+
+#* Testing a message that is to be sent later isn't prematurely sent
+#* And is actually sent in the end with correct timestamp
+def test_http_message_sendlaterdm(user1, user2):
+    d1 = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    sendTime = datetime.now().replace(tzinfo=timezone.utc).timestamp() + 3
+    m1 = requests.post(f"{url}message/sendlaterdm/v1", json={
+        "token": user1[token],
+        "dm_id": d1.json()[dmID],
+        "message": "You know what matters more than American Muscle?",
+        "time_sent": sendTime
+    })
+    messageFound = False
+    for message in requests.get(f"{url}dm/messages/v1", params={
+        "token": user2[token],
+        "dm_id": d1.json()[dmID],
+        "start": 0
+    }).json()['messages']:
+        if m1.json()['message_id'] == message['message_id']:
+            messageFound = True
+    assert not messageFound
+
+    #* Sleep for now
+    time.sleep(4)
+
+    for message in requests.get(f"{url}dm/messages/v1", params={
+        "token": user2[token],
+        "dm_id": d1.json()[dmID],
+        "start": 0
+    }).json()['messages']:
+        if m1.json()['message_id'] == message['message_id']:
+            mTime = message['time_created']
+            messageFound = True
+    assert messageFound
+    assert mTime == sendTime

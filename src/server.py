@@ -119,7 +119,7 @@ def channels_listall():
     token = request.args.get('token')
     return src.channels.channels_listall_v2(token)
 
-#* MESSAGE ROUTES
+#* ***************************************************MESSAGE ROUTES************************************************
 @APP.route("/message/send/v2", methods=['POST'])
 def message_send():
     payload = request.get_json()
@@ -154,6 +154,16 @@ def message_share():
 def message_senddm():
     payload = request.get_json()
     return src.message.message_senddm_v1(payload['token'], payload['dm_id'], payload['message'])
+
+@APP.route("/message/sendlater/v1", methods=['POST'])
+def message_sendlater():
+    payload = request.get_json()
+    return src.message.message_sendlater_v1(payload['token'], payload['channel_id'], payload['message'], payload['time_sent'])
+
+@APP.route("/message/sendlaterdm/v1", methods=['POST'])
+def message_sendlaterdm():
+    payload = request.get_json()
+    return src.message.message_sendlaterdm_v1(payload['token'], payload['dm_id'], payload['message'], payload['time_sent'])
 
 #* *********************************************DM ROUTES*****************************************
 @APP.route("/dm/details/v1", methods=['GET'])
