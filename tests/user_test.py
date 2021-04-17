@@ -463,10 +463,10 @@ def test_users_stats_v1(user1, user2, user3, user4):
 
     output1 = users_stats_v1(user1['token'])
 
-    assert len(output1['dreams_analytics']['channels_exist']) == 2
-    assert len(output1['dreams_analytics']['dms_exist']) == 1
-    assert len(output1['dreams_analytics']['messages_exist']) == 2
-    assert output1['dreams_analytics']['utilization_rate'] == 0.25
+    assert len(output1['dreams_stats']['channels_exist']) == 2
+    assert len(output1['dreams_stats']['dms_exist']) == 1
+    assert len(output1['dreams_stats']['messages_exist']) == 2
+    assert output1['dreams_stats']['utilization_rate'] == 0.25
 
     channel_join_v1(user2['token'], channel1['channel_id'])
     channel2 = channels_create_v1(user1['token'], 'Channel2', True)
@@ -475,38 +475,38 @@ def test_users_stats_v1(user1, user2, user3, user4):
 
     output2 = users_stats_v1(user1['token'])
 
-    assert len(output2['dreams_analytics']['channels_exist']) == 3
-    assert len(output2['dreams_analytics']['dms_exist']) == 2
-    assert len(output2['dreams_analytics']['messages_exist']) == 3
-    assert output2['dreams_analytics']['utilization_rate'] == 0.5
+    assert len(output2['dreams_stats']['channels_exist']) == 3
+    assert len(output2['dreams_stats']['dms_exist']) == 2
+    assert len(output2['dreams_stats']['messages_exist']) == 3
+    assert output2['dreams_stats']['utilization_rate'] == 0.5
 
     channel_join_v1(user1['token'], channel2['channel_id'])
     channel_join_v1(user3['token'], channel1['channel_id'])
 
     output3 = users_stats_v1(user1['token'])
 
-    assert len(output3['dreams_analytics']['channels_exist']) == 3
-    assert len(output3['dreams_analytics']['dms_exist']) == 2
-    assert len(output3['dreams_analytics']['messages_exist']) == 3
-    assert output3['dreams_analytics']['utilization_rate'] == 0.75
+    assert len(output3['dreams_stats']['channels_exist']) == 3
+    assert len(output3['dreams_stats']['dms_exist']) == 2
+    assert len(output3['dreams_stats']['messages_exist']) == 3
+    assert output3['dreams_stats']['utilization_rate'] == 0.75
 
     output4 = message_send_v1(user1['token'], channel1['channel_id'], "Hi")
     message_remove_v1(user1['token'], output4['message_id'])
 
     output5 = users_stats_v1(user1['token'])
 
-    assert len(output5['dreams_analytics']['channels_exist']) == 3
-    assert len(output5['dreams_analytics']['dms_exist']) == 2
-    assert len(output5['dreams_analytics']['messages_exist']) == 5
-    assert output5['dreams_analytics']['utilization_rate'] == 0.75
+    assert len(output5['dreams_stats']['channels_exist']) == 3
+    assert len(output5['dreams_stats']['dms_exist']) == 2
+    assert len(output5['dreams_stats']['messages_exist']) == 5
+    assert output5['dreams_stats']['utilization_rate'] == 0.75
 
     dm_create_v1(user4['token'], [user1['auth_user_id']])
     output6 = users_stats_v1(user1['token'])
 
-    assert len(output6['dreams_analytics']['channels_exist']) == 3
-    assert len(output6['dreams_analytics']['dms_exist']) == 3
-    assert len(output6['dreams_analytics']['messages_exist']) == 5
-    assert output6['dreams_analytics']['utilization_rate'] == 1
+    assert len(output6['dreams_stats']['channels_exist']) == 3
+    assert len(output6['dreams_stats']['dms_exist']) == 3
+    assert len(output6['dreams_stats']['messages_exist']) == 5
+    assert output6['dreams_stats']['utilization_rate'] == 1
 
 def test_user_stats1_v1(user1,user2):
     channel1 = channels_create_v1(user1[tok], 'Channel1', True)

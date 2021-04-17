@@ -222,5 +222,5 @@ def users_stats_v1(token):
     dream_stats.update({'utilization_rate': utilization_rate})
     
     return { 
-        "dreams_analytics": dream_stats
+        "dreams_stats": dream_stats
     }

@@ -235,10 +235,10 @@ def test_http_users_stats_v1(user1, user2, user3, user4):
 
     output1 = requests.get(f"{url}users/stats/v1", params={'token': user1[tok]}).json()
 
-    assert len(output1['dreams_analytics']['channels_exist']) == 2
-    assert len(output1['dreams_analytics']['dms_exist']) == 1
-    assert len(output1['dreams_analytics']['messages_exist']) == 2
-    assert output1['dreams_analytics']['utilization_rate'] == 0.25
+    assert len(output1['dreams_stats']['channels_exist']) == 2
+    assert len(output1['dreams_stats']['dms_exist']) == 1
+    assert len(output1['dreams_stats']['messages_exist']) == 2
+    assert output1['dreams_stats']['utilization_rate'] == 0.25
 
     requests.post(f"{url}channel/join/v2", json={
         "token": user2[tok],
@@ -265,10 +265,10 @@ def test_http_users_stats_v1(user1, user2, user3, user4):
 
     output2 = requests.get(f"{url}users/stats/v1", params={'token': user1[tok]}).json()
 
-    assert len(output2['dreams_analytics']['channels_exist']) == 3
-    assert len(output2['dreams_analytics']['dms_exist']) == 2
-    assert len(output2['dreams_analytics']['messages_exist']) == 3
-    assert output2['dreams_analytics']['utilization_rate'] == 0.5
+    assert len(output2['dreams_stats']['channels_exist']) == 3
+    assert len(output2['dreams_stats']['dms_exist']) == 2
+    assert len(output2['dreams_stats']['messages_exist']) == 3
+    assert output2['dreams_stats']['utilization_rate'] == 0.5
 
     requests.post(f"{url}channel/join/v2", json={
         "token": user1[tok],
@@ -282,10 +282,10 @@ def test_http_users_stats_v1(user1, user2, user3, user4):
     
     output3 = requests.get(f"{url}users/stats/v1", params={'token': user1[tok]}).json()
 
-    assert len(output3['dreams_analytics']['channels_exist']) == 3
-    assert len(output3['dreams_analytics']['dms_exist']) == 2
-    assert len(output3['dreams_analytics']['messages_exist']) == 3
-    assert output3['dreams_analytics']['utilization_rate'] == 0.75
+    assert len(output3['dreams_stats']['channels_exist']) == 3
+    assert len(output3['dreams_stats']['dms_exist']) == 2
+    assert len(output3['dreams_stats']['messages_exist']) == 3
+    assert output3['dreams_stats']['utilization_rate'] == 0.75
 
     output4 = requests.post(f"{url}message/send/v2", json={
         "token": user1[tok],
@@ -297,10 +297,10 @@ def test_http_users_stats_v1(user1, user2, user3, user4):
     
     output5 = requests.get(f"{url}users/stats/v1", params={'token': user1[tok]}).json()
 
-    assert len(output5['dreams_analytics']['channels_exist']) == 3
-    assert len(output5['dreams_analytics']['dms_exist']) == 2
-    assert len(output5['dreams_analytics']['messages_exist']) == 5
-    assert output5['dreams_analytics']['utilization_rate'] == 0.75
+    assert len(output5['dreams_stats']['channels_exist']) == 3
+    assert len(output5['dreams_stats']['dms_exist']) == 2
+    assert len(output5['dreams_stats']['messages_exist']) == 5
+    assert output5['dreams_stats']['utilization_rate'] == 0.75
 
     requests.post(f"{url}dm/create/v1", json={
         "token": user4[tok],
@@ -309,10 +309,10 @@ def test_http_users_stats_v1(user1, user2, user3, user4):
 
     output6 = requests.get(f"{url}users/stats/v1", params={'token': user1[tok]}).json()
 
-    assert len(output6['dreams_analytics']['channels_exist']) == 3
-    assert len(output6['dreams_analytics']['dms_exist']) == 3
-    assert len(output6['dreams_analytics']['messages_exist']) == 5
-    assert output6['dreams_analytics']['utilization_rate'] == 1
+    assert len(output6['dreams_stats']['channels_exist']) == 3
+    assert len(output6['dreams_stats']['dms_exist']) == 3
+    assert len(output6['dreams_stats']['messages_exist']) == 5
+    assert output6['dreams_stats']['utilization_rate'] == 1
 
 
 def test_http_user_stat(user1,user2):
