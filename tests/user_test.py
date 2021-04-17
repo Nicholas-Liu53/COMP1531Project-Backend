@@ -396,11 +396,8 @@ def test_users_all_v1_one(user1):
 
 # tests the return value of users_all for when two users are registered
 def test_users_all_v1_two(user1,user2):
-   
     user_data_1 = auth_login_v2("caricoleman@gmail.com", "1234567")
-
-    user_data_2 = auth_login_v2("ericamondy@gmail.com", "1234567") 
-
+    
     assert users_all(user_data_1['token']) == {
             'users':
             [{
@@ -421,17 +418,7 @@ def test_users_all_v1_two(user1,user2):
     
 # tests the return value of users_all for when multiple users are registered
 def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
-    user_data_1 = auth_login_v2("caricoleman@gmail.com", "1234567") 
-
-    user_data_2 = auth_login_v2("ericamondy@gmail.com", "1234567") 
-
-    user_data_3 = auth_login_v2("hilarybently@gmail.com", "1234567") 
-
-    user_data_4 = auth_login_v2("kentonwatkins@gmail.com", "1234567")
-
-    user_data_5 = auth_login_v2("claudiamarley@gmail.com", "1234567") 
-
-    assert users_all(user_data_1['token']) == {   
+    assert users_all(user1['token']) == {   
             'users':
             [{
             'u_id': 0, 
