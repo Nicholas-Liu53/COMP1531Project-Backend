@@ -1,8 +1,10 @@
 from src.error import AccessError, InputError
 import src.auth
-from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications
+from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications, generate_new_message_id
 from datetime import timezone, datetime
 import json
+import threading, time
+from random import getrandbits
 from src.user import users_stats_v1
 
 AuID      = 'auth_user_id'
@@ -58,10 +60,7 @@ def message_send_v1(token, channel_id, message):
 
     now = datetime.now()
     time_created = int(now.strftime("%s"))
-    if len(data['messages_log']) > 0:
-        newID = data['messages_log'][-1]['message_id'] + 1
-    else:
-        newID = 0
+    newID = generate_new_message_id()
 
     # User is in the channel (which exists) & message is appropriate length
     #* Time to send a message
@@ -276,10 +275,7 @@ def message_senddm_v1(token, dm_id, message):
     if len(message) > 1000:
         raise InputError
     data = json.load(open('data.json', 'r'))
-    if len(data['messages_log']) > 0:
-        message_id = data['messages_log'][-1]['message_id'] + 1
-    else:
-        message_id = 0
+    message_id = generate_new_message_id()
     now = datetime.now()
     time_created = int(now.strftime("%s"))
 
@@ -424,3 +420,103 @@ def message_unpin_v1(token, message_id):
                     json.dump(data, FILE)
                 return {}
     raise InputError
+
+def message_sendlater_v1(token, channel_id, message, time_sent):
+    # Decode the token
+    auth_user_id, _ = decode(token)
+
+    # If the message is too long, raise InputError
+    if len(message) > 1000:
+        raise InputError
+
+    # Check if user is in channel
+    if auth_user_id not in get_channel(channel_id)['all_members']:
+        raise AccessError
+
+    data = json.load(open('data.json', 'r'))
+    newID = generate_new_message_id()
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+    timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
+    newID = 0
+    threading.Timer(timeTillSend, sendlater_send, args=(token, channel_id, message, time_sent, newID)).start()
+    return {
+        'message_id': newID
+    }
+
+def message_sendlaterdm_v1(token, dm_id, message, time_sent):
+    # Decode the token
+    auth_user_id, _ = decode(token)
+
+    # If the message is too long, raise InputError
+    if len(message) > 1000:
+        raise InputError
+
+    # Check if user is in channel
+    if auth_user_id not in get_dm(dm_id)['all_members']:
+        raise AccessError
+
+    data = json.load(open('data.json', 'r'))
+    newID = generate_new_message_id()
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+    timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
+    newID = 0
+    threading.Timer(timeTillSend, sendlaterdm_send, args=(token, dm_id, message, time_sent, newID)).start()
+    return {
+        'message_id': newID
+    }
+
+def sendlater_send(token, channel_id, message, time_sent, newID):
+    # Decode the token
+    auth_user_id, _ = decode(token)
+
+    data = json.load(open('data.json', 'r'))
+
+    # User is in the channel (which exists) & message is appropriate length
+    #* Time to send a message
+    data['messages_log'].append(
+        {
+            'channel_id'    : channel_id,
+            'dm_id'         : -1,
+            'u_id'          : auth_user_id,
+            'time_created'  : time_sent,
+            'message_id'    : newID,
+            'message'       : message,
+            'reacts': [],
+            'is_pinned': False,
+        }
+    )
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+
+    #* Push notifications if anyone is tagged
+    push_tagged_notifications(auth_user_id, channel_id, -1, message)
+
+def sendlaterdm_send(token, dm_id, message, time_sent, newID):
+    # Decode the token
+    auth_user_id, _ = decode(token)
+
+    data = json.load(open('data.json', 'r'))
+
+    # User is in the dm (which exists) & message is appropriate length
+    #* Time to send a message
+    data['messages_log'].append(
+        {
+            'channel_id'    : -1,
+            'dm_id'         : dm_id,
+            'u_id'          : auth_user_id,
+            'time_created'  : time_sent,
+            'message_id'    : newID,
+            'message'       : message,
+            'reacts': [],
+            'is_pinned': False,
+        }
+    )
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+
+    #* Push notifications if anyone is tagged
+    push_tagged_notifications(auth_user_id, -1, dm_id, message)
