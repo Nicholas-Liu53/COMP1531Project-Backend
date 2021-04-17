@@ -3,6 +3,11 @@ import re
 from src.other import decode, check_session, get_user
 import json
 from datetime import timezone, datetime
+import urllib.request
+import requests
+from PIL import Image
+
+
 
 def user_profile_v2(token, u_id):
     """ Provided the u_id of an existing user with a valid token, returns information about the user 
@@ -224,3 +229,48 @@ def users_stats_v1(token):
     return { 
         "dreams_analytics": dream_stats
     }
+
+def user_profile_uploadphoto_v1(token, img_url,x_start,y_start,x_end,y_end):
+
+
+    # Fetch image via URL
+
+    #Crop image
+
+    #serving image (static)
+    
+    auth_user_id, _ = decode(token)
+
+    # Fetch image via URL
+
+    if requests.get(img_url).status_code != 200:
+        raise InputError
+
+    image_formats = ("image/jpeg", "image/jpg")
+    if requests.head(img_url).headers["content-type"] not in image_formats:
+        raise InputError
+        
+    urllib.request.urlretrieve(img_url, f"userImage/{auth_user_id}.jpg")
+
+    # Cropping image
+    imageObject = Image.open(f"userImage/{auth_user_id}.jpg")
+
+    width, height = imageObject.size
+
+
+    if x_end < x_start or y_end < y_start:
+        raise InputError
+
+    if x_start < 0 or y_start < 0 or  x_start > width or  y_start > height:
+        raise InputError
+    elif x_end < 0 or y_end < 0 or  x_end > width or  y_end > height:
+        raise InputError
+    
+    imageObject.crop((x_start, y_start, x_end, y_end)).save(f"userImage/{auth_user_id}.jpg")
+
+    return {}
+
+
+
+    # Call back into 
+
