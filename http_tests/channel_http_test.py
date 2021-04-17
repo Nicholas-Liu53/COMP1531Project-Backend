@@ -532,57 +532,72 @@ def test_http_channel_messages(user1, user2):
     })
     assert access_error.status_code == 403 
     
-    
-    #Success Case 1: less than 50 messages returns end as -1    
-    #Send one message in channel  
-    requests.post(f"{url}message/send/v2", json = {
+def test_http_channel_messages_valid(user1, user2):
+    # Create first channel for first test case
+    # Success case 1: Less than 50 messages returns end as -1 
+    channel1 = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
-        cID: channel1[cID],
-        "message" : "First message :)",
-    })
-        
+        "name": "channel1",
+        "is_public": False,
+    }).json()
+    requests.post(f"{url}message/send/v2", json = {
+            "token": user1[token],
+            cID: channel1[cID],
+            "message" : "First message",
+        })
 
-    result = requests.get(f"{url}channel/messages/v2", params = {
+    result1 = requests.get(f"{url}channel/messages/v2", params = {
         "token": user1[token],
         cID: channel1[cID],
         'start': 0
-    })
-    responseUser1 = result.json()
-    expected = {
-        "len_messages": 1,
-        "start" : 0,
-        "end": -1,
-    }
-    
-    assert len(responseUser1['messages']) == expected['len_messages']
-    assert responseUser1['start'] == expected['start']
-    assert responseUser1['end'] == expected['end']
-    
-    #Success case 2: More than 50 messages returns end as start + 50     
-    #Send 50 messages into dm_0 
+    }).json()
+
+    assert len(result1['messages']) == 1
+    assert result1['start'] == 0
+    assert result1['end'] == -1
+
+    # Success case 2: 50 messages returns end as -1 
     message_counter = 1
-    while message_counter < 51:
+    for _ in range(50):
         requests.post(f"{url}message/send/v2", json = {
             "token": user1[token],
             cID: channel1[cID],
             "message" : f"{message_counter}",
         })
-        message_counter += 1
-        
+        message_counter +=1
+
     result2 = requests.get(f"{url}channel/messages/v2", params = {
         "token": user1[token],
         cID: channel1[cID],
         'start': 1
-    })
-    response_2 = result2.json()
-        
-    expected_2 = {
-        "len_messages": 50,
-        "start" : 1,
-        "end": 51,
-    }
-    
-    assert len(response_2['messages']) == expected_2['len_messages']
-    assert response_2['start'] == expected_2['start']
-    assert response_2['end'] == expected_2['end']
-   
+    }).json()
+
+    assert len(result2['messages']) == 50
+    assert result2['start'] == 1
+    assert result2['end'] == -1
+
+    # Success case 3: 51 messages returns end as 50 (more messages to load)
+    channel2 = requests.post(f"{url}channels/create/v2", json={
+        "token": user2[token],
+        "name": "Second",
+        "is_public": True,
+    }).json()
+
+    message_counter = 1
+    for _ in range(51):
+        requests.post(f"{url}message/send/v2", json = {
+            "token": user2[token],
+            cID: channel2[cID],
+            "message" : f"{message_counter}",
+        })
+        message_counter +=1
+
+    result3 = requests.get(f"{url}channel/messages/v2", params = {
+        "token": user1[token],
+        cID: channel1[cID],
+        'start': 0
+    }).json()
+
+    assert len(result3['messages']) == 50
+    assert result3['start'] == 0
+    assert result3['end'] == 50

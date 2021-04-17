@@ -392,7 +392,7 @@ def dm_messages_v1(token, dm_id, start):
             messages.insert(0,current_DM)
 
     #Reverse list such that the we have the newest messages at the start and oldest at the end 
-    reversed(messages)        
+    reversed(messages)
 
     #Take 50 messages from our start value
     #Chop off all the messages before our start value 
