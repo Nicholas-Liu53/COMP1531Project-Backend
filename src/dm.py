@@ -379,7 +379,7 @@ def dm_messages_v1(token, dm_id, start):
         raise InputError
 
     desired_end = start + 50
-    if num_of_messages < desired_end:
+    if num_of_messages <= desired_end:
         desired_end = -1
 
     messages = []
