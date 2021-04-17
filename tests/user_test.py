@@ -59,6 +59,7 @@ def test_user_profile_valid(user1,user2):
             'name_first': 'cari', 
             'name_last': 'coleman', 
             'handle_str': 'caricoleman'
+            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }
     }
 
@@ -77,6 +78,7 @@ def test_user_profile_valid_multiple(user1,user2):
             'name_first': 'cari', 
             'name_last': 'coleman', 
             'handle_str': 'caricoleman'
+            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }
     }
 
@@ -88,6 +90,7 @@ def test_user_profile_valid_multiple(user1,user2):
             'name_first': 'erica', 
             'name_last': 'mondy', 
             'handle_str': 'ericamondy'
+            'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
             }
     }
     
@@ -105,7 +108,7 @@ def test_user_setname_valid_first_name(user1):
 
     assert user_setname_v2(user_data_1['token'], 'kari', 'coleman') == {}
 
-    assert  user_profile_v2(user_data_1['token'], user_data_1['auth_user_id']) == { 
+    assert user_profile_v2(user_data_1['token'], user_data_1['auth_user_id']) == { 
         'user':
             {
             'u_id': 0, 
@@ -113,6 +116,7 @@ def test_user_setname_valid_first_name(user1):
             'name_first': 'kari', 
             'name_last': 'coleman', 
             'handle_str': 'caricoleman'
+            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }
     }
 
@@ -131,6 +135,7 @@ def test_user_setname_valid_last_name(user1):
             'name_first': 'cari', 
             'name_last': 'koleman', 
             'handle_str': 'caricoleman'
+            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }
     }
 
@@ -149,6 +154,7 @@ def test_user_setname_valid_both_names(user1):
             'name_first': 'kari', 
             'name_last': 'koleman', 
             'handle_str': 'caricoleman'
+            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }
     }
 
@@ -170,6 +176,7 @@ def test_user_setname_valid_multiple(user1,user2):
         'name_first': 'kari', 
         'name_last': 'koleman', 
         'handle_str': 'caricoleman'
+        'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
         }
     }
     
@@ -183,6 +190,7 @@ def test_user_setname_valid_multiple(user1,user2):
         'name_first': 'erika', 
         'name_last': 'money', 
         'handle_str': 'ericamondy'
+        'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
         }
     }
 
@@ -226,6 +234,7 @@ def test_user_setemail_valid(user1):
         'name_first': 'cari', 
         'name_last': 'coleman', 
         'handle_str': 'caricoleman'
+        'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
         }
     }
 
@@ -245,6 +254,7 @@ def test_user_setemail_valid_multiple(user1,user2):
         'name_first': 'cari', 
         'name_last': 'coleman', 
         'handle_str': 'caricoleman'
+        'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
         }
     }
     
@@ -258,6 +268,7 @@ def test_user_setemail_valid_multiple(user1,user2):
         'name_first': 'erica', 
         'name_last': 'mondy', 
         'handle_str': 'ericamondy'
+        'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
         }
     }
 
@@ -286,6 +297,7 @@ def test_user_setemail_invalid_email_in_use(user1,user2):
             'name_first': 'cari', 
             'name_last': 'coleman', 
             'handle_str': 'caricoleman'
+            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }
         }
         
@@ -305,6 +317,7 @@ def test_user_sethandle_valid(user1):
         'name_first': 'cari', 
         'name_last': 'coleman', 
         'handle_str': 'karikoleman'
+        'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
         }
     }
 
@@ -325,6 +338,7 @@ def test_user_sethandle_valid_multiple(user1,user2):
         'name_first': 'cari', 
         'name_last': 'coleman', 
         'handle_str': 'karikoleman'
+        'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
         }
     }
     
@@ -338,6 +352,7 @@ def test_user_sethandle_valid_multiple(user1,user2):
         'name_first': 'erica', 
         'name_last': 'mondy', 
         'handle_str': 'erikamoney'
+        'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
         }
     }
 
@@ -373,6 +388,7 @@ def test_user_sethandle_invalid_handle_in_use(user1,user2):
             'name_first': 'cari', 
             'name_last': 'coleman', 
             'handle_str': 'kari'
+            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }
         }
         
@@ -391,6 +407,7 @@ def test_users_all_v1_one(user1):
             'name_first': 'cari', 
             'name_last': 'coleman', 
             'handle_str': 'caricoleman'
+            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             }]
     }
 
@@ -406,6 +423,7 @@ def test_users_all_v1_two(user1,user2):
             'name_first': 'cari', 
             'name_last': 'coleman', 
             'handle_str': 'caricoleman'
+            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             },
             {
             'u_id': 1, 
@@ -413,6 +431,7 @@ def test_users_all_v1_two(user1,user2):
             'name_first': 'erica', 
             'name_last': 'mondy', 
             'handle_str': 'ericamondy'
+            'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
             }]
     } 
     
@@ -426,6 +445,7 @@ def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
             'name_first': 'cari', 
             'name_last': 'coleman', 
             'handle_str': 'caricoleman'
+            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
             },
             {
             'u_id': 1, 
@@ -433,6 +453,7 @@ def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
             'name_first': 'erica', 
             'name_last': 'mondy', 
             'handle_str': 'ericamondy'
+            'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
             },
             {
             'u_id': 2, 
@@ -440,6 +461,7 @@ def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
             'name_first': 'hillary', 
             'name_last': 'bently', 
             'handle_str': 'hillarybently'
+            'profile_img_url': f"{url}static/{user3[AuID]}.jpg"
             },
             {
             'u_id': 3, 
@@ -447,6 +469,7 @@ def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
             'name_first': 'kenton', 
             'name_last': 'watkins', 
             'handle_str': 'kentonwatkins'
+            'profile_img_url': f"{url}static/{user4[AuID]}.jpg"
             },
             {
             'u_id': 4, 
@@ -454,6 +477,7 @@ def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
             'name_first': 'claudia', 
             'name_last': 'marley', 
             'handle_str': 'claudiamarley'
+            'profile_img_url': f"{url}static/{user5[AuID]}.jpg"
             },]
         } 
     
