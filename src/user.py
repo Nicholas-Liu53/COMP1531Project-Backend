@@ -228,7 +228,7 @@ def users_stats_v1(token):
     dream_stats.update({'utilization_rate': utilization_rate})
     
     return { 
-        "dreams_analytics": dream_stats
+        "dreams_stats": dream_stats
     }
 
 def user_profile_uploadphoto_v1(token, img_url,x_start,y_start,x_end,y_end):
