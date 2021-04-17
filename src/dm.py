@@ -365,8 +365,6 @@ def dm_messages_v1(token, dm_id, start):
         'start' is the value of start passed into the function
         'end' is "start + 50" if there more messages that can be loaded, otherwise, -1 is returned in 'end'
     '''
-    data = json.load(open('data.json', 'r'))
-
     auth_user_id, _ = decode(token)
     num_of_messages = message_count(-1, dm_id)
 
@@ -382,12 +380,15 @@ def dm_messages_v1(token, dm_id, start):
     if num_of_messages <= desired_end:
         desired_end = -1
 
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+
     messages = []
     for objects in data['messages_log']:
-        if dm_id == objects['dm_id']:
+        if dm_id == objects[dmID]:
             current_DM = objects.copy()
             del current_DM[cID]
-            del current_DM['dm_id']
+            del current_DM[dmID]
             messages.insert(0,current_DM)
 
     #Reverse list such that the we have the newest messages at the start and oldest at the end 
