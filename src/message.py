@@ -1,6 +1,6 @@
 from src.error import AccessError, InputError
 import src.auth
-from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications
+from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications, generate_new_message_id
 from datetime import timezone, datetime
 import json
 import threading, time
@@ -60,18 +60,7 @@ def message_send_v1(token, channel_id, message):
 
     now = datetime.now()
     time_created = int(now.strftime("%s"))
-    newID = getrandbits(32)
-    uniqueMessageID = False
-    foundIdenticalID = False
-    while not uniqueMessageID:
-        for messageDict in data['messages_log']:
-            if newID == messageDict['message_id']:
-                foundIdenticalID = True
-                break
-        if foundIdenticalID:
-            newID = getrandbits(32)
-        else:
-            uniqueMessageID = True
+    newID = generate_new_message_id()
 
     # User is in the channel (which exists) & message is appropriate length
     #* Time to send a message
@@ -286,18 +275,7 @@ def message_senddm_v1(token, dm_id, message):
     if len(message) > 1000:
         raise InputError
     data = json.load(open('data.json', 'r'))
-    message_id = getrandbits(32)
-    uniqueMessageID = False
-    foundIdenticalID = False
-    while not uniqueMessageID:
-        for messageDict in data['messages_log']:
-            if message_id == messageDict['message_id']:
-                foundIdenticalID = True
-                break
-        if foundIdenticalID:
-            message_id = getrandbits(32)
-        else:
-            uniqueMessageID = True
+    message_id = generate_new_message_id()
     now = datetime.now()
     time_created = int(now.strftime("%s"))
 
@@ -456,18 +434,7 @@ def message_sendlater_v1(token, channel_id, message, time_sent):
         raise AccessError
 
     data = json.load(open('data.json', 'r'))
-    newID = getrandbits(32)
-    uniqueMessageID = False
-    foundIdenticalID = False
-    while not uniqueMessageID:
-        for messageDict in data['messages_log']:
-            if newID == messageDict['message_id']:
-                foundIdenticalID = True
-                break
-        if foundIdenticalID:
-            newID = getrandbits(32)
-        else:
-            uniqueMessageID = True
+    newID = generate_new_message_id()
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
     timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
@@ -490,18 +457,7 @@ def message_sendlaterdm_v1(token, dm_id, message, time_sent):
         raise AccessError
 
     data = json.load(open('data.json', 'r'))
-    newID = getrandbits(32)
-    uniqueMessageID = False
-    foundIdenticalID = False
-    while not uniqueMessageID:
-        for messageDict in data['messages_log']:
-            if newID == messageDict['message_id']:
-                foundIdenticalID = True
-                break
-        if foundIdenticalID:
-            newID = getrandbits(32)
-        else:
-            uniqueMessageID = True
+    newID = generate_new_message_id()
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
     timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
