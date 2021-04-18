@@ -248,7 +248,6 @@ def user_profile_uploadphoto_v1(token, img_url,x_start,y_start,x_end,y_end):
         requests.get(img_url).status_code
     except Exception as e:
         raise InputError from e
-
     if requests.get(img_url).status_code != 200:
         raise InputError
 
