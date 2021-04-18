@@ -38,17 +38,24 @@ def user4():
 def user5():
     return src.auth.auth_register_v2("fifth@gmail.com", "password", "User", "5")
 
-def test_user_remove(user1, user2):
+def test_user_remove(user1, user2, user3):
     
     channelTest = src.channels.channels_create_v1(user1[token], 'Channel', True)
+    channelTest2 = src.channels.channels_create_v1(user1[token], 'Channel2', True)
+    src.channel.channel_join_v1(user2[token], channelTest2[cID])
     src.channel.channel_join_v1(user2[token], channelTest[cID])
     message = src.message.message_send_v1(user2[token], channelTest[cID], 'Hello')
-
+    src.message.message_send_v1(user1[token], channelTest[cID], 'Hi')
+    src.channel.channel_addowner_v1(user1[token], channelTest[cID], user3[AuID])
+    src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    src.dm.dm_create_v1(user2[token], [user3[AuID]])
     #* User not an owner
     with pytest.raises(AccessError): 
         user_remove_v1(user2[token], user1[AuID])
     
+
     user_remove_v1(user1[token], user2[AuID])
+    user_remove_v1(user1[token], user3[AuID])
     for dictionary in (src.channel.channel_messages_v1(user1[token], channelTest[cID], 0)['messages']):
         if dictionary['message_id'] == message['message_id']:
             assert 'Removed user' in dictionary['message']
