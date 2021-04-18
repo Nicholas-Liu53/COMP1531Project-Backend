@@ -324,5 +324,7 @@ def auth_passwordreset_reset_v1(reset_code, new_password):
             for user in data['users']:
                 if user['u_id'] == code['u_id']:
                     user['password'] = hashlib.sha256(new_password.encode()).hexdigest()
-                return {}
+                    with open('data.json', 'w') as FILE:
+                        json.dump(data, FILE)
+                    return {}
     raise InputError

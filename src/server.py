@@ -73,7 +73,7 @@ def auth_password_reset_request():
 @APP.route("/auth/passwordreset/reset/v1", methods=['POST'])
 def auth_password_reset_reset():
     payload = request.get_json()
-    src.auth.auth_passwordreset_reset_v1(payload['reset_code'],payload['new_password'])
+    src.auth.auth_passwordreset_reset_v1(int(payload['reset_code']),payload['new_password'])
     return {}
 
 #* *************************************************ADMIN ROUTES******************************************
