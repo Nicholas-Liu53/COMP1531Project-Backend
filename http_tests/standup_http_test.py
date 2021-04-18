@@ -120,7 +120,7 @@ def test_http_standup_start_v1(user1):
 #Assumption, don't have to be in channel to call standup_active_v1
 def test_http_standup_active_v1_invalid_cID(user1):
     invalid_cID = -1
-    response = requests.post(f"{url}standup/active/v1", json={
+    response = requests.get(f"{url}standup/active/v1", params={
         token: user1[token],
         cID: invalid_cID,
         "length": standard_length
@@ -142,7 +142,7 @@ def test_http_standup_active_v1(user1):
         "length": standard_length
     })
     
-    response2 = requests.post(f"{url}standup/active/v1", json={
+    response2 = requests.get(f"{url}standup/active/v1", params={
         token: user1[token],
         cID: channel[cID],
     })

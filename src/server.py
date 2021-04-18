@@ -4,7 +4,7 @@ from flask import Flask, request
 from flask_cors import CORS
 from src.error import InputError
 from src import config
-import src.auth, src.admin, src.other, src.dm, src.notifications, src.channel, src.channels, src.message, src.user
+import src.auth, src.admin, src.other, src.dm, src.notifications, src.channel, src.channels, src.message, src.user, src.standup
 
 def defaultHandler(err):
     response = err.get_response()
@@ -224,16 +224,20 @@ def dm_messages():
     
     
 #* ***************************************************STANDUP ROUTES***********************************************
+@APP.route("/standup/start/v1", methods=['POST'])
+def standup_start():
+    payload = request.get_json()
+    return src.standup.standup_start_v1(payload['token'], payload['channel_id'], payload['length'])]
 
+@APP.route("/standup/active/v1", methods=['GET'])
+def standup_active():
+    token, channel_id = request.args.get('token'), request.args.get('channel_id')
+    return src.standup.standup_active_v1(token, int(channel_id))
 
-
-
-
-
-
-
-
-
+@APP.route("/standup/send/v1", methods=['POST'])
+def standup_send():
+    payload = request.get_json()
+    return src.standup.standup_send_v1(payload['token'], payload['channel_id'], payload['message'])
 
 #* ***************************************************USER ROUTES***********************************************
 @APP.route("/user/profile/v2", methods=['GET'])
