@@ -37,7 +37,8 @@ def clear_v1():
             'dms': [],
             'messages_log': [],
             'notifs': {},
-            'user_analytics': {}
+            'user_analytics': {},
+            'reset_codes': []
         }, FILE)
 
 def search_v1(token, query_str):
@@ -259,3 +260,7 @@ def generate_new_message_id():
         except:
             status = True
     return newID
+
+def generate_reset_code():
+    reset_code = getrandbits(32)
+    return reset_code

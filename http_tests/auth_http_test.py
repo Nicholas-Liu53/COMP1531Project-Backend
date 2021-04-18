@@ -150,10 +150,11 @@ def test_http_auth_logout_v1_invalid():
 
 #* Test that for a registered email, it is successful (response 200)
 def test_http_auth_passwordreset_valid_email(user1, user2):
-    result = requests.post(f"{url}auth/passwordreset/request/v1", json={'email': f"{get_user(user1['auth_user_id'])}"})
+    
+    result = requests.post(f"{url}auth/passwordreset/request/v1", json={'email': get_user(user1['auth_user_id'])['email']})
     assert result.status_code == 200
 
-    result = requests.post(f"{url}auth/passwordreset/request/v1", json={'email': f"{get_user(user2['auth_user_id'])}"})
+    result = requests.post(f"{url}auth/passwordreset/request/v1", json={'email': get_user(user2['auth_user_id'])['email']})
     assert result.status_code == 200
 
 #* Test that for an unregistered email, it raises an InputError (response 400)
