@@ -121,7 +121,7 @@ def test_auth_register_valid_same_name():
             'name_first': 'cari', 
             'name_last': 'coleman', 
             'handle_str': 'caricoleman0',
-            'profile_img_url': f"{url}static/1.jpg"
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -133,7 +133,7 @@ def test_auth_register_valid_same_name():
             'name_first': 'cari', 
             'name_last': 'coleman', 
             'handle_str': 'caricoleman',
-            'profile_img_url': f"{url}static/0.jpg"
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -189,7 +189,7 @@ def test_auth_register_valid_long_name():
             'name_first': 'cariiiiiiiiiiiiiii', 
             'name_last': 'coleman', 
             'handle_str': 'cariiiiiiiiiiiiiiico',
-            'profile_img_url': f"{url}static/0.jpg"
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -207,7 +207,7 @@ def test_auth_register_valid_long_first_name():
             'name_first': 'cariiiiiiiiiiiiiiiiiii', 
             'name_last': 'coleman', 
             'handle_str': 'cariiiiiiiiiiiiiiiiii',
-            'profile_img_url': f"{url}static/0.jpg"
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -229,7 +229,7 @@ def test_auth_register_valid_long_name_multiple():
             'name_first': 'cariiiiiiiiiiiiiii', 
             'name_last': 'coleman', 
             'handle_str': 'cariiiiiiiiiiiiiiico',
-            'profile_img_url': f"{url}static/0.jpg"
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -241,7 +241,7 @@ def test_auth_register_valid_long_name_multiple():
             'name_first': 'cariiiiiiiiiiiiiii', 
             'name_last': 'coleman', 
             'handle_str': 'cariiiiiiiiiiiiiiico0',
-            'profile_img_url': f"{url}static/1.jpg"
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 

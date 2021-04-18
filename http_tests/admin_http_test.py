@@ -108,7 +108,7 @@ def test_http_admin_user_remove_valid(user1, user2):
             'name_first': 'User', 
             'name_last': '1', 
             'handle_str': 'user1',
-            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
+            'profile_img_url': f"{url}static/default.jpg"
             }]
     } 
 
@@ -159,7 +159,7 @@ def test_http_userpermissions_change(user1, user2, user3):
         'email': "second@gmail.com", 
         'handle_str': "user2",
         uID: user2[AuID],
-        'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
+        'profile_img_url': f"{url}static/default.jpg"
     } in details[allMems]
 
     requests.post(f"{url}channel/addowner/v1", json={
@@ -179,7 +179,7 @@ def test_http_userpermissions_change(user1, user2, user3):
         'email': "second@gmail.com", 
         'handle_str': "user2",
         uID: user2[AuID],
-        'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
+        'profile_img_url': f"{url}static/default.jpg"
     } in details1[ownMems]
 
 

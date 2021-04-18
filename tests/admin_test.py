@@ -63,7 +63,7 @@ def test_user_remove(user1, user2):
             'name_first': 'User', 
             'name_last': '1', 
             'handle_str': 'user1',
-            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
+            'profile_img_url': f"{url}static/default.jpg"
             },]
     } 
     with pytest.raises(InputError):
@@ -94,7 +94,7 @@ def test_userpermissions_change(user1, user2, user3):
         lName: '2',
         'email': 'second@gmail.com',
         'handle_str': 'user2',
-        'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
+        'profile_img_url': f"{url}static/default.jpg"
     } in src.channel.channel_details_v1(user2[token], channelTest[cID])[allMems]
 
     #* Test 3: adding owner when user is not an owner of the channel but has dreams permissions
@@ -104,7 +104,7 @@ def test_userpermissions_change(user1, user2, user3):
         lName: '2',
         'email': 'second@gmail.com',
         'handle_str': 'user2',
-        'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
+        'profile_img_url': f"{url}static/default.jpg"
     } in src.channel.channel_details_v1(user2[token], channelTest[cID])[ownMems]
 
     src.channel.channel_removeowner_v1(user2[token], channelTest[cID], user3[AuID])
@@ -116,7 +116,7 @@ def test_userpermissions_change(user1, user2, user3):
         lName: '3',
         'email': 'third@gmail.com',
         'handle_str': 'user3',
-        'profile_img_url': f"{url}static/{user3[AuID]}.jpg"
+        'profile_img_url': f"{url}static/default.jpg"
     } not in src.channel.channel_details_v1(user2[token], channelTest[cID])[ownMems]
 
     assert {
@@ -125,7 +125,7 @@ def test_userpermissions_change(user1, user2, user3):
         lName: '3',
         'email': 'third@gmail.com',
         'handle_str': 'user3',
-        'profile_img_url': f"{url}static/{user3[AuID]}.jpg"
+        'profile_img_url': f"{url}static/default.jpg"
     } in src.channel.channel_details_v1(user2[token], channelTest[cID])[allMems]
 
     #* Test 5: Raise input error for invalid permission id

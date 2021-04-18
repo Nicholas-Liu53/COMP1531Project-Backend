@@ -244,7 +244,10 @@ def user_profile_uploadphoto_v1(token, img_url,x_start,y_start,x_end,y_end):
 
     # Fetch image via URL
 
-    if requests.get(img_url).status_code != 200:
+    try:  
+        if requests.get(img_url).status_code != 200:
+            raise InputError
+    except:
         raise InputError
 
     image_formats = ("image/jpeg", "image/jpg")
@@ -269,6 +272,8 @@ def user_profile_uploadphoto_v1(token, img_url,x_start,y_start,x_end,y_end):
     
     imageObject.crop((x_start, y_start, x_end, y_end)).save(f"src/static/{auth_user_id}.jpg")
 
+    # Serving image
+    
     data = json.load(open('data.json', 'r'))
     for user in data['users']:
         if user['u_id'] == auth_user_id:

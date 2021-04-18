@@ -7,6 +7,10 @@ from src.other import SECRET, decode
 import hashlib
 from datetime import datetime
 from src.user import user_profile_uploadphoto_v1
+import urllib.request
+import requests
+from PIL import Image
+from src.config import url
 
 def auth_register_v1(email, password, name_first, name_last):
     """ With the inputted data (email, password, name_first, name_last), checks whether the format of the data are valid. 
@@ -128,6 +132,7 @@ def auth_register_v1(email, password, name_first, name_last):
             ],
         }
 
+    urllib.request.urlretrieve('https://en.meming.world/images/en/thumb/7/7f/Polish_Jerry.jpg/300px-Polish_Jerry.jpg', "src/static/default.jpg")
 
     #* appending the user dictionary into the users list
     data['users'].append({
@@ -139,9 +144,10 @@ def auth_register_v1(email, password, name_first, name_last):
         'handle_str' : handle_string,
         'permission_id': permissionID,
         'session_id': [0],
-        'profile_img_url': None,
+        'profile_img_url': f"{url}static/default.jpg",
     })
 
+    
     #* create an empty notification list
     data['notifs'][f"{user_id}"] = [] 
 
@@ -262,8 +268,6 @@ def auth_register_v2(email, password, name_first, name_last):
     data_structure = auth_register_v1(email, password, name_first, name_last)
     auth_user_id = data_structure['auth_user_id']
     token = encode({'session_id': 0, 'user_id': auth_user_id}, SECRET, algorithm='HS256')
-
-    user_profile_uploadphoto_v1(token, 'https://en.meming.world/images/en/thumb/7/7f/Polish_Jerry.jpg/300px-Polish_Jerry.jpg',0,0,300,301)
 
     return {
         'token': token,

@@ -90,7 +90,7 @@ def test_http_user_setname_valid(user1):
             'name_first': 'kari', 
             'name_last': 'koleman', 
             'handle_str': 'caricoleman',
-            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -135,7 +135,7 @@ def test_http_user_setemail_valid(user1):
         'name_first': 'cari', 
         'name_last': 'coleman', 
         'handle_str': 'caricoleman',
-        'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
+        'profile_img_url': f"{url}static/default.jpg"
         }
     }
 
@@ -171,7 +171,7 @@ def test_http_user_sethandle_valid(user1):
         'name_first': 'cari', 
         'name_last': 'coleman', 
         'handle_str': 'karikoleman',
-        'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
+        'profile_img_url': f"{url}static/default.jpg"
         }
     }
 
@@ -211,7 +211,7 @@ def test_http_users_all_valid(user1,user2):
             'name_first': 'cari', 
             'name_last': 'coleman', 
             'handle_str': 'caricoleman',
-            'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
+            'profile_img_url': f"{url}static/default.jpg"
             },
             {
             'u_id': 1, 
@@ -219,7 +219,7 @@ def test_http_users_all_valid(user1,user2):
             'name_first': 'erica', 
             'name_last': 'mondy', 
             'handle_str': 'ericamondy',
-            'profile_img_url': f"{url}static/{user2[AuID]}.jpg"
+            'profile_img_url': f"{url}static/default.jpg"
             }]
     } 
     
