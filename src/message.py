@@ -1,8 +1,11 @@
 from src.error import AccessError, InputError
 import src.auth
-from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications, push_reacted_notifications
+from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications, push_reacted_notifications, generate_new_message_id
 from datetime import timezone, datetime
 import json
+import threading, time
+from random import getrandbits
+from src.user import users_stats_v1
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -59,10 +62,7 @@ def message_send_v1(token, channel_id, message):
 
     now = datetime.now()
     time_created = int(now.strftime("%s"))
-    if len(data['messages_log']) > 0:
-        newID = data['messages_log'][-1]['message_id'] + 1
-    else:
-        newID = 0
+    newID = generate_new_message_id()
 
     # User is in the channel (which exists) & message is appropriate length
     #* Time to send a message
@@ -79,6 +79,20 @@ def message_send_v1(token, channel_id, message):
         }
     )
 
+    updated_num_message = data['dreams_analytics']['messages_exist'][-1]['num_messages_exist'] + 1
+    data['dreams_analytics']['messages_exist'].append({
+        'num_messages_exist': updated_num_message,
+        'time_stamp': int(datetime.now().strftime("%s"))
+    })
+    #* update analytics
+    messageSentPrev = data["user_analytics"][f"{auth_user_id}"]['messages_sent'][-1]["num_messages_sent"]
+    data["user_analytics"][f"{auth_user_id}"]['messages_sent'].append(
+        {
+            "num_messages_sent": messageSentPrev + 1,
+            "time_stamp": int(datetime.now().strftime("%s"))
+        }
+    )   
+
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
 
@@ -92,8 +106,6 @@ def message_send_v1(token, channel_id, message):
 def message_remove_v1(token, message_id):
     '''
     Takes in a user's token and a message's id and removes that message.
-        --> Note: The message dictionary isn't removed, but rather the message is 
-                    replaced with "### Message Removed ###"
 
     Arguments:
         token        (str) - The JWT containing user_id and session_id of the user that is to remove the message
@@ -130,14 +142,33 @@ def message_remove_v1(token, message_id):
 
     i -= 1              # Remove extra increment
 
-    #* Check if the user is the writer, channel owner or owner of Dreams
-    # Get the channel the message belongs to
-    channel = get_channel(data['messages_log'][i]['channel_id'])
-    if auth_user_id is not data['messages_log'][i]['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
-        raise AccessError
+    if data['messages_log'][i][cID] != -1:
+        #* If message is in a channel
+        #* Check if the user is the writer, channel owner or owner of Dreams
+        # Get the channel the message belongs to
+        channel = get_channel(data['messages_log'][i]['channel_id'])
+        if auth_user_id is not data['messages_log'][i]['u_id'] and auth_user_id not in channel['owner_members'] and get_user_permissions(auth_user_id) != 1:
+            raise AccessError
+    else:
+        if auth_user_id is not data['messages_log'][i]['u_id'] and get_user_permissions(auth_user_id) != 1:
+            raise AccessError
 
     #* Remove the message
     data['messages_log'].remove(data['messages_log'][i])
+
+    updated_num_message = data['dreams_analytics']['messages_exist'][-1]['num_messages_exist'] - 1
+    data['dreams_analytics']['messages_exist'].append({
+        'num_messages_exist': updated_num_message,
+        'time_stamp': int(datetime.now().strftime("%s"))
+    })
+    #* update analytics
+    messageSentPrev = data["user_analytics"][f"{auth_user_id}"]['messages_sent'][-1]["num_messages_sent"]
+    data["user_analytics"][f"{auth_user_id}"]['messages_sent'].append(
+        {
+            "num_messages_sent": messageSentPrev - 1,
+            "time_stamp": int(datetime.now().strftime("%s"))
+        }
+    )   
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
@@ -246,10 +277,7 @@ def message_senddm_v1(token, dm_id, message):
     if len(message) > 1000:
         raise InputError
     data = json.load(open('data.json', 'r'))
-    if len(data['messages_log']) > 0:
-        message_id = data['messages_log'][-1]['message_id'] + 1
-    else:
-        message_id = 0
+    message_id = generate_new_message_id()
     now = datetime.now()
     time_created = int(now.strftime("%s"))
 
@@ -264,6 +292,21 @@ def message_senddm_v1(token, dm_id, message):
         'is_pinned': False
     })
 
+    updated_num_message = data['dreams_analytics']['messages_exist'][-1]['num_messages_exist'] + 1
+    data['dreams_analytics']['messages_exist'].append({
+        'num_messages_exist': updated_num_message,
+        'time_stamp': int(datetime.now().strftime("%s"))
+    })
+    #* update analytics
+
+    messageSentPrev = data["user_analytics"][f"{auth_user_id}"]['messages_sent'][-1]["num_messages_sent"]
+    data["user_analytics"][f"{auth_user_id}"]['messages_sent'].append(
+        {
+            "num_messages_sent": messageSentPrev + 1,
+            "time_stamp": int(datetime.now().strftime("%s"))
+        }
+    )  
+
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
 
@@ -271,6 +314,8 @@ def message_senddm_v1(token, dm_id, message):
     return {
         'message_id': message_id,
     }
+
+    
 
 def message_share_v1(token, og_message_id, message, channel_id, dm_id):
     '''
@@ -378,8 +423,6 @@ def message_unpin_v1(token, message_id):
                 return {}
     raise InputError
 
-
-
 #Iteration 3    
 def message_react_v1(token, message_id, react_id):
     #Assumption: Only react ID that is valid is 1 
@@ -435,7 +478,6 @@ def message_react_v1(token, message_id, react_id):
     
     return {}
 
-
 def message_unreact_v1(token, message_id, react_id):
 #Assumption: Only react ID that is valid is 1 
 #And getting rid of unreact will not get rid of notif 
@@ -465,6 +507,103 @@ def message_unreact_v1(token, message_id, react_id):
             
     #If gets to here means message not found or react not found 
     raise InputError
-            
-
     
+def message_sendlater_v1(token, channel_id, message, time_sent):
+    # Decode the token
+    auth_user_id, _ = decode(token)
+
+    # If the message is too long, raise InputError
+    if len(message) > 1000:
+        raise InputError
+
+    # Check if user is in channel
+    if auth_user_id not in get_channel(channel_id)['all_members']:
+        raise AccessError
+
+    data = json.load(open('data.json', 'r'))
+    newID = generate_new_message_id()
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+    timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
+    newID = 0
+    threading.Timer(timeTillSend, sendlater_send, args=(token, channel_id, message, time_sent, newID)).start()
+    return {
+        'message_id': newID
+    }
+
+def message_sendlaterdm_v1(token, dm_id, message, time_sent):
+    # Decode the token
+    auth_user_id, _ = decode(token)
+
+    # If the message is too long, raise InputError
+    if len(message) > 1000:
+        raise InputError
+
+    # Check if user is in channel
+    if auth_user_id not in get_dm(dm_id)['all_members']:
+        raise AccessError
+
+    data = json.load(open('data.json', 'r'))
+    newID = generate_new_message_id()
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+    timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
+    newID = 0
+    threading.Timer(timeTillSend, sendlaterdm_send, args=(token, dm_id, message, time_sent, newID)).start()
+    return {
+        'message_id': newID
+    }
+
+def sendlater_send(token, channel_id, message, time_sent, newID):
+    # Decode the token
+    auth_user_id, _ = decode(token)
+
+    data = json.load(open('data.json', 'r'))
+
+    # User is in the channel (which exists) & message is appropriate length
+    #* Time to send a message
+    data['messages_log'].append(
+        {
+            'channel_id'    : channel_id,
+            'dm_id'         : -1,
+            'u_id'          : auth_user_id,
+            'time_created'  : time_sent,
+            'message_id'    : newID,
+            'message'       : message,
+            'reacts': [],
+            'is_pinned': False,
+        }
+    )
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+
+    #* Push notifications if anyone is tagged
+    push_tagged_notifications(auth_user_id, channel_id, -1, message)
+
+def sendlaterdm_send(token, dm_id, message, time_sent, newID):
+    # Decode the token
+    auth_user_id, _ = decode(token)
+
+    data = json.load(open('data.json', 'r'))
+
+    # User is in the dm (which exists) & message is appropriate length
+    #* Time to send a message
+    data['messages_log'].append(
+        {
+            'channel_id'    : -1,
+            'dm_id'         : dm_id,
+            'u_id'          : auth_user_id,
+            'time_created'  : time_sent,
+            'message_id'    : newID,
+            'message'       : message,
+            'reacts': [],
+            'is_pinned': False,
+        }
+    )
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+
+    #* Push notifications if anyone is tagged
+    push_tagged_notifications(auth_user_id, -1, dm_id, message)

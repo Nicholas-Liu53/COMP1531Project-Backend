@@ -1,6 +1,7 @@
 import jwt
 import json
 from src.error import AccessError, InputError
+from random import getrandbits
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -35,7 +36,8 @@ def clear_v1():
             'channels': [],
             'dms': [],
             'messages_log': [],
-            'notifs': {}
+            'notifs': {},
+            'user_analytics': {}
         }, FILE)
 
 def search_v1(token, query_str):
@@ -179,7 +181,7 @@ def get_message(message_id):
     for message in data['messages_log']:
         if message_id == message['message_id']:
             return message
-    # raise InputError
+    raise InputError
 
 def get_dm(dm_id):
     data = json.load(open('data.json', 'r'))
@@ -265,3 +267,14 @@ def check_removed(u_id):
                 raise InputError
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
+
+def generate_new_message_id():
+    newID = getrandbits(32)
+    status = False
+    while not status:
+        try:
+            get_message(newID)
+            newID = getrandbits(32)
+        except:
+            status = True
+    return newID

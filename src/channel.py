@@ -2,8 +2,9 @@ from src.error import AccessError, InputError
 from src.channels import channels_listall_v2, channels_list_v2
 from src.other import decode, get_channel, get_user, message_count, push_added_notifications, check_removed
 import jwt
-import json
+import json, time
 from src.other import SECRET
+from datetime import datetime
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -67,10 +68,22 @@ def channel_invite_v1(token, channel_id, u_id):
     check_removed(u_id)
 
     # now searches for channel_id
+    now = datetime.now()
+    time_created = int(now.strftime("%s"))
+    channelsJoinedPrev = data["user_analytics"][f"{u_id}"]['channels_joined'][-1]["num_channels_joined"]
+
     for chan in data['channels']:
         if chan["channel_id"] == channel_id:
             # ensure no duplicates
-            chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None    
+            chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
+            
+            #* update analytics
+            data["user_analytics"][f"{u_id}"]['channels_joined'].append(
+                {
+                    "num_channels_joined": channelsJoinedPrev + 1,
+                    "time_stamp": time_created
+                }
+            )   
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
@@ -176,10 +189,6 @@ def channel_messages_v1(token, channel_id, start):
     
     if not channelFound:
         raise InputError
-
-    #Input error: Start is greater than total number of messages in list 
-    if start > len(data['messages_log']):
-        raise InputError
     
     #Access error: When auth_user_id is not a member of channel with channel_id 
     userFound = False 
@@ -189,10 +198,20 @@ def channel_messages_v1(token, channel_id, start):
     
     if not userFound:
         raise AccessError
-    
+
     desired_end = start + 50
     num_of_messages = message_count(channel_id, -1)
-        
+
+    try:
+        data = json.load(open('data.json', 'r'))
+    except json.JSONDecodeError:
+        time.sleep(0.1)
+        data = json.load(open('data.json', 'r'))
+
+    #Input error: Start is greater than total number of messages in list 
+    if start > len(data['messages_log']):
+        raise InputError
+
     if num_of_messages < desired_end:
         desired_end = -1
     messages = []
@@ -273,6 +292,18 @@ def channel_leave_v1(token, channel_id):
     # Time to remove from all_members list
     channelData['all_members'].remove(auth_user_id)
 
+    #* update analytics
+    now = datetime.now()
+    time_created = int(now.strftime("%s"))
+    channelsJoinedPrev = data["user_analytics"][f"{auth_user_id}"]['channels_joined'][-1]["num_channels_joined"]
+    data["user_analytics"][f"{auth_user_id}"]['channels_joined'].append(
+        {
+            "num_channels_joined": channelsJoinedPrev - 1,
+            "time_stamp": time_created
+        }
+    )   
+    
+
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
 
@@ -336,6 +367,17 @@ def channel_join_v1(token, channel_id):
     # Time to add the user into the channel
     data['channels'][i]['all_members'].append(data['users'][j]['u_id'])
 
+    #* update analytics
+    now = datetime.now()
+    time_created = int(now.strftime("%s"))
+    channelsJoinedPrev = data["user_analytics"][f"{auth_user_id}"]['channels_joined'][-1]["num_channels_joined"]
+    data["user_analytics"][f"{auth_user_id}"]['channels_joined'].append(
+        {
+            "num_channels_joined": channelsJoinedPrev + 1,
+            "time_stamp": time_created
+        }
+    )   
+
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
         
@@ -397,10 +439,24 @@ def channel_addowner_v1(token, channel_id, u_id):
         raise AccessError
     
     # now searches for channel_id
+    now = datetime.now()
+    time_created = int(now.strftime("%s"))
+    channelsJoinedPrev = data["user_analytics"][f"{auth_user_id}"]['channels_joined'][-1]["num_channels_joined"]  
     for chan in data['channels']:
         if chan["channel_id"] == channel_id:
             # ensure no duplicates
-            chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
+            if u_id not in chan["all_members"]:
+                chan["all_members"].append(u_id)
+                
+                #* update analytics
+
+                data["user_analytics"][f"{u_id}"]['channels_joined'].append(
+                    {
+                        "num_channels_joined": channelsJoinedPrev + 1,
+                        "time_stamp": time_created
+                    }
+                ) 
+                
             chan["owner_members"].append(u_id) if u_id not in chan["owner_members"] else None
     push_added_notifications(auth_user_id, u_id, channel_id,-1)
     
@@ -475,10 +531,3 @@ def channel_removeowner_v1(token, channel_id, u_id):
 
     return {
     }
-
-
-
-
-
-
-

@@ -6,6 +6,7 @@ import src.channel, src.channels, src.auth, src.dm
 from src.other import clear_v1, SECRET
 from datetime import timezone, datetime
 import jwt
+import time
 
 
 AuID     = 'auth_user_id'
@@ -248,6 +249,31 @@ def test_message_remove(user1, user2, user3, user4):
     with pytest.raises(InputError):
         message_remove_v1(user4[token], -1)
 
+    #* Test for dm
+    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID], user3[AuID]])
+    dmMessage1 = message_senddm_v1(user2[token], dm1[dmID], "Trigger")
+    dmMessage2 = message_senddm_v1(user2[token], dm1[dmID], "Happy")
+    #* User 3 cannot remove messages it didn't send
+    with pytest.raises(AccessError):
+        message_remove_v1(user3[token], dmMessage1[mID])
+    #* Dreams owner can remove message
+    message_remove_v1(user1[token], dmMessage1[mID])
+    messageFound = False
+    for messageDict in src.dm.dm_messages_v1(user3[token], dm1[dmID], 0)['messages']:
+        if message3['message_id'] == messageDict['message_id']:
+            messageFound = True
+            break
+    assert messageFound is False
+    #* User can remove own message
+    message_remove_v1(user2[token], dmMessage2[mID])
+    messageFound = False
+    for messageDict in src.dm.dm_messages_v1(user3[token], dm1[dmID], 0)['messages']:
+        if message3['message_id'] == messageDict['message_id']:
+            messageFound = True
+            break
+    assert messageFound is False
+    
+
     #* All tests passed
     #! Clearing data
     clear_v1()
@@ -338,10 +364,14 @@ def test_senddm_invalid_dm(user1):
 
 def test_senddm_multiple(user1, user2):
     dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
-    assert message_senddm_v1(user1[token], dm1[dmID], '') == {'message_id': 0}
-    assert message_senddm_v1(user2[token], dm1[dmID], '') == {'message_id': 1}
-    assert message_senddm_v1(user2[token], dm1[dmID], '') == {'message_id': 2}
-    assert message_senddm_v1(user1[token], dm1[dmID], '') == {'message_id': 3}
+    message1 = message_senddm_v1(user1[token], dm1[dmID], '')
+    assert message1 == {'message_id': message1['message_id']}
+
+    message2 = message_senddm_v1(user2[token], dm1[dmID], '')
+    assert message2 == {'message_id': message2['message_id']}
+
+    message3 = message_senddm_v1(user2[token], dm1[dmID], '')
+    assert message3 == {'message_id': message3['message_id']}
 
 def test_dm_unauthorised_user(user1, user2, invalid_token):
     #* All unauthorised user tests
@@ -371,7 +401,6 @@ def test_message_pin_valid_channel(user1):
     for message in pinned['messages']:
         if target[mID] == message[mID]:
             mID_found = True
-            print(message)
             assert message['is_pinned'] is True
         else:
             assert message['is_pinned'] is False
@@ -566,7 +595,6 @@ def test_message_react_v1_errors_invalid_mID(user1, user2):
     invalid_message_id = -1 
     with pytest.raises(InputError):
         message_react_v1(user1[token], invalid_message_id, thumbsUp) 
-        
 
 #Input error test for invalid react id for message_react 
 def test_message_react_v1_errors_invalid_rID(user1, user2): 
@@ -584,7 +612,6 @@ def test_message_react_v1_errors_invalid_rID(user1, user2):
     #Invalid rID for DM
     with pytest.raises(InputError):
         message_react_v1(user1[token], message_2[mID], invalid_react_id)
-        
 
 #Test that already contains an active react raises input error  
 def test_message_react_v1_active_react(user1, user2):
@@ -595,7 +622,6 @@ def test_message_react_v1_active_react(user1, user2):
     #Already contains react in channel error 
     with pytest.raises(InputError):
         message_react_v1(user1[token], message_1[mID], thumbsUp)
-        
     
     dm_1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
     message_2 = message_senddm_v1(user1[token], dm_1[dmID], "Goodbye")
@@ -621,7 +647,6 @@ def test_message_react_v1_invalid_user(user1, user2, user3):
     with pytest.raises(AccessError):
         message_react_v1(user3[token], message_2[mID], thumbsUp)
 
-
 #Test that message_react works for a message in a channel
 def test_message_react_v1_valid_channel(user1, user2):
     channel_1 = src.channels.channels_create_v1(user1[token], 'Channel', False)
@@ -631,7 +656,6 @@ def test_message_react_v1_valid_channel(user1, user2):
     
     #Test 1: check that react_1 comes up in "messages"
     result = src.channel.channel_messages_v1(user1[token], channel_1[cID], 0)
-    
 
     #Create for loop that finds message looking for 
     for current_message in result['messages']: 
@@ -682,7 +706,6 @@ def test_message_unreact_v1_errors_invalid_rID(user1, user2):
     #Invalid rID for DM
     with pytest.raises(InputError):
         message_unreact_v1(user1[token], message_2[mID], invalid_react_id)
-        
 
 #Test that doesn't contain react raises input error for message_unreact
 def test_message_unreact_v1_active_react(user1, user2):
@@ -701,7 +724,6 @@ def test_message_unreact_v1_active_react(user1, user2):
     with pytest.raises(InputError):
         message_unreact_v1(user1[token], message_2[mID], thumbsUp)
     
-
 #Test that authorised user not a member of channel or dm raises access error for message_react 
 def test_message_unreact_v1_invalid_user(user1, user2, user3): 
     channel_1 = src.channels.channels_create_v1(user1[token], 'Channel', False)
@@ -717,7 +739,6 @@ def test_message_unreact_v1_invalid_user(user1, user2, user3):
     #Not a member of DM 
     with pytest.raises(AccessError):
         message_unreact_v1(user3[token], message_2[mID], thumbsUp)
-
 
 #Test that message_unreact works for a message in a channel
 def test_message_unreact_v1_valid_channel(user1, user2):
@@ -756,3 +777,103 @@ def test_message_unreact_v1_valid_dm(user1, user2):
                 if current_react['react_id'] == thumbsUp:
                     assert user1[AuID] not in current_react['u_ids'] 
                 assert current_react['is_this_user_reacted'] == False
+#* Testing a message that is to be sent later isn't prematurely sent
+def test_message_sendlater_is_sent_later(user1, user2):
+    # User1 creates channel
+    channel1 = src.channels.channels_create_v1(user1[token], 'Dominic Torreto', True)
+    # User2 joins channel
+    src.channel.channel_join_v1(user2[token], channel1[cID])
+    # Test for m1, sent by user1
+    sendTime = datetime.now().replace(tzinfo=timezone.utc).timestamp() + 3
+    m1 = src.message.message_sendlater_v1(user1[token], channel1[cID], "You know what matters more than American Muscle?", sendTime)
+
+    #* Make sure message isn't sent prematurely
+    messageFound = False
+    for message in src.channel.channel_messages_v1(user2[token], channel1[cID], 0)['messages']:
+        if m1[mID] == message[mID]:
+            messageFound = True
+    assert not messageFound
+
+    #* Sleep for now
+    time.sleep(4)
+    
+    #* Make sure the message is sent and the timestamp is correct
+    for message in src.channel.channel_messages_v1(user2[token], channel1[cID], 0)['messages']:
+        if m1[mID] == message[mID]:
+            mTime = message['time_created']
+            messageFound = True
+    assert messageFound
+    assert mTime == sendTime
+
+
+#* Testing a message that is to be sent later isn't prematurely sent
+def test_message_sendlaterdm_is_sent_later(user1, user2):
+    # User1 creates dm, invites user2
+    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    # Test for m1, sent by user1
+    sendTime = datetime.now().replace(tzinfo=timezone.utc).timestamp() + 3
+    m1 = src.message.message_sendlaterdm_v1(user1[token], dm1[dmID], "You know what matters more than American Muscle?", sendTime)
+    
+    #* Make sure message isn't sent prematurely
+    messageFound = False
+    for message in src.dm.dm_messages_v1(user2[token], dm1[dmID], 0)['messages']:
+        if m1[mID] == message[mID]:
+            messageFound = True
+    assert not messageFound
+
+    #* Sleep for now
+    time.sleep(4)
+    
+    #* Make sure the message is sent and the timestamp is correct
+    for message in src.dm.dm_messages_v1(user2[token], dm1[dmID], 0)['messages']:
+        if m1[mID] == message[mID]:
+            mTime = message['time_created']
+            messageFound = True
+    assert messageFound
+    assert mTime == sendTime
+
+#* Testing a message that is to be sent later isn't too long
+def test_message_sendlater_long_messages(user1, user2):
+    # User1 creates channel
+    channel1 = src.channels.channels_create_v1(user1[token], 'Dominic Torreto', True)
+    # User2 joins channel
+    src.channel.channel_join_v1(user2[token], channel1[cID])
+    # Test for m1, sent by user1
+    sendTime = datetime.now().replace(tzinfo=timezone.utc).timestamp() + 3
+    tooLong = ""
+    for _ in range(501):
+        tooLong += ":("
+    with pytest.raises(InputError):
+        src.message.message_sendlater_v1(user1[token], channel1[cID], tooLong, sendTime)
+
+#* Testing a message that is to be sent later isn't too long
+def test_message_sendlaterdm_long_messages(user1, user2):
+    # User1 creates dm, invites user2
+    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    # Test for m1, sent by user1
+    sendTime = datetime.now().replace(tzinfo=timezone.utc).timestamp() + 3
+    tooLong = ""
+    for _ in range(501):
+        tooLong += ":("
+    with pytest.raises(InputError):
+        src.message.message_sendlaterdm_v1(user1[token], dm1[dmID], tooLong, sendTime)
+
+def test_message_sendlater_other_user(user1, user2, user3):
+    # User1 creates channel
+    channel1 = src.channels.channels_create_v1(user1[token], 'Dominic Torreto', True)
+    # User2 joins channel
+    src.channel.channel_join_v1(user2[token], channel1[cID])
+    # Test for m1, sent by user3
+    sendTime = datetime.now().replace(tzinfo=timezone.utc).timestamp() + 3
+    messageToSend = "Quack"
+    with pytest.raises(AccessError):
+        src.message.message_sendlater_v1(user3[token], channel1[cID], messageToSend, sendTime)
+
+def test_message_sendlaterdm_other_user(user1, user2, user3):
+    # User1 creates dm, invites user2
+    dm1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    # Test for m1, sent by user3
+    sendTime = datetime.now().replace(tzinfo=timezone.utc).timestamp() + 3
+    messageToSend = "Quack quack"
+    with pytest.raises(AccessError):
+        src.message.message_sendlaterdm_v1(user3[token], dm1[dmID], messageToSend, sendTime)
