@@ -168,5 +168,5 @@ def test_http_auth_passwordreset_invalid_email():
 
 #* Test that if the reset password is less than 6 characters long, it raises an InputError (response 400)
 def test_http_auth_passwordreset_invalid_reset(user1, user2):
-    result = requests.post(f"{url}auth/passwordreset/reset/v1", json={'reset_code': 'Invalid', 'new_password': 'badpw'})
+    result = requests.post(f"{url}auth/passwordreset/reset/v1", json={'reset_code': -1, 'new_password': 'badpw'})
     assert result.status_code == 400
