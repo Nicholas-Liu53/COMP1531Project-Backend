@@ -299,5 +299,5 @@ def auth_logout_v1(token):
                     json.dump(data, FILE)
                 return {'is_success': True}
 
-    return {'is_success': False}
+
 
