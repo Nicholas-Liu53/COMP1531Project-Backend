@@ -122,7 +122,7 @@ def test_http_standup_active_v1_invalid_cID(user1):
 def test_http_standup_active_v1(user1):
     response = requests.post(f"{url}channels/create/v2", json={
         token: user1[token],
-        "name": "Channel1",
+        "name": "Channel",
         "is_public": False
     })
     channel = response.json()
@@ -153,6 +153,43 @@ def test_http_standup_active_v1(user1):
     })
     standup_end = response3.json()
     assert not standup_end['is_active']
+    
+#HTTP test that threading and timers done correctly for standup_active_v1
+def test_http_standup_active_v1_correct_time(user1):
+    response = requests.post(f"{url}channels/create/v2", json={
+        token: user1[token],
+        "name": "Channel1",
+        "is_public": False
+    })
+    channel1 = response.json()
+
+    response2 = requests.post(f"{url}channels/create/v2", json={
+        token: user1[token],
+        "name": "Channel2",
+        "is_public": False
+    })
+    channel2 = response2.json()
+    
+    requests.post(f"{url}standup/start/v1", json={
+        token: user1[token],
+        cID: channel1[cID],
+        "length": standard_length
+    })
+    
+    requests.post(f"{url}standup/start/v1", json={
+        token: user1[token],
+        cID: channel2[cID],
+        "length": standard_length * 2
+    })
+    
+    time.sleep(standard_length)
+    #Check that threading was done correctly, i.e. fake_channel is still running after standard_length 
+    response5 = requests.get(f"{url}standup/active/v1", params={
+        token: user1[token],
+        cID: channel2[cID],
+    })
+    standup2 = response5.json()
+    assert standup2['is_active']
 
 #HTTP test that InputError raised when cID not valid for standup_send_v1
 def test_http_standup_send_v1_invalid_cID(user1):
@@ -228,7 +265,7 @@ def test_http_standup_send_v1_one_message(user1):
         "is_public": False
     })
     channel = response.json()
-    
+
     requests.post(f"{url}standup/start/v1", json={
         token: user1[token],
         cID: channel[cID],
@@ -252,7 +289,41 @@ def test_http_standup_send_v1_one_message(user1):
     assert len(message_list['messages']) == 1
     for messages in message_list['messages']:
         assert "user1: Hello" in messages['message']
-     
+        
+#HTTP test that messages can be sent within a standup within the correct channel and not other channel 
+def test_http_standup_send_v1_correct_channel(user1):
+    response = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": "Channel1",
+        "is_public": False
+    })
+    channel = response.json()
+    
+    #Create fake channel to ensure messages in standup being sent to correct channel
+    fake_response = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": "fake_channel",
+        "is_public": True
+    })
+    fake_channel = fake_response.json()  
+    
+    requests.post(f"{url}standup/start/v1", json={
+        token: user1[token],
+        cID: channel[cID],
+        'length': standard_length
+    })
+    
+    #Make sure message was only sent to correct channel 
+    response = requests.get(f"{url}channel/messages/v2", params={
+        "token": user1[token],
+        "channel_id": fake_channel[cID],
+        "start": 0
+    })
+    message_list = response.json()
+    assert len(message_list['messages']) == 0
+    for messages in message_list['messages']:
+        assert "user1: Hello" not in messages['message']   
+
 #HTTP test messages can be sent within a standup as specified for more than one message 
 def test_http_standup_send_v1_multiple_messages(user1, user2):
     response = requests.post(f"{url}channels/create/v2", json={

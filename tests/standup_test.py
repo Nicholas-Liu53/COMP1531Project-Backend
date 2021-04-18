@@ -65,23 +65,29 @@ def test_standup_active_v1(user1, user2):
     invalid_cID = -1 
     with pytest.raises(InputError):
         standup_active_v1(user1[token], invalid_cID)
-    
+        
     #Success Case
     channel = src.channels.channels_create_v1(user1[token], 'Marms', False)
+    
+    #Create a fake channel to check that standup is started in correct channel 
+    fake_channel = src.channels.channels_create_v1(user1[token], 'Nez', True )
     src.channel.channel_invite_v1(user1[token], channel[cID], user2[AuID])
     standup_start_v1(user1[token], channel[cID], standard_length)
+    standup_start_v1(user1[token], fake_channel[cID], standard_length * 2)
     result = standup_active_v1(user1[token], channel[cID])
- 
     assert result['is_active'] 
     now = datetime.now()
     time_finish = int(now.strftime("%s")) + standard_length 
     assert result['time_finish'] == time_finish
- 
-    
+        
     #Can also check that once standup is done: is no longer active 
     time.sleep(standard_length)
     result1 = standup_active_v1(user1[token], channel[cID])
     assert not result1['is_active'] 
+       
+    #make sure that fake_channel standup is still running- i.e. threading is done correctly 
+    result2 = standup_active_v1(user1[token], fake_channel[cID])
+    assert result2['is_active']
        
 #Test that messages can be successfully sent in the standup queue 
 def test_standup_send_v1(user1, user2, user3):
@@ -92,6 +98,9 @@ def test_standup_send_v1(user1, user2, user3):
     
     channel = src.channels.channels_create_v1(user1[token], 'Marms', False)
     src.channel.channel_invite_v1(user1[token], channel[cID], user2[AuID])
+    
+    #Make fake channel to ensure that standup send only sends to correct channel
+    fake_channel = src.channels.channels_create_v1(user1[token], 'Nez', True)
         
     #Message is more than 1000 characters (not including username and colon)
     message = '?' * 1001
@@ -116,6 +125,10 @@ def test_standup_send_v1(user1, user2, user3):
     assert len(result['messages']) == 1
     for messages in result['messages']: 
         assert "user1: Hello" in messages['message']
+        
+    #Make sure message not sent to fake_channel
+    fake_result = channel_messages_v1(user1[token], fake_channel[cID], 0)
+    assert len(fake_result['messages']) == 0
     
     #Now do for two messages, assert that the 2 messages are appended as one message 
     channel2 = src.channels.channels_create_v1(user1[token], 'Yggdrasil', False)
