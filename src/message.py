@@ -425,7 +425,28 @@ def message_unpin_v1(token, message_id):
 
 #Iteration 3    
 def message_react_v1(token, message_id, react_id):
-    #Assumption: Only react ID that is valid is 1 
+    '''
+    For a given channel or DM, add a "react" to a particular message 
+    NOTE: Assuming that the only react ID that is valid is 1: Thumbs up. 
+
+    Arguments:
+        token        (str) - The JWT containing user_id and session_id of the user that is to send the message
+        message_id   (int) - The id of the message that the user wants to react to 
+        react_id     (int) - The type of react to the message 
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When message_id is not a valid message within a channel or DM that authorised user has joined 
+                            2) react_id is not a valid React ID
+                            3) Message with message_id already contains an active react with the same react_id from authorised user 
+                            
+        AccessError - Occurs when:
+                            1) The authorised user is not a member of channel or DM that the message is in 
+
+    Return Value:
+        Returns an empty dictionary {}
+    '''
+ 
     
     auth_user_id, _ = decode(token)
     with open('data.json', 'r') as FILE:
@@ -479,8 +500,27 @@ def message_react_v1(token, message_id, react_id):
     return {}
 
 def message_unreact_v1(token, message_id, react_id):
-#Assumption: Only react ID that is valid is 1 
-#And getting rid of unreact will not get rid of notif 
+    '''
+    For a given channel or DM, remove a "react" to a particular message 
+    NOTE: Assuming that the only react ID that is valid is 1: Thumbs up and that notification for initial react will not be deleted 
+
+    Arguments:
+        token        (str) - The JWT containing user_id and session_id of the user that is to send the message
+        message_id   (int) - The id of the message that the user wants to react to 
+        react_id     (int) - The type of react to the message 
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When message_id is not a valid message within a channel or DM that authorised user has joined 
+                            2) react_id is not a valid React ID
+                            3) Message with message_id does not contain an active react with the same react_id from authorised user 
+                            
+        AccessError - Occurs when:
+                            1) The authorised user is not a member of channel or DM that the message is in 
+
+    Return Value:
+        Returns an empty dictionary {}
+    '''
     
     auth_user_id, _ = decode(token)
     with open('data.json', 'r') as FILE:

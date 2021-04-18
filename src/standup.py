@@ -12,6 +12,26 @@ cID      = 'channel_id'
 chans    = 'channels'
 
 def standup_start_v1(token, channel_id, length):
+    '''
+    For a given channel, begin a standup in which messages that are sent will be sent as one string at end of time specified 
+
+    Arguments:
+        token        (str) - The JWT containing user_id and session_id of the user that is to send the message
+        channel_id   (int) - The id of the channel that the standup is being started in
+        length      (str) - The length in seconds of the startup 
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When Channel ID is invalid 
+                            2) An active standup is already running 
+
+        AccessError - Occurs when:
+                            1) When the authorised user is not in the channel 
+
+    Return Value:
+        Returns a dictionary with key 'time_finish' detailing the time that the standup will be finished 
+    '''
+    
     auth_user_id, _ = decode(token)
     #* If Channel ID is not a valid channel, then an InputError is raised
     #* If authorised user is not in the channel, an AccessError is raised
@@ -41,6 +61,21 @@ def standup_start_v1(token, channel_id, length):
     }
 
 def standup_active_v1(token, channel_id):
+    '''
+    For a given channel, return whether a standup is active in it or not and the time in which an active standup will be finished 
+    NOTE: Assuming that authorised user does not have to be in channel to call standup_active
+
+    Arguments:
+        token        (str) - The JWT containing user_id and session_id of the user that is to send the message
+        channel_id   (int) - The id of the channel that user wants to look for a standup in 
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When Channel ID is invalid 
+
+    Return Value:
+        Returns a dictionary with key 'is_active' detailing whether or not the standup is active and 'time_finish' detailing the time that the standup will be finished. 'time_finish' will return None if no standup is currently active 
+    '''
     _, _ = decode(token)
     #* If Channel ID is not a valid channel, then an InputError is raised
     get_channel(channel_id)
@@ -60,6 +95,25 @@ def standup_active_v1(token, channel_id):
 
 #* Append string with "handle: message" to stand_up messages
 def standup_send_v1(token, channel_id, message):
+    '''
+    For a given channel, sends a message to a standup queue which will be appended to messages log as one string when standup is finished 
+
+    Arguments:
+        token        (str) - The JWT containing user_id and session_id of the user that is to send the message
+        channel_id   (int) - The id of the channel that user wants to look for a standup in 
+        message      (str) - The string of the message being sent
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When Channel ID is invalid 
+                            2) Message is more than 1000 characters (not including username and colon)
+                            3) There is no active standup in channel 
+        AccessError - Occurs when:
+                            1) Authorised user not a member of channel the standup is within 
+
+    Return Value:
+        Returns an empty dictionary {}
+    '''
     auth_user_id, _ = decode(token)
     if auth_user_id not in get_channel(channel_id)['all_members']:
         raise AccessError
@@ -84,6 +138,13 @@ def standup_send_v1(token, channel_id, message):
 #* Compiles messages into one big string
 #* Removes the stand_up dictionary
 def stand_up_push(auth_user_id, channel_id):
+    '''
+    For a given channel, the function which executes the associated standup functions once the thread for the standup is completed. This includes: compiling the messages queue into one string and removing the stand-up from the dictionary
+
+    Arguments:
+        auth_user_id        (int) - The ID of the authorised user
+        channel_id   (int) - The id of the channel that user wants to look for a standup in 
+    '''
     with open('data.json', 'r') as FILE:
         data = json.load(FILE)
 
