@@ -2,11 +2,34 @@ import pytest
 import requests
 import json
 from src.error import AccessError, InputError
-from src.other import check_session, SECRET
+from src.other import check_session, SECRET, get_user
 from src.config import url
 from jwt import encode
 from src.other import check_session, SECRET
 from src.error import AccessError, InputError
+
+#* Fixture that clears and registers the first user
+@pytest.fixture
+def user1():
+    requests.delete(f"{url}clear/v1")    
+    response = requests.post(f"{url}auth/register/v2", json={
+        "email": "first@gmail.com",
+        "password": "password",
+        "name_first": "User",
+        "name_last": "1"
+    })
+    return response.json()
+
+#* Fixture that registers a second user
+@pytest.fixture
+def user2():
+    response = requests.post(f"{url}auth/register/v2", json={
+        "email": "second@gmail.com",
+        "password": "password",
+        "name_first": "User",
+        "name_last": "2"
+    })
+    return response.json()
 
 # tests the return value of the auth login of a valid user
 def test_http_auth_login_valid():
@@ -124,4 +147,25 @@ def test_http_auth_logout_v1_invalid():
     response_3 = requests.delete(f"{url}auth/logout/v1", json={'token': token_1})
     payload_3 = response_3.json()
     assert payload_3['is_success'] == False
-    
+
+#* Test that for a registered email, it is successful (response 200)
+def test_http_auth_passwordreset_valid_email(user1, user2):
+    result = requests.post(f"{url}auth/passwordreset/request/v1", json={'email': f"{get_user(user1['auth_user_id'])}"})
+    assert result.status_code == 200
+
+    result = requests.post(f"{url}auth/passwordreset/request/v1", json={'email': f"{get_user(user2['auth_user_id'])}"})
+    assert result.status_code == 200
+
+#* Test that for an unregistered email, it raises an InputError (response 400)
+def test_http_auth_passwordreset_invalid_email():
+    requests.delete(f"{url}clear/v1")
+    result = requests.post(f"{url}auth/passwordreset/request/v1", json={'email': 'CorrectFormat@asd.com'})
+    assert result.status_code == 400
+
+    result = requests.post(f"{url}auth/passwordreset/request/v1", json={'email': 'NotAnEmail'})
+    assert result.status_code == 400
+
+#* Test that if the reset password is less than 6 characters long, it raises an InputError (response 400)
+def test_http_auth_passwordreset_invalid_reset(user1, user2):
+    result = requests.post(f"{url}auth/passwordreset/reset/v1", json={'reset_code': 'Invalid', 'new_password': 'badpw'})
+    assert result.status_code == 400
