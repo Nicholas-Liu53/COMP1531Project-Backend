@@ -4,7 +4,10 @@ from src.standup import standup_start_v1, standup_active_v1, standup_send_v1
 from src.error import InputError, AccessError
 from src.other import SECRET, clear_v1
 import src.channel
+from src.channel import channel_messages_v1
 import jwt
+import time
+from datetime import datetime 
 
 AuID     = 'auth_user_id'
 uID      = 'u_id'
@@ -40,13 +43,8 @@ def test_standup_start_v1(user1, user2, user3):
     #Input Error when Standup is already running in channel 
     channel = src.channels.channels_create_v1(user1[token], 'Marms', False)
     src.channel.channel_invite_v1(user1[token], channel[cID], user2[AuID])
-    
-    '''
-    NOT TOO SURE ABOUT LENGTH AND THREADING HOW IT WORKS
-    DO I NEED TO DO LIKE TIMER.START() thing in MAIN 
-    '''
-    
-    standup_start_v1(user1[token], channel[cID], 1.0)
+        
+    result = standup_start_v1(user1[token], channel[cID], 1.0)
     with pytest.raises(InputError):
         standup_start_v1(user1[token], channel[cID], 1.0)
     
@@ -55,7 +53,10 @@ def test_standup_start_v1(user1, user2, user3):
         standup_start_v1(user3[token], channel[cID], 1.0)
     
     #Success case 
-    #Check that standup is active in channel dictionary? 
+    #Assert that time_finish is correct
+    now = datetime.now()
+    time_finish = int(now.strftime("%s")) + 1
+    assert result['time_finish'] == time_finish
 
 #Test whether there is a standup active in a channel currently 
 def test_standup_active_v1(user1, user2):
@@ -68,11 +69,17 @@ def test_standup_active_v1(user1, user2):
     channel = src.channels.channels_create_v1(user1[token], 'Marms', False)
     src.channel.channel_invite_v1(user1[token], channel[cID], user2[AuID])
     standup_start_v1(user1[token], channel[cID], 1.0)
+    
     #Success Case 
-    standup_active_v1(user1[token], channel[cID])
+    result = standup_active_v1(user1[token], channel[cID])
     #Same as before? - standup is active in channel dictionary 
-    #Can also check that is done
-   
+    assert result['is_active'] 
+    
+    #Can also check that once standup is done: is no longer active 
+    time.sleep(1.0)
+    result1 = standup_active_v1(user1[token], channel[cID])
+    assert not result1['is_active'] 
+       
 #Test that messages can be successfully sent in the standup queue 
 def test_standup_send_v1(user1, user2, user3):
     #Input error when Channel ID not a valid channel 
@@ -84,9 +91,6 @@ def test_standup_send_v1(user1, user2, user3):
     src.channel.channel_invite_v1(user1[token], channel[cID], user2[AuID])
         
     #Message is more than 1000 characters (not including username and colon)
-    '''
-    DO I NEED TO START STANDUP HERE?
-    '''
     message = '?' * 1001
     with pytest.raises(InputError):
         standup_send_v1(user1[token], channel[cID], message)
@@ -101,6 +105,27 @@ def test_standup_send_v1(user1, user2, user3):
         standup_send_v1(user3[token], channel[cID], "Hello")
     
     #Success case 
-    #Similar to message send, can check that message is in a message log within standups data?
-    #Assert len of messages log is only plussed one
+    standup_start_v1(user1[token], channel[cID], 1.0)
+    standup_send_v1(user1[token], channel[cID], "Hello")
+        
+    #Assert that correct message appears in channel_messages after standup 
+    time.sleep(1.0)
+    result = channel_messages_v1(user1[token], channel[cID], 0)
+    assert len(result['messages']) == 1
+    for messages in result['messages']: 
+        assert "user1: Hello" in messages['message']
+    
+    #Now do for two messages, assert that the 2 messages are appended as one message 
+    channel2 = src.channels.channels_create_v1(user1[token], 'Yggdrasil', False)
+    src.channel.channel_invite_v1(user1[token], channel2[cID], user2[AuID])
+    standup_start_v1(user1[token], channel2[cID], 1.0)
+    standup_send_v1(user1[token], channel2[cID], "Hello")
+    standup_send_v1(user2[token], channel2[cID], "Goodbye")
+    time.sleep(1.0)
+    result2 = channel_messages_v1(user1[token], channel2[cID], 0)
+
+    assert len(result2['messages']) == 1
+    for messages in result2['messages']: 
+        assert "user1: Hello\nuser2: Goodbye" in messages['message'] 
+    
 

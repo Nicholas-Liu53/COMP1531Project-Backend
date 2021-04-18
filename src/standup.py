@@ -90,7 +90,7 @@ def stand_up_push(auth_user_id, channel_id):
         if stand_up[cID] == channel_id:
             target = data['stand_ups'].pop(index)
             message = "\n".join(target['messages'])
-
+    
     now = datetime.now()
     time_created = int(now.strftime("%s"))
     newID = generate_new_message_id()
