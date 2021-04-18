@@ -2,7 +2,9 @@
 import pytest
 from src.standup import standup_start_v1, standup_active_v1, standup_send_v1
 from src.error import InputError, AccessError
+from src.other import SECRET, clear_v1
 import src.channel
+import jwt
 
 AuID     = 'auth_user_id'
 uID      = 'u_id'
@@ -60,7 +62,7 @@ def test_standup_active_v1(user1, user2):
     #Input Error when Channel ID not a valid channel 
     invalid_cID = -1 
     with pytest.raises(InputError):
-        standup_active_v1(user1[token], invalid_cID, 1.0)
+        standup_active_v1(user1[token], invalid_cID)
     
     #Input Error when Standup is already running in channel 
     channel = src.channels.channels_create_v1(user1[token], 'Marms', False)
@@ -72,7 +74,7 @@ def test_standup_active_v1(user1, user2):
     #Can also check that is done
    
 #Test that messages can be successfully sent in the standup queue 
-def test_standup_send_v1(user1, user2):
+def test_standup_send_v1(user1, user2, user3):
     #Input error when Channel ID not a valid channel 
     invalid_cID = -1 
     with pytest.raises(InputError):
