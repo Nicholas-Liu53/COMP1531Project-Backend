@@ -55,6 +55,14 @@ def auth_logout():
     payload = request.get_json()
     return src.auth.auth_logout_v1(payload['token'])
 
+@APP.route("/auth/passwordreset/request/v1", methods=['POST'])
+def auth_password_reset_request():
+    pass
+
+@APP.route("/auth/passwordreset/reset/v1", methods=['POST'])
+def auth_password_reset_reset():
+    pass
+
 #* *************************************************ADMIN ROUTES******************************************
 @APP.route("/admin/userpermission/change/v1", methods=['POST'])
 def userpermission_change():
