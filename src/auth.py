@@ -294,3 +294,8 @@ def auth_logout_v1(token):
 
     return {'is_success': False}
 
+def auth_passwordreset_request_v1(email):
+    return {}
+
+def auth_passwordreset_reset_v1(reset_code, new_password):
+    return {}
