@@ -214,7 +214,7 @@ def test_http_dm_invite_invalid_dm(user1, user2):
     invalid_dm = requests.post(f"{url}dm/invite/v1", json={
         "token": user1[token],
         dmID: invalid_dm_id,
-        uID: [user2[AuID]],
+        uID: user2[AuID],
     })
     assert invalid_dm.status_code == 400
 
@@ -323,7 +323,6 @@ def test_http_dm_messages_invalid_dm(user1, user2):
         'start' : 0,
     })
     assert invalid_dm.status_code == 400
-    
 
 def test_http_dm_messages_invalid_start(user1, user2):
     #Test for input error, when 'start' is greater than # of messages in DM 
@@ -356,66 +355,76 @@ def test_http_dm_messages_access_error(user1, user2, user3):
     })
     assert access_error.status_code == 403 
 
-
 def test_http_dm_messages(user1, user2, user3):
-    #Create dm with dm_id 0 
-    response = requests.post(f"{url}dm/create/v1", json={
+    # Create first dm for first test case
+    # Success case 1: Less than 50 messages returns end as -1 
+    dm1 = requests.post(f"{url}dm/create/v1", json={
         "token": user1[token],
         "u_ids": [user2[AuID]],
-    })
-    
-    dm_0 = response.json()
+    }).json()
     requests.post(f"{url}message/senddm/v1", json={
         "token": user1[token],
-        dmID: dm_0[dmID],
+        dmID: dm1[dmID],
         "message" : "First message :)",
     })
-        
-    #Success case 1: Less than 50 messages returns end as -1 
-    result = requests.get(f"{url}dm/messages/v1", params = {
+    result1 = requests.get(f"{url}dm/messages/v1", params = {
         "token": user1[token],
-        dmID: dm_0[dmID],
+        dmID: dm1[dmID],
         'start': 0
-    })
-    responseUser1 = result.json()
-    
-    expected = {
-        "len_messages": 1,
-        'start': 0,
-        "end": -1,
-    }
-    
-    assert len(responseUser1['messages']) == expected['len_messages']
-    assert responseUser1['start'] == expected['start']
-    assert responseUser1['end'] == expected['end']
-    
+    }).json()
 
-    #Success case 2: More than 50 messages returns end as 'start' + 50     
-    #Send 50 messages into dm_0 
+    assert len(result1['messages']) == 1
+    assert result1['start'] == 0
+    assert result1['end'] == -1
+
+    # Create second dm for second test case
+    # Success case 2: 50 messages returns end as -1 (no more messages to load)
+    dm2 = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]],
+    }).json()
+    
     message_counter = 1
-    while message_counter < 51:
+    for _ in range(50):
         requests.post(f"{url}message/senddm/v1", json = {
             "token": user1[token],
-            dmID: dm_0[dmID],
+            dmID: dm2[dmID],
             "message" : f"{message_counter}",
         })
         message_counter += 1
-        
+
     result2 = requests.get(f"{url}dm/messages/v1", params = {
-        'token': user2[token],
-        dmID: dm_0[dmID],
-        'start': 1
-    })
-    
-    response_2 = result2.json()
+        "token": user1[token],
+        dmID: dm2[dmID],
+        'start': 0
+    }).json()
 
-    expected_2 = {
-        'len_messages': 50,
-        'start' : 1,
-        'end': 51,
-    }
-    
-    assert len(response_2['messages']) == expected_2['len_messages']
-    assert response_2['start'] == expected_2['start']
-    assert response_2['end'] == expected_2['end']
+    assert len(result2['messages']) == 50
+    assert result2['start'] == 0
+    assert result2['end'] == -1
 
+    # Create third dm for third test case
+    # Success case 3: 51 messages returns end as 50 (more messages to load)
+    dm3 = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]],
+    }).json()
+    
+    message_counter = 1
+    for _ in range(51):
+        requests.post(f"{url}message/senddm/v1", json = {
+            "token": user1[token],
+            dmID: dm3[dmID],
+            "message" : f"{message_counter}",
+        })
+        message_counter += 1
+
+    result3 = requests.get(f"{url}dm/messages/v1", params = {
+        "token": user1[token],
+        dmID: dm3[dmID],
+        'start': 0
+    }).json()
+
+    assert len(result3['messages']) == 50
+    assert result3['start'] == 0
+    assert result3['end'] == 50

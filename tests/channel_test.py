@@ -103,56 +103,46 @@ def test_channel_details(user1, user2):
     #* Test 3: Is AccessError raised when the user is not membber of channel with the channel id
     with pytest.raises(AccessError):
         channel_details_v1(user2[token], realChannel[cID])
-    
 
-def test_channel_messages():
-    #* Ensure database is empty
-    #! Clearing data
-    src.other.clear_v1()
-    #Setup user_id
-    userID1 = src.auth.auth_register_v2("1531@gmail.com", "123456", "Tom", "Zhang")
-    userID2 = src.auth.auth_register_v2("comp@gmail.com", "456789", "Jack", "P")
-    
-
-    #Create private channel by userID1
-    firstChannel = channels_create_v1(userID1[token], 'Yggdrasil', False)
-    #Now create a second public channel by userID1 to make sure that message only sent to first channel 
-    channels_create_v1(userID1[token], 'Marmot', True)
-    
-    #Send one message in channel 
-    message_send_v1(userID1[token], firstChannel[cID], "First Message")
-
+def test_channel_messages_errors(user1, user2):
+    firstChannel = channels_create_v1(user1[token], 'Yggdrasil', False)
+    #* Test 1: returns input error when start is greater than total number of messages in channel
     with pytest.raises(InputError):
-        #* Test 1: returns input error when start is greater than total number of 
-        #* messages in channel
-        channel_messages_v1(userID1[token], firstChannel[cID], 4)
-        
+        channel_messages_v1(user1[token], firstChannel[cID], 4)
+
+    #* Test 2: Raises input error when channel_id is invalid 
+    invalid_channel_id = -1
     with pytest.raises(InputError):
-        #* Test 2: Raises input error when channel_id is invalid 
-        channel_messages_v1(userID1[token], -1, 0) 
-        
+        channel_messages_v1(user1[token], invalid_channel_id, 0)
+
+    #* Test 3: returns access error when authorised user not a member of channel
     with pytest.raises(AccessError):
-        #* Test 3: returns access error when authorised user not a member of channel
-        channel_messages_v1(userID2[token], firstChannel[cID], 0)
-        
-    #Test 4: if there are less than 50 messages, returns -1 in "end"
-    assert channel_messages_v1(userID1[token], firstChannel[cID], 0)["end"] == -1
-    
-    #Test 5: if there are more than 50 messages, returns "start+50" as "end"
-    #first need to write 50 messages in channel 
-    counter = 0
-    while counter < 51:
-        message_send_v1(userID1[token], firstChannel[cID], "Spam :)")
-        counter += 1  
-    
-    #Now there should be 52 messages in our channel (1 from start + 51 from while loop)
-    assert channel_messages_v1(userID1[token], firstChannel[cID], 1)['end'] == 51
-    assert channel_messages_v1(userID1[token], firstChannel[cID], 1)['start'] == 1
-    assert len(channel_messages_v1(userID1[token], firstChannel[cID], 1)['messages']) == 50
+        channel_messages_v1(user2[token], firstChannel[cID], 0)
 
-    #* Finished testing for this function
-    #! Clearing data
-    src.other.clear_v1()
+def test_channel_messages(user1, user2):
+    #Create private channel by userID1
+    firstChannel = channels_create_v1(user1[token], 'Yggdrasil', False)
+    message_send_v1(user1[token], firstChannel[cID], "First Message")
+    
+    # Success case 1: if there are less than 50 messages, returns -1 in "end"
+    assert len(channel_messages_v1(user1[token], firstChannel[cID], 0)["messages"]) == 1
+    assert channel_messages_v1(user1[token], firstChannel[cID], 0)["start"] == 0
+    assert channel_messages_v1(user1[token], firstChannel[cID], 0)["end"] == -1
+    
+    # Success case 2: if there are 50 messages, returns -1 in "end"
+    secondChannel = channels_create_v1(user2[token], 'Second', False)
+    for _ in range(50):
+        message_send_v1(user2[token], secondChannel[cID], "xD")
+    assert len(channel_messages_v1(user2[token], secondChannel[cID], 0)["messages"]) == 50
+    assert channel_messages_v1(user2[token], secondChannel[cID], 0)["start"] == 0
+    assert channel_messages_v1(user2[token], secondChannel[cID], 0)["end"] == -1
+
+    # Success case 3: if there are 51 messages, returns "start" + 1 in "end"
+    for _ in range(50):
+        message_send_v1(user1[token], firstChannel[cID], "xD")
+    assert len(channel_messages_v1(user1[token], firstChannel[cID], 0)["messages"]) == 50
+    assert channel_messages_v1(user1[token], firstChannel[cID], 0)["start"] == 0
+    assert channel_messages_v1(user1[token], firstChannel[cID], 0)["end"] == 50
 
 def test_channel_leave(user1, user2, user3, user4):
 

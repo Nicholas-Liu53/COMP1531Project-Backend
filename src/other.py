@@ -1,6 +1,7 @@
 import jwt
 import json
 from src.error import AccessError, InputError
+from random import getrandbits
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -114,7 +115,7 @@ def decode(token):
 def check_session(auth_user_id, session_id):
     data = json.load(open('data.json', 'r'))
     for user in data['users']:
-        if auth_user_id == user[uID]:
+        if auth_user_id == user[uID] and user['permission_id'] != 0:
             if session_id in user['session_id']:
                 return
     raise AccessError
@@ -182,7 +183,7 @@ def get_message(message_id):
     for message in data['messages_log']:
         if message_id == message['message_id']:
             return message
-    # raise InputError
+    raise InputError
 
 def get_dm(dm_id):
     data = json.load(open('data.json', 'r'))
@@ -249,3 +250,14 @@ def check_removed(u_id):
                 raise InputError
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
+
+def generate_new_message_id():
+    newID = getrandbits(32)
+    status = False
+    while not status:
+        try:
+            get_message(newID)
+            newID = getrandbits(32)
+        except:
+            status = True
+    return newID
