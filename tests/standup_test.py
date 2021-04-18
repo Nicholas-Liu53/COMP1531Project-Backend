@@ -84,13 +84,10 @@ def test_standup_send_v1(user1, user2, user3):
     src.channel.channel_invite_v1(user1[token], channel[cID], user2[AuID])
         
     #Message is more than 1000 characters (not including username and colon)
-    message = ''
-    
     '''
     DO I NEED TO START STANDUP HERE?
     '''
-    for _ in range(1500):
-        message += '?'
+    message = '?' * 1001
     with pytest.raises(InputError):
         standup_send_v1(user1[token], channel[cID], message)
         
