@@ -227,7 +227,7 @@ def dm_messages():
 @APP.route("/standup/start/v1", methods=['POST'])
 def standup_start():
     payload = request.get_json()
-    return src.standup.standup_start_v1(payload['token'], payload['channel_id'], payload['length'])]
+    return src.standup.standup_start_v1(payload['token'], payload['channel_id'], payload['length'])
 
 @APP.route("/standup/active/v1", methods=['GET'])
 def standup_active():

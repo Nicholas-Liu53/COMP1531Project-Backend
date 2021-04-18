@@ -1,26 +1,17 @@
 #File for http testing of standup functions 
-'''
+
 import pytest
+from src.config import url
 from src.standup import standup_start_v1, standup_active_v1, standup_send_v1
 from src.error import InputError, AccessError
 from src.other import SECRET, clear_v1
 import src.channel
 from src.channel import channel_messages_v1
 import jwt
+import json
 import time
 import requests 
-from datetime import datetime 
-'''
-import pytest
-import requests
-import json
-from src.config import url
-from src.channel import channel_messages_v1
-from src.other import SECRET
-from datetime import timezone, datetime
-import jwt
-import time
-
+from datetime import datetime, timezone 
 
 AuID     = 'auth_user_id'
 uID      = 'u_id'
@@ -52,7 +43,7 @@ def test_http_standup_start_v1_invalid_cID(user1):
     response = requests.post(f"{url}standup/start/v1", json={
         token: user1[token],
         cID: invalid_cID,
-        length: 1
+        'length': 1
     })
     assert response.status_code == 400
 
@@ -75,7 +66,7 @@ def test_http_standup_start_v1_active_standup(user1):
     response2 = requests.post(f"{url}standup/start/v1", json={
         token: user1[token],
         cID: channel[cID],
-        length: standard_length
+        'length': standard_length
     })
     assert response2.status_code == 400
     
@@ -86,12 +77,12 @@ def test_http_standup_start_v1_user_not_in(user1, user2):
         "name": "Channel1",
         "is_public": False
     })
-    channel = cResponse.json()
+    channel = response.json()
     
     response = requests.post(f"{url}standup/start/v1", json={
         token: user2[token],
         cID: channel[cID],
-        length: standard_length
+        'length': standard_length
     })
     assert response.status_code == 403
 
@@ -102,8 +93,8 @@ def test_http_standup_start_v1(user1):
         "name": "Channel1",
         "is_public": False
     })
-    channel = cResponse.json()
-    length = 1
+    channel = response.json()
+
     response = requests.post(f"{url}standup/start/v1", json={
         token: user1[token],
         cID: channel[cID],
@@ -146,7 +137,6 @@ def test_http_standup_active_v1(user1):
         token: user1[token],
         cID: channel[cID],
     })
-    
     standup = response2.json()
     #Check that standup is active
     assert standup['is_active']
@@ -157,7 +147,12 @@ def test_http_standup_active_v1(user1):
 
     #Check that after length standup is no longer active 
     time.sleep(standard_length)
-    assert not standup['is_active']
+    response3 = requests.get(f"{url}standup/active/v1", params={
+        token: user1[token],
+        cID: channel[cID],
+    })
+    standup_end = response3.json()
+    assert not standup_end['is_active']
 
 #HTTP test that InputError raised when cID not valid for standup_send_v1
 def test_http_standup_send_v1_invalid_cID(user1):
@@ -225,8 +220,8 @@ def test_http_standup_send_v1_invalid_user(user1, user2):
     })
     assert response2.status_code == 403
     
-#HTTP test that messages can be sent within a standup as specified 
-def test_http_standup_send_v1(user1, user2):
+#HTTP test that messages can be sent within a standup as specified for one message  
+def test_http_standup_send_v1_one_message(user1):
     response = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
         "name": "Channel1",
@@ -248,57 +243,61 @@ def test_http_standup_send_v1(user1, user2):
     })
     
     time.sleep(standard_length)
-    
     response2 = requests.get(f"{url}channel/messages/v2", params={
         "token": user1[token],
         "channel_id": channel[cID],
         "start": 0
     })
     message_list = response2.json()
-    assert len(message_list) == 1
+    assert len(message_list['messages']) == 1
     for messages in message_list['messages']:
         assert "user1: Hello" in messages['message']
-        
-        
-    #Assert that two messages sent as one message 
-    response3 = requests.post(f"{url}channels/create/v2", json={
+     
+#HTTP test messages can be sent within a standup as specified for more than one message 
+def test_http_standup_send_v1_multiple_messages(user1, user2):
+    response = requests.post(f"{url}channels/create/v2", json={
         "token": user1[token],
-        "name": "Channel2",
+        "name": "Channel",
         "is_public": False
     })
-    channel2 = response3.json()
+    channel = response.json()
     
     requests.post(f"{url}channel/invite/v2", json={
         token: user1[token],
-        cID: channel2[cID],
+        cID: channel[cID],
         "u_id": user2[AuID]}
     )
     
     requests.post(f"{url}standup/start/v1", json={
         token: user1[token],
-        cID: channel2[cID],
+        cID: channel[cID],
         'length': standard_length
     })
 
     requests.post(f"{url}standup/send/v1", json={
         token: user1[token],
-        cID: channel2[cID],
+        cID: channel[cID],
         'message': 'Hello'
     })
 
     requests.post(f"{url}standup/send/v1", json={
         token: user2[token],
-        cID: channel2[cID],
+        cID: channel[cID],
         'message': 'Goodbye'
     })
+    
+    #After standup is finished 
     time.sleep(standard_length)
     
-    response4 = requests.get(f"{url}channel/messages/v2", params={
+    response2 = requests.get(f"{url}channel/messages/v2", params={
         "token": user1[token],
         "channel_id": channel[cID],
         "start": 0
     })
-    message_list2 = response4.json()
-    assert len(message_list2) == 1
-    for messages in message_list2['messages']:
+    
+    message_list = response2.json()
+    print(message_list['messages'])
+    
+    assert len(message_list['messages']) == 1
+    for messages in message_list['messages']:
         assert "user1: Hello\nuser2: Goodbye" in messages['message']
