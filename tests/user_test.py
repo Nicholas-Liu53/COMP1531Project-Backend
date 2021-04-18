@@ -57,8 +57,6 @@ def test_user_profile_errors(user1):
         user_profile_uploadphoto_v1(user1[tok],"https://i.pinimg.com/originals/05/1b/7d/051b7d93394fc94c082f1801bc4ccfb2.jpg", -1 ,-1 ,500,500)
     with pytest.raises(InputError):    
         user_profile_uploadphoto_v1(user1[tok],"https://i.pinimg.com/originals/05/1b/7d/051b7d93394fc94c082f1801bc4ccfb2.jpg", 0 ,0 ,1000,1000)
-    with pytest.raises(InputError):    
-        user_profile_uploadphoto_v1(user1[tok],"https://i.pinimg.com/originals/05/1b/7d/051b7d93394fc94c082f1801bc4ccfb2.jpg", 0 ,0 ,1000,1000)
     with pytest.raises(InputError):
         user_profile_uploadphoto_v1(user1[tok],"http://agsgasg.com/nicklam/04/2/hiiiii.jpg", 0 ,0 ,500,500)
     with pytest.raises(InputError):
