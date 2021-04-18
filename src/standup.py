@@ -5,6 +5,7 @@ from datetime import datetime
 import json
 import threading, time
 
+
 AuID     = 'auth_user_id'
 uID      = 'u_id'
 cID      = 'channel_id'
@@ -107,6 +108,20 @@ def stand_up_push(auth_user_id, channel_id):
             'is_pinned': False,
         }
     )
+
+    updated_num_message = data['dreams_analytics']['messages_exist'][-1]['num_messages_exist'] + 1
+    data['dreams_analytics']['messages_exist'].append({
+        'num_messages_exist': updated_num_message,
+        'time_stamp': int(datetime.now().strftime("%s"))
+    })
+    #* update analytics
+    messageSentPrev = data["user_analytics"][f"{auth_user_id}"]['messages_sent'][-1]["num_messages_sent"]
+    data["user_analytics"][f"{auth_user_id}"]['messages_sent'].append(
+        {
+            "num_messages_sent": messageSentPrev + 1,
+            "time_stamp": int(datetime.now().strftime("%s"))
+        }
+    )   
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
