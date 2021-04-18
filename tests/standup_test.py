@@ -14,6 +14,7 @@ uID      = 'u_id'
 cID      = 'channel_id'
 chans    = 'channels'
 token    = 'token'
+standard_length = 1
 
 @pytest.fixture
 def invalid_token():
@@ -38,24 +39,24 @@ def test_standup_start_v1(user1, user2, user3):
     invalid_cID = -1 
     #Input Error when Channel ID not a valid channel 
     with pytest.raises(InputError):
-        standup_start_v1(user1[token], invalid_cID, 1.0)
+        standup_start_v1(user1[token], invalid_cID, standard_length)
     
     #Input Error when Standup is already running in channel 
     channel = src.channels.channels_create_v1(user1[token], 'Marms', False)
     src.channel.channel_invite_v1(user1[token], channel[cID], user2[AuID])
         
-    result = standup_start_v1(user1[token], channel[cID], 1.0)
+    result = standup_start_v1(user1[token], channel[cID], standard_length)
     with pytest.raises(InputError):
-        standup_start_v1(user1[token], channel[cID], 1.0)
+        standup_start_v1(user1[token], channel[cID], standard_length)
     
     #Access error when authorised user is not in channel 
     with pytest.raises(AccessError):
-        standup_start_v1(user3[token], channel[cID], 1.0)
+        standup_start_v1(user3[token], channel[cID], standard_length)
     
     #Success case 
     #Assert that time_finish is correct
     now = datetime.now()
-    time_finish = int(now.strftime("%s")) + 1
+    time_finish = int(now.strftime("%s")) + standard_length
     assert result['time_finish'] == time_finish
 
 #Test whether there is a standup active in a channel currently 
@@ -65,18 +66,20 @@ def test_standup_active_v1(user1, user2):
     with pytest.raises(InputError):
         standup_active_v1(user1[token], invalid_cID)
     
-    #Input Error when Standup is already running in channel 
+    #Success Case
     channel = src.channels.channels_create_v1(user1[token], 'Marms', False)
     src.channel.channel_invite_v1(user1[token], channel[cID], user2[AuID])
-    standup_start_v1(user1[token], channel[cID], 1.0)
-    
-    #Success Case 
+    standup_start_v1(user1[token], channel[cID], standard_length)
     result = standup_active_v1(user1[token], channel[cID])
-    #Same as before? - standup is active in channel dictionary 
+ 
     assert result['is_active'] 
+    now = datetime.now()
+    time_finish = int(now.strftime("%s")) + standard_length 
+    assert result['time_finish'] == time_finish
+ 
     
     #Can also check that once standup is done: is no longer active 
-    time.sleep(1.0)
+    time.sleep(standard_length)
     result1 = standup_active_v1(user1[token], channel[cID])
     assert not result1['is_active'] 
        
@@ -85,7 +88,7 @@ def test_standup_send_v1(user1, user2, user3):
     #Input error when Channel ID not a valid channel 
     invalid_cID = -1 
     with pytest.raises(InputError):
-        standup_send_v1(user1[token], invalid_cID, 1.0)
+        standup_send_v1(user1[token], invalid_cID, standard_length)
     
     channel = src.channels.channels_create_v1(user1[token], 'Marms', False)
     src.channel.channel_invite_v1(user1[token], channel[cID], user2[AuID])
@@ -99,17 +102,16 @@ def test_standup_send_v1(user1, user2, user3):
     with pytest.raises(InputError):
         standup_send_v1(user1[token], channel[cID], "Hello")
     
-    
     #Access error when authorised user not a member of channel the message is within 
     with pytest.raises(AccessError):
         standup_send_v1(user3[token], channel[cID], "Hello")
     
     #Success case 
-    standup_start_v1(user1[token], channel[cID], 1.0)
+    standup_start_v1(user1[token], channel[cID], standard_length)
     standup_send_v1(user1[token], channel[cID], "Hello")
         
     #Assert that correct message appears in channel_messages after standup 
-    time.sleep(1.0)
+    time.sleep(standard_length)
     result = channel_messages_v1(user1[token], channel[cID], 0)
     assert len(result['messages']) == 1
     for messages in result['messages']: 
@@ -118,10 +120,10 @@ def test_standup_send_v1(user1, user2, user3):
     #Now do for two messages, assert that the 2 messages are appended as one message 
     channel2 = src.channels.channels_create_v1(user1[token], 'Yggdrasil', False)
     src.channel.channel_invite_v1(user1[token], channel2[cID], user2[AuID])
-    standup_start_v1(user1[token], channel2[cID], 1.0)
+    standup_start_v1(user1[token], channel2[cID], standard_length)
     standup_send_v1(user1[token], channel2[cID], "Hello")
     standup_send_v1(user2[token], channel2[cID], "Goodbye")
-    time.sleep(1.0)
+    time.sleep(standard_length)
     result2 = channel_messages_v1(user1[token], channel2[cID], 0)
 
     assert len(result2['messages']) == 1

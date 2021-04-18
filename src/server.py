@@ -220,6 +220,20 @@ def dm_leave():
 def dm_messages():
     token, dm_id, start = request.args.get('token'), request.args.get('dm_id'), request.args.get('start')
     return src.dm.dm_messages_v1(token, int(dm_id), int(start))
+    
+    
+    
+#* ***************************************************STANDUP ROUTES***********************************************
+
+
+
+
+
+
+
+
+
+
 
 #* ***************************************************USER ROUTES***********************************************
 @APP.route("/user/profile/v2", methods=['GET'])
