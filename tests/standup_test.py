@@ -106,7 +106,7 @@ def test_standup_send_v1(user1, user2, user3):
     message = '?' * 1001
     with pytest.raises(InputError):
         standup_send_v1(user1[token], channel[cID], message)
-        
+    
     #Input error when standup is not active in channel 
     with pytest.raises(InputError):
         standup_send_v1(user1[token], channel[cID], "Hello")

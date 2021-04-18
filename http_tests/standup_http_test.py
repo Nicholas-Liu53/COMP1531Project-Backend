@@ -367,8 +367,6 @@ def test_http_standup_send_v1_multiple_messages(user1, user2):
     })
     
     message_list = response2.json()
-    print(message_list['messages'])
-    
     assert len(message_list['messages']) == 1
     for messages in message_list['messages']:
         assert "user1: Hello\nuser2: Goodbye" in messages['message']
