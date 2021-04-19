@@ -2,6 +2,7 @@ import jwt
 import json
 from src.error import AccessError, InputError
 from random import getrandbits
+import os
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -41,6 +42,9 @@ def clear_v1():
             'stand_ups': [],
             'reset_codes': []
         }, FILE)
+
+    for FILE in os.listdir('/static/'):
+        os.remove(FILE) 
 
 def search_v1(token, query_str):
     '''
