@@ -567,6 +567,7 @@ def message_sendlater_v1(token, channel_id, message, time_sent):
                             1) When the user id doesn't belong to any user
                             2) The channel_id doesn't belong to any channel
                             3) The message is too long (exceeds 1000 chars)
+                            4) The time_sent is actually in the past
         AccessError - Occurs when:
                             1) When the user's token contains wrong session id
                             2) The token doesn't belong to a member of the channel
@@ -579,6 +580,10 @@ def message_sendlater_v1(token, channel_id, message, time_sent):
 
     # If the message is too long, raise InputError
     if len(message) > 1000:
+        raise InputError
+
+    # Check if time_sent is in the past
+    if time_sent < datetime.now().replace(tzinfo=timezone.utc).timestamp():
         raise InputError
 
     # Check if user is in channel
@@ -613,6 +618,7 @@ def message_sendlaterdm_v1(token, dm_id, message, time_sent):
                             1) When the user id doesn't belong to any user
                             2) The dm_id doesn't belong to any dm
                             3) The message is too long (exceeds 1000 chars)
+                            4) The time_sent is actually in the past
         AccessError - Occurs when:
                             1) When the user's token contains wrong session id
                             2) The token doesn't belong to a member of the dm
@@ -625,6 +631,10 @@ def message_sendlaterdm_v1(token, dm_id, message, time_sent):
 
     # If the message is too long, raise InputError
     if len(message) > 1000:
+        raise InputError
+
+    # Check if time_sent is in the past
+    if time_sent < datetime.now().replace(tzinfo=timezone.utc).timestamp():
         raise InputError
 
     # Check if user is in channel
