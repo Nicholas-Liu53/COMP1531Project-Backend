@@ -219,7 +219,11 @@ def auth_login_v2(email, password):
 
     for user in data['users']:
         if email == user.get('email') and hashlib.sha256(password.encode()).hexdigest() == user.get('password'):
-            new_session_id = user['session_id'][-1] + 1
+            if len(user['session_id']) != 0: 
+                new_session_id = user['session_id'][-1] + 1
+            else:
+                new_session_id = 0
+                
             user['session_id'].append(new_session_id)
             token = encode({'session_id': new_session_id, 'user_id': user['u_id']}, SECRET, algorithm='HS256')
 
