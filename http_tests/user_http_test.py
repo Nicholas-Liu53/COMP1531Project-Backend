@@ -67,6 +67,59 @@ def user4():
     })
     return response.json()
 
+# Test for all the input errors
+def test_http_user_profile_errors(user1):
+
+    response = requests.post(f"{url}user/profile/uploadphoto/v1", json={'token':user1[tok], 'img_url':"https://i.pinimg.com/originals/05/1b/7d/051b7d93394fc94c082f1801bc4ccfb2.jpg", 'x_start' : -1 , 'y_start': -1, 'x_end': 500, 'y_end': 500})
+    assert response.status_code == 400
+
+    response1 = requests.post(f"{url}user/profile/uploadphoto/v1", json={'token':user1[tok], 'img_url':"https://i.pinimg.com/originals/05/1b/7d/051b7d93394fc94c082f1801bc4ccfb2.jpg", 'x_start' : 0 , 'y_start': 0, 'x_end': 1000, 'y_end': 1000})
+    assert response1.status_code == 400
+
+    response2 = requests.post(f"{url}user/profile/uploadphoto/v1", json={'token':user1[tok], 'img_url':"https://i.pinimg.com/originals/05/1b/7d/051b7d93394fc94c082f1801bc4ccfb2.jpg", 'x_start' : -1 , 'y_start': -1, 'x_end': 500, 'y_end': 500})
+    assert response2.status_code == 400
+
+    response3 = requests.post(f"{url}user/profile/uploadphoto/v1", json={'token':user1[tok], 'img_url':"http://agsgasg.com/nicklam/04/2/hiiiii.jpg", 'x_start' : 0 , 'y_start': 0, 'x_end': 500, 'y_end': 500})
+    assert response3.status_code == 400
+
+    response4 = requests.post(f"{url}user/profile/uploadphoto/v1", json={'token':user1[tok], 'img_url':"https://www.clipartmax.com/png/middle/450-4500720_tom-and-jerry-aesthetic.png", 'x_start' : 0 , 'y_start': 0, 'x_end': 500, 'y_end': 500})
+    assert response4.status_code == 400
+
+# Test for defaul image
+def test_http_user_profile_default(user1):
+
+    response = requests.get(f"{url}user/profile/v2", params={'token': user1['token'], 'u_id': user1['auth_user_id']})
+    expected = response.json()
+    assert expected == {
+        'user':
+        {
+        'u_id': user1[AuID],
+        'email': "caricoleman@gmail.com", 
+        'name_first': 'cari', 
+        'name_last': 'coleman', 
+        'handle_str': 'caricoleman',
+        'profile_img_url': f"{url}static/default.jpg",
+        }
+    }
+
+# test for succesful change
+def test_http_user_profile_change(user1):
+
+    requests.post(f"{url}user/profile/uploadphoto/v1", json={'token':user1[tok], 'img_url':"https://i.pinimg.com/originals/05/1b/7d/051b7d93394fc94c082f1801bc4ccfb2.jpg", 'x_start' : 0 , 'y_start': 0, 'x_end': 500, 'y_end': 500})
+    response = requests.get(f"{url}user/profile/v2", params={'token': user1['token'], 'u_id': user1['auth_user_id']})
+    expected = response.json()
+    assert expected == {
+        'user':
+        {
+        'u_id': user1[AuID],
+        'email': "caricoleman@gmail.com", 
+        'name_first': 'cari', 
+        'name_last': 'coleman', 
+        'handle_str': 'caricoleman',
+        'profile_img_url': f"{url}static/{user1[AuID]}.jpg",
+        }
+    }
+
 # tests the case when the provided token contains an invalid user id    
 def test_http_user_profile_invalid_uid(user1):
     user_data_1 = requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"}).json()
@@ -89,7 +142,8 @@ def test_http_user_setname_valid(user1):
             'email': "caricoleman@gmail.com", 
             'name_first': 'kari', 
             'name_last': 'koleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -133,7 +187,8 @@ def test_http_user_setemail_valid(user1):
         'email': "karicoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_str': 'caricoleman'
+        'handle_str': 'caricoleman',
+        'profile_img_url': f"{url}static/default.jpg"
         }
     }
 
@@ -168,7 +223,8 @@ def test_http_user_sethandle_valid(user1):
         'email': "caricoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_str': 'karikoleman'
+        'handle_str': 'karikoleman',
+        'profile_img_url': f"{url}static/default.jpg"
         }
     }
 
@@ -207,14 +263,16 @@ def test_http_users_all_valid(user1,user2):
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
+            'profile_img_url': f"{url}static/default.jpg"
             },
             {
             'u_id': 1, 
             'email': "ericamondy@gmail.com", 
             'name_first': 'erica', 
             'name_last': 'mondy', 
-            'handle_str': 'ericamondy'
+            'handle_str': 'ericamondy',
+            'profile_img_url': f"{url}static/default.jpg"
             }]
     } 
     

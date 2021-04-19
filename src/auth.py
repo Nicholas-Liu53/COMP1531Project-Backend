@@ -6,7 +6,8 @@ import json
 from src.other import SECRET, generate_reset_code, get_user, decode
 import hashlib
 from datetime import datetime
-from src.user import users_stats_v1
+import urllib.request
+from src.config import url
 from flask_mail import Message
 
 def auth_register_v1(email, password, name_first, name_last):
@@ -129,6 +130,7 @@ def auth_register_v1(email, password, name_first, name_last):
             ],
         }
 
+    urllib.request.urlretrieve('https://en.meming.world/images/en/thumb/7/7f/Polish_Jerry.jpg/300px-Polish_Jerry.jpg', "src/static/default.jpg")
 
     #* appending the user dictionary into the users list
     data['users'].append({
@@ -140,8 +142,10 @@ def auth_register_v1(email, password, name_first, name_last):
         'handle_str' : handle_string,
         'permission_id': permissionID,
         'session_id': [0],
+        'profile_img_url': f"{url}static/default.jpg",
     })
 
+    
     #* create an empty notification list
     data['notifs'][f"{user_id}"] = [] 
 
@@ -262,6 +266,7 @@ def auth_register_v2(email, password, name_first, name_last):
     data_structure = auth_register_v1(email, password, name_first, name_last)
     auth_user_id = data_structure['auth_user_id']
     token = encode({'session_id': 0, 'user_id': auth_user_id}, SECRET, algorithm='HS256')
+
     return {
         'token': token,
         'auth_user_id': auth_user_id
@@ -292,7 +297,7 @@ def auth_logout_v1(token):
                     json.dump(data, FILE)
                 return {'is_success': True}
 
-    return {'is_success': False}
+
 
 def auth_passwordreset_request_v1(email):
     with open('data.json', 'r') as FILE:
