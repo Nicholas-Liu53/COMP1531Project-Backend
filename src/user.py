@@ -30,6 +30,7 @@ def user_profile_v2(token, u_id):
     }
 
 def user_setname_v2(token, name_first, name_last):
+    
     """ Provided with a valid token, the first and last names of the user corresponding to the payload of the token are
         changed to the provided first and last name
 
@@ -172,7 +173,8 @@ def users_all(token):
     user_list = []
     
     for user in data['users']:
-        user_list.append(get_user(user['u_id']))
+        if user['permission_id'] != 0:
+            user_list.append(get_user(user['u_id']))
         
     return { 'users': user_list
     
@@ -220,5 +222,5 @@ def users_stats_v1(token):
     dream_stats.update({'utilization_rate': utilization_rate})
     
     return { 
-        "dreams_analytics": dream_stats
+        "dreams_stats": dream_stats
     }

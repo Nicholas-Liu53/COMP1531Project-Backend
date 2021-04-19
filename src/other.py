@@ -38,7 +38,8 @@ def clear_v1():
             'messages_log': [],
             'notifs': {},
             'user_analytics': {},
-            'stand_ups': []
+            'stand_ups': [],
+            'reset_codes': []
         }, FILE)
 
 def search_v1(token, query_str):
@@ -116,7 +117,7 @@ def decode(token):
 def check_session(auth_user_id, session_id):
     data = json.load(open('data.json', 'r'))
     for user in data['users']:
-        if auth_user_id == user[uID]:
+        if auth_user_id == user[uID] and user['permission_id'] != 0:
             if session_id in user['session_id']:
                 return
     raise AccessError
@@ -279,3 +280,7 @@ def generate_new_message_id():
         except:
             status = True
     return newID
+
+def generate_reset_code():
+    reset_code = getrandbits(32)
+    return reset_code

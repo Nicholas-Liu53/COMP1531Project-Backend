@@ -1,9 +1,9 @@
 from src.error import AccessError, InputError 
 from src.channels import channels_listall_v2, channels_list_v2
-from src.other import decode, get_channel, get_user, message_count, push_added_notifications, check_removed
+from src.other import decode, get_channel, get_user, message_count, push_added_notifications, check_removed, SECRET, get_user_permissions
 import jwt
-import json, time
-from src.other import SECRET
+import json
+import time
 from datetime import datetime
 
 AuID      = 'auth_user_id'
@@ -75,6 +75,8 @@ def channel_invite_v1(token, channel_id, u_id):
     for chan in data['channels']:
         if chan["channel_id"] == channel_id:
             # ensure no duplicates
+            if get_user_permissions(u_id) == 1 :
+                chan["owner_members"].append(u_id) if u_id not in chan["owner_members"] else None
             chan["all_members"].append(u_id) if u_id not in chan["all_members"] else None
             
             #* update analytics
@@ -92,7 +94,6 @@ def channel_invite_v1(token, channel_id, u_id):
 
     return {   
     }
-
 
 def channel_details_v1(token, channel_id):
     '''
@@ -177,47 +178,26 @@ def channel_messages_v1(token, channel_id, start):
         Returns up to 50 messages alongside a start and and end value.
     '''
     auth_user_id, _ = decode(token)
-    data = json.load(open('data.json', 'r'))
-    
-    #Handling of input and access errors 
-    #Input error: Channel ID is not a valid channel 
-    #This is the case
-    channelFound = False 
-    for channel in channels_listall_v2(token)["channels"]:
-        if channel_id == channel["channel_id"]:
-            channelFound = True
-    
-    if not channelFound:
-        raise InputError
-    
-    #Access error: When auth_user_id is not a member of channel with channel_id 
-    userFound = False 
-    for channel in channels_list_v2(token)["channels"]:
-        if channel_id == channel["channel_id"]:
-            userFound = True
-    
-    if not userFound:
-        raise AccessError
-
-    desired_end = start + 50
     num_of_messages = message_count(channel_id, -1)
 
-    try:
-        data = json.load(open('data.json', 'r'))
-    except json.JSONDecodeError:
-        time.sleep(0.1)
-        data = json.load(open('data.json', 'r'))
-
-    #Input error: Start is greater than total number of messages in list 
-    if start > len(data['messages_log']):
+    chanMembers = get_channel(channel_id)[allMems]
+    if auth_user_id not in chanMembers:
+        raise AccessError
+    
+    # Input error 2:start is greater than the total number of messages in the channel
+    if start > num_of_messages:
         raise InputError
-
-    if num_of_messages < desired_end:
+    
+    desired_end = start + 50
+    if num_of_messages <= desired_end:
         desired_end = -1
-    messages = []
 
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+
+    messages = []
     for objects in data['messages_log']:
-        if channel_id == objects['channel_id']:
+        if channel_id == objects[cID]:
             current_message = objects.copy()
             del current_message['channel_id']
             del current_message['dm_id']
@@ -229,7 +209,7 @@ def channel_messages_v1(token, channel_id, start):
             messages.insert(0,current_message)
 
     #Reverse list such that the we have the newest messages at the start and oldest at the end 
-    reversed(messages)        
+    reversed(messages)
 
     #Take 50 messages from our start value
     #Chop off all the messages before our start value 
@@ -238,16 +218,13 @@ def channel_messages_v1(token, channel_id, start):
     
     while len(messages) > 50:
         messages.pop(-1)
-        
-    with open('data.json', 'w') as FILE:
-        json.dump(data, FILE)
-    
+
     return {
         'messages': messages,
         'start': start,
         'end': desired_end,
     }
-    
+
 def channel_leave_v1(token, channel_id):
     '''
     Takes in a user's id and a channel's id and removes that user from that given channel.
@@ -283,7 +260,7 @@ def channel_leave_v1(token, channel_id):
 
     # If the user is an owner
     if auth_user_id in channelData['owner_members']:
-        channel_removeowner_v1(token, channel_id, auth_user_id)
+        channelData['owner_members'].remove(auth_user_id) 
 
     # Check if user is in the channel
     if auth_user_id not in channelData['all_members']:
@@ -366,6 +343,9 @@ def channel_join_v1(token, channel_id):
 
     # Time to add the user into the channel
     data['channels'][i]['all_members'].append(data['users'][j]['u_id'])
+
+    if get_user_permissions(auth_user_id) == 1:
+        data['channels'][i]['owner_members'].append(data['users'][j]['u_id'])
 
     #* update analytics
     now = datetime.now()
@@ -458,11 +438,12 @@ def channel_addowner_v1(token, channel_id, u_id):
                 ) 
                 
             chan["owner_members"].append(u_id) if u_id not in chan["owner_members"] else None
-    push_added_notifications(auth_user_id, u_id, channel_id,-1)
-    
+ 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
 
+    push_added_notifications(auth_user_id, u_id, channel_id,-1)
+    
     return {
     }
 
@@ -486,39 +467,12 @@ def channel_removeowner_v1(token, channel_id, u_id):
     '''
     data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
-    
-    passed = False
-    for check in data['channels']:
-        if check['channel_id'] == channel_id:
-            passed = True
-    if not passed:
-        raise InputError
-    for chans in data['channels']:
-        if chans["channel_id"] == channel_id:
-            userisOwner = False
-            for users in chans["owner_members"]:
-                if users == u_id:
-                    if len(chans["owner_members"]) == 1:
-                        raise InputError
-                    userisOwner = True             
-    if not userisOwner:
-        raise InputError
-        
-    dreamsOwner = False
-    for users in data['users']:
-        if users['u_id'] == auth_user_id:
-            if users['permission_id'] == 1:
-                dreamsOwner = True
-    
-    for chans in data['channels']:
-        if chans["channel_id"] == channel_id:
-            userAuth = False
-            for users in chans["owner_members"]:
-                if users == auth_user_id:
-                    userAuth = True
 
-    if dreamsOwner == False and userAuth == False:
+    channel_deets = get_channel(channel_id)
+    if auth_user_id not in channel_deets['all_members'] and get_user_permissions(u_id) != 1:
         raise AccessError
+    elif auth_user_id not in channel_deets['owner_members'] or len(channel_deets['owner_members']) == 1 or u_id not in channel_deets['owner_members']:
+        raise InputError
 
     for chan in data['channels']:
         if chan["channel_id"] == channel_id:

@@ -5,6 +5,7 @@ from flask_cors import CORS
 from src.error import InputError
 from src import config
 import src.auth, src.admin, src.other, src.dm, src.notifications, src.channel, src.channels, src.message, src.user, src.standup
+from flask_mail import Mail, Message
 
 def defaultHandler(err):
     response = err.get_response()
@@ -19,6 +20,15 @@ def defaultHandler(err):
 
 APP = Flask(__name__)
 CORS(APP)
+mail= Mail(APP)
+
+APP.config['MAIL_SERVER']='smtp.gmail.com'
+APP.config['MAIL_PORT'] = 465
+APP.config['MAIL_USERNAME'] = 'W13BCactus@gmail.com'
+APP.config['MAIL_PASSWORD'] = 'themarms'
+APP.config['MAIL_USE_TLS'] = False
+APP.config['MAIL_USE_SSL'] = True
+mail = Mail(APP)
 
 APP.config['TRAP_HTTP_EXCEPTIONS'] = True
 APP.register_error_handler(Exception, defaultHandler)
@@ -32,7 +42,6 @@ def echo():
     return dumps({
         'data': data
     })
-
 
 @APP.route("/clear/v1", methods=['DELETE'])
 def clear():
@@ -50,10 +59,22 @@ def auth_login():
     payload = request.get_json()
     return src.auth.auth_login_v2(payload['email'], payload['password'])
 
-@APP.route("/auth/logout/v1", methods=['DELETE'])
+@APP.route("/auth/logout/v1", methods=['POST'])
 def auth_logout():
     payload = request.get_json()
     return src.auth.auth_logout_v1(payload['token'])
+
+@APP.route("/auth/passwordreset/request/v1", methods=['POST'])
+def auth_password_reset_request():
+    payload = request.get_json()
+    mail.send(src.auth.auth_passwordreset_request_v1(payload['email']))
+    return {}
+
+@APP.route("/auth/passwordreset/reset/v1", methods=['POST'])
+def auth_password_reset_reset():
+    payload = request.get_json()
+    src.auth.auth_passwordreset_reset_v1(int(payload['reset_code']),payload['new_password'])
+    return {}
 
 #* *************************************************ADMIN ROUTES******************************************
 @APP.route("/admin/userpermission/change/v1", methods=['POST'])
@@ -257,7 +278,7 @@ def user_setemail():
     print(payload['token'])
     return src.user.user_setemail_v2(payload['token'], payload['email'])
 
-@APP.route("/user/profile/sethandle/v2", methods=['PUT'])
+@APP.route("/user/profile/sethandle/v1", methods=['PUT'])
 def user_sethandle():
     payload = request.get_json()
     return src.user.user_sethandle_v2(payload['token'], payload['handle_str'])
