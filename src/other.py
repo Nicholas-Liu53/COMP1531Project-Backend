@@ -43,9 +43,6 @@ def clear_v1():
             'reset_codes': []
         }, FILE)
 
-    for FILE in os.listdir('/static/'):
-        os.remove(FILE) 
-
 def search_v1(token, query_str):
     '''
     Takes in a user's token and query string to return a list of messages that contains details about the message
