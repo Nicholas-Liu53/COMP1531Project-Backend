@@ -231,6 +231,10 @@ def message_edit_v1(token, message_id, message):
         raise InputError
     elif message == '':      #* If new message is empty string --> remove message
         data['messages_log'].remove(data['messages_log'][i])
+        with open('data.json', 'w') as FILE:
+            json.dump(data, FILE)
+        return {
+        }
     else:                       # Else 
         data['messages_log'][i]['message'] = message
     
