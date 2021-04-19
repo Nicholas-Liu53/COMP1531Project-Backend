@@ -1,7 +1,7 @@
 import pytest
 from src.dm import dm_details_v1, dm_list_v1, dm_create_v1, dm_remove_v1, dm_invite_v1, dm_leave_v1, dm_messages_v1
 from src.error import AccessError, InputError
-from src.message import message_senddm_v1
+from src.message import message_senddm_v1, message_react_v1
 from src.other import SECRET
 import src.auth, src.channel, src.other
 import jwt
@@ -19,6 +19,7 @@ chans   = 'channels'
 token   = 'token'
 dmID    = 'dm_id'
 handle  = 'handle_str'
+thumbsUp = 1
 
 #* Fixture that returns a JWT with invalid u_id and session_id
 @pytest.fixture
@@ -155,11 +156,11 @@ def test_dm_create_errors(user1):
         dm_create_v1(user1[token], [invalid_u_id])
 
 #Test for function which removes a dm from all dm's
-def test_dm_remove(user1, user2):
+def test_dm_remove(user1, user2, user3):
     #Create two dm's: one which we will remove and one we will keep
     dm_0 = dm_create_v1(user1[token], [user2[AuID]])
     #This second dm will have dm_id 1 
-    dm_create_v1(user1[token], [user2[AuID]])
+    dm_create_v1(user1[token], [user3[AuID]])
     #Test for input error, when dm input is invalid 
     invalid_dm = -2
     with pytest.raises(InputError):
@@ -199,6 +200,11 @@ def test_dm_leave(user1, user2, user3):
     #AccessError when user not in DM tries to leave 
     with pytest.raises(AccessError):
         dm_leave_v1(user3[token], dm_0['dm_id'])
+        
+    #Check that owner can't leave dm 
+    dm_leave_v1(user1[token], dm_0['dm_id'])
+    assert {dmID: dm_0[dmID], Name: 'user1, user2'} in dm_list_v1(user1[token])['dms']
+    
     #Now that errors are omitted, can use user2 to leave dm 
     dm_leave_v1(user2[token], dm_0['dm_id'])
     #Assert that dm is still in user1 but not in user2
@@ -231,7 +237,8 @@ def test_dm_messages(user1, user2, user3):
     }
 
     #Send DM to dm_1 to make sure that it is sending to the correct dm
-    message_senddm_v1(user2[token], dm_1['dm_id'], "Lawl")
+    DM1 = message_senddm_v1(user2[token], dm_1['dm_id'], "Lawl")
+    message_react_v1(user3[token], DM1['message_id'], thumbsUp)
 
     #Add certain number of DMs to dm_0 e.g. 10
     message_counter = 0
@@ -244,7 +251,8 @@ def test_dm_messages(user1, user2, user3):
     assert len(return_dict['messages']) == 10
     assert return_dict['start'] == 0
     assert return_dict['end'] == -1
-
+    
+    
     #Check dm_1 is unaffected
     return_dict_dm_1 = dm_messages_v1(user2[token], dm_1['dm_id'],0)
     assert len(return_dict_dm_1['messages']) == 1

@@ -286,3 +286,9 @@ def generate_new_message_id():
 def generate_reset_code():
     reset_code = getrandbits(32)
     return reset_code
+
+def get_reset_code(email):
+    data = json.load(open('data.json', 'r'))
+    for code in data['reset_codes']:
+        if code['email'] == email:
+            return code['reset_code']

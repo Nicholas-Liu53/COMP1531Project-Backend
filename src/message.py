@@ -450,8 +450,6 @@ def message_react_v1(token, message_id, react_id):
     Return Value:
         Returns an empty dictionary {}
     '''
- 
-    
     auth_user_id, _ = decode(token)
     with open('data.json', 'r') as FILE:
         data = json.load(FILE)

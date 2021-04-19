@@ -148,6 +148,7 @@ def stand_up_push(auth_user_id, channel_id):
     with open('data.json', 'r') as FILE:
         data = json.load(FILE)
 
+    message = ''
     for index, stand_up in enumerate(data['stand_ups']):
         if stand_up[cID] == channel_id:
             target = data['stand_ups'].pop(index)
@@ -157,32 +158,32 @@ def stand_up_push(auth_user_id, channel_id):
     time_created = int(now.strftime("%s"))
     newID = generate_new_message_id()
 
-    data['messages_log'].append(
-        {
-            'channel_id'    : channel_id,
-            'dm_id'         : -1,
-            'u_id'          : auth_user_id,
-            'time_created'  : time_created,
-            'message_id'    : newID,
-            'message'       : message,
-            'reacts': [],
-            'is_pinned': False,
-        }
-    )
-
-    updated_num_message = data['dreams_analytics']['messages_exist'][-1]['num_messages_exist'] + 1
-    data['dreams_analytics']['messages_exist'].append({
-        'num_messages_exist': updated_num_message,
-        'time_stamp': int(datetime.now().strftime("%s"))
-    })
-    #* update analytics
-    messageSentPrev = data["user_analytics"][f"{auth_user_id}"]['messages_sent'][-1]["num_messages_sent"]
-    data["user_analytics"][f"{auth_user_id}"]['messages_sent'].append(
-        {
-            "num_messages_sent": messageSentPrev + 1,
-            "time_stamp": int(datetime.now().strftime("%s"))
-        }
-    )   
+    if message != '':
+        data['messages_log'].append(
+            {
+                'channel_id'    : channel_id,
+                'dm_id'         : -1,
+                'u_id'          : auth_user_id,
+                'time_created'  : time_created,
+                'message_id'    : newID,
+                'message'       : message,
+                'reacts': [],
+                'is_pinned': False,
+            }
+        )
+        updated_num_message = data['dreams_analytics']['messages_exist'][-1]['num_messages_exist'] + 1
+        data['dreams_analytics']['messages_exist'].append({
+            'num_messages_exist': updated_num_message,
+            'time_stamp': int(datetime.now().strftime("%s"))
+        })
+        #* update analytics
+        messageSentPrev = data["user_analytics"][f"{auth_user_id}"]['messages_sent'][-1]["num_messages_sent"]
+        data["user_analytics"][f"{auth_user_id}"]['messages_sent'].append(
+            {
+                "num_messages_sent": messageSentPrev + 1,
+                "time_stamp": int(datetime.now().strftime("%s"))
+            }
+        )   
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
