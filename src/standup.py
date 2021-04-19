@@ -5,7 +5,6 @@ from datetime import datetime
 import json
 import threading, time
 
-
 AuID     = 'auth_user_id'
 uID      = 'u_id'
 cID      = 'channel_id'
@@ -140,7 +139,10 @@ def stand_up_push(auth_user_id, channel_id):
 
     Arguments:
         auth_user_id        (int) - The ID of the authorised user
-        channel_id   (int) - The id of the channel that user wants to look for a standup in 
+        channel_id   (int) - The id of the channel that user wants to look for a standup in
+
+    Return Value:
+        No return values
     '''
     data = data_load()
 

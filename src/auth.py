@@ -274,7 +274,8 @@ def auth_register_v2(email, password, name_first, name_last):
     }
 
 def auth_logout_v1(token):
-    """ Provided a valid token, logs out the corresponding user session (invalidates session id and token) 
+    """ 
+        Provided a valid token, logs out the corresponding user session (invalidates session id and token) 
 
         Arguments:
             token (str): The token containing the user_id and session_id of user that called the function
@@ -298,8 +299,19 @@ def auth_logout_v1(token):
                 return {'is_success': True}
 
 def auth_passwordreset_request_v1(email):
-    data = data_load()
+    '''
+    Provided an email that matches a registered user's email, sends and email containing a password reset code
 
+    Arguments:
+        email (str): Email of the user trying to reset their password
+
+    Exceptions:
+        InputError : Raised if inputted email does not match a registered user's email
+
+    Return Value:
+        Upon sucess, returns the message to be sent in the email
+    '''
+    data = data_load()
     for user in data['users']:
         if user['email'] == email:
             reset_code = generate_reset_code()
@@ -318,6 +330,20 @@ def auth_passwordreset_request_v1(email):
     raise InputError
 
 def auth_passwordreset_reset_v1(reset_code, new_password):
+    '''
+    Provided a valid reset code, changes the corresponding user's password to new_password
+
+    Arguments:
+        reset_code (int): Reset code provided to the user's email
+        new_password (str): New password of the user
+
+    Exceptions:
+        InputError : Raised if reset code is invalid
+        InputError : Raised if new_password has a length less than 6 characters
+
+    Return Value:
+        Upon sucess, returns an empty dictionary
+    '''
     if len(new_password) < 6:
         raise InputError
     
