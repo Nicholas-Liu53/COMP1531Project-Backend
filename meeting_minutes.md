@@ -101,5 +101,107 @@ Attendance: Nick Liu, Ethan Kwong, Jeffrey Meng, Vincent Le and Nick Lam
     Wrote up assumptions document
     Discussed things to work on for iteration 3
 
+7/4/21
+Attendance: Nick Liu, Ethan Kwong, Jeffrey Meng, Vincent Le and Nick Lam
+Time 11-12:00am
+    Iteration 3 released
+    Co-reading of the spec and discussion
+    broke down the tasks and assigned functions and workload
+        Vincent and Meng: analytics
+        Nick Liu: Message send later
+        Nick lam and Ethan: reacts and pins
+    Also work was planned for interviewing,
+    Hoping to find people for interview ASAP
+    Discussed deployment
+
+9/4/21
+Attendance: Nick Liu, Ethan Kwong, Jeffrey Meng, Vincent Le and Nick Lam
+    Interviews
+    Two interviewees were conducted and our notes from the interview was discussed
+    Allocated work for the Planning documentation
+    In the meeting we also briefly broke down:
+        - Use Cases
+        - small discussion on the functions needed and HTTP request
+        
+13/4/21
+Attendance: Nick Liu, Ethan Kwong, Jeffrey Meng, Vincent Le and Nick Lam
+Time: 11 -1:30 am
+    Discussed how to fix assertion errors for iteration 2 so that iteration 3 will work:
+    Add something into decode such that it checks permission ID and will raise AccessErrors accordingly
+    E.g. for Remove_user
+    When user is removed, remove them from all channels and DMs
+    In users_all, do not append users with user_permission_id = 0
+    auth/logout is raising InputError when it shouldn’t
+    Test_can_have_two_sessions
+    Test_successful_logout
+    Test_not_logged_in_logout
+    Test_invalid_token
+    test_invalidated_token
+    When inviting global_owners, make sure to add them to channel[‘owner_members’]
+    test_invite_global_owner
+    When join channels for global_owners, make sure to add them to channel[‘owner_members’]
+    Test_global_owner_join_channel_public
+    When joining private channels for global_owners, make sure to add them to channel[‘owner_members’]
+    Test_global_owner_join_channel_private
+    Owners of a channel can leave freely
+    Test_member_leave_channel_successfully
+    Error being raised in message_edit
+    Test_removal_by_edit_reflected
+    Test_nonmember_cannot_remove_owner
+    Check tests for channel_removeowner
+    Test_cannot_edit_deleted_message
+    Check that shared message tags
+    Test_tag_thru_message_share_triggers_notification
+    Check that when adding a owner_member triggers a notif
+    Write tests for this
+
+    Test_http_admin_user_remove_valid
+    Change channel_messages and dm_messages for edge cases
+    Fixed http tests but cbbs fixing normal tests
+    Change dm_invite test
+    I think ive fixed all of these
+    Change hard coded tests (who GAF if its circular definitions)
+    Fixed my DM test ones
+    Come back to search function
+    Channel and dm_details
+
+    For our next sub-iteration: 
+        Standups - Ethan and Nicks
+        Profile - Vincent and Jeffrey
+
+16/4/21
+Attendance: Nick Liu, Ethan Kwong, Jeffrey Meng, Vincent Le and Nick Lam
+    Reinterview of our user cases
+    Noted down some limitations in their needs
+        - No offline capabilities etc
+    Had a short debrief after interview to discuss our documentation
+    Small checkup on coding progress of our assigned functions
+    User and Dreams analytics successfully implemented
+    Message react and pin successfully implemented.
+
+17/4/21
+Attendance: Nick Liu, Ethan Kwong, Jeffrey Meng, Vincent Le and Nick Lam
+
+    Started on userprofile/upload and standups
+    Coding done throughout the day, periodic meetings and standup meetings to discuss
+    Changes in data structures proposed and implementing more helper functions
+
+18/4/21
+Attendance: Nick Liu, Ethan Kwong, Jeffrey Meng, Vincent Le and Nick Lam
+    Started implementation of password reset functions
+    General meetings throughout the day for checkups and standup meetings
+    Worked in subgroups for the SDLC pdf and coding, alternating
+
+19/4/21
+Attendance: Nick Liu, Ethan Kwong, Jeffrey Meng, Vincent Le and Nick Lam
+Time: 11am-1:30 am
+    Day spent on wrapping up and general life-style bug fixes
+    Most of the merges to master was discussed and finalised today
+    Deployment night, 
+        - wrapping up, 
+        - bugfixing, 
+        - code review,
+        - Assumptions.
+
 More details can be found at:
     https://docs.google.com/document/d/1GIzf-JhN33HH3dEVvG0U6j_GUUdKqp4hqIfOrDVuXBA/edit?usp=sharing 
