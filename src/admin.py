@@ -22,7 +22,8 @@ def user_remove_v1(token, u_id):
 
     get_user(u_id)
 
-    data = json.load(open('data.json', 'r'))
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
 
     dream_owner = 0
     for users in data['users']:
@@ -83,7 +84,8 @@ def userpermission_change_v1(token, u_id, permission_id):
         Empty dictionary
     '''
 
-    data = json.load(open('data.json', 'r'))
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
 
     auth_user_id, _ = decode(token)
 

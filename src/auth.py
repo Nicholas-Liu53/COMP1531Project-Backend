@@ -33,7 +33,8 @@ def auth_register_v1(email, password, name_first, name_last):
             Returns (dict) containing user_id corresponding to the inputted email, password, name_first and name_last
 
     """
-    data = json.load(open('data.json', 'r'))
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
 
     #** Storing name_first & name_list so original names 
     #** unaffected by handle generation
@@ -196,7 +197,8 @@ def check_handle(handle_string):
 
     """ 
     
-    data = json.load(open('data.json', 'r'))
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
 
     for user in data['users']:
         if handle_string == user['handle_str']:
@@ -220,7 +222,8 @@ def auth_login_v2(email, password):
             Returns (dict) containing user_id corresponding to the inputted email and password 
 
     """ 
-    data = json.load(open('data.json', 'r'))
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
 
     for user in data['users']:
         if email == user.get('email') and hashlib.sha256(password.encode()).hexdigest() == user.get('password'):
@@ -289,7 +292,8 @@ def auth_logout_v1(token):
             has been successfully logged out otherwise false
 
     """
-    data = json.load(open('data.json', 'r'))
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
 
     auth_user_id, session_id = decode(token)
 
@@ -304,6 +308,7 @@ def auth_logout_v1(token):
 def auth_passwordreset_request_v1(email):
     with open('data.json', 'r') as FILE:
         data = json.load(FILE)
+
     for user in data['users']:
         if user['email'] == email:
             reset_code = generate_reset_code()

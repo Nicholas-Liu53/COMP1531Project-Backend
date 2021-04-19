@@ -28,7 +28,9 @@ def channels_list_v2(token):
         Returns dictionary of a list of channels mapped to the key string 'channels'
         Each channel is represented by a dictionary containing types { channel_id, name }
     '''
-    data = json.load(open('data.json', 'r'))
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+
     auth_user_id, _ = decode(token)
     output = []
     for chanD in data['channels']:
@@ -58,8 +60,11 @@ def channels_listall_v2(token):
         Returns dictionary of a list of channels mapped to the key string 'channels'
         Each channel is represented by a dictionary containing types { channel_id, name }
     '''
-    data = json.load(open('data.json', 'r'))
     decode(token)
+
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+    
     output = []
     for d in data['channels']:
         channel = {}
@@ -88,15 +93,15 @@ def channels_create_v1(token, name, is_public):
     Return Value:
         Returns a dictionary with the key being 'channel_id' and the value of the newly created channel's id
     '''
-    
-    data = json.load(open('data.json', 'r'))
-
     auth_user_id, _ = decode(token)
     
     # Ensure an InputError when the channel name is 
     # more than 20 characters long
     if len(name) > 20:
         raise InputError
+
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
 
     # Time to find the user details
     userFound = False

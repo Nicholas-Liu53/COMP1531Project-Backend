@@ -37,7 +37,8 @@ def channel_invite_v1(token, channel_id, u_id):
     Return Value:
         Returns an empty list on passing all Exceptions, with changes being made directly to our data.py  
     '''
-    data = json.load(open('data.json', 'r'))
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
 
     auth_user_id, _ = decode(token)
 
@@ -111,10 +112,11 @@ def channel_details_v1(token, channel_id):
     Return Value:
         Returns filteredDetails on succesfully creating a copy of the channel we want, with only the filtered information. The return is a dictionary.
     '''
-    data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
 
     # check for valid channel
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
     passed = False
     for check in data['channels']:
         if check["channel_id"] == channel_id:

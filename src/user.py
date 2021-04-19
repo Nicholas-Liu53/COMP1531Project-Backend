@@ -56,8 +56,6 @@ def user_setname_v2(token, name_first, name_last):
             Returns an empty dictionary 
 
     """ 
-    data = json.load(open('data.json', 'r'))
-
     auth_user_id, _ = decode(token)
     
     if len(name_first) > 50 or len(name_first) < 1:
@@ -65,6 +63,9 @@ def user_setname_v2(token, name_first, name_last):
     if len(name_last) > 50 or len(name_last) < 1:
         raise InputError
         
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+
     for user in data['users']:
         if auth_user_id == user['u_id']:
             user['name_first'] = name_first
@@ -95,13 +96,14 @@ def user_setemail_v2(token, email):
             Returns an empty dictionary 
 
     """ 
-    data = json.load(open('data.json', 'r'))
-
     auth_user_id, _ = decode(token)
     
     if not re.search('^[a-zA-Z0-9]+[\\._]?[a-zA-Z0-9]+[@]\\w+[.]\\w{2,3}$', email):
         raise InputError
-        
+
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+
     for user in data['users']:
         if email == user['email']:
             raise InputError
@@ -136,12 +138,13 @@ def user_sethandle_v2(token, handle_str):
             Returns an empty dictionary 
 
     """ 
-    data = json.load(open('data.json', 'r'))
-
     auth_user_id, _ = decode(token)
-    
+
     if len(handle_str) < 3 or len(handle_str) > 20:
         raise InputError
+
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
     
     for user in data['users']:
         if handle_str == user['handle_str']:
@@ -171,12 +174,12 @@ def users_all(token):
             The information provided is the user_id, email, first name, last name and handle string of each user 
 
     """ 
-    data = json.load(open('data.json', 'r'))
-
     decode(token)
     
     user_list = []
-    
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+
     for user in data['users']:
         if user['permission_id'] != 0:
             user_list.append(get_user(user['u_id']))
@@ -206,10 +209,10 @@ def user_stats_v1(token):
             This will also include the involvement rate of the user which is defined by this pseudocode: 
             sum(num_channels_joined, num_dms_joined, num_msgs_sent)/sum(num_dreams_channels, num_dreams_dms, num_dreams_msgs)
     '''
-
-    data = json.load(open('data.json', 'r'))
-
     auth_user_id, _ = decode(token)
+
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
 
     userstat = data["user_analytics"][f"{auth_user_id}"].copy()
 
@@ -245,11 +248,12 @@ def users_stats_v1(token):
             This will also include the utilization rate which is defined by this pseudocode: 
             num_users_who_have_joined_at_least_one_channel_or_dm / total_num_users
     '''
-    data = json.load(open('data.json', 'r'))
-
     decode(token)
 
     active_users = {}
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+
     for channel in data['channels']:
         for member in channel['all_members']:
             if member not in active_users:
@@ -291,7 +295,6 @@ def user_profile_uploadphoto_v1(token, img_url,x_start,y_start,x_end,y_end):
     auth_user_id, _ = decode(token)
 
     # Fetch image via URL
-
     try:  
         requests.get(img_url).status_code
     except Exception as e:
@@ -308,7 +311,6 @@ def user_profile_uploadphoto_v1(token, img_url,x_start,y_start,x_end,y_end):
 
     width, height = imageObject.size
 
-
     if x_end < x_start or y_end < y_start:
         raise InputError
 
@@ -320,8 +322,9 @@ def user_profile_uploadphoto_v1(token, img_url,x_start,y_start,x_end,y_end):
     imageObject.crop((x_start, y_start, x_end, y_end)).save(f"src/static/{auth_user_id}.jpg")
 
     # Serving image
-    
-    data = json.load(open('data.json', 'r'))
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+
     for user in data['users']:
         if user['u_id'] == auth_user_id:
             user['profile_img_url'] = f"{url}static/{auth_user_id}.jpg"

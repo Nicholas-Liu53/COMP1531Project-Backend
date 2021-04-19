@@ -15,11 +15,11 @@ def notifications_get_v1(token):
     Return value:
         Returns a dictionary containing a list of notifications with key 'notifications'
     '''
-
-    data = json.load(open('data.json', 'r'))
-
     #* Decode the taken and get the auth user's id
     auth_user_id, _ = decode(token)
+
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
 
     notifications = data['notifs'][f"{auth_user_id}"][0:20]
 
