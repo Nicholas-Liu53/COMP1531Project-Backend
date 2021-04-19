@@ -102,11 +102,6 @@ def test_standup_send_v1(user1, user2, user3):
     #Make fake channel to ensure that standup send only sends to correct channel
     fake_channel = src.channels.channels_create_v1(user1[token], 'Nez', True)
         
-    #Message is more than 1000 characters (not including username and colon)
-    message = '?' * 1001
-    with pytest.raises(InputError):
-        standup_send_v1(user1[token], channel[cID], message)
-    
     #Input error when standup is not active in channel 
     with pytest.raises(InputError):
         standup_send_v1(user1[token], channel[cID], "Hello")
@@ -118,6 +113,12 @@ def test_standup_send_v1(user1, user2, user3):
     #Success case 
     standup_start_v1(user1[token], channel[cID], standard_length)
     standup_send_v1(user1[token], channel[cID], "Hello")
+    
+    #Input error when message is more than 1000 characters (not including username and colon)
+    message = '?' * 1001
+    with pytest.raises(InputError):
+        standup_send_v1(user1[token], channel[cID], message)
+    
         
     #Assert that correct message appears in channel_messages after standup 
     time.sleep(standard_length)
