@@ -231,6 +231,7 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
     data = data_load()
     for taggedUser in taggedUsersList:
         data['notifs'][f"{taggedUser}"].insert(0, notification)
+
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
 
