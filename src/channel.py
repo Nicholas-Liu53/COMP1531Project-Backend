@@ -3,6 +3,7 @@ from src.channels import channels_listall_v2, channels_list_v2
 from src.other import decode, get_channel, get_user, message_count, push_added_notifications, check_removed, SECRET, get_user_permissions
 import jwt
 import json
+import time
 from datetime import datetime
 
 AuID      = 'auth_user_id'
@@ -176,48 +177,39 @@ def channel_messages_v1(token, channel_id, start):
     Return Value:
         Returns up to 50 messages alongside a start and and end value.
     '''
-    data = json.load(open('data.json', 'r'))
-    
-    #Handling of input and access errors 
-    #Input error: Channel ID is not a valid channel 
-    #This is the case
-    channelFound = False 
-    for channel in channels_listall_v2(token)["channels"]:
-        if channel_id == channel["channel_id"]:
-            channelFound = True
-    
-    if not channelFound:
-        raise InputError
+    auth_user_id, _ = decode(token)
+    num_of_messages = message_count(channel_id, -1)
 
-    #Input error: Start is greater than total number of messages in list 
-    if start > len(data['messages_log']):
-        raise InputError
-    
-    #Access error: When auth_user_id is not a member of channel with channel_id 
-    userFound = False 
-    for channel in channels_list_v2(token)["channels"]:
-        if channel_id == channel["channel_id"]:
-            userFound = True
-    
-    if not userFound:
+    chanMembers = get_channel(channel_id)[allMems]
+    if auth_user_id not in chanMembers:
         raise AccessError
     
+    # Input error 2:start is greater than the total number of messages in the channel
+    if start > num_of_messages:
+        raise InputError
+    
     desired_end = start + 50
-    num_of_messages = message_count(channel_id, -1)
-        
-    if num_of_messages < desired_end:
+    if num_of_messages <= desired_end:
         desired_end = -1
-    messages = []
 
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+
+    messages = []
     for objects in data['messages_log']:
-        if channel_id == objects['channel_id']:
+        if channel_id == objects[cID]:
             current_message = objects.copy()
             del current_message['channel_id']
             del current_message['dm_id']
+            for current_react in current_message['reacts']: 
+                if auth_user_id in current_react['u_ids']:
+                    current_react['is_this_user_reacted'] = True 
+                else:
+                    current_react['is_this_user_reacted'] = False
             messages.insert(0,current_message)
 
     #Reverse list such that the we have the newest messages at the start and oldest at the end 
-    reversed(messages)        
+    reversed(messages)
 
     #Take 50 messages from our start value
     #Chop off all the messages before our start value 
@@ -226,16 +218,13 @@ def channel_messages_v1(token, channel_id, start):
     
     while len(messages) > 50:
         messages.pop(-1)
-        
-    with open('data.json', 'w') as FILE:
-        json.dump(data, FILE)
-    
+
     return {
         'messages': messages,
         'start': start,
         'end': desired_end,
     }
-    
+
 def channel_leave_v1(token, channel_id):
     '''
     Takes in a user's id and a channel's id and removes that user from that given channel.

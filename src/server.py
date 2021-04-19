@@ -4,7 +4,8 @@ from flask import Flask, request, send_from_directory
 from flask_cors import CORS
 from src.error import InputError
 from src import config
-import src.auth, src.admin, src.other, src.dm, src.notifications, src.channel, src.channels, src.message, src.user
+import src.auth, src.admin, src.other, src.dm, src.notifications, src.channel, src.channels, src.message, src.user, src.standup
+from flask_mail import Mail, Message
 
 def defaultHandler(err):
     response = err.get_response()
@@ -19,6 +20,15 @@ def defaultHandler(err):
 
 APP = Flask(__name__, static_url_path='/static/')
 CORS(APP)
+mail= Mail(APP)
+
+APP.config['MAIL_SERVER']='smtp.gmail.com'
+APP.config['MAIL_PORT'] = 465
+APP.config['MAIL_USERNAME'] = 'W13BCactus@gmail.com'
+APP.config['MAIL_PASSWORD'] = 'themarms'
+APP.config['MAIL_USE_TLS'] = False
+APP.config['MAIL_USE_SSL'] = True
+mail = Mail(APP)
 
 APP.config['TRAP_HTTP_EXCEPTIONS'] = True
 APP.register_error_handler(Exception, defaultHandler)
@@ -32,7 +42,6 @@ def echo():
     return dumps({
         'data': data
     })
-
 
 @APP.route("/clear/v1", methods=['DELETE'])
 def clear():
@@ -50,10 +59,22 @@ def auth_login():
     payload = request.get_json()
     return src.auth.auth_login_v2(payload['email'], payload['password'])
 
-@APP.route("/auth/logout/v1", methods=['DELETE'])
+@APP.route("/auth/logout/v1", methods=['POST'])
 def auth_logout():
     payload = request.get_json()
     return src.auth.auth_logout_v1(payload['token'])
+
+@APP.route("/auth/passwordreset/request/v1", methods=['POST'])
+def auth_password_reset_request():
+    payload = request.get_json()
+    mail.send(src.auth.auth_passwordreset_request_v1(payload['email']))
+    return {}
+
+@APP.route("/auth/passwordreset/reset/v1", methods=['POST'])
+def auth_password_reset_reset():
+    payload = request.get_json()
+    src.auth.auth_passwordreset_reset_v1(int(payload['reset_code']),payload['new_password'])
+    return {}
 
 #* *************************************************ADMIN ROUTES******************************************
 @APP.route("/admin/userpermission/change/v1", methods=['POST'])
@@ -119,7 +140,7 @@ def channels_listall():
     token = request.args.get('token')
     return src.channels.channels_listall_v2(token)
 
-#* MESSAGE ROUTES
+#* ***************************************************MESSAGE ROUTES************************************************
 @APP.route("/message/send/v2", methods=['POST'])
 def message_send():
     payload = request.get_json()
@@ -155,6 +176,15 @@ def message_senddm():
     payload = request.get_json()
     return src.message.message_senddm_v1(payload['token'], payload['dm_id'], payload['message'])
 
+@APP.route("/message/sendlater/v1", methods=['POST'])
+def message_sendlater():
+    payload = request.get_json()
+    return src.message.message_sendlater_v1(payload['token'], payload['channel_id'], payload['message'], payload['time_sent'])
+
+@APP.route("/message/sendlaterdm/v1", methods=['POST'])
+def message_sendlaterdm():
+    payload = request.get_json()
+    return src.message.message_sendlaterdm_v1(payload['token'], payload['dm_id'], payload['message'], payload['time_sent'])
 @APP.route("/message/pin/v1", methods=['POST'])
 def message_pin():
     payload = request.get_json()
@@ -164,6 +194,17 @@ def message_pin():
 def message_unpin():
     payload = request.get_json()
     return src.message.message_unpin_v1(payload['token'], payload['message_id'])
+    
+@APP.route("/message/react/v1", methods=['POST'])
+def message_react():
+    payload = request.get_json()
+    return src.message.message_react_v1(payload['token'], payload['message_id'], payload['react_id'])
+    
+@APP.route("/message/unreact/v1", methods=['POST'])
+def message_unreact():
+    payload = request.get_json()
+    return src.message.message_unreact_v1(payload['token'], payload['message_id'], payload['react_id'])
+    
 
 #* *********************************************DM ROUTES*****************************************
 @APP.route("/dm/details/v1", methods=['GET'])
@@ -200,6 +241,24 @@ def dm_leave():
 def dm_messages():
     token, dm_id, start = request.args.get('token'), request.args.get('dm_id'), request.args.get('start')
     return src.dm.dm_messages_v1(token, int(dm_id), int(start))
+    
+    
+    
+#* ***************************************************STANDUP ROUTES***********************************************
+@APP.route("/standup/start/v1", methods=['POST'])
+def standup_start():
+    payload = request.get_json()
+    return src.standup.standup_start_v1(payload['token'], payload['channel_id'], payload['length'])
+
+@APP.route("/standup/active/v1", methods=['GET'])
+def standup_active():
+    token, channel_id = request.args.get('token'), request.args.get('channel_id')
+    return src.standup.standup_active_v1(token, int(channel_id))
+
+@APP.route("/standup/send/v1", methods=['POST'])
+def standup_send():
+    payload = request.get_json()
+    return src.standup.standup_send_v1(payload['token'], payload['channel_id'], payload['message'])
 
 #* ***************************************************USER ROUTES***********************************************
 @APP.route("/user/profile/v2", methods=['GET'])

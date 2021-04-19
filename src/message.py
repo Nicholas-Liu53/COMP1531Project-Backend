@@ -1,8 +1,10 @@
 from src.error import AccessError, InputError
 import src.auth
-from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications
+from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications, push_reacted_notifications, generate_new_message_id
 from datetime import timezone, datetime
 import json
+import threading, time
+from random import getrandbits
 from src.user import users_stats_v1
 
 AuID      = 'auth_user_id'
@@ -18,6 +20,8 @@ handle    = 'handle_string'
 dmID      = 'dm_id'
 seshID    = 'session_id'
 mID       = 'message_id'
+rID       = 'react_id'
+thumbsUp  = 1 
 
 def message_send_v1(token, channel_id, message):
     '''
@@ -58,10 +62,7 @@ def message_send_v1(token, channel_id, message):
 
     now = datetime.now()
     time_created = int(now.strftime("%s"))
-    if len(data['messages_log']) > 0:
-        newID = data['messages_log'][-1]['message_id'] + 1
-    else:
-        newID = 0
+    newID = generate_new_message_id()
 
     # User is in the channel (which exists) & message is appropriate length
     #* Time to send a message
@@ -232,6 +233,10 @@ def message_edit_v1(token, message_id, message):
         raise InputError
     elif message == '':      #* If new message is empty string --> remove message
         data['messages_log'].remove(data['messages_log'][i])
+        with open('data.json', 'w') as FILE:
+            json.dump(data, FILE)
+        return {
+        }
     else:                       # Else 
         data['messages_log'][i]['message'] = message
     
@@ -276,10 +281,7 @@ def message_senddm_v1(token, dm_id, message):
     if len(message) > 1000:
         raise InputError
     data = json.load(open('data.json', 'r'))
-    if len(data['messages_log']) > 0:
-        message_id = data['messages_log'][-1]['message_id'] + 1
-    else:
-        message_id = 0
+    message_id = generate_new_message_id()
     now = datetime.now()
     time_created = int(now.strftime("%s"))
 
@@ -424,3 +426,340 @@ def message_unpin_v1(token, message_id):
                     json.dump(data, FILE)
                 return {}
     raise InputError
+
+#Iteration 3    
+def message_react_v1(token, message_id, react_id):
+    '''
+    For a given channel or DM, add a "react" to a particular message 
+    NOTE: Assuming that the only react ID that is valid is 1: Thumbs up. 
+
+    Arguments:
+        token        (str) - The JWT containing user_id and session_id of the user that is to send the message
+        message_id   (int) - The id of the message that the user wants to react to 
+        react_id     (int) - The type of react to the message 
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When message_id is not a valid message within a channel or DM that authorised user has joined 
+                            2) react_id is not a valid React ID
+                            3) Message with message_id already contains an active react with the same react_id from authorised user 
+                            
+        AccessError - Occurs when:
+                            1) The authorised user is not a member of channel or DM that the message is in 
+
+    Return Value:
+        Returns an empty dictionary {}
+    '''
+ 
+    
+    auth_user_id, _ = decode(token)
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+    
+    if react_id != thumbsUp:
+        raise InputError
+        
+    message_found = False 
+    
+    for message in data['messages_log']: 
+        if message[mID] == message_id:
+            #AccessError if user not a part of channel or DM
+            if message[dmID] == -1 and auth_user_id not in get_channel(message[cID])[allMems]:
+                raise AccessError
+            elif message[cID] == -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
+                raise AccessError
+            message_found = True 
+            #Case 1: First react for that message 
+            if len(message['reacts']) == 0:
+                result = {
+                    'react_id': react_id,
+                    'u_ids': [auth_user_id],
+                    'is_this_user_reacted': None,
+                
+                    }
+                message['reacts'].append(result)
+            #Case 2: Reacting to a message which already has a react
+            elif len(message['reacts']) == 1:
+                for current_react in message['reacts']:
+                    if current_react[rID] == react_id: 
+                        if auth_user_id in current_react['u_ids']:
+                            raise InputError
+                        else:
+                            current_react['u_ids'].append(auth_user_id)
+        
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)  
+            #Now can push to notifs 
+            #If message in channel 
+            if message['channel_id'] != -1:  
+                push_reacted_notifications(auth_user_id, message['u_id'], message[cID], -1)
+            #If message is in DM
+            else: 
+                push_reacted_notifications(auth_user_id, message['u_id'], -1, message[dmID])
+    
+    #If gets to end of messages log without finding message with same mID then mID not valid  
+    if message_found == False:
+        raise InputError
+    
+    return {}
+
+def message_unreact_v1(token, message_id, react_id):
+    '''
+    For a given channel or DM, remove a "react" to a particular message 
+    NOTE: Assuming that the only react ID that is valid is 1: Thumbs up and that notification for initial react will not be deleted 
+
+    Arguments:
+        token        (str) - The JWT containing user_id and session_id of the user that is to send the message
+        message_id   (int) - The id of the message that the user wants to react to 
+        react_id     (int) - The type of react to the message 
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When message_id is not a valid message within a channel or DM that authorised user has joined 
+                            2) react_id is not a valid React ID
+                            3) Message with message_id does not contain an active react with the same react_id from authorised user 
+                            
+        AccessError - Occurs when:
+                            1) The authorised user is not a member of channel or DM that the message is in 
+
+    Return Value:
+        Returns an empty dictionary {}
+    '''
+    
+    auth_user_id, _ = decode(token)
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+    
+    if react_id != thumbsUp:
+        raise InputError
+            
+    for message in data['messages_log']: 
+        if message[mID] == message_id:
+            #AccessError if user not a part of channel or DM
+            if message[dmID] == -1 and auth_user_id not in get_channel(message[cID])[allMems]:
+                raise AccessError
+            elif message[cID] == -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
+                raise AccessError           
+           
+            #For unreact, delete the list with same react_id, if its not found then the message doesn't have a react and thus raises InputError
+            for react in range(len(message['reacts'])):
+                if message['reacts'][react]['react_id'] == react_id:
+                    message['reacts'].pop(react)
+                    with open('data.json', 'w') as FILE:
+                        json.dump(data, FILE)     
+                    return {} 
+            
+    #If gets to here means message not found or react not found 
+    raise InputError
+    
+def message_sendlater_v1(token, channel_id, message, time_sent):
+    '''
+    Takes in a user's token, a channel's id, a string and a unix timestamp
+    and sends a message at that given unix timestamp from that user into the channel.
+    --> Note: Messages cannot be more 1000 chars
+
+    Arguments:
+        token        (str)   - The JWT containing user_id and session_id of the user that is to send the message
+        channel_id   (int)   - The id of the channel that the message is being sent to
+        message      (str)   - The string of the message being sent
+        time_sent    (float) - The Unix Timestamp of which the message is to be sent
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When the user id doesn't belong to any user
+                            2) The channel_id doesn't belong to any channel
+                            3) The message is too long (exceeds 1000 chars)
+        AccessError - Occurs when:
+                            1) When the user's token contains wrong session id
+                            2) The token doesn't belong to a member of the channel
+
+    Return Value:
+        Returns a dictionary with key 'message_id' to the new message's message_id
+    '''
+    # Decode the token
+    auth_user_id, _ = decode(token)
+
+    # If the message is too long, raise InputError
+    if len(message) > 1000:
+        raise InputError
+
+    # Check if user is in channel
+    if auth_user_id not in get_channel(channel_id)['all_members']:
+        raise AccessError
+
+    data = json.load(open('data.json', 'r'))
+    newID = generate_new_message_id()
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+    timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
+    newID = 0
+    threading.Timer(timeTillSend, sendlater_send, args=(token, channel_id, message, time_sent, newID)).start()
+    return {
+        'message_id': newID
+    }
+
+def message_sendlaterdm_v1(token, dm_id, message, time_sent):
+    '''
+    Takes in a user's token, a dm's id, a string and a unix timestamp
+    and sends a message at that given unix timestamp from that user into the channel.
+    --> Note: Messages cannot be more 1000 chars
+
+    Arguments:
+        token        (str)   - The JWT containing user_id and session_id of the user that is to send the message
+        dm_id        (int)   - The id of the dm that the message is being sent to
+        message      (str)   - The string of the message being sent
+        time_sent    (float) - The Unix Timestamp of which the message is to be sent
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When the user id doesn't belong to any user
+                            2) The dm_id doesn't belong to any dm
+                            3) The message is too long (exceeds 1000 chars)
+        AccessError - Occurs when:
+                            1) When the user's token contains wrong session id
+                            2) The token doesn't belong to a member of the dm
+
+    Return Value:
+        Returns a dictionary with key 'message_id' to the new message's message_id
+    '''
+    # Decode the token
+    auth_user_id, _ = decode(token)
+
+    # If the message is too long, raise InputError
+    if len(message) > 1000:
+        raise InputError
+
+    # Check if user is in channel
+    if auth_user_id not in get_dm(dm_id)['all_members']:
+        raise AccessError
+
+    data = json.load(open('data.json', 'r'))
+    newID = generate_new_message_id()
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+    timeTillSend = time_sent - datetime.now().replace(tzinfo=timezone.utc).timestamp()
+    newID = 0
+    threading.Timer(timeTillSend, sendlaterdm_send, args=(token, dm_id, message, time_sent, newID)).start()
+    return {
+        'message_id': newID
+    }
+
+def sendlater_send(token, channel_id, message, time_sent, newID):
+    '''
+    HELPER FUNCTION FOR: message_sendlater_v1
+    Takes in a user's token, a channel's id, a string, a unix timestamp and a new message ID
+    and executes the actual sending of the message in message_sendlater_v1
+
+    Arguments:
+        token        (str)   - The JWT containing user_id and session_id of the user that is to send the message
+        channel_id   (int)   - The id of the channel that the message is being sent to
+        message      (str)   - The string of the message being sent
+        time_sent    (float) - The Unix Timestamp of which the message is to be sent
+        newID        (int)   - The new message ID of the message (already generated in message_sendlater_v1)
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When the user id doesn't belong to any user
+
+    Return Value:
+        Returns a dictionary with key 'message_id' to the new message's message_id
+    '''
+    # Decode the token
+    auth_user_id, _ = decode(token)
+
+    data = json.load(open('data.json', 'r'))
+
+    # User is in the channel (which exists) & message is appropriate length
+    #* Time to send a message
+    data['messages_log'].append(
+        {
+            'channel_id'    : channel_id,
+            'dm_id'         : -1,
+            'u_id'          : auth_user_id,
+            'time_created'  : time_sent,
+            'message_id'    : newID,
+            'message'       : message,
+            'reacts': [],
+            'is_pinned': False,
+        }
+    )
+
+    updated_num_message = data['dreams_analytics']['messages_exist'][-1]['num_messages_exist'] + 1
+    data['dreams_analytics']['messages_exist'].append({
+        'num_messages_exist': updated_num_message,
+        'time_stamp': int(datetime.now().strftime("%s"))
+    })
+
+    messageSentPrev = data["user_analytics"][f"{auth_user_id}"]['messages_sent'][-1]["num_messages_sent"]
+    data["user_analytics"][f"{auth_user_id}"]['messages_sent'].append(
+        {
+            "num_messages_sent": messageSentPrev + 1,
+            "time_stamp": int(datetime.now().strftime("%s"))
+        }
+    )  
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+
+    #* Push notifications if anyone is tagged
+    push_tagged_notifications(auth_user_id, channel_id, -1, message)
+
+def sendlaterdm_send(token, dm_id, message, time_sent, newID):
+    '''
+    HELPER FUNCTION FOR: message_sendlaterdm_v1
+    Takes in a user's token, a dm's id, a string, a unix timestamp and a new message ID
+    and executes the actual sending of the message in message_sendlaterdm_v1
+
+    Arguments:
+        token        (str)   - The JWT containing user_id and session_id of the user that is to send the message
+        dm_id        (int)   - The id of the dm that the message is being sent to
+        message      (str)   - The string of the message being sent
+        time_sent    (float) - The Unix Timestamp of which the message is to be sent
+        newID        (int)   - The new message ID of the message (already generated in message_sendlater_v1)
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When the user id doesn't belong to any user
+
+    Return Value:
+        Returns a dictionary with key 'message_id' to the new message's message_id
+    '''
+    # Decode the token
+    auth_user_id, _ = decode(token)
+
+    data = json.load(open('data.json', 'r'))
+
+    # User is in the dm (which exists) & message is appropriate length
+    #* Time to send a message
+    data['messages_log'].append(
+        {
+            'channel_id'    : -1,
+            'dm_id'         : dm_id,
+            'u_id'          : auth_user_id,
+            'time_created'  : time_sent,
+            'message_id'    : newID,
+            'message'       : message,
+            'reacts': [],
+            'is_pinned': False,
+        }
+    )
+
+    updated_num_message = data['dreams_analytics']['messages_exist'][-1]['num_messages_exist'] + 1
+    data['dreams_analytics']['messages_exist'].append({
+        'num_messages_exist': updated_num_message,
+        'time_stamp': int(datetime.now().strftime("%s"))
+    })
+
+    messageSentPrev = data["user_analytics"][f"{auth_user_id}"]['messages_sent'][-1]["num_messages_sent"]
+    data["user_analytics"][f"{auth_user_id}"]['messages_sent'].append(
+        {
+            "num_messages_sent": messageSentPrev + 1,
+            "time_stamp": int(datetime.now().strftime("%s"))
+        }
+    )  
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+
+    #* Push notifications if anyone is tagged
+    push_tagged_notifications(auth_user_id, -1, dm_id, message)

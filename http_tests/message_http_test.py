@@ -3,22 +3,26 @@ import requests
 import json
 from src.config import url
 from src.other import SECRET
+from datetime import timezone, datetime
 import jwt
+import time
 
-AuID    = 'auth_user_id'
-uID     = 'u_id'
-cID     = 'channel_id'
-allMems = 'all_members'
-Name    = 'name'
-dmName  = 'dm_name'
-fName   = 'name_first'
-lName   = 'name_last'
-chans   = 'channels'
-token   = 'token'
-dmID    = 'dm_id'
-handle  = 'handle_string'
-ownMems = 'owner_members'
-mID     = 'message_id'
+AuID     = 'auth_user_id'
+uID      = 'u_id'
+cID      = 'channel_id'
+allMems  = 'all_members'
+Name     = 'name'
+dmName   = 'dm_name'
+fName    = 'name_first'
+lName    = 'name_last'
+chans    = 'channels'
+token    = 'token'
+dmID     = 'dm_id'
+handle   = 'handle_string'
+ownMems  = 'owner_members'
+mID      = 'message_id'
+rID      = 'react_id'
+thumbsUp = 1
 
 #* Fixture that clears and registers the first user
 @pytest.fixture
@@ -442,7 +446,7 @@ def test_http_senddm_multiple(user1, user2):
         'message': ''
     })
     message0 = response0.json()
-    assert message0 == {mID: 0}
+    assert message0 == {'message_id': message0['message_id']}
     response1 = requests.post(f"{url}message/senddm/v1", json={
         token: user1[token],
         dmID: dm1[dmID],
@@ -450,7 +454,7 @@ def test_http_senddm_multiple(user1, user2):
     })
 
     message1 = response1.json()
-    assert message1 == {mID: 1}
+    assert message1 == {'message_id': message1['message_id']}
 
     response2 = requests.post(f"{url}message/senddm/v1", json={
         token: user1[token],
@@ -459,7 +463,7 @@ def test_http_senddm_multiple(user1, user2):
     })
 
     message2 = response2.json()
-    assert message2 == {mID: 2}
+    assert message2 == {'message_id': message2['message_id']}
     
     response3 = requests.post(f"{url}message/senddm/v1", json={
         token: user1[token],
@@ -468,7 +472,7 @@ def test_http_senddm_multiple(user1, user2):
     })
 
     message3 = response3.json()
-    assert message3 == {mID: 3}
+    assert message3 == {'message_id': message3['message_id']}
 
 #* Testing that a valid message is pinned for channel
 def test_http_message_pin_valid_channel(user1):
@@ -1007,3 +1011,546 @@ def test_http_message_pin_unauthorised_user(user1, invalid_token):
         mID: m2[mID]
     })
     assert e1Response.status_code == 403
+    
+#Message_react
+#Input Error test for invalid message id for message_react
+def test_http_message_react_v1_errors_invalid_mID(user1):
+    invalid_mID = -1
+    result = requests.post(f"{url}message/react/v1", json= {
+        token: user1[token],
+        mID: invalid_mID,
+        rID: thumbsUp,
+    })
+    
+    assert result.status_code == 400
+
+#Input error test for invalid react id for message_react 
+def test_http_message_react_v1_errors_invalid_rID(user1, user2):
+    invalid_rID = -1
+    
+    #Invalid rID for channel 
+    channel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Iteration 3',
+        "is_public": True
+    }).json()
+    
+    result = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'First one'
+    })
+    
+    m1 = result.json()
+    response = requests.post(f"{url}message/react/v1", json= {
+        token: user1[token],
+        mID: m1[mID],
+        rID: invalid_rID,
+    })
+    assert response.status_code == 400
+    
+    #Invalid rID for DM
+    result2 = requests.post(f"{url}dm/create/v1", json={
+        token: user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm1 = result2.json()
+    
+    result3 = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm1[dmID],
+        'message': 'Second one'
+    })
+    
+    m2 = result3.json()
+    
+    response2 = requests.post(f"{url}message/react/v1", json= {
+        token: user1[token],
+        mID: m2[mID],
+        rID: invalid_rID,
+    })
+    assert response2.status_code == 400
+
+#Test that already contains an active react raises input error
+def test_http_message_react_v1_active_react(user1, user2):
+    #Already contains react in channel 
+    channel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Iteration 3',
+        "is_public": True
+    }).json()
+    result = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'First one'
+    })
+    m1 = result.json()
+    
+    requests.post(f"{url}message/react/v1", json= {
+        token: user1[token],
+        mID: m1[mID],
+        rID: thumbsUp,
+    })
+    
+    #Second react with already active react 
+    response = requests.post(f"{url}message/react/v1", json= {
+        token: user1[token],
+        mID: m1[mID],
+        rID: thumbsUp,
+    })
+    assert response.status_code == 400
+    
+    #Already contains react in DM 
+    dm = requests.post(f"{url}dm/create/v1", json={
+        token: user1[token],
+        "u_ids": [user2[AuID]]
+    }).json()
+    result2 = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'Second one'
+    })
+    m2 = result2.json()
+    
+    requests.post(f"{url}message/react/v1", json= {
+        token: user1[token],
+        mID: m2[mID],
+        rID: thumbsUp,
+    })
+    
+    #Second react with already active react 
+    response2 = requests.post(f"{url}message/react/v1", json= {
+        token: user1[token],
+        mID: m2[mID],
+        rID: thumbsUp,
+    })
+    assert response2.status_code == 400
+   
+#Test that authorised user not a member of channel or dm raises access error for message_react 
+def test_http_message_react_v1_invalid_user(user1, user2, user3): 
+    #Not a member of channel 
+    channel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Iteration 3',
+        "is_public": False
+    }).json()
+    
+    result = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'First one'
+    })
+    m1 = result.json()
+    
+    response = requests.post(f"{url}message/react/v1", json= {
+        token: user2[token],
+        mID: m1[mID],
+        rID: thumbsUp,
+    })
+    assert response.status_code == 403
+    
+    #Not a member of DM
+    dm = requests.post(f"{url}dm/create/v1", json={
+        token: user1[token],
+        "u_ids": [user2[AuID]]
+    }).json()
+    
+    result2 = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'Second one'
+    })
+    m2 = result2.json()
+    
+    response2 = requests.post(f"{url}message/react/v1", json= {
+        token: user3[token],
+        mID: m2[mID],
+        rID: thumbsUp,
+    })
+    
+    assert response2.status_code == 403
+
+#Test that message_react works for a message in a channel
+def test_http_message_react_v1_valid_channel(user1, user2):
+    channel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Iteration 3',
+        "is_public": True
+    }).json()
+    
+    result = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'First one'
+    })
+    m1 = result.json()
+    
+    requests.post(f"{url}message/react/v1", json= {
+        token: user1[token],
+        mID: m1[mID],
+        rID: thumbsUp,
+    })
+
+    #Find the message and look in its reacts['u_ids'] to find user_1[AuID]
+    check = requests.get(f"{url}channel/messages/v2", params={
+        token: user1[token],
+        cID: channel[cID] ,
+        'start' : 0,}
+    )
+
+    #Instead of this, can assert that is_this_user reacted is true for message with same message id and react ID
+    checklog = check.json()
+    
+    for current_message in checklog['messages']: 
+        if current_message[mID] == m1[mID]: 
+            #Now that the message is found, can assert that our user has reacted to it    
+            for current_react in current_message['reacts']: 
+                if current_react['react_id'] == thumbsUp:
+                    assert user1[AuID] in current_react['u_ids'] 
+                assert current_react['is_this_user_reacted'] == True 
+
+#Test that message_react works for a dm 
+def test_http_message_react_v1_valid_dm(user1, user2):
+    dm = requests.post(f"{url}dm/create/v1", json={
+        token: user1[token],
+        "u_ids": [user2[AuID]]
+    }).json()
+    
+    result = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'First one'
+    })
+    m1 = result.json()
+    
+    requests.post(f"{url}message/react/v1", json= {
+        token: user1[token],
+        mID: m1[mID],
+        rID: thumbsUp,
+    })
+    
+    #Assert that is_this_user reacted is true when dm_messages is called for that message with message_id and same rID
+    check = requests.get(f"{url}dm/messages/v1", params={
+        token: user1[token],
+        dmID: dm[dmID] ,
+        'start' : 0,}
+    )
+    
+    checklog = check.json()
+    for current_message in checklog['messages']: 
+        if current_message[mID] == m1[mID]: 
+            #Now that the message is found, can assert that our user has reacted to it       
+            for current_react in current_message['reacts']: 
+                if current_react['react_id'] == thumbsUp:
+                    assert user1[AuID] in current_react['u_ids'] 
+                assert current_react['is_this_user_reacted'] == True 
+                    
+#Message_unreact
+#Input Error test for invalid message id for message_unreact
+def test_http_message_unreact_v1_errors_invalid_mID(user1, user2):
+    invalid_mID = -1
+    result = requests.post(f"{url}message/unreact/v1", json= {
+        token: user1[token],
+        mID: invalid_mID,
+        rID: thumbsUp,
+    })
+    assert result.status_code == 400
+
+#Input error test for invalid react id for message_unreact 
+def test_http_message_unreact_v1_errors_invalid_rID(user1, user2): 
+    invalid_rID = -1
+    
+    #Invalid rID for channel 
+    channel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Iteration 3',
+        "is_public": True
+    }).json()
+    
+    result = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'First one'
+    })
+    
+    m1 = result.json()
+    response = requests.post(f"{url}message/unreact/v1", json= {
+        token: user1[token],
+        mID: m1[mID],
+        rID: invalid_rID,
+    })
+    assert response.status_code == 400
+    
+    #Invalid rID for DM
+    result2 = requests.post(f"{url}dm/create/v1", json={
+        token: user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    dm = result2.json()
+    
+    result3 = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'Second one'
+    })
+    
+    m2 = result3.json()
+    
+    response2 = requests.post(f"{url}message/unreact/v1", json= {
+        token: user1[token],
+        mID: m2[mID],
+        rID: invalid_rID,
+    })
+    assert response2.status_code == 400
+
+#Test that doesn't contain react raises input error for message_unreact
+def test_http_message_unreact_v1_active_react(user1, user2):
+    #Doesn't contain react in channel 
+    channel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Iteration 3',
+        "is_public": True
+    }).json()
+    result = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'First one'
+    })
+    m1 = result.json()
+        
+    #React with no active react  
+    response = requests.post(f"{url}message/unreact/v1", json= {
+        token: user1[token],
+        mID: m1[mID],
+        rID: thumbsUp,
+    })
+    assert response.status_code == 400
+    
+    #No react in DM 
+    dm = requests.post(f"{url}dm/create/v1", json={
+        token: user1[token],
+        "u_ids": [user2[AuID]]
+    }).json()
+    result2 = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'Second one'
+    })
+    m2 = result2.json()
+
+    response2 = requests.post(f"{url}message/unreact/v1", json= {
+        token: user1[token],
+        mID: m2[mID],
+        rID: thumbsUp,
+    })
+    assert response2.status_code == 400
+
+#Test that authorised user not a member of channel or dm raises access error for message_unreact 
+def test_http_message_unreact_v1_invalid_user(user1, user2, user3): 
+    #Not a member of channel 
+    channel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Iteration 3',
+        "is_public": False
+    }).json()
+    
+    result = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'First one'
+    })
+    m1 = result.json()
+    
+    response = requests.post(f"{url}message/unreact/v1", json= {
+        token: user2[token],
+        mID: m1[mID],
+        rID: thumbsUp,
+    })
+    assert response.status_code == 403
+    
+    #Not a member of DM
+    dm = requests.post(f"{url}dm/create/v1", json={
+        token: user1[token],
+        "u_ids": [user2[AuID]]
+    }).json()
+    
+    result2 = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'Second one'
+    })
+    m2 = result2.json()
+    
+    response2 = requests.post(f"{url}message/unreact/v1", json= {
+        token: user3[token],
+        mID: m2[mID],
+        rID: thumbsUp,
+    })
+    assert response2.status_code == 403
+
+#Test that message_unreact works for a message in a channel
+def test_http_message_unreact_v1_valid_channel(user1, user2):
+    channel = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": 'Iteration 3',
+        "is_public": True
+    }).json()
+    
+    result = requests.post(f"{url}message/send/v2", json={
+        "token": user1[token],
+        "channel_id": channel[cID],
+        "message": 'First one'
+    })
+    m1 = result.json()
+    
+    requests.post(f"{url}message/react/v1", json= {
+        token: user1[token],
+        mID: m1[mID],
+        rID: thumbsUp,
+    })
+    
+    requests.post(f"{url}message/unreact/v1", json= {
+        token: user1[token],
+        mID: m1[mID],
+        rID: thumbsUp,
+    })
+    
+    check = requests.get(f"{url}channel/messages/v2", params={
+        token: user1[token],
+        cID: channel[cID] ,
+        'start' : 0,}
+    )
+    
+    message_log = check.json()
+    #Go through check and find that is this user for messages is False 
+    for current_message in message_log['messages']: 
+        if current_message[mID] == m1[mID]: 
+            #Now that the message is found, can assert that our user has reacted to it  
+            for current_react in current_message['reacts']: 
+                if current_react['react_id'] == thumbsUp:
+                    assert user1[AuID] not in current_react['u_ids']
+                assert current_react['is_this_user_reacted'] == False 
+    
+#Test that message_unreact works for a dm 
+def test_http_message_unreact_v1_valid_dm(user1, user2):
+    dm = requests.post(f"{url}dm/create/v1", json={
+        token: user1[token],
+        "u_ids": [user2[AuID]]
+    }).json()
+    
+    result = requests.post(f"{url}message/senddm/v1", json={
+        token: user1[token],
+        dmID: dm[dmID],
+        'message': 'First one'
+    })
+    m1 = result.json()
+    
+    requests.post(f"{url}message/react/v1", json= {
+        token: user1[token],
+        mID: m1[mID],
+        rID: thumbsUp,
+    })
+    requests.post(f"{url}message/unreact/v1", json= {
+        token: user1[token],
+        mID: m1[mID],
+        rID: thumbsUp,
+    })
+    
+    #Assert that is_this_user reacted is true when dm_messages is called for that message with message_id and same rID
+    check = requests.get(f"{url}dm/messages/v1", params={
+        token: user1[token],
+        dmID: dm[dmID] ,
+        'start' : 0,}
+    )
+    
+    message_log = check.json()
+    for current_message in message_log['messages']: 
+        if current_message[mID] == m1[mID]: 
+            #Now that the message is found, can assert that our user has reacted to it       
+            for current_react in current_message['reacts']: 
+                if current_react['react_id'] == thumbsUp:
+                    assert user1[AuID] not in current_react['u_ids'] 
+                assert current_react['is_this_user_reacted'] == False
+    
+
+
+#* Testing a message that is to be sent later isn't prematurely sent
+#* And is actually sent in the end with correct timestamp
+def test_http_message_sendlater(user1, user2):
+    c1 = requests.post(f"{url}channels/create/v2", json={
+        "token": user1[token],
+        "name": "TrumpPence",
+        "is_public": True
+    })
+    requests.post(f"{url}channel/join/v2", json={
+        "token": user2[token],
+        "channel_id": c1.json()['channel_id']
+    })
+    sendTime = datetime.now().replace(tzinfo=timezone.utc).timestamp() + 3
+    m1 = requests.post(f"{url}message/sendlater/v1", json={
+        "token": user1[token],
+        "channel_id": c1.json()['channel_id'],
+        "message": "You know what matters more than American Muscle?",
+        "time_sent": sendTime
+    })
+    messageFound = False
+    for message in requests.get(f"{url}channel/messages/v2", params={
+        "token": user2[token],
+        "channel_id": c1.json()[cID],
+        "start": 0
+    }).json()['messages']:
+        if m1.json()['message_id'] == message['message_id']:
+            messageFound = True
+    assert not messageFound
+
+    #* Sleep for now
+    time.sleep(4)
+
+    for message in requests.get(f"{url}channel/messages/v2", params={
+        "token": user2[token],
+        "channel_id": c1.json()[cID],
+        "start": 0
+    }).json()['messages']:
+        if m1.json()['message_id'] == message['message_id']:
+            mTime = message['time_created']
+            messageFound = True
+    assert messageFound
+    assert mTime == sendTime
+
+#* Testing a message that is to be sent later isn't prematurely sent
+#* And is actually sent in the end with correct timestamp
+def test_http_message_sendlaterdm(user1, user2):
+    d1 = requests.post(f"{url}dm/create/v1", json={
+        "token": user1[token],
+        "u_ids": [user2[AuID]]
+    })
+    sendTime = datetime.now().replace(tzinfo=timezone.utc).timestamp() + 3
+    m1 = requests.post(f"{url}message/sendlaterdm/v1", json={
+        "token": user1[token],
+        "dm_id": d1.json()[dmID],
+        "message": "You know what matters more than American Muscle?",
+        "time_sent": sendTime
+    })
+    messageFound = False
+    for message in requests.get(f"{url}dm/messages/v1", params={
+        "token": user2[token],
+        "dm_id": d1.json()[dmID],
+        "start": 0
+    }).json()['messages']:
+        if m1.json()['message_id'] == message['message_id']:
+            messageFound = True
+    assert not messageFound
+
+    #* Sleep for now
+    time.sleep(4)
+
+    for message in requests.get(f"{url}dm/messages/v1", params={
+        "token": user2[token],
+        "dm_id": d1.json()[dmID],
+        "start": 0
+    }).json()['messages']:
+        if m1.json()['message_id'] == message['message_id']:
+            mTime = message['time_created']
+            messageFound = True
+    assert messageFound
+    assert mTime == sendTime
