@@ -1,6 +1,6 @@
 from src.error import AccessError, InputError 
 from src.channels import channels_listall_v2, channels_list_v2
-from src.other import decode, get_channel, get_user, message_count, push_added_notifications, check_removed, SECRET, get_user_permissions
+from src.other import decode, get_channel, get_user, message_count, push_added_notifications, check_removed, SECRET, get_user_permissions, data_load
 import jwt
 import json
 import time
@@ -37,10 +37,9 @@ def channel_invite_v1(token, channel_id, u_id):
     Return Value:
         Returns an empty list on passing all Exceptions, with changes being made directly to our data.py  
     '''
-    data = json.load(open('data.json', 'r'))
-
     auth_user_id, _ = decode(token)
 
+    data = data_load()
     #check if channel_id is valid
     passed = False
     for check in data['channels']:
@@ -111,10 +110,10 @@ def channel_details_v1(token, channel_id):
     Return Value:
         Returns filteredDetails on succesfully creating a copy of the channel we want, with only the filtered information. The return is a dictionary.
     '''
-    data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
 
     # check for valid channel
+    data = data_load()
     passed = False
     for check in data['channels']:
         if check["channel_id"] == channel_id:
@@ -192,8 +191,7 @@ def channel_messages_v1(token, channel_id, start):
     if num_of_messages <= desired_end:
         desired_end = -1
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     messages = []
     for objects in data['messages_log']:
@@ -242,11 +240,9 @@ def channel_leave_v1(token, channel_id):
     Return Value:
         Returns an empty list regardless of conditions :)
     '''
-
-    data = json.load(open('data.json', 'r'))
-
     auth_user_id, _ = decode(token)
 
+    data = data_load()
     # Get the channel directory from data.py
     channelData = {}
     channelFound = False
@@ -307,12 +303,11 @@ def channel_join_v1(token, channel_id):
         Returns an empty list regardless of conditions :)
     '''
 
-    data = json.load(open('data.json', 'r'))
-
     # Find the channel in the database
     channelFound = False
     i = 0
 
+    data = data_load()
     # Loop throug channel data base until channel is found
     while not channelFound:
         if i >= len(data['channels']):
@@ -323,9 +318,8 @@ def channel_join_v1(token, channel_id):
             channelFound = True
         i += 1
 
-    i -= 1      # Undo extra increment
-
     auth_user_id, _ = decode(token)
+    i -= 1      # Undo extra increment
 
     # Time to find the user details
     userFound = False
@@ -382,8 +376,8 @@ def channel_addowner_v1(token, channel_id, u_id):
     Return Value:
         Empty Dictionary
     '''
-    data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
+    data = data_load()
     
     passed = False
     for check in data['channels']:
@@ -465,10 +459,10 @@ def channel_removeowner_v1(token, channel_id, u_id):
     Return Value:
         Empty Dictionary
     '''
-    data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
-
     channel_deets = get_channel(channel_id)
+
+    data = data_load()
     if auth_user_id not in channel_deets['all_members'] and get_user_permissions(u_id) != 1:
         raise AccessError
     elif auth_user_id not in channel_deets['owner_members'] or len(channel_deets['owner_members']) == 1 or u_id not in channel_deets['owner_members']:

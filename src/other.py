@@ -2,6 +2,7 @@ import jwt
 import json
 from src.error import AccessError, InputError
 from random import getrandbits
+import os
 
 AuID      = 'auth_user_id'
 uID       = 'u_id'
@@ -62,15 +63,14 @@ def search_v1(token, query_str):
                 message string, and
                 time_created.
     '''
-
-    data = json.load(open('data.json', 'r'))
-
     #* Decode the token
     auth_user_id, _ = decode(token)
 
     # When query_str is >1000 characters, InputError is raised
     if len(query_str) > 1000:
         raise InputError
+
+    data = data_load()
 
     channelList = []
     #* Check which channels the user is in
@@ -85,7 +85,6 @@ def search_v1(token, query_str):
             DMList.append(dm['dm_id'])
 
     messages = []
-
     #* Add in every message in the channel/DM that contains query_str
     for message in data['messages_log']:
         if (message[cID] in channelList or message['dm_id'] in DMList) and query_str.lower() in message['message'].lower():
@@ -115,7 +114,8 @@ def decode(token):
     return auth_user_id, session_id
 
 def check_session(auth_user_id, session_id):
-    data = json.load(open('data.json', 'r'))
+    data = data_load()
+
     for user in data['users']:
         if auth_user_id == user[uID] and user['permission_id'] != 0:
             if session_id in user['session_id']:
@@ -123,7 +123,8 @@ def check_session(auth_user_id, session_id):
     raise AccessError
 
 def get_channel(channel_id):
-    data = json.load(open('data.json', 'r'))
+    data = data_load()
+
     for channel in data['channels']:
         if channel_id == channel['channel_id']:
             with open('data.json', 'w') as FILE:
@@ -132,7 +133,8 @@ def get_channel(channel_id):
     raise InputError
 
 def get_user(user_id):
-    data = json.load(open('data.json', 'r'))
+    data = data_load()
+
     for user in data['users']:
         if user_id == user[uID]:
             return {
@@ -147,7 +149,8 @@ def get_user(user_id):
 
 def message_count(channel_id, dm_id):
     counter = 0
-    data = json.load(open('data.json', 'r'))
+    data = data_load()
+
     if dm_id == -1:
         for message in data['messages_log']:
             if channel_id == message[cID]:
@@ -160,14 +163,16 @@ def message_count(channel_id, dm_id):
     return counter
 
 def get_user_permissions(user_id):
-    data = json.load(open('data.json', 'r'))
+    data = data_load()
+
     for user in data['users']:
         if user_id == user[uID]:
             return user['permission_id']
     # raise InputError
 
 def get_user_from_handlestring(handlestring):
-    data = json.load(open('data.json', 'r'))
+    data = data_load()
+
     for user in data['users']:
         if handlestring == user['handle_str']:
             return {
@@ -181,14 +186,16 @@ def get_user_from_handlestring(handlestring):
     # raise InputError
 
 def get_message(message_id):
-    data = json.load(open('data.json', 'r'))
+    data = data_load()
+
     for message in data['messages_log']:
         if message_id == message['message_id']:
             return message
     raise InputError
 
 def get_dm(dm_id):
-    data = json.load(open('data.json', 'r'))
+    data = data_load()
+
     for dm in data['dms']:
         if dm_id == dm['dm_id']:
             return dm
@@ -221,7 +228,7 @@ def push_tagged_notifications(auth_user_id, channel_id, dm_id, message):
         'dm_id': dm_id,
         'notification_message': f"{taggerHandle} tagged you in {channelDMname}: {message[0:20]}"
     }
-    data = json.load(open('data.json', 'r'))
+    data = data_load()
     for taggedUser in taggedUsersList:
         data['notifs'][f"{taggedUser}"].insert(0, notification)
     with open('data.json', 'w') as FILE:
@@ -239,7 +246,7 @@ def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
         'dm_id': dm_id,
         'notification_message': f"{taggerHandle} added you to {channelDMname}"
     }
-    data = json.load(open('data.json', 'r'))
+    data = data_load()
     data['notifs'][f"{user_id}"].insert(0, notification)
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
@@ -257,14 +264,14 @@ def push_reacted_notifications(auth_user_id, user_id, channel_id, dm_id):
         'dm_id': dm_id,
         'notification_message': f"{users_handle} reacted to your message in {channelDMname}",
     }
-    data = json.load(open('data.json', 'r'))
+    data = data_load()
     data['notifs'][f"{user_id}"].insert(0, notification)
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
         
 
 def check_removed(u_id):
-    data = json.load(open('data.json', 'r'))
+    data = data_load()
     for user in data["users"]:
         if user["u_id"] == u_id:
             if user['permission_id'] == 0:
@@ -288,7 +295,17 @@ def generate_reset_code():
     return reset_code
 
 def get_reset_code(email):
-    data = json.load(open('data.json', 'r'))
+    data = data_load()
+
     for code in data['reset_codes']:
         if code['email'] == email:
             return code['reset_code']
+
+def data_load():
+    while True:
+        try:
+            with open('data.json', 'r') as FILE:
+                data = json.load(FILE)
+            return data
+        except:
+            pass

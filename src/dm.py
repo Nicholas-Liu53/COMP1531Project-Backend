@@ -1,6 +1,6 @@
 from flask import Flask, request
 from src.error import AccessError, InputError
-from src.other import decode, get_user, get_dm, message_count, get_user_from_handlestring, push_added_notifications, check_removed
+from src.other import decode, get_user, get_dm, message_count, get_user_from_handlestring, push_added_notifications, check_removed, data_load
 import src.auth
 import json
 import jwt
@@ -71,8 +71,10 @@ def dm_list_v1(token):
         Returns a dictionary with key 'dms' mapping to a list of DMs that the user is a member of
         Each DM is represented by a dictionary containing types { dm_id, name }
     '''
-    data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
+
+    data = data_load()
+
     output = []
     for dmDetails in data['dms']:
         if auth_user_id in dmDetails['all_members']:
@@ -104,17 +106,16 @@ def dm_create_v1(token, u_ids):
     Return Value:
         Returns a dictionary with key 'dm_id' and 'dm_name' when sucessful
     '''
-    data = json.load(open('data.json', 'r'))
     creator_id, _ = decode(token)
+
+    data = data_load()
+
     if len(data['dms']) == 0:
         dm_ID = 0
     else:
         dm_ID = data['dms'][-1][dmID] + 1
 
     dmUsers = [creator_id]
-
-
-
     for user_id in u_ids:
         dmUsers.append(user_id)
 
@@ -130,7 +131,6 @@ def dm_create_v1(token, u_ids):
         dm_name = ', '.join(handles)
 
         #* update analytics
-
         dmJoinedPrev = data["user_analytics"][f"{user}"]['dms_joined'][-1]["num_dms_joined"]
         data["user_analytics"][f"{user}"]['dms_joined'].append(
             {
@@ -138,7 +138,6 @@ def dm_create_v1(token, u_ids):
                 "time_stamp": time_created
             }
         )  
-
 
     for user_id in u_ids:
         check_removed(user_id)
@@ -158,17 +157,14 @@ def dm_create_v1(token, u_ids):
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
-    
 
     for user in u_ids:
         push_added_notifications(creator_id, user, -1, dm_ID)
-
 
     return {
         'dm_id': dm_ID,
         'dm_name': dm_name
     }
-
 
 def dm_remove_v1(token, dm_id):
     '''
@@ -191,7 +187,8 @@ def dm_remove_v1(token, dm_id):
     auth_user_ID, _ = decode(token)
     input_error = True
 
-    data = json.load(open('data.json', 'r'))
+    data = data_load()
+
     for items in data['dms']:
         #Loop for input errors:
         if dm_id == items['dm_id']:
@@ -251,15 +248,16 @@ def dm_invite_v1(token, dm_id, u_id):
     Return Value:
         {}
     '''
-    data = json.load(open('data.json', 'r'))
     #ASSUME: Do not need to add new user into dm_name
+    auth_user_ID, _ = decode(token)
     get_user(u_id)
     check_removed(u_id)
-    auth_user_ID, _ = decode(token)
     input_error = True
 
     now = datetime.now()
     time_created = int(now.strftime("%s"))
+    data = data_load()
+
     for items in data['dms']:
         #Loop for input errors:
         if dm_id == items['dm_id']:
@@ -305,10 +303,9 @@ def dm_leave_v1(token, dm_id):
     Return Value:
         {}
     '''
-
     auth_user_ID, _ = decode(token)
     input_error = True
-    data = json.load(open('data.json', 'r'))
+    data = data_load()
 
     now = datetime.now()
     time_created = int(now.strftime("%s"))
@@ -381,9 +378,7 @@ def dm_messages_v1(token, dm_id, start):
     if num_of_messages <= desired_end:
         desired_end = -1
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
-
+    data = data_load()
     messages = []
     for objects in data['messages_log']:
         if dm_id == objects[dmID]:

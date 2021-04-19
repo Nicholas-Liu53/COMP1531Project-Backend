@@ -1,5 +1,5 @@
 from src.error import AccessError, InputError
-from src.other import decode, get_channel, get_user
+from src.other import decode, get_channel, get_user, data_load
 import json
 import jwt
 from datetime import datetime
@@ -28,8 +28,9 @@ def channels_list_v2(token):
         Returns dictionary of a list of channels mapped to the key string 'channels'
         Each channel is represented by a dictionary containing types { channel_id, name }
     '''
-    data = json.load(open('data.json', 'r'))
     auth_user_id, _ = decode(token)
+
+    data = data_load()
     output = []
     for chanD in data['channels']:
         if auth_user_id in chanD['all_members']:
@@ -58,8 +59,9 @@ def channels_listall_v2(token):
         Returns dictionary of a list of channels mapped to the key string 'channels'
         Each channel is represented by a dictionary containing types { channel_id, name }
     '''
-    data = json.load(open('data.json', 'r'))
     decode(token)
+    
+    data = data_load()
     output = []
     for d in data['channels']:
         channel = {}
@@ -88,9 +90,6 @@ def channels_create_v1(token, name, is_public):
     Return Value:
         Returns a dictionary with the key being 'channel_id' and the value of the newly created channel's id
     '''
-    
-    data = json.load(open('data.json', 'r'))
-
     auth_user_id, _ = decode(token)
     
     # Ensure an InputError when the channel name is 
@@ -98,6 +97,7 @@ def channels_create_v1(token, name, is_public):
     if len(name) > 20:
         raise InputError
 
+    data = data_load()
     # Time to find the user details
     userFound = False
     j = 0
