@@ -305,10 +305,10 @@ def auth_passwordreset_request_v1(email):
             msg = Message('UNSW Dreams Password Reset', sender = 'W13BCactus@gmail.com', recipients = [f"{email}"])
             msg.body = f"We've received your request for a password reset. Please use the following code to reset your password: \n {reset_code}"
             for index, code in enumerate(data['reset_codes']):
-                if user['u_id'] == code['u_id']:
+                if user['email'] == code['email']:
                     data['reset_codes'].pop(index)
             data['reset_codes'].append({
-                'u_id': user['u_id'],
+                'email': user['email'],
                 'reset_code': reset_code
             })
             with open('data.json', 'w') as FILE:
@@ -327,7 +327,7 @@ def auth_passwordreset_reset_v1(reset_code, new_password):
         if reset_code == code['reset_code']:
             data['reset_codes'].pop(index)
             for user in data['users']:
-                if user['u_id'] == code['u_id']:
+                if user['email'] == code['email']:
                     user['password'] = hashlib.sha256(new_password.encode()).hexdigest()
                     with open('data.json', 'w') as FILE:
                         json.dump(data, FILE)
