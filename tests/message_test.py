@@ -1,6 +1,6 @@
 # file to test functions in src/message.py
 import pytest
-from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_share_v1, message_senddm_v1, message_pin_v1, message_unpin_v1
+from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_share_v1, message_senddm_v1, message_pin_v1, message_unpin_v1, message_react_v1, message_unreact_v1
 from src.error import InputError, AccessError
 import src.channel, src.channels, src.auth, src.dm
 from src.other import clear_v1, SECRET
@@ -8,18 +8,21 @@ from datetime import timezone, datetime
 import jwt
 import time
 
-AuID    = 'auth_user_id'
-uID     = 'u_id'
-cID     = 'channel_id'
-chans   = 'channels'
-allMems = 'all_members'
-ownMems = 'owner_members'
-fName   = 'name_first'
-lName   = 'name_last'
-token   = 'token'
-mID     = 'message_id'
-dmID    = 'dm_id'
-Name    = 'name'
+
+AuID     = 'auth_user_id'
+uID      = 'u_id'
+cID      = 'channel_id'
+chans    = 'channels'
+allMems  = 'all_members'
+ownMems  = 'owner_members'
+fName    = 'name_first'
+lName    = 'name_last'
+token    = 'token'
+mID      = 'message_id'
+dmID     = 'dm_id'
+Name     = 'name'
+thumbsUp = 1
+rID      = 'react_id'
 
 @pytest.fixture
 def invalid_token():
@@ -582,6 +585,193 @@ def test_message_pin_unauthorised_user(user1, invalid_token):
     with pytest.raises(AccessError):
         message_pin_v1(invalid_token, m2[mID])
 
+#Input Error test for invalid message id for message_react
+def test_message_react_v1_errors_invalid_mID(user1, user2):
+    invalid_message_id = -1 
+    with pytest.raises(InputError):
+        message_react_v1(user1[token], invalid_message_id, thumbsUp) 
+
+#Input error test for invalid react id for message_react 
+def test_message_react_v1_errors_invalid_rID(user1, user2): 
+    channel_1 = src.channels.channels_create_v1(user1[token], 'Channel', True)
+    message_1 = message_send_v1(user1[token], channel_1[cID], "Hello")
+    
+    dm_1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    message_2 = message_senddm_v1(user1[token], dm_1[dmID], "Goodbye")
+
+    invalid_react_id = -1 
+    #Invalid rID for channel 
+    with pytest.raises(InputError):
+        message_react_v1(user1[token], message_1[mID], invalid_react_id) 
+      
+    #Invalid rID for DM
+    with pytest.raises(InputError):
+        message_react_v1(user1[token], message_2[mID], invalid_react_id)
+
+#Test that already contains an active react raises input error  
+def test_message_react_v1_active_react(user1, user2):
+    channel_1 = src.channels.channels_create_v1(user1[token], 'Channel', True)
+    message_1 = src.message.message_send_v1(user1[token], channel_1[cID], "Hello")
+    message_react_v1(user1[token], message_1[mID], thumbsUp)
+    
+    #Already contains react in channel error 
+    with pytest.raises(InputError):
+        message_react_v1(user1[token], message_1[mID], thumbsUp)
+    
+    dm_1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    message_2 = message_senddm_v1(user1[token], dm_1[dmID], "Goodbye")
+    message_react_v1(user1[token], message_2[mID], thumbsUp)
+    
+    #Already contains react in DM error
+    with pytest.raises(InputError):
+        message_react_v1(user1[token], message_2[mID], thumbsUp)
+   
+#Test that authorised user not a member of channel or dm raises access error for message_react 
+def test_message_react_v1_invalid_user(user1, user2, user3): 
+    channel_1 = src.channels.channels_create_v1(user1[token], 'Channel', False)
+    message_1 = message_send_v1(user1[token], channel_1[cID], "Hello")
+    
+    #Not a member of channel 
+    with pytest.raises(AccessError):
+        message_react_v1(user2[token], message_1[mID], thumbsUp)
+    
+    dm_1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    message_2 = message_senddm_v1(user1[token], dm_1[dmID], "Goodbye")
+    
+    #Not a member of DM 
+    with pytest.raises(AccessError):
+        message_react_v1(user3[token], message_2[mID], thumbsUp)
+
+#Test that message_react works for a message in a channel
+def test_message_react_v1_valid_channel(user1, user2):
+    channel_1 = src.channels.channels_create_v1(user1[token], 'Channel', False)
+    src.channel.channel_invite_v1(user1[token], channel_1[cID], user2[AuID])
+    message_1 = message_send_v1(user1[token], channel_1[cID], "Hello")
+    message_react_v1(user1[token], message_1[mID], thumbsUp)
+    
+    #Test 1: check that react_1 comes up in "messages"
+    result = src.channel.channel_messages_v1(user1[token], channel_1[cID], 0)
+
+    #Create for loop that finds message looking for 
+    for current_message in result['messages']: 
+        if current_message[mID] == message_1[mID]: 
+            #Now that the message is found, can assert that our user has reacted to it    
+            for current_react in current_message['reacts']: 
+                if current_react['react_id'] == thumbsUp:
+                    assert user1[AuID] in current_react['u_ids'] 
+                assert current_react['is_this_user_reacted'] == True 
+
+#Test that message_react works for a dm 
+def test_message_react_v1_valid_dm(user1, user2):
+    dm_1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    message_1 = message_senddm_v1(user1[token], dm_1[dmID], "Goodbye")
+    message_react_v1(user1[token], message_1[mID], thumbsUp)
+    
+    #Test 1: check that reacts comes up in "messages"
+    result = src.dm.dm_messages_v1(user1[token], dm_1[dmID], 0)
+    #Create for loop that finds message looking for 
+    for current_message in result['messages']: 
+        if current_message[mID] == message_1[mID]: 
+            #Now that the message is found, can assert that our user has reacted to it       
+            for current_react in current_message['reacts']: 
+                if current_react['react_id'] == thumbsUp:
+                    assert user1[AuID] in current_react['u_ids'] 
+                assert current_react['is_this_user_reacted'] == True 
+
+#Input Error test for invalid message id for message_unreact
+def test_message_unreact_v1_errors_invalid_mID(user1, user2):
+    invalid_message_id = -1 
+    with pytest.raises(InputError):
+        message_unreact_v1(user1[token], invalid_message_id, thumbsUp) 
+        
+
+#Input error test for invalid react id for message_unreact 
+def test_message_unreact_v1_errors_invalid_rID(user1, user2): 
+    channel_1 = src.channels.channels_create_v1(user1[token], 'Channel', True)
+    message_1 = message_send_v1(user1[token], channel_1[cID], "Hello")
+    
+    dm_1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    message_2 = message_senddm_v1(user1[token], dm_1[dmID], "Goodbye")
+
+    invalid_react_id = -1 
+    #Invalid rID for channel 
+    with pytest.raises(InputError):
+        message_unreact_v1(user1[token], message_1[mID], invalid_react_id) 
+      
+    #Invalid rID for DM
+    with pytest.raises(InputError):
+        message_unreact_v1(user1[token], message_2[mID], invalid_react_id)
+
+#Test that doesn't contain react raises input error for message_unreact
+def test_message_unreact_v1_active_react(user1, user2):
+    channel_1 = src.channels.channels_create_v1(user1[token], 'Channel', True)
+    message_1 = src.message.message_send_v1(user1[token], channel_1[cID], "Hello")
+    
+    #Doesn't contain react in channel error 
+    with pytest.raises(InputError):
+        message_unreact_v1(user1[token], message_1[mID], thumbsUp)
+        
+    
+    dm_1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    message_2 = message_senddm_v1(user1[token], dm_1[dmID], "Goodbye")
+    
+    #Doesn't contain react in DM error
+    with pytest.raises(InputError):
+        message_unreact_v1(user1[token], message_2[mID], thumbsUp)
+    
+#Test that authorised user not a member of channel or dm raises access error for message_react 
+def test_message_unreact_v1_invalid_user(user1, user2, user3): 
+    channel_1 = src.channels.channels_create_v1(user1[token], 'Channel', False)
+    message_1 = message_send_v1(user1[token], channel_1[cID], "Hello")
+    
+    #Not a member of channel 
+    with pytest.raises(AccessError):
+        message_unreact_v1(user2[token], message_1[mID], thumbsUp)
+    
+    dm_1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    message_2 = message_senddm_v1(user1[token], dm_1[dmID], "Goodbye")
+    
+    #Not a member of DM 
+    with pytest.raises(AccessError):
+        message_unreact_v1(user3[token], message_2[mID], thumbsUp)
+
+#Test that message_unreact works for a message in a channel
+def test_message_unreact_v1_valid_channel(user1, user2):
+    channel_1 = src.channels.channels_create_v1(user1[token], 'Channel', False)
+    src.channel.channel_invite_v1(user1[token], channel_1[cID], user2[AuID])
+    message_1 = message_send_v1(user1[token], channel_1[cID], "Hello")
+    message_react_v1(user1[token], message_1[mID], thumbsUp)
+    message_unreact_v1(user1[token], message_1[mID], thumbsUp)
+    
+    #Test 1: check that react_1 no longer comes up in "messages"
+    result = src.channel.channel_messages_v1(user1[token], channel_1[cID], 0)
+    
+    #Create for loop that finds message looking for 
+    for current_message in result['messages']: 
+        if current_message[mID] == message_1[mID]: 
+            #Now that the message is found, can assert that our user has reacted to it  
+            for current_react in current_message['reacts']: 
+                if current_react['react_id'] == thumbsUp:
+                    assert user1[AuID] not in current_react['u_ids']
+                assert current_react['is_this_user_reacted'] == False 
+                
+#Test that message_unreact works for a dm 
+def test_message_unreact_v1_valid_dm(user1, user2):
+    dm_1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
+    message_1 = message_senddm_v1(user1[token], dm_1[dmID], "Goodbye")
+    message_react_v1(user1[token], message_1[mID], thumbsUp)
+    message_unreact_v1(user1[token], message_1[mID], thumbsUp)
+    
+    #Test 1: check that react no longer comes up in "messages"
+    result = src.dm.dm_messages_v1(user1[token], dm_1[dmID], 0)
+    #Create for loop that finds message looking for 
+    for current_message in result['messages']: 
+        if current_message[mID] == message_1[mID]: 
+            #Now that the message is found, can assert that our user has reacted to it       
+            for current_react in current_message['reacts']: 
+                if current_react['react_id'] == thumbsUp:
+                    assert user1[AuID] not in current_react['u_ids'] 
+                assert current_react['is_this_user_reacted'] == False
 #* Testing a message that is to be sent later isn't prematurely sent
 def test_message_sendlater_is_sent_later(user1, user2):
     # User1 creates channel
@@ -650,7 +840,6 @@ def test_message_sendlater_long_messages(user1, user2):
         tooLong += ":("
     with pytest.raises(InputError):
         src.message.message_sendlater_v1(user1[token], channel1[cID], tooLong, sendTime)
-
 
 #* Testing a message that is to be sent later isn't too long
 def test_message_sendlaterdm_long_messages(user1, user2):

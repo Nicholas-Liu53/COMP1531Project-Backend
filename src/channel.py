@@ -199,8 +199,13 @@ def channel_messages_v1(token, channel_id, start):
     for objects in data['messages_log']:
         if channel_id == objects[cID]:
             current_message = objects.copy()
-            del current_message[cID]
-            del current_message[dmID]
+            del current_message['channel_id']
+            del current_message['dm_id']
+            for current_react in current_message['reacts']: 
+                if auth_user_id in current_react['u_ids']:
+                    current_react['is_this_user_reacted'] = True 
+                else:
+                    current_react['is_this_user_reacted'] = False
             messages.insert(0,current_message)
 
     #Reverse list such that the we have the newest messages at the start and oldest at the end 

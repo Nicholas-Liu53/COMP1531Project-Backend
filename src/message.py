@@ -1,6 +1,6 @@
 from src.error import AccessError, InputError
 import src.auth
-from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications, generate_new_message_id
+from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications, push_reacted_notifications, generate_new_message_id
 from datetime import timezone, datetime
 import json
 import threading, time
@@ -20,6 +20,8 @@ handle    = 'handle_string'
 dmID      = 'dm_id'
 seshID    = 'session_id'
 mID       = 'message_id'
+rID       = 'react_id'
+thumbsUp  = 1 
 
 def message_send_v1(token, channel_id, message):
     '''
@@ -425,6 +427,131 @@ def message_unpin_v1(token, message_id):
                 return {}
     raise InputError
 
+#Iteration 3    
+def message_react_v1(token, message_id, react_id):
+    '''
+    For a given channel or DM, add a "react" to a particular message 
+    NOTE: Assuming that the only react ID that is valid is 1: Thumbs up. 
+
+    Arguments:
+        token        (str) - The JWT containing user_id and session_id of the user that is to send the message
+        message_id   (int) - The id of the message that the user wants to react to 
+        react_id     (int) - The type of react to the message 
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When message_id is not a valid message within a channel or DM that authorised user has joined 
+                            2) react_id is not a valid React ID
+                            3) Message with message_id already contains an active react with the same react_id from authorised user 
+                            
+        AccessError - Occurs when:
+                            1) The authorised user is not a member of channel or DM that the message is in 
+
+    Return Value:
+        Returns an empty dictionary {}
+    '''
+ 
+    
+    auth_user_id, _ = decode(token)
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+    
+    if react_id != thumbsUp:
+        raise InputError
+        
+    message_found = False 
+    
+    for message in data['messages_log']: 
+        if message[mID] == message_id:
+            #AccessError if user not a part of channel or DM
+            if message[dmID] == -1 and auth_user_id not in get_channel(message[cID])[allMems]:
+                raise AccessError
+            elif message[cID] == -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
+                raise AccessError
+            message_found = True 
+            #Case 1: First react for that message 
+            if len(message['reacts']) == 0:
+                result = {
+                    'react_id': react_id,
+                    'u_ids': [auth_user_id],
+                    'is_this_user_reacted': None,
+                
+                    }
+                message['reacts'].append(result)
+            #Case 2: Reacting to a message which already has a react
+            elif len(message['reacts']) == 1:
+                for current_react in message['reacts']:
+                    if current_react[rID] == react_id: 
+                        if auth_user_id in current_react['u_ids']:
+                            raise InputError
+                        else:
+                            current_react['u_ids'].append(auth_user_id)
+        
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)  
+            #Now can push to notifs 
+            #If message in channel 
+            if message['channel_id'] != -1:  
+                push_reacted_notifications(auth_user_id, message['u_id'], message[cID], -1)
+            #If message is in DM
+            else: 
+                push_reacted_notifications(auth_user_id, message['u_id'], -1, message[dmID])
+    
+    #If gets to end of messages log without finding message with same mID then mID not valid  
+    if message_found == False:
+        raise InputError
+    
+    return {}
+
+def message_unreact_v1(token, message_id, react_id):
+    '''
+    For a given channel or DM, remove a "react" to a particular message 
+    NOTE: Assuming that the only react ID that is valid is 1: Thumbs up and that notification for initial react will not be deleted 
+
+    Arguments:
+        token        (str) - The JWT containing user_id and session_id of the user that is to send the message
+        message_id   (int) - The id of the message that the user wants to react to 
+        react_id     (int) - The type of react to the message 
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When message_id is not a valid message within a channel or DM that authorised user has joined 
+                            2) react_id is not a valid React ID
+                            3) Message with message_id does not contain an active react with the same react_id from authorised user 
+                            
+        AccessError - Occurs when:
+                            1) The authorised user is not a member of channel or DM that the message is in 
+
+    Return Value:
+        Returns an empty dictionary {}
+    '''
+    
+    auth_user_id, _ = decode(token)
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+    
+    if react_id != thumbsUp:
+        raise InputError
+            
+    for message in data['messages_log']: 
+        if message[mID] == message_id:
+            #AccessError if user not a part of channel or DM
+            if message[dmID] == -1 and auth_user_id not in get_channel(message[cID])[allMems]:
+                raise AccessError
+            elif message[cID] == -1 and auth_user_id not in get_dm(message[dmID])[allMems]:
+                raise AccessError           
+           
+            #For unreact, delete the list with same react_id, if its not found then the message doesn't have a react and thus raises InputError
+            for react in range(len(message['reacts'])):
+                if message['reacts'][react]['react_id'] == react_id:
+                    message['reacts'].pop(react)
+                    with open('data.json', 'w') as FILE:
+                        json.dump(data, FILE)     
+                    return {} 
+            
+    #If gets to here means message not found or react not found 
+    raise InputError
+    
 def message_sendlater_v1(token, channel_id, message, time_sent):
     # Decode the token
     auth_user_id, _ = decode(token)
@@ -492,6 +619,20 @@ def sendlater_send(token, channel_id, message, time_sent, newID):
         }
     )
 
+    updated_num_message = data['dreams_analytics']['messages_exist'][-1]['num_messages_exist'] + 1
+    data['dreams_analytics']['messages_exist'].append({
+        'num_messages_exist': updated_num_message,
+        'time_stamp': int(datetime.now().strftime("%s"))
+    })
+
+    messageSentPrev = data["user_analytics"][f"{auth_user_id}"]['messages_sent'][-1]["num_messages_sent"]
+    data["user_analytics"][f"{auth_user_id}"]['messages_sent'].append(
+        {
+            "num_messages_sent": messageSentPrev + 1,
+            "time_stamp": int(datetime.now().strftime("%s"))
+        }
+    )  
+
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
 
@@ -518,6 +659,20 @@ def sendlaterdm_send(token, dm_id, message, time_sent, newID):
             'is_pinned': False,
         }
     )
+
+    updated_num_message = data['dreams_analytics']['messages_exist'][-1]['num_messages_exist'] + 1
+    data['dreams_analytics']['messages_exist'].append({
+        'num_messages_exist': updated_num_message,
+        'time_stamp': int(datetime.now().strftime("%s"))
+    })
+
+    messageSentPrev = data["user_analytics"][f"{auth_user_id}"]['messages_sent'][-1]["num_messages_sent"]
+    data["user_analytics"][f"{auth_user_id}"]['messages_sent'].append(
+        {
+            "num_messages_sent": messageSentPrev + 1,
+            "time_stamp": int(datetime.now().strftime("%s"))
+        }
+    )  
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)

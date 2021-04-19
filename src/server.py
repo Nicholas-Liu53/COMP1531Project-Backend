@@ -4,7 +4,7 @@ from flask import Flask, request
 from flask_cors import CORS
 from src.error import InputError
 from src import config
-import src.auth, src.admin, src.other, src.dm, src.notifications, src.channel, src.channels, src.message, src.user
+import src.auth, src.admin, src.other, src.dm, src.notifications, src.channel, src.channels, src.message, src.user, src.standup
 from flask_mail import Mail, Message
 
 def defaultHandler(err):
@@ -194,6 +194,17 @@ def message_pin():
 def message_unpin():
     payload = request.get_json()
     return src.message.message_unpin_v1(payload['token'], payload['message_id'])
+    
+@APP.route("/message/react/v1", methods=['POST'])
+def message_react():
+    payload = request.get_json()
+    return src.message.message_react_v1(payload['token'], payload['message_id'], payload['react_id'])
+    
+@APP.route("/message/unreact/v1", methods=['POST'])
+def message_unreact():
+    payload = request.get_json()
+    return src.message.message_unreact_v1(payload['token'], payload['message_id'], payload['react_id'])
+    
 
 #* *********************************************DM ROUTES*****************************************
 @APP.route("/dm/details/v1", methods=['GET'])
@@ -230,6 +241,24 @@ def dm_leave():
 def dm_messages():
     token, dm_id, start = request.args.get('token'), request.args.get('dm_id'), request.args.get('start')
     return src.dm.dm_messages_v1(token, int(dm_id), int(start))
+    
+    
+    
+#* ***************************************************STANDUP ROUTES***********************************************
+@APP.route("/standup/start/v1", methods=['POST'])
+def standup_start():
+    payload = request.get_json()
+    return src.standup.standup_start_v1(payload['token'], payload['channel_id'], payload['length'])
+
+@APP.route("/standup/active/v1", methods=['GET'])
+def standup_active():
+    token, channel_id = request.args.get('token'), request.args.get('channel_id')
+    return src.standup.standup_active_v1(token, int(channel_id))
+
+@APP.route("/standup/send/v1", methods=['POST'])
+def standup_send():
+    payload = request.get_json()
+    return src.standup.standup_send_v1(payload['token'], payload['channel_id'], payload['message'])
 
 #* ***************************************************USER ROUTES***********************************************
 @APP.route("/user/profile/v2", methods=['GET'])
