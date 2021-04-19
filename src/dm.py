@@ -388,7 +388,13 @@ def dm_messages_v1(token, dm_id, start):
         if dm_id == objects[dmID]:
             current_DM = objects.copy()
             del current_DM[cID]
-            del current_DM[dmID]
+            del current_DM['dm_id']
+            for current_react in current_DM['reacts']: 
+                if auth_user_id in current_react['u_ids']:
+                    current_react['is_this_user_reacted'] = True 
+                else:
+                    current_react['is_this_user_reacted'] = False
+            
             messages.insert(0,current_DM)
 
     #Reverse list such that the we have the newest messages at the start and oldest at the end 

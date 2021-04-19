@@ -37,7 +37,9 @@ def clear_v1():
             'dms': [],
             'messages_log': [],
             'notifs': {},
-            'user_analytics': {}
+            'user_analytics': {},
+            'stand_ups': [],
+            'reset_codes': []
         }, FILE)
 
 def search_v1(token, query_str):
@@ -239,6 +241,25 @@ def push_added_notifications(auth_user_id, user_id, channel_id, dm_id):
     data['notifs'][f"{user_id}"].insert(0, notification)
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
+        
+def push_reacted_notifications(auth_user_id, user_id, channel_id, dm_id):
+    users_handle = get_user(auth_user_id)['handle_str']
+    if channel_id != -1:
+        channelDMname = get_channel(channel_id)['name']
+    else:
+        channelDMname = get_dm(dm_id)['name']
+    #Checking if user_id is valid
+    get_user(user_id)
+    notification = {
+        'channel_id': channel_id,
+        'dm_id': dm_id,
+        'notification_message': f"{users_handle} reacted to your message in {channelDMname}",
+    }
+    data = json.load(open('data.json', 'r'))
+    data['notifs'][f"{user_id}"].insert(0, notification)
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+        
 
 def check_removed(u_id):
     data = json.load(open('data.json', 'r'))
@@ -259,3 +280,7 @@ def generate_new_message_id():
         except:
             status = True
     return newID
+
+def generate_reset_code():
+    reset_code = getrandbits(32)
+    return reset_code

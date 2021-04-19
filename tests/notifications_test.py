@@ -1,5 +1,5 @@
 import pytest
-from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_share_v1, message_senddm_v1
+from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_share_v1, message_senddm_v1, message_react_v1
 from src.error import InputError, AccessError
 import src.channel, src.channels, src.auth
 from src.other import get_user, get_channel, get_dm, clear_v1, SECRET
@@ -16,6 +16,8 @@ notifs = 'notifications'
 AuID = 'auth_user_id'
 dmID = 'dm_id'
 handle = 'handle_str'
+mID = 'message_id'
+thumbsUp = 1
 
 @pytest.fixture
 def user1():
@@ -205,3 +207,32 @@ def test_dm_edit_notif(user1, user2):
         dmID: dm1[dmID],
         nMess : f"{get_user(user1[AuID])['handle_str']} tagged you in {get_dm(dm1['dm_id'])['name']}: Yo {tagMessage}",
     } in notifications_get_v1(user2[token])[notifs]
+    
+#Test that notification is received when there is a react to a message in a channel 
+def test_react_notif_in_channel(user1, user2):
+    channel1 = src.channels.channels_create_v1(user1[token], 'Hello', True)
+    src.channel.channel_invite_v1(user1[token], channel1[cID], user2[AuID])
+    message1 =  message_send_v1(user1[token], channel1[cID], "Good-bye")
+    message_react_v1(user2[token], message1[mID], thumbsUp)
+    
+    assert {
+        cID: channel1[cID],
+        dmID: -1, 
+        nMess: f"{get_user(user2[AuID])['handle_str']} reacted to your message in {get_channel(channel1['channel_id'])['name']}"
+    } in notifications_get_v1(user1[token])[notifs]
+    
+    
+'''
+#Test that notification is received when there is a react to a message in a dm
+def test_react_notif_in_dm(user1, user2):
+    dm1 = dm_create_v1(user1[token], [user2[AuID]])
+    message1 =  message_senddm_v1(user1[token], dm1[dmID], "Hello")
+    message_react_v1(user2[token], message1[mID], thumbsUp)
+    
+    assert {
+        cID: -1,
+        dmID: dm1[dmID],
+        nMess: f"{get_user(user2[AuID])['handle_str']} reacted to your message in {get_dm(dm1['dm_id'])['name']}",
+    } in notifications_get_v1(user1[token])[notifs]
+'''
+

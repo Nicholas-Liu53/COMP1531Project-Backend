@@ -3,10 +3,11 @@ from src.error import AccessError, InputError
 import re
 from jwt import encode
 import json
-from src.other import SECRET, decode
+from src.other import SECRET, generate_reset_code, get_user, decode
 import hashlib
 from datetime import datetime
 from src.user import users_stats_v1
+from flask_mail import Message
 
 def auth_register_v1(email, password, name_first, name_last):
     """ With the inputted data (email, password, name_first, name_last), checks whether the format of the data are valid. 
@@ -295,5 +296,40 @@ def auth_logout_v1(token):
                     json.dump(data, FILE)
                 return {'is_success': True}
 
-    return {'is_success': False}
+def auth_passwordreset_request_v1(email):
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+    for user in data['users']:
+        if user['email'] == email:
+            reset_code = generate_reset_code()
+            msg = Message('UNSW Dreams Password Reset', sender = 'W13BCactus@gmail.com', recipients = [f"{email}"])
+            msg.body = f"We've received your request for a password reset. Please use the following code to reset your password: \n {reset_code}"
+            for index, code in enumerate(data['reset_codes']):
+                if user['u_id'] == code['u_id']:
+                    data['reset_codes'].pop(index)
+            data['reset_codes'].append({
+                'u_id': user['u_id'],
+                'reset_code': reset_code
+            })
+            with open('data.json', 'w') as FILE:
+                json.dump(data, FILE)
+            return msg
+    raise InputError
 
+def auth_passwordreset_reset_v1(reset_code, new_password):
+    if len(new_password) < 6:
+        raise InputError
+    
+    with open('data.json', 'r') as FILE:
+        data = json.load(FILE)
+
+    for index, code in enumerate(data['reset_codes']):
+        if reset_code == code['reset_code']:
+            data['reset_codes'].pop(index)
+            for user in data['users']:
+                if user['u_id'] == code['u_id']:
+                    user['password'] = hashlib.sha256(new_password.encode()).hexdigest()
+                    with open('data.json', 'w') as FILE:
+                        json.dump(data, FILE)
+                    return {}
+    raise InputError
