@@ -296,8 +296,8 @@ def test_auth_logout_v1_valid():
     token_1 = user_data_1['token']
     user_data_2 = auth_login_v2("caricoleman@gmail.com", "1234567")
     token_2 = user_data_2['token']
-    user_data_3 = auth_login_v2("caricoleman@gmail.com", "1234567")
-    token_3 = user_data_2['token']
+    auth_login_v2("caricoleman@gmail.com", "1234567")
+    user_data_2['token']
     
     assert auth_logout_v1(token_1) == {'is_success': True}
     
