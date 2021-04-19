@@ -50,7 +50,7 @@ def auth_login():
     payload = request.get_json()
     return src.auth.auth_login_v2(payload['email'], payload['password'])
 
-@APP.route("/auth/logout/v1", methods=['DELETE'])
+@APP.route("/auth/logout/v1", methods=['POST'])
 def auth_logout():
     payload = request.get_json()
     return src.auth.auth_logout_v1(payload['token'])
