@@ -1,10 +1,9 @@
 #File for implementation of standup functions 
 from src.error import AccessError, InputError
-from src.other import decode, get_channel, generate_new_message_id, get_user, data_load
+from src.other import decode, get_channel, generate_new_message_id, get_user, data_load, push_tagged_notifications
 from datetime import datetime
 import json
 import threading, time
-
 
 AuID     = 'auth_user_id'
 uID      = 'u_id'
@@ -140,7 +139,10 @@ def stand_up_push(auth_user_id, channel_id):
 
     Arguments:
         auth_user_id        (int) - The ID of the authorised user
-        channel_id   (int) - The id of the channel that user wants to look for a standup in 
+        channel_id   (int) - The id of the channel that user wants to look for a standup in
+
+    Return Value:
+        No return values
     '''
     data = data_load()
 
@@ -183,3 +185,6 @@ def stand_up_push(auth_user_id, channel_id):
 
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
+
+        #* Push notifications if anyone is tagged
+    push_tagged_notifications(auth_user_id, channel_id, -1, message)

@@ -2,8 +2,8 @@
 import pytest
 from src.standup import standup_start_v1, standup_active_v1, standup_send_v1
 from src.error import InputError, AccessError
-from src.other import SECRET, clear_v1
-import src.channel
+from src.other import SECRET, clear_v1, get_user
+import src.channel, src.notifications
 from src.channel import channel_messages_v1
 import jwt
 import time
@@ -143,3 +143,11 @@ def test_standup_send_v1(user1, user2, user3):
     assert len(result2['messages']) == 1
     for messages in result2['messages']: 
         assert "user1: Hello\nuser2: Goodbye" in messages['message']
+
+def test_standup_tag(user1):
+    channel = src.channels.channels_create_v1(user1[token], 'Marms', False)
+    standup_start_v1(user1[token], channel[cID], standard_length)
+    standup_send_v1(user1[token], channel[cID], f"Hello @{get_user(user1['auth_user_id'])['handle_str']}")
+    time.sleep(standard_length + 2)
+
+    assert len(src.notifications.notifications_get_v1(user1[token])['notifications']) == 1

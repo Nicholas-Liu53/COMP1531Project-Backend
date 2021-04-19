@@ -19,7 +19,7 @@ def notifications_get_v1(token):
     auth_user_id, _ = decode(token)
 
     data = data_load()
-
+    print(data_load()['notifs'][f"{auth_user_id}"])
     notifications = data['notifs'][f"{auth_user_id}"][0:20]
 
     return {
