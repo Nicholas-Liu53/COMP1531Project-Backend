@@ -1,6 +1,6 @@
 #File for implementation of standup functions 
 from src.error import AccessError, InputError
-from src.other import decode, get_channel, generate_new_message_id, get_user
+from src.other import decode, get_channel, generate_new_message_id, get_user, data_load
 from datetime import datetime
 import json
 import threading, time
@@ -40,8 +40,7 @@ def standup_start_v1(token, channel_id, length):
     elif standup_active_v1(token, channel_id)['is_active']:
         raise InputError
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     now = datetime.now()
     time_finish = int(now.strftime("%s")) + length
@@ -79,8 +78,7 @@ def standup_active_v1(token, channel_id):
     _, _ = decode(token)
     #* If Channel ID is not a valid channel, then an InputError is raised
     get_channel(channel_id)
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
     
     for stand_up in data['stand_ups']:
         if channel_id == stand_up[cID]:
@@ -122,8 +120,7 @@ def standup_send_v1(token, channel_id, message):
     elif len(message) > 1000:
         raise InputError
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     for stand_up in data['stand_ups']:
         if channel_id == stand_up[cID]:
@@ -145,8 +142,7 @@ def stand_up_push(auth_user_id, channel_id):
         auth_user_id        (int) - The ID of the authorised user
         channel_id   (int) - The id of the channel that user wants to look for a standup in 
     '''
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     message = ''
     for index, stand_up in enumerate(data['stand_ups']):
