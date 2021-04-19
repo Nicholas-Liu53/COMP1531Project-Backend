@@ -302,7 +302,6 @@ def channel_join_v1(token, channel_id):
     Return Value:
         Returns an empty list regardless of conditions :)
     '''
-    auth_user_id, _ = decode(token)
 
     # Find the channel in the database
     channelFound = False
@@ -319,6 +318,7 @@ def channel_join_v1(token, channel_id):
             channelFound = True
         i += 1
 
+    auth_user_id, _ = decode(token)
     i -= 1      # Undo extra increment
 
     # Time to find the user details
