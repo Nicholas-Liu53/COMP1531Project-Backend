@@ -80,6 +80,13 @@ In src/auth.py,
         - N/A
     For auth/logout/v1:
         - Can't log out if you haven't logged in
+    For auth/passwordreset/request/v1:
+        - No time limit for the reset code
+        - When you request multiple times, only the most recent is valid
+    For auth/passwordreset/reset/v1:
+        - You can reset the old password to an identical new password
+        - Reset code is type int
+        - When resetting a password, all sessions of the user are invalidated
 
 In src/channel.py,
     For channel/invite/v2:
@@ -148,6 +155,15 @@ In src/message.py,
         - Assumes that channel_id and dm_id cannot be -1 simultaneously
     For message/senddm/v1:
         - An invalid dm_id raise an input error
+    For message/sendlater/v1 and message/senddmlater/v1:
+        - Uncapped time for a message sent later
+        - Cannot cancel a message sent for later
+        - Can still tag
+        - The message can still be editted, removed etc.
+    For message/react/v1:
+        - The only react ID that is valid is 1: Thumbs up
+    For message/unreact/v1:
+        - The only react ID that is valid is 1: Thumbs up and that notification for initial react will not be deleted when message is unreacted to
 
 In src/notifications.py,
     For notifications/get/v1:
@@ -172,3 +188,24 @@ In src/user.py,
     For users/all/v1:
         - Removed users are still in the list
         - Anyone can call this route aside from removed users
+    For user/stats/v1 and users/stats/v1:
+        - Removed users do not affect the calculations of the time-series data and rates
+        - Stats only commence when the first user registers into the Dream
+        - No negative stats
+    For user/uploadphoto/v1:
+        - Does not accept local jpgs and only takes jpgs from http urls
+        - The resolution of the image does not matter
+        - If the coordinates of the start and end of the crop are switched, raises InputError
+        - Can reupload same photo
+
+In src/standup.py
+    For standup/start/v1:
+        - A stand-up has no time restrictions
+        - The stand-up message sent at the end can still be editted, removed etc.
+    For standup/active/v1:
+        - Cannot be interrupted once it is active
+        - Authorised user does not have to be in channel to call standup_active and see details of channel
+    For standup/send/v1:
+        - Can tag people in the stand-up message and a notification will still be sent
+        - Notification is sent from the person who started the stand-up
+        - Normal channel messages cannot be sent during this time
