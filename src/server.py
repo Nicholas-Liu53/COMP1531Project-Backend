@@ -50,7 +50,7 @@ def auth_login():
     payload = request.get_json()
     return src.auth.auth_login_v2(payload['email'], payload['password'])
 
-@APP.route("/auth/logout/v1", methods=['DELETE'])
+@APP.route("/auth/logout/v1", methods=['POST'])
 def auth_logout():
     payload = request.get_json()
     return src.auth.auth_logout_v1(payload['token'])
@@ -228,7 +228,7 @@ def user_setemail():
     print(payload['token'])
     return src.user.user_setemail_v2(payload['token'], payload['email'])
 
-@APP.route("/user/profile/sethandle/v2", methods=['PUT'])
+@APP.route("/user/profile/sethandle/v1", methods=['PUT'])
 def user_sethandle():
     payload = request.get_json()
     return src.user.user_sethandle_v2(payload['token'], payload['handle_str'])

@@ -166,8 +166,8 @@ def message_remove_v1(token, message_id):
             "num_messages_sent": messageSentPrev - 1,
             "time_stamp": int(datetime.now().strftime("%s"))
         }
-    )   
-
+    )
+    
     with open('data.json', 'w') as FILE:
         json.dump(data, FILE)
 
@@ -380,10 +380,10 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
 
     if dm_id == -1:
         push_tagged_notifications(auth_user_id, channel_id, -1, newMessage)
-    else: 
+    elif channel_id == -1: 
         push_tagged_notifications(auth_user_id, -1, dm_id, newMessage)
 
-    return shared_message_id
+    return {"shared_message_id" : shared_message_id["message_id"]}
 
 def message_pin_v1(token, message_id):
     auth_user_id, _ = decode(token)
