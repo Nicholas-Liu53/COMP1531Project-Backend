@@ -292,8 +292,6 @@ def auth_logout_v1(token):
                     json.dump(data, FILE)
                 return {'is_success': True}
 
-    return {'is_success': False}
-
 def auth_passwordreset_request_v1(email):
     with open('data.json', 'r') as FILE:
         data = json.load(FILE)

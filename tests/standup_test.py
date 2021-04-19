@@ -141,6 +141,4 @@ def test_standup_send_v1(user1, user2, user3):
 
     assert len(result2['messages']) == 1
     for messages in result2['messages']: 
-        assert "user1: Hello\nuser2: Goodbye" in messages['message'] 
-    
-
+        assert "user1: Hello\nuser2: Goodbye" in messages['message']
