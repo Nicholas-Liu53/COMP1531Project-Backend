@@ -553,6 +553,29 @@ def message_unreact_v1(token, message_id, react_id):
     raise InputError
     
 def message_sendlater_v1(token, channel_id, message, time_sent):
+    '''
+    Takes in a user's token, a channel's id, a string and a unix timestamp
+    and sends a message at that given unix timestamp from that user into the channel.
+    --> Note: Messages cannot be more 1000 chars
+
+    Arguments:
+        token        (str)   - The JWT containing user_id and session_id of the user that is to send the message
+        channel_id   (int)   - The id of the channel that the message is being sent to
+        message      (str)   - The string of the message being sent
+        time_sent    (float) - The Unix Timestamp of which the message is to be sent
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When the user id doesn't belong to any user
+                            2) The channel_id doesn't belong to any channel
+                            3) The message is too long (exceeds 1000 chars)
+        AccessError - Occurs when:
+                            1) When the user's token contains wrong session id
+                            2) The token doesn't belong to a member of the channel
+
+    Return Value:
+        Returns a dictionary with key 'message_id' to the new message's message_id
+    '''
     # Decode the token
     auth_user_id, _ = decode(token)
 
@@ -576,6 +599,29 @@ def message_sendlater_v1(token, channel_id, message, time_sent):
     }
 
 def message_sendlaterdm_v1(token, dm_id, message, time_sent):
+    '''
+    Takes in a user's token, a dm's id, a string and a unix timestamp
+    and sends a message at that given unix timestamp from that user into the channel.
+    --> Note: Messages cannot be more 1000 chars
+
+    Arguments:
+        token        (str)   - The JWT containing user_id and session_id of the user that is to send the message
+        dm_id        (int)   - The id of the dm that the message is being sent to
+        message      (str)   - The string of the message being sent
+        time_sent    (float) - The Unix Timestamp of which the message is to be sent
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When the user id doesn't belong to any user
+                            2) The dm_id doesn't belong to any dm
+                            3) The message is too long (exceeds 1000 chars)
+        AccessError - Occurs when:
+                            1) When the user's token contains wrong session id
+                            2) The token doesn't belong to a member of the dm
+
+    Return Value:
+        Returns a dictionary with key 'message_id' to the new message's message_id
+    '''
     # Decode the token
     auth_user_id, _ = decode(token)
 
@@ -599,6 +645,25 @@ def message_sendlaterdm_v1(token, dm_id, message, time_sent):
     }
 
 def sendlater_send(token, channel_id, message, time_sent, newID):
+    '''
+    HELPER FUNCTION FOR: message_sendlater_v1
+    Takes in a user's token, a channel's id, a string, a unix timestamp and a new message ID
+    and executes the actual sending of the message in message_sendlater_v1
+
+    Arguments:
+        token        (str)   - The JWT containing user_id and session_id of the user that is to send the message
+        channel_id   (int)   - The id of the channel that the message is being sent to
+        message      (str)   - The string of the message being sent
+        time_sent    (float) - The Unix Timestamp of which the message is to be sent
+        newID        (int)   - The new message ID of the message (already generated in message_sendlater_v1)
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When the user id doesn't belong to any user
+
+    Return Value:
+        Returns a dictionary with key 'message_id' to the new message's message_id
+    '''
     # Decode the token
     auth_user_id, _ = decode(token)
 
@@ -640,6 +705,25 @@ def sendlater_send(token, channel_id, message, time_sent, newID):
     push_tagged_notifications(auth_user_id, channel_id, -1, message)
 
 def sendlaterdm_send(token, dm_id, message, time_sent, newID):
+    '''
+    HELPER FUNCTION FOR: message_sendlaterdm_v1
+    Takes in a user's token, a dm's id, a string, a unix timestamp and a new message ID
+    and executes the actual sending of the message in message_sendlaterdm_v1
+
+    Arguments:
+        token        (str)   - The JWT containing user_id and session_id of the user that is to send the message
+        dm_id        (int)   - The id of the dm that the message is being sent to
+        message      (str)   - The string of the message being sent
+        time_sent    (float) - The Unix Timestamp of which the message is to be sent
+        newID        (int)   - The new message ID of the message (already generated in message_sendlater_v1)
+
+    Exceptions:
+        InputError - Occurs when:
+                            1) When the user id doesn't belong to any user
+
+    Return Value:
+        Returns a dictionary with key 'message_id' to the new message's message_id
+    '''
     # Decode the token
     auth_user_id, _ = decode(token)
 
