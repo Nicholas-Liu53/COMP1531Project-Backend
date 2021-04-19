@@ -8,7 +8,7 @@ __pycache__/
 
 # Data files
 data.json
-src/static
+src/static/
 
 # Misc Files
 .idea
