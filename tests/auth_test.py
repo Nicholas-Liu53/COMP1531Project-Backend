@@ -6,6 +6,8 @@ from src.user import user_profile_v2
 import src.channel, src.channels
 from src.other import clear_v1, SECRET, check_session, get_user, get_reset_code
 from jwt import encode
+from src.config import url
+
 # tests the return value of the auth login of a valid user
 def test_auth_login_valid():
     clear_v1()
@@ -119,7 +121,8 @@ def test_auth_register_valid_same_name():
             'email': "caricoleman@hotmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman0'
+            'handle_str': 'caricoleman0',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -130,7 +133,8 @@ def test_auth_register_valid_same_name():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -185,7 +189,8 @@ def test_auth_register_valid_long_name():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cariiiiiiiiiiiiiii', 
             'name_last': 'coleman', 
-            'handle_str': 'cariiiiiiiiiiiiiiico'
+            'handle_str': 'cariiiiiiiiiiiiiiico',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -202,7 +207,8 @@ def test_auth_register_valid_long_first_name():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cariiiiiiiiiiiiiiiiiii', 
             'name_last': 'coleman', 
-            'handle_str': 'cariiiiiiiiiiiiiiiiii'
+            'handle_str': 'cariiiiiiiiiiiiiiiiii',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -223,7 +229,8 @@ def test_auth_register_valid_long_name_multiple():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cariiiiiiiiiiiiiii', 
             'name_last': 'coleman', 
-            'handle_str': 'cariiiiiiiiiiiiiiico'
+            'handle_str': 'cariiiiiiiiiiiiiiico',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -234,7 +241,8 @@ def test_auth_register_valid_long_name_multiple():
             'email': "caricoleman@hotmail.com", 
             'name_first': 'cariiiiiiiiiiiiiii', 
             'name_last': 'coleman', 
-            'handle_str': 'cariiiiiiiiiiiiiiico0'
+            'handle_str': 'cariiiiiiiiiiiiiiico0',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -289,6 +297,8 @@ def test_auth_logout_v1_valid():
     token_1 = user_data_1['token']
     user_data_2 = auth_login_v2("caricoleman@gmail.com", "1234567")
     token_2 = user_data_2['token']
+    auth_login_v2("caricoleman@gmail.com", "1234567")
+    user_data_2['token']
     
     assert auth_logout_v1(token_1) == {'is_success': True}
     

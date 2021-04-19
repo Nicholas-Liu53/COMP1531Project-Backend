@@ -1,8 +1,13 @@
-from src.error import AccessError, InputError
+from src.error import InputError
 import re
 from src.other import decode, check_session, get_user
 import json
-from datetime import timezone, datetime
+import urllib.request
+import requests
+from PIL import Image
+from src.config import url
+
+
 
 def user_profile_v2(token, u_id):
     """ Provided the u_id of an existing user with a valid token, returns information about the user 
@@ -182,6 +187,26 @@ def users_all(token):
 
 def user_stats_v1(token):
 
+    '''
+    Fetches the required statistics about this user's use of UNSW Dreams. The statistics are time-series data types for:
+    - The number of channels the user is a part of
+    - The number of DMs the user is a part of
+    - The number of messages the user has sent.
+
+    This will also include the involvement rate of the user 
+
+        Arguments:
+            token (str): The token containing the user_id and session_id of user that called the function
+
+        Return Values:
+            returns a dictionary containing user_stats which includes the user's statistics for which are:
+            - The number of channels the user is a part of
+            - The number of DMs the user is a part of
+            - The number of messages the user has sent.
+            This will also include the involvement rate of the user which is defined by this pseudocode: 
+            sum(num_channels_joined, num_dms_joined, num_msgs_sent)/sum(num_dreams_channels, num_dreams_dms, num_dreams_msgs)
+    '''
+
     data = json.load(open('data.json', 'r'))
 
     auth_user_id, _ = decode(token)
@@ -200,6 +225,26 @@ def user_stats_v1(token):
     }
 
 def users_stats_v1(token):
+    
+    '''
+    Fetches the required statistics about the use of UNSW Dreams, The statistics are time-series data types for:
+    - The number of channels that exist currently
+    - The number of DMs that exist currently
+    - The number of messages that exist currently.
+
+    This will also include the utilization rate of Dreams
+
+        Arguments:
+            token (str): The token containing the user_id and session_id of user that called the function
+
+        Return Values:
+            returns a dictionary containing dreams_stats which includes some statistics for which are:
+            - The number of channels that exist currently
+            - The number of DMs that exist currently
+            - The number of messages that exist currently.
+            This will also include the utilization rate which is defined by this pseudocode: 
+            num_users_who_have_joined_at_least_one_channel_or_dm / total_num_users
+    '''
     data = json.load(open('data.json', 'r'))
 
     decode(token)
@@ -224,3 +269,64 @@ def users_stats_v1(token):
     return { 
         "dreams_stats": dream_stats
     }
+
+def user_profile_uploadphoto_v1(token, img_url,x_start,y_start,x_end,y_end):
+    
+    ''' 
+    Given an img url from the internet and the starting coordinates and ending coordinates of the image's pixel,
+    crops the img and uploads it as the user's new profile picture.
+        Arguments:
+            token (str): The token containing the user_id and session_id of user that called the function
+            img_url (str): the img_url of the desired profile photo to upload
+
+        Exceptions:
+            InputError : img_url returns an HTTP status other than 200.
+            InputError : any of x_start, y_start, x_end, y_end are not within the dimensions of the image at the URL.
+            InputError : Image uploaded is not a JPG
+            
+        Return Value:
+            Returns an empty dictionary 
+    '''
+
+    auth_user_id, _ = decode(token)
+
+    # Fetch image via URL
+
+    try:  
+        requests.get(img_url).status_code
+    except Exception as e:
+        raise InputError from e
+
+    image_formats = ("image/jpeg", "image/jpg")
+    if requests.head(img_url).headers["content-type"] not in image_formats:
+        raise InputError
+        
+    urllib.request.urlretrieve(img_url, f"src/static/{auth_user_id}.jpg")
+
+    # Cropping image
+    imageObject = Image.open(f"src/static/{auth_user_id}.jpg")
+
+    width, height = imageObject.size
+
+
+    if x_end < x_start or y_end < y_start:
+        raise InputError
+
+    if x_start < 0 or y_start < 0 or  x_start > width or  y_start > height:
+        raise InputError
+    elif x_end < 0 or y_end < 0 or  x_end > width or  y_end > height:
+        raise InputError
+    
+    imageObject.crop((x_start, y_start, x_end, y_end)).save(f"src/static/{auth_user_id}.jpg")
+
+    # Serving image
+    
+    data = json.load(open('data.json', 'r'))
+    for user in data['users']:
+        if user['u_id'] == auth_user_id:
+            user['profile_img_url'] = f"{url}static/{auth_user_id}.jpg"
+
+    with open('data.json', 'w') as FILE:
+        json.dump(data, FILE)
+
+    return {}

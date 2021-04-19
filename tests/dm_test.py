@@ -5,6 +5,7 @@ from src.message import message_senddm_v1, message_react_v1
 from src.other import SECRET
 import src.auth, src.channel, src.other
 import jwt
+from src.config import url
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
@@ -53,12 +54,14 @@ def test_dm_details_valid(user1, user2):
             lName: '1',
             'email': 'first@gmail.com',
             handle: 'user1',
+            'profile_img_url': f"{url}static/default.jpg"
         }, {
             uID: user2[AuID], 
             fName: "User",
             lName: '2',
             'email': 'second@gmail.com',
             handle: 'user2',
+            'profile_img_url': f"{url}static/default.jpg"
         }
         ]
     }

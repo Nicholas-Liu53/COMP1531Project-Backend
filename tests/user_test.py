@@ -1,6 +1,6 @@
 from src.error import AccessError, InputError
 import pytest
-from src.user import user_profile_v2, user_setname_v2, user_setemail_v2, user_sethandle_v2, users_all, users_stats_v1, user_stats_v1
+from src.user import user_profile_v2, user_setname_v2, user_setemail_v2, user_sethandle_v2, users_all, users_stats_v1, user_stats_v1,user_profile_uploadphoto_v1
 from src.auth import auth_register_v2, auth_login_v2
 from src.other import clear_v1, SECRET
 from src.channel import channel_join_v1
@@ -8,6 +8,8 @@ from src.channels import channels_create_v1
 from src.dm import dm_create_v1, dm_invite_v1
 from src.message import message_send_v1, message_remove_v1, message_senddm_v1
 import jwt
+from PIL import Image
+from src.config import url
 
 AuID    = 'auth_user_id'
 uID     = 'u_id'
@@ -47,6 +49,53 @@ def user4():
 def user5():
     return auth_register_v2("claudiamarley@gmail.com", "1234567", "claudia", "marley")
 
+
+
+def test_user_profile_errors(user1):
+
+    with pytest.raises(InputError):
+        user_profile_uploadphoto_v1(user1[tok],"https://i.pinimg.com/originals/05/1b/7d/051b7d93394fc94c082f1801bc4ccfb2.jpg", -1 ,-1 ,500,500)
+    with pytest.raises(InputError):
+        user_profile_uploadphoto_v1(user1[tok],"https://i.pinimg.com/originals/05/1b/7d/051b7d93394fc94c082f1801bc4ccfb2.jpg", 500 ,500 ,0,0)
+    with pytest.raises(InputError):    
+        user_profile_uploadphoto_v1(user1[tok],"https://i.pinimg.com/originals/05/1b/7d/051b7d93394fc94c082f1801bc4ccfb2.jpg", 0 ,0 ,1000,1000)
+    with pytest.raises(InputError):
+        user_profile_uploadphoto_v1(user1[tok],"http://agsgasg.com/nicklam/04/2/hiiiii.jpg", 0 ,0 ,500,500)
+    with pytest.raises(InputError):
+        user_profile_uploadphoto_v1(user1[tok],"https://www.clipartmax.com/png/middle/450-4500720_tom-and-jerry-aesthetic.png", 0 ,0 ,500,500)
+
+
+def test_user_profile_default(user1):
+
+    userprof = user_profile_v2(user1[tok], user1[AuID])
+    assert userprof == {
+        'user':
+        {
+        'u_id': user1[AuID],
+        'email': "caricoleman@gmail.com", 
+        'name_first': 'cari', 
+        'name_last': 'coleman', 
+        'handle_str': 'caricoleman',
+        'profile_img_url': f"{url}static/default.jpg",
+        }
+    }
+
+def test_user_profile_change(user1,user2):
+
+    user_profile_uploadphoto_v1(user1[tok],"https://i.pinimg.com/originals/05/1b/7d/051b7d93394fc94c082f1801bc4ccfb2.jpg", 0 ,0 ,500,500)
+    
+    userprof = user_profile_v2(user1[tok], user1[AuID])
+    assert userprof == {
+        'user':
+        {
+        'u_id': user1[AuID],
+        'email': "caricoleman@gmail.com", 
+        'name_first': 'cari', 
+        'name_last': 'coleman', 
+        'handle_str': 'caricoleman',
+        'profile_img_url': f"{url}static/{user1[AuID]}.jpg"
+        }
+    }
 # tests the return value when user profile is called from a valid user 
 def test_user_profile_valid(user1,user2):
     user_data_1 = auth_login_v2("caricoleman@gmail.com", "1234567") 
@@ -54,11 +103,12 @@ def test_user_profile_valid(user1,user2):
     assert user_profile_v2(user_data_1['token'], user_data_1['auth_user_id']) == { 
         'user':
             {
-            'u_id': 0, 
+            'u_id': user_data_1['auth_user_id'],
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -72,22 +122,24 @@ def test_user_profile_valid_multiple(user1,user2):
     assert user_profile_v2(user_data_1['token'], user_data_1['auth_user_id']) == { 
         'user':
             {
-            'u_id': 0, 
+            'u_id': user_data_1['auth_user_id'], 
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
     assert user_profile_v2(user_data_2['token'], user_data_2['auth_user_id']) == { 
         'user':
             {
-            'u_id': 1, 
+            'u_id': user_data_2['auth_user_id'], 
             'email': "ericamondy@gmail.com", 
             'name_first': 'erica', 
             'name_last': 'mondy', 
-            'handle_str': 'ericamondy'
+            'handle_str': 'ericamondy',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
     
@@ -105,14 +157,15 @@ def test_user_setname_valid_first_name(user1):
 
     assert user_setname_v2(user_data_1['token'], 'kari', 'coleman') == {}
 
-    assert  user_profile_v2(user_data_1['token'], user_data_1['auth_user_id']) == { 
+    assert user_profile_v2(user_data_1['token'], user_data_1['auth_user_id']) == { 
         'user':
             {
-            'u_id': 0, 
+            'u_id': user_data_1['auth_user_id'], 
             'email': "caricoleman@gmail.com", 
             'name_first': 'kari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -126,11 +179,12 @@ def test_user_setname_valid_last_name(user1):
     assert  user_profile_v2(user_data_1['token'], user_data_1['auth_user_id']) == { 
         'user':
             {
-            'u_id': 0, 
+            'u_id': user_data_1['auth_user_id'], 
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'koleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -144,11 +198,12 @@ def test_user_setname_valid_both_names(user1):
     assert  user_profile_v2(user_data_1['token'], user_data_1['auth_user_id']) == { 
         'user':
             {
-            'u_id': 0, 
+            'u_id': user_data_1['auth_user_id'], 
             'email': "caricoleman@gmail.com", 
             'name_first': 'kari', 
             'name_last': 'koleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -165,11 +220,12 @@ def test_user_setname_valid_multiple(user1,user2):
     assert  user_profile_v2(user_data_1['token'], user_data_1['auth_user_id']) == {
         'user':
         {
-        'u_id': 0, 
+        'u_id': user_data_1['auth_user_id'], 
         'email': "caricoleman@gmail.com", 
         'name_first': 'kari', 
         'name_last': 'koleman', 
-        'handle_str': 'caricoleman'
+        'handle_str': 'caricoleman',
+        'profile_img_url': f"{url}static/default.jpg"
         }
     }
     
@@ -178,11 +234,12 @@ def test_user_setname_valid_multiple(user1,user2):
     assert user_profile_v2(user_data_2['token'], user_data_2['auth_user_id']) == {
         'user':
         {
-        'u_id': 1, 
+        'u_id': user_data_2['auth_user_id'], 
         'email': "ericamondy@gmail.com", 
         'name_first': 'erika', 
         'name_last': 'money', 
-        'handle_str': 'ericamondy'
+        'handle_str': 'ericamondy',
+        'profile_img_url': f"{url}static/default.jpg"
         }
     }
 
@@ -221,11 +278,12 @@ def test_user_setemail_valid(user1):
     assert user_profile_v2(user_data_1['token'], 0) == {
         'user':
         {
-        'u_id': 0, 
+        'u_id': user_data_1['auth_user_id'], 
         'email': "karicoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_str': 'caricoleman'
+        'handle_str': 'caricoleman',
+        'profile_img_url': f"{url}static/default.jpg"
         }
     }
 
@@ -240,11 +298,12 @@ def test_user_setemail_valid_multiple(user1,user2):
     assert  user_profile_v2(user_data_1['token'], 0) == {
         'user':
         {
-        'u_id': 0, 
+        'u_id': user_data_1['auth_user_id'], 
         'email': "karicoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_str': 'caricoleman'
+        'handle_str': 'caricoleman',
+        'profile_img_url': f"{url}static/default.jpg"
         }
     }
     
@@ -253,11 +312,12 @@ def test_user_setemail_valid_multiple(user1,user2):
     assert  user_profile_v2(user_data_2['token'], user_data_2['auth_user_id']) == {
         'user':
         {
-        'u_id': 1, 
+        'u_id': user_data_2['auth_user_id'], 
         'email': "erikamoney@gmail.com", 
         'name_first': 'erica', 
         'name_last': 'mondy', 
-        'handle_str': 'ericamondy'
+        'handle_str': 'ericamondy',
+        'profile_img_url': f"{url}static/default.jpg"
         }
     }
 
@@ -281,11 +341,12 @@ def test_user_setemail_invalid_email_in_use(user1,user2):
         assert  user_profile_v2(user_data_1['token'], user_data_1['auth_user_id']) == {
             'user':
             {
-            'u_id': 0, 
+            'u_id': user_data_1['auth_user_id'], 
             'email': "karicoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
+            'profile_img_url': f"{url}static/default.jpg"
             }
         }
         
@@ -300,11 +361,12 @@ def test_user_sethandle_valid(user1):
     assert user_profile_v2(user_data_1['token'], user_data_1['auth_user_id']) == {
         'user':
         {
-        'u_id': 0, 
+        'u_id': user_data_1['auth_user_id'], 
         'email': "caricoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_str': 'karikoleman'
+        'handle_str': 'karikoleman',
+        'profile_img_url': f"{url}static/default.jpg"
         }
     }
 
@@ -320,11 +382,12 @@ def test_user_sethandle_valid_multiple(user1,user2):
     assert  user_profile_v2(user_data_1['token'], user_data_1['auth_user_id']) == {
         'user':
         {
-        'u_id': 0, 
+        'u_id': user_data_1['auth_user_id'], 
         'email': "caricoleman@gmail.com", 
         'name_first': 'cari', 
         'name_last': 'coleman', 
-        'handle_str': 'karikoleman'
+        'handle_str': 'karikoleman',
+        'profile_img_url': f"{url}static/default.jpg"
         }
     }
     
@@ -333,11 +396,12 @@ def test_user_sethandle_valid_multiple(user1,user2):
     assert  user_profile_v2(user_data_2['token'], user_data_2['auth_user_id']) == {
         'user':
         {
-        'u_id': 1, 
+        'u_id': user_data_2['auth_user_id'], 
         'email': "ericamondy@gmail.com", 
         'name_first': 'erica', 
         'name_last': 'mondy', 
-        'handle_str': 'erikamoney'
+        'handle_str': 'erikamoney',
+        'profile_img_url': f"{url}static/default.jpg"
         }
     }
 
@@ -368,11 +432,12 @@ def test_user_sethandle_invalid_handle_in_use(user1,user2):
         assert user_profile_v2(user_data_1['token'], user_data_1['auth_user_id']) == {
             'user':
             {
-            'u_id': 0, 
+            'u_id': user_data_1['auth_user_id'], 
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'kari'
+            'handle_str': 'kari',
+            'profile_img_url': f"{url}static/default.jpg"
             }
         }
         
@@ -386,11 +451,12 @@ def test_users_all_v1_one(user1):
     assert users_all(user_data_1['token']) == {
             'users':
             [{
-            'u_id': 0, 
+            'u_id': user_data_1['auth_user_id'], 
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
+            'profile_img_url': f"{url}static/default.jpg"
             }]
     }
 
@@ -401,18 +467,20 @@ def test_users_all_v1_two(user1,user2):
     assert users_all(user_data_1['token']) == {
             'users':
             [{
-            'u_id': 0, 
+            'u_id': user_data_1['auth_user_id'], 
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
+            'profile_img_url': f"{url}static/default.jpg"
             },
             {
-            'u_id': 1, 
+            'u_id': user2['auth_user_id'], 
             'email': "ericamondy@gmail.com", 
             'name_first': 'erica', 
             'name_last': 'mondy', 
-            'handle_str': 'ericamondy'
+            'handle_str': 'ericamondy',
+            'profile_img_url': f"{url}static/default.jpg"
             }]
     } 
     
@@ -421,39 +489,44 @@ def test_users_all_v1_multiple(user1, user2, user3, user4, user5):
     assert users_all(user1['token']) == {   
             'users':
             [{
-            'u_id': 0, 
+            'u_id': user1['auth_user_id'], 
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
+            'profile_img_url': f"{url}static/default.jpg"
             },
             {
-            'u_id': 1, 
+            'u_id': user2['auth_user_id'], 
             'email': "ericamondy@gmail.com", 
             'name_first': 'erica', 
             'name_last': 'mondy', 
-            'handle_str': 'ericamondy'
+            'handle_str': 'ericamondy',
+            'profile_img_url': f"{url}static/default.jpg"
             },
             {
-            'u_id': 2, 
+            'u_id': user3['auth_user_id'], 
             'email': "hilarybently@gmail.com", 
             'name_first': 'hillary', 
             'name_last': 'bently', 
-            'handle_str': 'hillarybently'
+            'handle_str': 'hillarybently',
+            'profile_img_url': f"{url}static/default.jpg"
             },
             {
-            'u_id': 3, 
+            'u_id': user4['auth_user_id'], 
             'email': "kentonwatkins@gmail.com", 
             'name_first': 'kenton', 
             'name_last': 'watkins', 
-            'handle_str': 'kentonwatkins'
+            'handle_str': 'kentonwatkins',
+            'profile_img_url': f"{url}static/default.jpg"
             },
             {
-            'u_id': 4, 
+            'u_id': user5['auth_user_id'], 
             'email': "claudiamarley@gmail.com", 
             'name_first': 'claudia', 
             'name_last': 'marley', 
-            'handle_str': 'claudiamarley'
+            'handle_str': 'claudiamarley',
+            'profile_img_url': f"{url}static/default.jpg"
             },]
         } 
     
