@@ -199,7 +199,7 @@ def test_dm_leave(user1, user2, user3):
         dm_leave_v1(user3[token], dm_0['dm_id'])
         
     #Check that owner can't leave dm 
-    result = dm_leave_v1(user1[token], dm_0['dm_id'])
+    dm_leave_v1(user1[token], dm_0['dm_id'])
     assert {dmID: dm_0[dmID], Name: 'user1, user2'} in dm_list_v1(user1[token])['dms']
     
     #Now that errors are omitted, can use user2 to leave dm 
