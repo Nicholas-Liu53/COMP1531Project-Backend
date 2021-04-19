@@ -1,9 +1,9 @@
 from datetime import datetime
 from src.error import AccessError, InputError
 import re
-from jwt import encode, decode
+from jwt import encode
 import json
-from src.other import SECRET, generate_reset_code, get_user
+from src.other import SECRET, generate_reset_code, get_user, decode
 import hashlib
 from datetime import datetime
 from src.user import users_stats_v1
@@ -282,8 +282,7 @@ def auth_logout_v1(token):
     """
     data = json.load(open('data.json', 'r'))
 
-    payload = decode(token, SECRET, algorithms='HS256')
-    auth_user_id, session_id = payload.get('user_id'), payload.get('session_id')
+    auth_user_id, session_id = decode(token)
 
     for user in data['users']:
         if user['u_id'] == auth_user_id:

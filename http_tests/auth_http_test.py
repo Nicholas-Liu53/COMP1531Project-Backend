@@ -123,14 +123,14 @@ def test_http_auth_logout_valid():
     response_2 = requests.post(f"{url}auth/login/v2", json={"email": "caricoleman@gmail.com", "password": "1234567"})
     payload_2 = response_2.json()
     
-    response_3 = requests.delete(f"{url}auth/logout/v1", json={'token': payload_1['token']})
+    response_3 = requests.post(f"{url}auth/logout/v1", json={'token': payload_1['token']})
     payload_3 = response_3.json()
     assert payload_3['is_success'] == True
 
     with pytest.raises(AccessError):
         check_session(0, 0)
 
-    response_4 = requests.delete(f"{url}auth/logout/v1", json={'token': payload_2['token']})
+    response_4 = requests.post(f"{url}auth/logout/v1", json={'token': payload_2['token']})
     payload_4 = response_4.json()
     assert payload_4['is_success'] == True
 
@@ -143,10 +143,8 @@ def test_http_auth_logout_v1_invalid():
     requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
 
     token_1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
-
-    response_3 = requests.delete(f"{url}auth/logout/v1", json={'token': token_1})
-    payload_3 = response_3.json()
-    assert payload_3['is_success'] == False
+    response_3 = requests.post(f"{url}auth/logout/v1", json={'token': token_1})
+    assert response_3.status_code == 403
 
 #* Test that for a registered email, it is successful (response 200)
 def test_http_auth_passwordreset_valid_email(user1, user2):
