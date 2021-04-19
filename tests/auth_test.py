@@ -6,7 +6,6 @@ from src.user import user_profile_v2
 import src.channel, src.channels
 from src.other import clear_v1, SECRET, check_session, get_user, get_reset_code
 from jwt import encode
-
 # tests the return value of the auth login of a valid user
 def test_auth_login_valid():
     clear_v1()
@@ -308,8 +307,7 @@ def test_auth_logout_v1_invalid():
         user_data_1 = auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
         auth_logout_v1(user_data_1['token'])
         auth_logout_v1(user_data_1['token'])
-
-def auth_test_passwordreset_request():
+def test_auth_passwordreset_request():
     clear_v1()
     #* Test for the case when email passed in doesn't correspond to any known user
     with pytest.raises(InputError):
@@ -320,8 +318,7 @@ def auth_test_passwordreset_request():
     #* Test that a reset code exists for the registered email
     assert get_reset_code(get_user(user1['auth_user_id'])['email']) is not None
 
-auth_passwordreset_reset_v1
-def auth_test_passwordreset_reset():
+def test_auth_passwordreset_reset():
     clear_v1()
     #* Test that an invalid reset code raises an InputError
     with pytest.raises(InputError):
