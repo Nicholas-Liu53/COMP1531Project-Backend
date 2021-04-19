@@ -3,7 +3,7 @@ from src.error import AccessError, InputError
 import re
 from jwt import encode
 import json
-from src.other import SECRET, generate_reset_code, get_user, decode
+from src.other import SECRET, generate_reset_code, get_user, decode, data_load
 import hashlib
 from datetime import datetime
 import urllib.request
@@ -33,8 +33,7 @@ def auth_register_v1(email, password, name_first, name_last):
             Returns (dict) containing user_id corresponding to the inputted email, password, name_first and name_last
 
     """
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     #** Storing name_first & name_list so original names 
     #** unaffected by handle generation
@@ -196,10 +195,7 @@ def check_handle(handle_string):
                 - false if not in use
 
     """ 
-    
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
-
+    data = data_load()
     for user in data['users']:
         if handle_string == user['handle_str']:
             return True
@@ -222,9 +218,7 @@ def auth_login_v2(email, password):
             Returns (dict) containing user_id corresponding to the inputted email and password 
 
     """ 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
-
+    data = data_load()
     for user in data['users']:
         if email == user.get('email') and hashlib.sha256(password.encode()).hexdigest() == user.get('password'):
             if len(user['session_id']) != 0: 
@@ -292,11 +286,9 @@ def auth_logout_v1(token):
             has been successfully logged out otherwise false
 
     """
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
-
     auth_user_id, session_id = decode(token)
 
+    data = data_load()
     for user in data['users']:
         if user['u_id'] == auth_user_id:
             if session_id in user['session_id']:
@@ -306,8 +298,7 @@ def auth_logout_v1(token):
                 return {'is_success': True}
 
 def auth_passwordreset_request_v1(email):
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     for user in data['users']:
         if user['email'] == email:
@@ -330,9 +321,7 @@ def auth_passwordreset_reset_v1(reset_code, new_password):
     if len(new_password) < 6:
         raise InputError
     
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
-
+    data = data_load()
     for index, code in enumerate(data['reset_codes']):
         if reset_code == code['reset_code']:
             data['reset_codes'].pop(index)

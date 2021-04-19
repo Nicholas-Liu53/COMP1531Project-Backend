@@ -1,6 +1,6 @@
 from src.error import InputError
 import re
-from src.other import decode, check_session, get_user
+from src.other import decode, check_session, get_user, data_load
 import json
 import urllib.request
 import requests
@@ -63,8 +63,7 @@ def user_setname_v2(token, name_first, name_last):
     if len(name_last) > 50 or len(name_last) < 1:
         raise InputError
         
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     for user in data['users']:
         if auth_user_id == user['u_id']:
@@ -101,8 +100,7 @@ def user_setemail_v2(token, email):
     if not re.search('^[a-zA-Z0-9]+[\\._]?[a-zA-Z0-9]+[@]\\w+[.]\\w{2,3}$', email):
         raise InputError
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     for user in data['users']:
         if email == user['email']:
@@ -143,8 +141,7 @@ def user_sethandle_v2(token, handle_str):
     if len(handle_str) < 3 or len(handle_str) > 20:
         raise InputError
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
     
     for user in data['users']:
         if handle_str == user['handle_str']:
@@ -177,8 +174,7 @@ def users_all(token):
     decode(token)
     
     user_list = []
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     for user in data['users']:
         if user['permission_id'] != 0:
@@ -211,8 +207,7 @@ def user_stats_v1(token):
     '''
     auth_user_id, _ = decode(token)
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     userstat = data["user_analytics"][f"{auth_user_id}"].copy()
 
@@ -251,8 +246,7 @@ def users_stats_v1(token):
     decode(token)
 
     active_users = {}
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     for channel in data['channels']:
         for member in channel['all_members']:
@@ -322,8 +316,7 @@ def user_profile_uploadphoto_v1(token, img_url,x_start,y_start,x_end,y_end):
     imageObject.crop((x_start, y_start, x_end, y_end)).save(f"src/static/{auth_user_id}.jpg")
 
     # Serving image
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     for user in data['users']:
         if user['u_id'] == auth_user_id:

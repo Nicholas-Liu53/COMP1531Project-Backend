@@ -1,7 +1,7 @@
 from src.error import AccessError, InputError
 import jwt
 import json
-from src.other import decode, get_channel, get_user, get_user_permissions, check_removed
+from src.other import decode, get_channel, get_user, get_user_permissions, check_removed, data_load
 
 
 AuID      = 'auth_user_id'
@@ -22,8 +22,7 @@ def user_remove_v1(token, u_id):
 
     get_user(u_id)
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     dream_owner = 0
     for users in data['users']:
@@ -84,9 +83,7 @@ def userpermission_change_v1(token, u_id, permission_id):
         Empty dictionary
     '''
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
-
+    data = data_load()
     auth_user_id, _ = decode(token)
 
     validUser = False

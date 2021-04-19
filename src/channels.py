@@ -1,5 +1,5 @@
 from src.error import AccessError, InputError
-from src.other import decode, get_channel, get_user
+from src.other import decode, get_channel, get_user, data_load
 import json
 import jwt
 from datetime import datetime
@@ -28,10 +28,9 @@ def channels_list_v2(token):
         Returns dictionary of a list of channels mapped to the key string 'channels'
         Each channel is represented by a dictionary containing types { channel_id, name }
     '''
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
-
     auth_user_id, _ = decode(token)
+
+    data = data_load()
     output = []
     for chanD in data['channels']:
         if auth_user_id in chanD['all_members']:
@@ -61,10 +60,8 @@ def channels_listall_v2(token):
         Each channel is represented by a dictionary containing types { channel_id, name }
     '''
     decode(token)
-
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
     
+    data = data_load()
     output = []
     for d in data['channels']:
         channel = {}
@@ -100,9 +97,7 @@ def channels_create_v1(token, name, is_public):
     if len(name) > 20:
         raise InputError
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
-
+    data = data_load()
     # Time to find the user details
     userFound = False
     j = 0

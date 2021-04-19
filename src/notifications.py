@@ -1,4 +1,4 @@
-from src.other import decode
+from src.other import decode, data_load
 import json
 
 def notifications_get_v1(token):
@@ -18,8 +18,7 @@ def notifications_get_v1(token):
     #* Decode the taken and get the auth user's id
     auth_user_id, _ = decode(token)
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     notifications = data['notifs'][f"{auth_user_id}"][0:20]
 

@@ -1,6 +1,6 @@
 from src.error import AccessError, InputError
 import src.auth
-from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications, push_reacted_notifications, generate_new_message_id
+from src.other import decode, get_channel, get_user, get_dm, get_user_permissions, push_tagged_notifications, push_reacted_notifications, generate_new_message_id, data_load
 from datetime import timezone, datetime
 import json
 import threading, time
@@ -61,8 +61,7 @@ def message_send_v1(token, channel_id, message):
     time_created = int(now.strftime("%s"))
     newID = generate_new_message_id()
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     # User is in the channel (which exists) & message is appropriate length
     #* Time to send a message
@@ -127,8 +126,7 @@ def message_remove_v1(token, message_id):
     #* Decode the token
     auth_user_id, _ = decode(token)
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     #* Get message dictionary in data
     messageFound = False
@@ -203,8 +201,7 @@ def message_edit_v1(token, message_id, message):
     #* Decode the token
     auth_user_id, _ = decode(token)
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     #* Get message dictionary in data
     messageFound = False
@@ -282,8 +279,7 @@ def message_senddm_v1(token, dm_id, message):
         raise InputError
     message_id = generate_new_message_id()
     
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     now = datetime.now()
     time_created = int(now.strftime("%s"))
@@ -341,8 +337,7 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
     '''
     auth_user_id, _ = decode(token)
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
     # put message with optional message first,
     newMessage = ''
     for msg in data['messages_log']:
@@ -387,8 +382,7 @@ def message_share_v1(token, og_message_id, message, channel_id, dm_id):
 
 def message_pin_v1(token, message_id):
     auth_user_id, _ = decode(token)
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     for message in data['messages_log']:
         if message[mID] == message_id:
@@ -407,8 +401,7 @@ def message_pin_v1(token, message_id):
 
 def message_unpin_v1(token, message_id):
     auth_user_id, _ = decode(token)
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     for message in data['messages_log']:
         if message[mID] == message_id:
@@ -449,8 +442,7 @@ def message_react_v1(token, message_id, react_id):
         Returns an empty dictionary {}
     '''
     auth_user_id, _ = decode(token)
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
     
     if react_id != thumbsUp:
         raise InputError
@@ -523,8 +515,7 @@ def message_unreact_v1(token, message_id, react_id):
     '''
     
     auth_user_id, _ = decode(token)
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
     
     if react_id != thumbsUp:
         raise InputError
@@ -657,8 +648,7 @@ def sendlater_send(token, channel_id, message, time_sent, newID):
     # Decode the token
     auth_user_id, _ = decode(token)
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     # User is in the channel (which exists) & message is appropriate length
     #* Time to send a message
@@ -718,8 +708,7 @@ def sendlaterdm_send(token, dm_id, message, time_sent, newID):
     # Decode the token
     auth_user_id, _ = decode(token)
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     # User is in the dm (which exists) & message is appropriate length
     #* Time to send a message

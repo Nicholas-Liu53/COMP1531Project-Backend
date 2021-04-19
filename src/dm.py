@@ -1,6 +1,6 @@
 from flask import Flask, request
 from src.error import AccessError, InputError
-from src.other import decode, get_user, get_dm, message_count, get_user_from_handlestring, push_added_notifications, check_removed
+from src.other import decode, get_user, get_dm, message_count, get_user_from_handlestring, push_added_notifications, check_removed, data_load
 import src.auth
 import json
 import jwt
@@ -73,8 +73,7 @@ def dm_list_v1(token):
     '''
     auth_user_id, _ = decode(token)
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     output = []
     for dmDetails in data['dms']:
@@ -109,8 +108,7 @@ def dm_create_v1(token, u_ids):
     '''
     creator_id, _ = decode(token)
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     if len(data['dms']) == 0:
         dm_ID = 0
@@ -189,8 +187,7 @@ def dm_remove_v1(token, dm_id):
     auth_user_ID, _ = decode(token)
     input_error = True
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     for items in data['dms']:
         #Loop for input errors:
@@ -259,8 +256,7 @@ def dm_invite_v1(token, dm_id, u_id):
 
     now = datetime.now()
     time_created = int(now.strftime("%s"))
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     for items in data['dms']:
         #Loop for input errors:
@@ -309,8 +305,7 @@ def dm_leave_v1(token, dm_id):
     '''
     auth_user_ID, _ = decode(token)
     input_error = True
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
+    data = data_load()
 
     now = datetime.now()
     time_created = int(now.strftime("%s"))
@@ -383,9 +378,7 @@ def dm_messages_v1(token, dm_id, start):
     if num_of_messages <= desired_end:
         desired_end = -1
 
-    with open('data.json', 'r') as FILE:
-        data = json.load(FILE)
-
+    data = data_load()
     messages = []
     for objects in data['messages_log']:
         if dm_id == objects[dmID]:
