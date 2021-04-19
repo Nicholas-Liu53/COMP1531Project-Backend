@@ -339,7 +339,6 @@ def test_auth_passwordreset_reset():
 
     user1 = auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     user2 = auth_register_v2("ericamondy@gmail.com", "1234567", "erica", "mondy")
-    auth_register_v2("hilarybently@gmail.com", "1234567", "hilary", "bently")
     
     auth_passwordreset_request_v1(get_user(user1['auth_user_id'])['email'])
     auth_passwordreset_request_v1(get_user(user2['auth_user_id'])['email'])
