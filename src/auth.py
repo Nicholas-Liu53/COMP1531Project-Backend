@@ -6,7 +6,8 @@ import json
 from src.other import SECRET, generate_reset_code, get_user, decode
 import hashlib
 from datetime import datetime
-from src.user import users_stats_v1
+import urllib.request
+from src.config import url
 from flask_mail import Message
 
 def auth_register_v1(email, password, name_first, name_last):
@@ -129,6 +130,7 @@ def auth_register_v1(email, password, name_first, name_last):
             ],
         }
 
+    urllib.request.urlretrieve('https://en.meming.world/images/en/thumb/7/7f/Polish_Jerry.jpg/300px-Polish_Jerry.jpg', "src/static/default.jpg")
 
     #* appending the user dictionary into the users list
     data['users'].append({
@@ -140,8 +142,10 @@ def auth_register_v1(email, password, name_first, name_last):
         'handle_str' : handle_string,
         'permission_id': permissionID,
         'session_id': [0],
+        'profile_img_url': f"{url}static/default.jpg",
     })
 
+    
     #* create an empty notification list
     data['notifs'][f"{user_id}"] = [] 
 
@@ -220,7 +224,11 @@ def auth_login_v2(email, password):
 
     for user in data['users']:
         if email == user.get('email') and hashlib.sha256(password.encode()).hexdigest() == user.get('password'):
-            new_session_id = user['session_id'][-1] + 1
+            if len(user['session_id']) != 0: 
+                new_session_id = user['session_id'][-1] + 1
+            else:
+                new_session_id = 0
+                
             user['session_id'].append(new_session_id)
             token = encode({'session_id': new_session_id, 'user_id': user['u_id']}, SECRET, algorithm='HS256')
 
@@ -262,6 +270,7 @@ def auth_register_v2(email, password, name_first, name_last):
     data_structure = auth_register_v1(email, password, name_first, name_last)
     auth_user_id = data_structure['auth_user_id']
     token = encode({'session_id': 0, 'user_id': auth_user_id}, SECRET, algorithm='HS256')
+
     return {
         'token': token,
         'auth_user_id': auth_user_id
@@ -292,8 +301,6 @@ def auth_logout_v1(token):
                     json.dump(data, FILE)
                 return {'is_success': True}
 
-    return {'is_success': False}
-
 def auth_passwordreset_request_v1(email):
     with open('data.json', 'r') as FILE:
         data = json.load(FILE)
@@ -303,10 +310,10 @@ def auth_passwordreset_request_v1(email):
             msg = Message('UNSW Dreams Password Reset', sender = 'W13BCactus@gmail.com', recipients = [f"{email}"])
             msg.body = f"We've received your request for a password reset. Please use the following code to reset your password: \n {reset_code}"
             for index, code in enumerate(data['reset_codes']):
-                if user['u_id'] == code['u_id']:
+                if user['email'] == code['email']:
                     data['reset_codes'].pop(index)
             data['reset_codes'].append({
-                'u_id': user['u_id'],
+                'email': user['email'],
                 'reset_code': reset_code
             })
             with open('data.json', 'w') as FILE:
@@ -325,8 +332,9 @@ def auth_passwordreset_reset_v1(reset_code, new_password):
         if reset_code == code['reset_code']:
             data['reset_codes'].pop(index)
             for user in data['users']:
-                if user['u_id'] == code['u_id']:
+                if user['email'] == code['email']:
                     user['password'] = hashlib.sha256(new_password.encode()).hexdigest()
+                    user['session_ids'] = []
                     with open('data.json', 'w') as FILE:
                         json.dump(data, FILE)
                     return {}

@@ -648,6 +648,7 @@ def test_message_react_v1_valid_channel(user1, user2):
     src.channel.channel_invite_v1(user1[token], channel_1[cID], user2[AuID])
     message_1 = message_send_v1(user1[token], channel_1[cID], "Hello")
     message_react_v1(user1[token], message_1[mID], thumbsUp)
+    message_react_v1(user2[token], message_1[mID], thumbsUp)
     
     #Test 1: check that react_1 comes up in "messages"
     result = src.channel.channel_messages_v1(user1[token], channel_1[cID], 0)
@@ -666,6 +667,7 @@ def test_message_react_v1_valid_dm(user1, user2):
     dm_1 = src.dm.dm_create_v1(user1[token], [user2[AuID]])
     message_1 = message_senddm_v1(user1[token], dm_1[dmID], "Goodbye")
     message_react_v1(user1[token], message_1[mID], thumbsUp)
+    message_react_v1(user2[token], message_1[mID], thumbsUp)
     
     #Test 1: check that reacts comes up in "messages"
     result = src.dm.dm_messages_v1(user1[token], dm_1[dmID], 0)

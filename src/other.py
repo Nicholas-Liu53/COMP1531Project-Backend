@@ -141,6 +141,7 @@ def get_user(user_id):
                 'name_first': user['name_first'],
                 'name_last': user['name_last'],
                 'handle_str': user['handle_str'],
+                'profile_img_url': user['profile_img_url'],
             }
     raise InputError
 
@@ -175,6 +176,7 @@ def get_user_from_handlestring(handlestring):
                 'name_first': user['name_first'],
                 'name_last': user['name_last'],
                 'handle_str': user['handle_str'],
+                'profile_img_url': user['profile_img_url'],
             }
     # raise InputError
 
@@ -284,3 +286,9 @@ def generate_new_message_id():
 def generate_reset_code():
     reset_code = getrandbits(32)
     return reset_code
+
+def get_reset_code(email):
+    data = json.load(open('data.json', 'r'))
+    for code in data['reset_codes']:
+        if code['email'] == email:
+            return code['reset_code']

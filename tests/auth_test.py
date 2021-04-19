@@ -1,11 +1,12 @@
 # File to test functions in src/auth.py
 from src.error import AccessError, InputError
 import pytest
-from src.auth import auth_login_v2, auth_register_v2, auth_logout_v1
+from src.auth import auth_login_v2, auth_register_v2, auth_logout_v1, auth_passwordreset_request_v1, auth_passwordreset_reset_v1
 from src.user import user_profile_v2
 import src.channel, src.channels
-from src.other import clear_v1, SECRET, check_session
+from src.other import clear_v1, SECRET, check_session, get_user, get_reset_code
 from jwt import encode
+from src.config import url
 
 # tests the return value of the auth login of a valid user
 def test_auth_login_valid():
@@ -120,7 +121,8 @@ def test_auth_register_valid_same_name():
             'email': "caricoleman@hotmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman0'
+            'handle_str': 'caricoleman0',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -131,7 +133,8 @@ def test_auth_register_valid_same_name():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cari', 
             'name_last': 'coleman', 
-            'handle_str': 'caricoleman'
+            'handle_str': 'caricoleman',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -186,7 +189,8 @@ def test_auth_register_valid_long_name():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cariiiiiiiiiiiiiii', 
             'name_last': 'coleman', 
-            'handle_str': 'cariiiiiiiiiiiiiiico'
+            'handle_str': 'cariiiiiiiiiiiiiiico',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -203,7 +207,8 @@ def test_auth_register_valid_long_first_name():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cariiiiiiiiiiiiiiiiiii', 
             'name_last': 'coleman', 
-            'handle_str': 'cariiiiiiiiiiiiiiiiii'
+            'handle_str': 'cariiiiiiiiiiiiiiiiii',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -224,7 +229,8 @@ def test_auth_register_valid_long_name_multiple():
             'email': "caricoleman@gmail.com", 
             'name_first': 'cariiiiiiiiiiiiiii', 
             'name_last': 'coleman', 
-            'handle_str': 'cariiiiiiiiiiiiiiico'
+            'handle_str': 'cariiiiiiiiiiiiiiico',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -235,7 +241,8 @@ def test_auth_register_valid_long_name_multiple():
             'email': "caricoleman@hotmail.com", 
             'name_first': 'cariiiiiiiiiiiiiii', 
             'name_last': 'coleman', 
-            'handle_str': 'cariiiiiiiiiiiiiiico0'
+            'handle_str': 'cariiiiiiiiiiiiiiico0',
+            'profile_img_url': f"{url}static/default.jpg"
             }
     }
 
@@ -290,6 +297,8 @@ def test_auth_logout_v1_valid():
     token_1 = user_data_1['token']
     user_data_2 = auth_login_v2("caricoleman@gmail.com", "1234567")
     token_2 = user_data_2['token']
+    auth_login_v2("caricoleman@gmail.com", "1234567")
+    user_data_2['token']
     
     assert auth_logout_v1(token_1) == {'is_success': True}
     
@@ -308,4 +317,48 @@ def test_auth_logout_v1_invalid():
         user_data_1 = auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
         auth_logout_v1(user_data_1['token'])
         auth_logout_v1(user_data_1['token'])
+def test_auth_passwordreset_request():
+    clear_v1()
+    #* Test for the case when email passed in doesn't correspond to any known user
+    with pytest.raises(InputError):
+        auth_passwordreset_request_v1("InvalidEmail")
+
+    user1 = auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    auth_passwordreset_request_v1(get_user(user1['auth_user_id'])['email'])
+    #* Test that a reset code exists for the registered email
+    assert get_reset_code(get_user(user1['auth_user_id'])['email']) is not None
+
+#* Test that when reseting multiple times, a new code is generated every time and invalidates old one
+def test_auth_passwordreset_request_multiple():
+    clear_v1()
+    user1 = auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
     
+    auth_passwordreset_request_v1(get_user(user1['auth_user_id'])['email'])
+    code1 = get_reset_code(get_user(user1['auth_user_id'])['email'])
+
+    auth_passwordreset_request_v1(get_user(user1['auth_user_id'])['email'])
+    code2 = get_reset_code(get_user(user1['auth_user_id'])['email'])
+
+    assert code1 != code2
+
+def test_auth_passwordreset_reset():
+    clear_v1()
+    #* Test that an invalid reset code raises an InputError
+    with pytest.raises(InputError):
+        auth_passwordreset_reset_v1(-1, "newpassword")
+
+    user1 = auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    user2 = auth_register_v2("ericamondy@gmail.com", "1234567", "erica", "mondy")
+    
+    auth_passwordreset_request_v1(get_user(user1['auth_user_id'])['email'])
+    auth_passwordreset_request_v1(get_user(user2['auth_user_id'])['email'])
+
+    reset = get_reset_code(get_user(user2['auth_user_id'])['email'])
+    #* Test that an invalid password raises an InputError
+    with pytest.raises(InputError):
+        auth_passwordreset_reset_v1(reset, "short")
+    
+    new_password = 'CrocodileLikesStrawberries'
+
+    auth_passwordreset_reset_v1(reset, new_password)
+    auth_login_v2(get_user(user2['auth_user_id'])['email'], new_password)

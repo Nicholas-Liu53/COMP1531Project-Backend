@@ -1,6 +1,6 @@
 import sys
 from json import dumps
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 from flask_cors import CORS
 from src.error import InputError
 from src import config
@@ -18,7 +18,7 @@ def defaultHandler(err):
     response.content_type = 'application/json'
     return response
 
-APP = Flask(__name__)
+APP = Flask(__name__, static_url_path='/static/')
 CORS(APP)
 mail= Mail(APP)
 
@@ -298,6 +298,14 @@ def user_stats():
     token = request.args.get('token')
     return src.user.user_stats_v1(token)
 
+@APP.route("/user/profile/uploadphoto/v1", methods=['POST'])
+def user_uploadphoto():
+    payload = request.get_json()
+    return src.user.user_profile_uploadphoto_v1(payload['token'], payload['img_url'],payload['x_start'],payload['y_start'],payload['x_end'],payload['y_end'])
+
+@APP.route("/static/<path:path>")
+def send_js(path):
+    return send_from_directory('', path)
 #* ------------------------------------------------------------------------------------
 
 #* SERVER RUN
