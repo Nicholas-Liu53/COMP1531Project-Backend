@@ -318,6 +318,19 @@ def test_auth_passwordreset_request():
     #* Test that a reset code exists for the registered email
     assert get_reset_code(get_user(user1['auth_user_id'])['email']) is not None
 
+#* Test that when reseting multiple times, a new code is generated every time and invalidates old one
+def test_auth_passwordreset_request_multiple():
+    clear_v1()
+    user1 = auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
+    
+    auth_passwordreset_request_v1(get_user(user1['auth_user_id'])['email'])
+    code1 = get_reset_code(get_user(user1['auth_user_id'])['email'])
+
+    auth_passwordreset_request_v1(get_user(user1['auth_user_id'])['email'])
+    code2 = get_reset_code(get_user(user1['auth_user_id'])['email'])
+
+    assert code1 != code2
+
 def test_auth_passwordreset_reset():
     clear_v1()
     #* Test that an invalid reset code raises an InputError
@@ -325,9 +338,10 @@ def test_auth_passwordreset_reset():
         auth_passwordreset_reset_v1(-1, "newpassword")
 
     user1 = auth_register_v2("caricoleman@gmail.com", "1234567", "cari", "coleman")
-    auth_passwordreset_request_v1(get_user(user1['auth_user_id'])['email'])
-    
     user2 = auth_register_v2("ericamondy@gmail.com", "1234567", "erica", "mondy")
+    auth_register_v2("hilarybently@gmail.com", "1234567", "hilary", "bently")
+    
+    auth_passwordreset_request_v1(get_user(user1['auth_user_id'])['email'])
     auth_passwordreset_request_v1(get_user(user2['auth_user_id'])['email'])
 
     reset = get_reset_code(get_user(user2['auth_user_id'])['email'])
