@@ -1,0 +1,1674 @@
+============================= test session starts ==============================
+platform linux -- Python 3.7.3, pytest-6.2.3, py-1.10.0, pluggy-0.13.1
+rootdir: /tmp_amd/kamen/export/kamen/3/cs1531/automark/tempstore, configfile: pytest.ini
+plugins: forked-1.3.0, xdist-2.2.1, hypothesis-6.1.1, timeout-1.4.2
+collected 81 items
+
+http_tests/admin_http_test.py FFFF                                       [  2%]
+http_tests/auth_http_test.py F...F.......FF                              [ 19%]
+http_tests/channel_http_test.py FFFFFFF                                  [ 28%]
+http_tests/channels_http_test.py ......                                  [ 35%]
+http_tests/dm_http_test.py F....F....F.F.....F                           [ 59%]
+http_tests/echo_http_test.py F                                           [ 60%]
+http_tests/message_http_test.py ...F..F                                  [ 69%]
+http_tests/notifications_http_test.py .......                            [ 77%]
+http_tests/other_http_test.py FF                                         [ 80%]
+http_tests/user_http_test.py FFFFFFFFFFFFFF
+
+=================================== FAILURES ===================================
+______________________ test_http_admin_user_remove_valid _______________________
+
+user1 = {'auth_user_id': 0, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjAsImxvZ2luX3RpbWUiOjE2MTkxODk4OTgsInNhbHQiOiI4NGMwZWVhZS1jMTQxLTRhOTItOTdiMS1hNzRlZWJkNjhjYjcifQ.La_IjmEFYqKsIje6pMliFm-v2yedvEY-Z-6ssvpDSHc'}
+user2 = {'auth_user_id': 1, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjEsImxvZ2luX3RpbWUiOjE2MTkxODk4OTgsInNhbHQiOiI4MzIyYTYzOC0xMTVkLTQ1YmYtYjhiOC02ZTUyZTZhOTk5ZmIifQ.SEvFDs4nBahN8lu4-6jjFbm3om27XRzaHkp_pMQGHv0'}
+
+    def test_http_admin_user_remove_valid(user1, user2):
+    
+        chan = requests.post(f"{url}channels/create/v2", json={
+            "token": user1[token],
+            "name": "Channel",
+            "is_public": True
+        })
+        channelTest = chan.json()
+    
+        requests.post(f"{url}channel/join/v2", json={
+            "token": user2[token],
+            "channel_id": channelTest[cID]
+        })
+    
+        msg = requests.post(f"{url}message/send/v2", json={
+            "token": user2[token],
+            "channel_id": channelTest[cID],
+            "message": 'Hello'
+        })
+        message = msg.json()
+    
+        #* User not an owner
+        response_1 = requests.delete(f"{url}admin/user/remove/v1", json={
+            "token": user2[token],
+            "u_id": user1[AuID]
+        })
+        assert response_1.status_code == 403
+    
+        requests.delete(f"{url}admin/user/remove/v1", json={
+            "token": user1[token],
+            "u_id": user2[AuID]
+        })
+    
+        msg_data = requests.get(f"{url}channel/messages/v2", params={
+            "token": user1[token],
+            "channel_id": channelTest[cID],
+            "start": 0
+        })
+>       message_data = msg_data.json()
+
+http_tests/admin_http_test.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/requests/models.py:900: in json
+    return complexjson.loads(self.text, **kwargs)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/__init__.py:525: in loads
+    return _default_decoder.decode(s)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:370: in decode
+    obj, end = self.raw_decode(s)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <simplejson.decoder.JSONDecoder object at 0x7f09fc7ff7b8>
+s = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>403 Forbidden</title>\n<h1>Forbidden</h1>\n<p>Only members can view messages</p>\n'
+idx = 0, _w = <built-in method match of re.Pattern object at 0x7f09fce3b9f0>
+_PY3 = True
+
+    def raw_decode(self, s, idx=0, _w=WHITESPACE.match, _PY3=PY3):
+        """Decode a JSON document from ``s`` (a ``str`` or ``unicode``
+        beginning with a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+        Optionally, ``idx`` can be used to specify an offset in ``s`` where
+        the JSON document begins.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        if idx < 0:
+            # Ensure that raw_decode bails on negative indexes, the regex
+            # would otherwise mask this behavior. #98
+            raise JSONDecodeError('Expecting value', s, idx)
+        if _PY3 and not isinstance(s, str):
+            raise TypeError("Input string must be text, not bytes")
+        # strip UTF-8 bom
+        if len(s) > idx:
+            ord0 = ord(s[idx])
+            if ord0 == 0xfeff:
+                idx += 1
+            elif ord0 == 0xef and s[idx:idx + 3] == '\xef\xbb\xbf':
+                idx += 3
+>       return self.scan_once(s, idx=_w(s, idx).end())
+E       simplejson.errors.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:400: JSONDecodeError
+_______________________ test_http_userpermissions_change _______________________
+
+user1 = {'auth_user_id': 4, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjQsImxvZ2luX3RpbWUiOjE2MTkxODk4OTgsInNhbHQiOiJhOGEwMjg1ZC02MzkzLTRkMmYtOTM3ZS05NDgzZTIzY2NlMzcifQ.Dmgdt_dNWmH_ho5SsBw0EB7OKBnvTVZ_C8LFADgU6lo'}
+user2 = {'auth_user_id': 5, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjUsImxvZ2luX3RpbWUiOjE2MTkxODk4OTgsInNhbHQiOiJhYjFjMjQ2MS0xNTY5LTRkZmEtODIwYy1lZmM0NmFmYzFjYjEifQ.WBlt8PM-iexeysujUAZ5jdBgcoSgp6DpgnAnSZccAF0'}
+user3 = {'auth_user_id': 6, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjYsImxvZ2luX3RpbWUiOjE2MTkxODk4OTgsInNhbHQiOiIxY2VkMzFkYy0yZmU3LTQ2MjEtODZiYy1kYjNlYTRiYWE4OTYifQ.uD0Dd_Ao0HwVqrYaUBd5cQUWU9xKiKbCwMEznEKsyUQ'}
+
+    def test_http_userpermissions_change(user1, user2, user3):
+    
+        #* Test 1: Test if the user gets the permissions when changed by user1
+    
+        requests.post(f"{url}admin/userpermission/change/v1", json={
+            "token": user1[token],
+            "u_id": user2[AuID],
+            "permission_id": 1}
+        )
+    
+        chan = requests.post(f"{url}channels/create/v2", json={
+            "token": user3[token],
+            "name": "channel",
+            "is_public": False}
+        )
+        channel = chan.json()
+    
+        requests.post(f"{url}channel/join/v2", json={
+            "token": user2[token],
+            "channel_id": channel[cID]}
+        )
+    
+        response = requests.get(f"{url}channel/details/v2", params={
+            'token': user2[token],
+            'channel_id': channel[cID]}
+        )
+        details = response.json()
+>       assert {
+            fName: 'User',
+            lName: '2',
+            'email': "second@gmail.com",
+            'handle_str': "user2",
+            uID: user2[AuID],
+        } in details[allMems]
+E       AssertionError: assert {'email': 'second@gmail.com', 'handle_str': 'user2', 'name_first': 'User', 'name_last': '2', ...} in [{'email': 'second@gmail.com', 'handle_str': 'user2', 'name_first': 'User', 'name_last': '2', ...}, {'email': 'third@gmail.com', 'handle_str': 'user3', 'name_first': 'User', 'name_last': '3', ...}]
+
+http_tests/admin_http_test.py:162: AssertionError
+______________________ test_http_admin_user_remove_valid _______________________
+
+user1 = {'auth_user_id': 8, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjgsImxvZ2luX3RpbWUiOjE2MTkxODk4OTgsInNhbHQiOiI5YjRmMTE1ZS1kYjA5LTQ0ODgtYTVlNi0yMTU2MWUwMGMxNjgifQ.15G__jjnwWtcxXy-0tqcE_3c28k4DhA8Vl2FbVTNAIU'}
+user2 = {'auth_user_id': 9, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjksImxvZ2luX3RpbWUiOjE2MTkxODk4OTgsInNhbHQiOiI2MjlkNzBjZi02Mzc0LTQyZTctOWJlZS1mNDIzMTlmOWI4YzYifQ.fHZv6HDzzX8c_nstahVjZYfFhJUOrlImcl42FvGL4ek'}
+
+    def test_http_admin_user_remove_valid(user1, user2):
+    
+        chan = requests.post(f"{url}channels/create/v2", json={
+            "token": user1[token],
+            "name": "Channel",
+            "is_public": True
+        })
+        channelTest = chan.json()
+    
+        requests.post(f"{url}channel/join/v2", json={
+            "token": user2[token],
+            "channel_id": channelTest[cID]
+        })
+    
+        msg = requests.post(f"{url}message/send/v2", json={
+            "token": user2[token],
+            "channel_id": channelTest[cID],
+            "message": 'Hello'
+        })
+        message = msg.json()
+    
+        #* User not an owner
+        response_1 = requests.delete(f"{url}admin/user/remove/v1", json={
+            "token": user2[token],
+            "u_id": user1[AuID]
+        })
+        assert response_1.status_code == 403
+    
+        requests.delete(f"{url}admin/user/remove/v1", json={
+            "token": user1[token],
+            "u_id": user2[AuID]
+        })
+    
+        msg_data = requests.get(f"{url}channel/messages/v2", params={
+            "token": user1[token],
+            "channel_id": channelTest[cID],
+            "start": 0
+        })
+>       message_data = msg_data.json()
+
+http_tests/admin_http_test.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/requests/models.py:900: in json
+    return complexjson.loads(self.text, **kwargs)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/__init__.py:525: in loads
+    return _default_decoder.decode(s)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:370: in decode
+    obj, end = self.raw_decode(s)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <simplejson.decoder.JSONDecoder object at 0x7f09fc7ff7b8>
+s = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>403 Forbidden</title>\n<h1>Forbidden</h1>\n<p>Only members can view messages</p>\n'
+idx = 0, _w = <built-in method match of re.Pattern object at 0x7f09fce3b9f0>
+_PY3 = True
+
+    def raw_decode(self, s, idx=0, _w=WHITESPACE.match, _PY3=PY3):
+        """Decode a JSON document from ``s`` (a ``str`` or ``unicode``
+        beginning with a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+        Optionally, ``idx`` can be used to specify an offset in ``s`` where
+        the JSON document begins.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        if idx < 0:
+            # Ensure that raw_decode bails on negative indexes, the regex
+            # would otherwise mask this behavior. #98
+            raise JSONDecodeError('Expecting value', s, idx)
+        if _PY3 and not isinstance(s, str):
+            raise TypeError("Input string must be text, not bytes")
+        # strip UTF-8 bom
+        if len(s) > idx:
+            ord0 = ord(s[idx])
+            if ord0 == 0xfeff:
+                idx += 1
+            elif ord0 == 0xef and s[idx:idx + 3] == '\xef\xbb\xbf':
+                idx += 3
+>       return self.scan_once(s, idx=_w(s, idx).end())
+E       simplejson.errors.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:400: JSONDecodeError
+_______________________ test_http_userpermissions_change _______________________
+
+user1 = {'auth_user_id': 12, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjEyLCJsb2dpbl90aW1lIjoxNjE5MTg5ODk4LCJzYWx0IjoiZjc4NjUyZGMtNTk4MC00NjMyLWFlNzgtY2FlODAxOThkN2EwIn0.Szn9OF0BTs68JZ7P4pj-wmBiYBhedH1TGKSuvBWz3gs'}
+user2 = {'auth_user_id': 13, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjEzLCJsb2dpbl90aW1lIjoxNjE5MTg5ODk4LCJzYWx0IjoiYWFhM2ZlZmItZDZiYi00M2IwLWFhZjUtNmExZDBkMzEwYTk3In0.bJFdXE8DfY5FUQVovO3FYYqrGbQs1zvtOARwhOsIkQE'}
+user3 = {'auth_user_id': 14, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjE0LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk4LCJzYWx0IjoiY2QzNWE4M2ItMzQyOS00YzNhLWJlZTEtNDVmNjEzYzRjNTI4In0.z2rs5PXKWXywopocvs-To2lJxyHr8-Iu7LJuZwQtVKo'}
+
+    def test_http_userpermissions_change(user1, user2, user3):
+    
+        #* Test 1: Test if the user gets the permissions when changed by user1
+    
+        requests.post(f"{url}admin/userpermission/change/v1", json={
+            "token": user1[token],
+            "u_id": user2[AuID],
+            "permission_id": 1}
+        )
+    
+        chan = requests.post(f"{url}channels/create/v2", json={
+            "token": user3[token],
+            "name": "channel",
+            "is_public": False}
+        )
+        channel = chan.json()
+    
+        requests.post(f"{url}channel/join/v2", json={
+            "token": user2[token],
+            "channel_id": channel[cID]}
+        )
+    
+        response = requests.get(f"{url}channel/details/v2", params={
+            'token': user2[token],
+            'channel_id': channel[cID]}
+        )
+        details = response.json()
+>       assert {
+            fName: 'User',
+            lName: '2',
+            'email': "second@gmail.com",
+            'handle_str': "user2",
+            uID: user2[AuID],
+        } in details[allMems]
+E       AssertionError: assert {'email': 'second@gmail.com', 'handle_str': 'user2', 'name_first': 'User', 'name_last': '2', ...} in [{'email': 'third@gmail.com', 'handle_str': 'user3', 'name_first': 'User', 'name_last': '3', ...}, {'email': 'second@gmail.com', 'handle_str': 'user2', 'name_first': 'User', 'name_last': '2', ...}]
+
+http_tests/admin_http_test.py:162: AssertionError
+__________________________ test_http_auth_login_valid __________________________
+
+    def test_http_auth_login_valid():
+        requests.delete(f"{url}clear/v1")
+        requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
+        r = requests.post(f"{url}auth/login/v2", json={"email": "caricoleman@gmail.com", "password": "1234567"})
+        token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+        payload = r.json()
+>       assert payload['token'] == token
+E       AssertionError: assert 'eyJ0eXAiOiJK...YBtoJGnFgjYng' == 'eyJ0eXAiOiJK...AT20JYyIi7_YU'
+E         - eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzZXNzaW9uX2lkIjoxLCJ1c2VyX2lkIjowfQ.gX9zFdDRtGh_zugBZN7DlqAfPD-0_cAT20JYyIi7_YU
+E         + eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjE2LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk4LCJzYWx0IjoiNjYzOGZhYTQtMjVlOS00YmIxLTllM2ItNjMzMTI2YWVmOTQ4In0.sOqnmtT9J-fj3accFUlWPUuTK-AWvfYBtoJGnFgjYng
+
+http_tests/auth_http_test.py:18: AssertionError
+________________________ test_http_auth_register_valid _________________________
+
+    def test_http_auth_register_valid():
+        requests.delete(f"{url}clear/v1")
+        r = requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
+        token = encode({'session_id': 0, 'user_id': 0}, SECRET, algorithm='HS256')
+        payload = r.json()
+>       assert payload["token"] == token
+E       AssertionError: assert 'eyJ0eXAiOiJK...qUHBbz9Lfz0Pg' == 'eyJ0eXAiOiJK...R8_I5RvFgXpeg'
+E         - eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzZXNzaW9uX2lkIjowLCJ1c2VyX2lkIjowfQ.mNX5f58rMYtTkp9fZydVCSZAXxviyhR8_I5RvFgXpeg
+E         + eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjE5LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk4LCJzYWx0IjoiOTQzOTNlMGYtNzVlMC00YmNkLWExZGItYmRhNGQ0ODlkYTdlIn0.CBTwG0NsyPdSC3Chfv7H5qo7nJQEk_qUHBbz9Lfz0Pg
+
+http_tests/auth_http_test.py:49: AssertionError
+_________________________ test_http_auth_logout_valid __________________________
+
+    def test_http_auth_logout_valid():
+        requests.delete(f"{url}clear/v1")
+        response_1 = requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
+        payload_1 = response_1.json()
+        response_2 = requests.post(f"{url}auth/login/v2", json={"email": "caricoleman@gmail.com", "password": "1234567"})
+        payload_2 = response_2.json()
+    
+        response_3 = requests.delete(f"{url}auth/logout/v1", json={'token': payload_1['token']})
+>       payload_3 = response_3.json()
+
+http_tests/auth_http_test.py:104: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/requests/models.py:900: in json
+    return complexjson.loads(self.text, **kwargs)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/__init__.py:525: in loads
+    return _default_decoder.decode(s)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:370: in decode
+    obj, end = self.raw_decode(s)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <simplejson.decoder.JSONDecoder object at 0x7f09fc7ff7b8>
+s = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>405 Method Not Allowed</title>\n<h1>Method Not Allowed</h1>\n<p>The method is not allowed for the requested URL.</p>\n'
+idx = 0, _w = <built-in method match of re.Pattern object at 0x7f09fce3b9f0>
+_PY3 = True
+
+    def raw_decode(self, s, idx=0, _w=WHITESPACE.match, _PY3=PY3):
+        """Decode a JSON document from ``s`` (a ``str`` or ``unicode``
+        beginning with a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+        Optionally, ``idx`` can be used to specify an offset in ``s`` where
+        the JSON document begins.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        if idx < 0:
+            # Ensure that raw_decode bails on negative indexes, the regex
+            # would otherwise mask this behavior. #98
+            raise JSONDecodeError('Expecting value', s, idx)
+        if _PY3 and not isinstance(s, str):
+            raise TypeError("Input string must be text, not bytes")
+        # strip UTF-8 bom
+        if len(s) > idx:
+            ord0 = ord(s[idx])
+            if ord0 == 0xfeff:
+                idx += 1
+            elif ord0 == 0xef and s[idx:idx + 3] == '\xef\xbb\xbf':
+                idx += 3
+>       return self.scan_once(s, idx=_w(s, idx).end())
+E       simplejson.errors.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:400: JSONDecodeError
+_______________________ test_http_auth_logout_v1_invalid _______________________
+
+    def test_http_auth_logout_v1_invalid():
+        requests.delete(f"{url}clear/v1")
+        requests.post(f"{url}auth/register/v2", json={"email": "caricoleman@gmail.com", "password": "1234567", "name_first": "cari", "name_last": "coleman"})
+    
+        token_1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+    
+        response_3 = requests.delete(f"{url}auth/logout/v1", json={'token': token_1})
+>       payload_3 = response_3.json()
+
+http_tests/auth_http_test.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/requests/models.py:900: in json
+    return complexjson.loads(self.text, **kwargs)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/__init__.py:525: in loads
+    return _default_decoder.decode(s)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:370: in decode
+    obj, end = self.raw_decode(s)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <simplejson.decoder.JSONDecoder object at 0x7f09fc7ff7b8>
+s = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>405 Method Not Allowed</title>\n<h1>Method Not Allowed</h1>\n<p>The method is not allowed for the requested URL.</p>\n'
+idx = 0, _w = <built-in method match of re.Pattern object at 0x7f09fce3b9f0>
+_PY3 = True
+
+    def raw_decode(self, s, idx=0, _w=WHITESPACE.match, _PY3=PY3):
+        """Decode a JSON document from ``s`` (a ``str`` or ``unicode``
+        beginning with a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+        Optionally, ``idx`` can be used to specify an offset in ``s`` where
+        the JSON document begins.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        if idx < 0:
+            # Ensure that raw_decode bails on negative indexes, the regex
+            # would otherwise mask this behavior. #98
+            raise JSONDecodeError('Expecting value', s, idx)
+        if _PY3 and not isinstance(s, str):
+            raise TypeError("Input string must be text, not bytes")
+        # strip UTF-8 bom
+        if len(s) > idx:
+            ord0 = ord(s[idx])
+            if ord0 == 0xfeff:
+                idx += 1
+            elif ord0 == 0xef and s[idx:idx + 3] == '\xef\xbb\xbf':
+                idx += 3
+>       return self.scan_once(s, idx=_w(s, idx).end())
+E       simplejson.errors.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:400: JSONDecodeError
+___________________________ test_http_channel_invite ___________________________
+
+user1 = {'auth_user_id': 29, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjI5LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk4LCJzYWx0IjoiOGUwMWI2NTQtYmE5ZC00M2FjLThmNzctNTZjNzlmYzAyYTg4In0.Jxl_EwJqv6B4MxuSSUmMfqRLhXNG-XGqD8sZskX4NvA'}
+user2 = {'auth_user_id': 30, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjMwLCJsb2dpbl90aW1lIjoxNjE5MTg5ODk4LCJzYWx0IjoiODIzMzhjODUtNjZiMy00ODY4LWFlZWYtYzEyMGViZjgxZmI4In0.7SeumIPqIimRYoZaa2slU-LvXaaI6d6cQU6Xbm6n5fA'}
+user3 = {'auth_user_id': 31, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjMxLCJsb2dpbl90aW1lIjoxNjE5MTg5ODk4LCJzYWx0IjoiMGU4Njc4YWYtZTM5YS00ZjFlLWIzYTQtNjJkOGMzODI0YTFhIn0.wDf14896B_c0sVg9mplTApAQJQ78JtxAYuFITRporok'}
+
+    def test_http_channel_invite(user1, user2, user3):
+    
+        responseChannel = requests.post(f"{url}channels/create/v2", json={
+            "token": user1[token],
+            "name": 'Channel1',
+            "is_public": True}
+        )
+        #* Test 1: Invite user2 into channel1 should be successful
+        channel1 = responseChannel.json()
+        requests.post(f"{url}channel/invite/v2", json={
+            "token": user1[token],
+            "channel_id": channel1[cID],
+            "u_id": user2[AuID]}
+        )
+        response = requests.get(f"{url}channel/details/v2", params={
+            'token': user1[token],
+            'channel_id': channel1[cID]}
+        )
+        details = response.json()
+>       assert {
+            fName: 'User',
+            lName: '2',
+            'email': "second@gmail.com",
+            'handle_str': "user2",
+            uID: user2[AuID],
+        } in details[allMems]
+E       AssertionError: assert {'email': 'second@gmail.com', 'handle_str': 'user2', 'name_first': 'User', 'name_last': '2', ...} in [{'email': 'second@gmail.com', 'handle_str': 'user2', 'name_first': 'User', 'name_last': '2', ...}, {'email': 'first@gmail.com', 'handle_str': 'user1', 'name_first': 'User', 'name_last': '1', ...}]
+
+http_tests/channel_http_test.py:93: AssertionError
+__________________________ test_http_channel_details ___________________________
+
+user1 = {'auth_user_id': 33, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjMzLCJsb2dpbl90aW1lIjoxNjE5MTg5ODk4LCJzYWx0IjoiY2QxNWNjOWYtMjgyMi00ZmRhLWI3MDctNWE1ZGZkODQ3Njc5In0.7WZ38dHtGUETdHkahNkitLlKWJMp1eqQmk22b86FLAM'}
+user2 = {'auth_user_id': 34, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM0LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk4LCJzYWx0IjoiOWRhNDkyMjktYmM5OS00Y2UxLWJhZDEtOWEyZGQ0YWM3ZDZlIn0.aSVVFb5JYUyXqgOOoF_sDA1ZV6nI37NmO4nik3KLCBM'}
+
+    def test_http_channel_details(user1, user2):
+    
+        responseChannel = requests.post(f"{url}channels/create/v2", json={
+            "token": user1[token],
+            "name": 'Channel1',
+            "is_public": True}
+        )
+        channel1 = responseChannel.json()
+    
+        #* Test 1: expected channel details
+        expected = {'name': "Channel1",
+            'is_public': True,
+            'owner_members':[{
+                'u_id': user1[AuID],
+                'name_first': "User",
+                'name_last': '1',
+                'email': 'first@gmail.com',
+                'handle_str': 'user1',
+            }],
+            'all_members':[{
+                'u_id': user1[AuID],
+                'name_first': "User",
+                'name_last': '1',
+                'email': 'first@gmail.com',
+                'handle_str': 'user1',
+            }]
+        }
+    
+        responseUser = requests.get(f"{url}channel/details/v2", params = {'token': user1[token], 'channel_id': channel1[cID]})
+    
+>       assert responseUser.json() == expected
+E       AssertionError: assert {'all_members...': '1', ...}]} == {'all_members...': '1', ...}]}
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'all_members': [{'email': 'first@gmail.com', 'handle_str': 'user1', 'name_first': 'User', 'name_last': '1', ...}]} != {'all_members': [{'email': 'first@gmail.com', 'handle_str': 'user1', 'name_first': 'User', 'name_last': '1', ...}]}
+E         {'owner_members': [{'email': 'first@gmail.com', 'handle_str': 'user1', 'name_first': 'User', 'name_last': '1', ...}]} != {'owner_members': [{'email': 'first@gmail.com', 'handle_str': 'user1', 'name_first': 'User', 'name_last': '1', ...}]}
+E         Use -v to get the full diff
+
+http_tests/channel_http_test.py:158: AssertionError
+___________________________ test_http_channel_leave ____________________________
+
+user1 = {'auth_user_id': 36, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM2LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiOTYyMzA3YmEtMGI5NS00ZTBmLWFjMDgtYmViOGFmM2IwMGNiIn0.Sjux86TnBr2dZSUQ-Ah88PngxhG5TRfgbuMhBhIVPS4'}
+user2 = {'auth_user_id': 37, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM3LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiYjVjNmM2MmEtYzA0YS00ZWNkLTllOTMtNGZhNjhlNGNhZjc0In0.BUtEQylcbboykW9yj2F-rxHkxSawCr4f85qXeOLi_FA'}
+user3 = {'auth_user_id': 38, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM4LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiY2ZlNjFhYzYtMjBjYy00OTQ2LWIzMWUtMzJmZjk3NzAyMjUzIn0.w1t8A37VAsFbfgvKx7cZEzCKdOa9eqRPMRqtBO6QftA'}
+user4 = {'auth_user_id': 39, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM5LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiZWZmZjRlNDctNjQwZS00ZTY5LWE1ZWQtOTViNzgwYmFkMGE1In0.m6Q9VRr_O7wgjE0Cq559-bG9gbZ4HPXpp84WC3hQrwc'}
+
+    def test_http_channel_leave(user1, user2, user3, user4):
+        #* Public channel is created by user1
+        c1 = requests.post(f"{url}channels/create/v2", json={
+            "token": user1[token],
+            "name": "TrumpPence",
+            "is_public": True
+        })
+        #* Users 2, 3 and 4 join this channel
+        requests.post(f"{url}channel/join/v2", json={
+            "token": user2[token],
+            "channel_id": c1.json()['channel_id']
+        })
+        requests.post(f"{url}channel/join/v2", json={
+            "token": user3[token],
+            "channel_id": c1.json()['channel_id']
+        })
+        requests.post(f"{url}channel/join/v2", json={
+            "token": user4[token],
+            "channel_id": c1.json()['channel_id']
+        })
+        #* Make sure they joined
+>       assert {
+            uID: user2[AuID],
+            fName: 'User',
+            lName: "2",
+            'email': "second@gmail.com",
+            'handle_str': "user2",
+        } in requests.get(f"{url}channel/details/v2", params={
+            'token': user3[token],
+            'channel_id': c1.json()['channel_id']
+        }).json()[allMems]
+E       AssertionError: assert {'email': 'second@gmail.com', 'handle_str': 'user2', 'name_first': 'User', 'name_last': '2', ...} in [{'email': 'second@gmail.com', 'handle_str': 'user2', 'name_first': 'User', 'name_last': '2', ...}, {'email': 'first@g...me_last': '3', ...}, {'email': 'fourth@gmail.com', 'handle_str': 'user4', 'name_first': 'User', 'name_last': '4', ...}]
+
+http_tests/channel_http_test.py:192: AssertionError
+____________________________ test_http_channel_join ____________________________
+
+user1 = {'auth_user_id': 41, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjQxLCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiZmRlYjVlODMtZDE3Ni00NThiLThiZmEtYjhjMzc1YmQyOGQ5In0.APeovkJEZFrXxgjKryJ_JygWb-8SuGLTlZkbCdIfsYM'}
+user2 = {'auth_user_id': 42, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjQyLCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiZTkwZjQ0M2ItMzc0ZC00YjQwLWJhZDktYmZlOTQ3NzNiNzM4In0.nHFH3ignzYRTMu4eN_PTXK3zHpe4iXJ-oB__Yn9LtJY'}
+user3 = {'auth_user_id': 43, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjQzLCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiNjVmNzZjMzUtYWVhNi00ZmQyLTkzOGMtOWQ5NzQwZWVhNjg0In0.EB3qmloACDou2SifNd0fKTGX4f6IfZpfFJva7nazQAI'}
+user4 = {'auth_user_id': 44, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjQ0LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiY2UzZDA5YzUtYzU5Ni00Y2RlLWEzZjgtNDk4ZDdjNWViMjM4In0.YSWDen5BKDctRwrfjzYR3hn38DAkGOgYlAlHrUdbY_Y'}
+
+    def test_http_channel_join(user1, user2, user3, user4):
+        #* This test is structured identically to test_channel_join in tests/channel_test.py
+        c1 = requests.post(f"{url}channels/create/v2", json={
+            "token": user1[token],
+            "name": "TrumpPence",
+            "is_public": True
+        })
+        c2 = requests.post(f"{url}channels/create/v2", json={
+            "token": user2[token],
+            "name": "BidenHarris",
+            "is_public": False
+        })
+        requests.post(f"{url}channel/join/v2", json={
+            "token": user3[token],
+            "channel_id": c1.json()['channel_id']
+        })
+>       assert requests.get(f"{url}channel/details/v2", params={
+            'token': user3[token],
+            'channel_id': c1.json()['channel_id']
+        }).json() == {
+            "name": "TrumpPence",
+            "is_public": True,
+            "owner_members": [
+                {
+                    uID: user1[AuID],
+                    'email': "first@gmail.com",
+                    fName: "User",
+                    lName: "1",
+                    'handle_str': "user1"
+                }
+            ],
+            "all_members": [
+                {
+                    uID: user1[AuID],
+                    'email': "first@gmail.com",
+                    fName: "User",
+                    lName: "1",
+                    'handle_str': "user1"
+                },
+                {
+                    uID: user3[AuID],
+                    'email': "third@gmail.com",
+                    fName: "User",
+                    lName: "3",
+                    'handle_str': "user3"
+                }
+            ]
+        }
+E       AssertionError: assert {'all_members...': '1', ...}]} == {'all_members...': '1', ...}]}
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'all_members': [{'email': 'first@gmail.com', 'handle_str': 'user1', 'name_first': 'User', 'name_last': '1', ...}, {'email': 'third@gmail.com', 'handle_str': 'user3', 'name_first': 'User', 'name_last': '3', ...}]} != {'all_members': [{'email': 'first@gmail.com', 'handle_str': 'user1', 'name_first': 'User', 'name_last': '1', ...}, {'email': 'third@gmail.com', 'handle_str': 'user3', 'name_first': 'User', 'name_last': '3', ...}]}
+E         {'owner_members': [{'email': 'first@gmail.com', 'handle_str': 'user1', 'name_first': 'U...
+E         
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+http_tests/channel_http_test.py:284: AssertionError
+__________________________ test_http_channel_addowner __________________________
+
+user1 = {'auth_user_id': 47, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjQ3LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiZDJmODY4MWUtYjcwOS00Y2Y4LThmMTktMDVlZjU0ODUwNjQ3In0.5it1_XgI8LpbkdlrfWAyL4MENF6DN2zQKYMmkaeR8X0'}
+user2 = {'auth_user_id': 48, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjQ4LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiN2FhMTEyNzktMzZmNS00NmFkLWE3YjMtZTUzOWMzMDY4YzY2In0.wrx1RwgsrLWT2xySMCcYP1aDhbyznWutxKrTyVO2Oeg'}
+user3 = {'auth_user_id': 49, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjQ5LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiMzBlNDA3NzEtOWI0Yi00ZWZjLTg2NDAtYzA2Y2U0MmE3YTRmIn0.aC62OOQVvr_oWv7SaUFzl-Y-72yUBa5ljJVqeneyQRo'}
+user4 = {'auth_user_id': 50, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjUwLCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiMzRkNTcxYjItMjgwYi00MmVlLWJkNDYtNGRmZWNkZjExMGZiIn0.GfK27d_VKrBfRdflqihtV3snpkSqIFxuvnGrYaTwnbQ'}
+
+    def test_http_channel_addowner(user1, user2, user3, user4):
+    
+        responseChannel = requests.post(f"{url}channels/create/v2", json={
+            "token": user1[token],
+            "name": 'Channel1',
+            "is_public": True}
+        )
+        channel1 = responseChannel.json()
+    
+        #* Test 1: Succesfully add owner
+    
+        requests.post(f"{url}channel/addowner/v1", json={
+            "token": user1[token],
+            "channel_id": channel1[cID],
+            "u_id": user2[AuID]}
+        )
+    
+        response = requests.get(f"{url}channel/details/v2", params={
+            'token': user1[token],
+            'channel_id': channel1[cID]}
+        )
+        details = response.json()
+    
+>       assert {
+            uID: user2[AuID],
+            fName: 'User',
+            lName: '2',
+            'email': 'second@gmail.com',
+            'handle_str': 'user2',
+        } in details[allMems]
+E       AssertionError: assert {'email': 'second@gmail.com', 'handle_str': 'user2', 'name_first': 'User', 'name_last': '2', ...} in [{'email': 'second@gmail.com', 'handle_str': 'user2', 'name_first': 'User', 'name_last': '2', ...}, {'email': 'first@gmail.com', 'handle_str': 'user1', 'name_first': 'User', 'name_last': '1', ...}]
+
+http_tests/channel_http_test.py:356: AssertionError
+________________________ test_http_channel_removeowner _________________________
+
+user1 = {'auth_user_id': 52, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjUyLCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiNjczZjg5YTgtZTk3NS00MDBlLWI1NzUtNGJmYzc0OTEwMWY0In0.WIwPIeOJGUFtDVmg5Abmj_ckEJhn1fPH1c7HSEVAa8Y'}
+user2 = {'auth_user_id': 53, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjUzLCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiYTY4ZjQ4M2UtZTM0ZS00YmRkLTlhZTgtNWQ2NGYzYWY3Zjg0In0.5ZvLCOJc6dvk2uop8nr_0_J1B2aQcuOSWD7MVlyJPdM'}
+user3 = {'auth_user_id': 54, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjU0LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiZDc0Y2EzZWMtMDA3ZS00YmM4LWIzNjktOWMyYjdjODU3ZjFhIn0.MZ301gbbIRStBahTsRfsH5sya_DgIpkVHjFU-Un2HTo'}
+user4 = {'auth_user_id': 55, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjU1LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiMTdlYjJkZjUtZDM2Yy00MGQ0LTg1YjctYWMxOGY3NDUzZmQwIn0.jALdESZfZlgpBmDB_0flO0wfWuH-ReNco-9GATQPmyY'}
+
+    def test_http_channel_removeowner(user1, user2, user3, user4):
+    
+        responseChannel = requests.post(f"{url}channels/create/v2", json={
+            "token": user1[token],
+            "name": 'Channel1',
+            "is_public": True}
+        )
+        channel1 = responseChannel.json()
+        #* Test 1 : see if successfully removed member from owner not all members
+        requests.post(f"{url}channel/addowner/v1", json={
+            "token": user1[token],
+            "channel_id": channel1[cID],
+            "u_id": user2[AuID]}
+        )
+    
+        requests.post(f"{url}channel/removeowner/v1", json={
+            "token": user2[token],
+            "channel_id": channel1[cID],
+            "u_id": user1[AuID]}
+        )
+    
+        response = requests.get(f"{url}channel/details/v2", params={
+            'token': user2[token],
+            'channel_id': channel1[cID]}
+        )
+        details = response.json()
+    
+        assert {
+            uID: user1[AuID],
+            fName: 'User',
+            lName: '1',
+            'email': 'first@gmail.com',
+            'handle_str': 'user1',
+        } not in details[ownMems]
+>       assert {
+            uID: user1[AuID],
+            fName: 'User',
+            lName: '1',
+            'email': 'first@gmail.com',
+            'handle_str': 'user1',
+        } in details[allMems]
+E       AssertionError: assert {'email': 'first@gmail.com', 'handle_str': 'user1', 'name_first': 'User', 'name_last': '1', ...} in [{'email': 'second@gmail.com', 'handle_str': 'user2', 'name_first': 'User', 'name_last': '2', ...}, {'email': 'first@gmail.com', 'handle_str': 'user1', 'name_first': 'User', 'name_last': '1', ...}]
+
+http_tests/channel_http_test.py:434: AssertionError
+__________________________ test_http_channel_messages __________________________
+
+user1 = {'auth_user_id': 57, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjU3LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiZTIyZjgwMTMtNWZhYi00NGQ0LWExMGEtNzY5MmVlNzNiMzhlIn0.4AikpE65DLeHbeMq9oSmar3bJO2Q05-Yu7bXfbs5yrg'}
+user2 = {'auth_user_id': 58, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjU4LCJsb2dpbl90aW1lIjoxNjE5MTg5ODk5LCJzYWx0IjoiMmUxMzEzMjMtMTcyOC00YTNhLTllMjAtNzM5N2I4ZjRmODQ1In0.l0af8uQk__uS9oPBpP1QG8iM1DLL9ZaM5YNnyVrrdMY'}
+
+    def test_http_channel_messages(user1, user2):
+    
+        #Create private channel by user1
+        response = requests.post(f"{url}channels/create/v2", json={
+            "token": user1[token],
+            "name": "channel1",
+            "is_public": False,
+        })
+        channel1 = response.json()
+    
+    
+        #channel ID not a valid channel
+        invalid_cID = -1
+        invalid_channel = requests.get(f"{url}channel/messages/v2", params = {
+            'token': user1[token],
+             cID: invalid_cID,
+            "start": "0"
+        })
+        assert invalid_channel.status_code == 400
+    
+        #when start is greater than # of messages in channel
+        invalid_start = requests.get(f"{url}channel/messages/v2", params = {
+            "token": user1[token],
+            cID: channel1[cID],
+            'start': 2,
+        })
+        assert invalid_start.status_code == 400
+    
+    
+        #Access error when authorised user not a member of channel
+        access_error = requests.get(f"{url}channel/messages/v2", params = {
+            "token": user2[token],
+            cID: channel1[cID],
+            'start': 0,
+        })
+        assert access_error.status_code == 403
+    
+    
+        #Success Case 1: less than 50 messages returns end as -1
+        #Send one message in channel
+        requests.post(f"{url}message/send/v2", json = {
+            "token": user1[token],
+            cID: channel1[cID],
+            "message" : "First message :)",
+        })
+    
+    
+        result = requests.get(f"{url}channel/messages/v2", params = {
+            "token": user1[token],
+            cID: channel1[cID],
+            'start': 0
+        })
+        responseUser1 = result.json()
+        expected = {
+            "len_messages": 1,
+            "start" : 0,
+            "end": -1,
+        }
+    
+        assert len(responseUser1['messages']) == expected['len_messages']
+        assert responseUser1['start'] == expected['start']
+        assert responseUser1['end'] == expected['end']
+    
+        #Success case 2: More than 50 messages returns end as start + 50
+        #Send 50 messages into dm_0
+        message_counter = 1
+        while message_counter < 51:
+            requests.post(f"{url}message/send/v2", json = {
+                "token": user1[token],
+                cID: channel1[cID],
+                "message" : f"{message_counter}",
+            })
+            message_counter += 1
+    
+        result2 = requests.get(f"{url}channel/messages/v2", params = {
+            "token": user1[token],
+            cID: channel1[cID],
+            'start': 1
+        })
+        response_2 = result2.json()
+    
+        expected_2 = {
+            "len_messages": 50,
+            "start" : 1,
+            "end": 51,
+        }
+    
+        assert len(response_2['messages']) == expected_2['len_messages']
+        assert response_2['start'] == expected_2['start']
+>       assert response_2['end'] == expected_2['end']
+E       assert -1 == 51
+
+http_tests/channel_http_test.py:591: AssertionError
+__________________________ test_http_dm_details_valid __________________________
+
+user1 = {'auth_user_id': 124, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjEyNCwibG9naW5fdGltZSI6MTYxOTE4OTg5OSwic2FsdCI6ImMzMTUwNzYwLTlkOTItNGU1ZC04M2I1LTJkMDg1Y2EwODFkZCJ9.PhjKi4bUJHKLzTx8gSbP5NaWhDFn9n0WSlY9221NaFU'}
+user2 = {'auth_user_id': 125, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjEyNSwibG9naW5fdGltZSI6MTYxOTE4OTg5OSwic2FsdCI6IjE3NTU1OGRlLTkxYTAtNGQ0Mi05NjY5LTU5ODZjNTc0MTc3MSJ9.hOxrE5c5t6QFRZ-XfKEYy5t4jJTWenwA6DomgIEqir0'}
+
+    def test_http_dm_details_valid(user1, user2):
+        dmResponse = requests.post(f"{url}dm/create/v1", json={
+            "token": user1[token],
+            "u_ids": [user2[AuID]]
+        })
+        dm1 = dmResponse.json()
+        expected = {
+            Name: 'user1, user2',
+            'members': [{
+                uID: user1[AuID],
+                fName: "User",
+                lName: '1',
+                'email': 'first@gmail.com',
+                handle: 'user1',
+            }, {
+                uID: user2[AuID],
+                fName: "User",
+                lName: '2',
+                'email': 'second@gmail.com',
+                handle: 'user2',
+            }
+            ]
+        }
+        responseUser1 = requests.get(f"{url}dm/details/v1", params = {'token': user1[token], 'dm_id': dm1[dmID]})
+        responseUser2 = requests.get(f"{url}dm/details/v1", params = {'token': user2[token], 'dm_id': dm1[dmID]})
+    
+>       assert responseUser1.json() == expected
+E       AssertionError: assert {'members': [...user1, user2'} == {'members': [...user1, user2'}
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'members': [{'email': 'second@gmail.com', 'handle_str': 'user2', 'name_first': 'User', 'name_last': '2', ...}, {'email': 'first@gmail.com', 'handle_str': 'user1', 'name_first': 'User', 'name_last': '1', ...}]} != {'members': [{'email': 'first@gmail.com', 'handle_str': 'user1', 'name_first': 'User', 'name_last': '1', ...}, {'email': 'second@gmail.com', 'handle_str': 'user2', 'name_first': 'User', 'name_last': '2', ...}]}
+E         Use -v to get the full diff
+
+http_tests/dm_http_test.py:97: AssertionError
+_____________________________ test_http_dm_create ______________________________
+
+user1 = {'auth_user_id': 138, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjEzOCwibG9naW5fdGltZSI6MTYxOTE4OTg5OSwic2FsdCI6IjQwNjk2NDA4LTNhMTktNGNhZS04NjUyLTFkNDAwM2JjMDllOSJ9.1CbUcv-MY4iTSevdIS_lOp-BHQZMhVTt3w0fWRqP7Kg'}
+user2 = {'auth_user_id': 139, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjEzOSwibG9naW5fdGltZSI6MTYxOTE4OTg5OSwic2FsdCI6IjEzNWU5N2RkLTZlMWItNDY2Zi04Njc1LTQxMDkyYWFmNGVmNCJ9.7VnXFsL18wY9ZomcYLFqq_W1i1IqL95zhQaIWelgOAs'}
+
+    def test_http_dm_create(user1, user2):
+        dmResponse = requests.post(f"{url}dm/create/v1", json={
+            "token": user1[token],
+            "u_ids": [user2[AuID]]
+        })
+    
+>       assert dmResponse.json() == {
+            dmID: 0,
+            'dm_name': 'user1, user2',
+        }
+E       AssertionError: assert {'dm_id': 140...user1, user2'} == {'dm_id': 0, ...user1, user2'}
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'dm_id': 140} != {'dm_id': 0}
+E         Use -v to get the full diff
+
+http_tests/dm_http_test.py:147: AssertionError
+________________________ test_http_dm_invite_invalid_dm ________________________
+
+user1 = {'auth_user_id': 149, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjE0OSwibG9naW5fdGltZSI6MTYxOTE4OTg5OSwic2FsdCI6ImY2ZThlNWM3LTE1MTgtNDBjMi04ZGFmLTkxMDFlNmQ1NTM1YiJ9.1LAWdXHmB2nSpQklZFPIbJI4WGmthyMSsIAhXEe7C6U'}
+user2 = {'auth_user_id': 150, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjE1MCwibG9naW5fdGltZSI6MTYxOTE4OTg5OSwic2FsdCI6ImYyYmJhYjY2LThiMzItNGVhNi05MjE2LWE1OGYzYTljNzQwOSJ9.L0cifuWjAm_Cef1JB3BWl37t4u505t0dpui7pfdKwnk'}
+
+    def test_http_dm_invite_invalid_dm(user1, user2):
+        invalid_dm_id = -1
+        invalid_dm = requests.post(f"{url}dm/invite/v1", json={
+            "token": user1[token],
+            dmID: invalid_dm_id,
+            uID: [user2[AuID]],
+        })
+>       assert invalid_dm.status_code == 400
+E       assert 500 == 400
+E        +  where 500 = <Response [500]>.status_code
+
+http_tests/dm_http_test.py:216: AssertionError
+_______________________ test_http_dm_invite_access_error _______________________
+
+user1 = {'auth_user_id': 155, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjE1NSwibG9naW5fdGltZSI6MTYxOTE4OTg5OSwic2FsdCI6IjE3OThlOWUwLWY2YjgtNDYyMC1iZjUxLTExYTQzMTNlYmU0YSJ9.glAAb67i2FyfDbrTqFgdJVftgX0IooBCpcQJS_vWdwM'}
+user2 = {'auth_user_id': 156, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjE1NiwibG9naW5fdGltZSI6MTYxOTE4OTg5OSwic2FsdCI6ImE3NDk1MGFiLTQzZGMtNDhjNS04ZmQ4LTEzMWExMTc4MWZkYiJ9.oxqegy2T3itO1a6a2WyQVKyx-3Gki9UB58bc08uPNok'}
+user3 = {'auth_user_id': 157, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjE1NywibG9naW5fdGltZSI6MTYxOTE4OTg5OSwic2FsdCI6IjczODYyOTE2LWZlMjctNGYzMS04MDNhLTNlMDllMjNhNGQ1MCJ9.XGSHYGR7rkomh55qlry1rfUn-Ax_iNQjwrU8Fc_Ahik'}
+
+    def test_http_dm_invite_access_error(user1, user2, user3):
+        #Create dm with dm_id 0 containing user1 and user2
+        response = requests.post(f"{url}dm/create/v1", json={
+            "token": user1[token],
+            "u_ids": [user2[AuID]]
+        })
+        dm_0 = response.json()
+    
+        access_error = requests.post(f"{url}dm/invite/v1", json={
+            "token": user3[token],
+            dmID: dm_0[dmID],
+            uID: user2[AuID],
+        })
+>       assert access_error.status_code == 403
+E       assert 400 == 403
+E        +  where 400 = <Response [400]>.status_code
+
+http_tests/dm_http_test.py:250: AssertionError
+____________________________ test_http_dm_messages _____________________________
+
+user1 = {'auth_user_id': 176, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjE3NiwibG9naW5fdGltZSI6MTYxOTE4OTg5OSwic2FsdCI6IjFkZWExMWRhLTU2OGUtNGJkYy1hZTUwLTMxM2IxOTcwMTUyZiJ9.th0m-Oa12Bt1O1JAvPIjbPdQBQMdMnc99EfUL8v-JB8'}
+user2 = {'auth_user_id': 177, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjE3NywibG9naW5fdGltZSI6MTYxOTE4OTg5OSwic2FsdCI6Ijk2MmIzZTIwLTVhZGMtNGY0MS1hOTdkLTE4OWYzNWNkY2Y3NSJ9.FGYztRyGEPHB-ySYnWf9k93SHVdMeNpRIYBg35Kl5z8'}
+user3 = {'auth_user_id': 178, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjE3OCwibG9naW5fdGltZSI6MTYxOTE4OTg5OSwic2FsdCI6IjBhMjgwYmZhLTM3ZjItNGM3Zi1hOTUwLTE5NDYzN2VmYWVhYiJ9.uvFnPHCA4-OJkqhV3pXEFymNzCn-orujdLqwVFQsw1I'}
+
+    def test_http_dm_messages(user1, user2, user3):
+        #Create dm with dm_id 0
+        response = requests.post(f"{url}dm/create/v1", json={
+            "token": user1[token],
+            "u_ids": [user2[AuID]],
+        })
+    
+        dm_0 = response.json()
+        requests.post(f"{url}message/senddm/v1", json={
+            "token": user1[token],
+            dmID: dm_0[dmID],
+            "message" : "First message :)",
+        })
+    
+        #Success case 1: Less than 50 messages returns end as -1
+        result = requests.get(f"{url}dm/messages/v1", params = {
+            "token": user1[token],
+            dmID: dm_0[dmID],
+            'start': 0
+        })
+        responseUser1 = result.json()
+    
+        expected = {
+            "len_messages": 1,
+            'start': 0,
+            "end": -1,
+        }
+    
+        assert len(responseUser1['messages']) == expected['len_messages']
+        assert responseUser1['start'] == expected['start']
+        assert responseUser1['end'] == expected['end']
+    
+    
+        #Success case 2: More than 50 messages returns end as 'start' + 50
+        #Send 50 messages into dm_0
+        message_counter = 1
+        while message_counter < 51:
+            requests.post(f"{url}message/senddm/v1", json = {
+                "token": user1[token],
+                dmID: dm_0[dmID],
+                "message" : f"{message_counter}",
+            })
+            message_counter += 1
+    
+        result2 = requests.get(f"{url}dm/messages/v1", params = {
+            'token': user2[token],
+            dmID: dm_0[dmID],
+            'start': 1
+        })
+    
+        response_2 = result2.json()
+    
+        expected_2 = {
+            'len_messages': 50,
+            'start' : 1,
+            'end': 51,
+        }
+    
+        assert len(response_2['messages']) == expected_2['len_messages']
+        assert response_2['start'] == expected_2['start']
+>       assert response_2['end'] == expected_2['end']
+E       assert -1 == 51
+
+http_tests/dm_http_test.py:417: AssertionError
+__________________________________ test_echo ___________________________________
+
+    def test_echo():
+        '''
+        A simple test to check echo
+        '''
+        resp = requests.get(config.url + 'echo', params={'data': 'hello'})
+>       assert json.loads(resp.text) == {'data': 'hello'}
+
+http_tests/echo_http_test.py:11: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.7/json/__init__.py:348: in loads
+    return _default_decoder.decode(s)
+/usr/lib/python3.7/json/decoder.py:337: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x7f09fcfce390>
+s = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>404 Not Found</title>\n<h1>Not Found</h1>\n<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>\n'
+idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/usr/lib/python3.7/json/decoder.py:355: JSONDecodeError
+_________________________ test_http_message_share_todm _________________________
+
+user1 = {'auth_user_id': 257, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjI1NywibG9naW5fdGltZSI6MTYxOTE4OTkwMCwic2FsdCI6IjUyMmEwMGZiLTNhODMtNGQ2MS04MWRjLWFhZGI0YzhmMzE3YyJ9.QWQMC-44CroAhMqGUmm5zKKdzuiNd2kX8CSTyBX50D4'}
+user2 = {'auth_user_id': 258, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjI1OCwibG9naW5fdGltZSI6MTYxOTE4OTkwMCwic2FsdCI6Ijg2YTZhMWFlLWIzNzMtNGQwYS05MGJmLWI2NzZkM2E3ZjU0ZSJ9.JUnlA6kJKdVcQNh7HqRywGTdeKphCQsCE406ta_kG04'}
+user3 = {'auth_user_id': 259, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjI1OSwibG9naW5fdGltZSI6MTYxOTE4OTkwMCwic2FsdCI6IjcwMWM4NWY0LTY5YjQtNDVlYi1iODE0LWUzZGMyMTJhY2E4YyJ9.-EXZi5VN2I17srypRZUs_zolAXIJdgI6hGwmpsfIwGA'}
+user4 = {'auth_user_id': 260, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjI2MCwibG9naW5fdGltZSI6MTYxOTE4OTkwMCwic2FsdCI6IjcxYTk4ZDAyLTQyYmItNGQ2Yy05ZWUzLWI5MzNmNTM2NmNkZiJ9.4p5QjoLY7s0ELTfAkq0MYd-oaql1gj0fjKinkXNTLg0'}
+
+    def test_http_message_share_todm(user1, user2, user3, user4):
+    
+        #* Test 1: create a channel and dm and share a channel message to the dm
+        responseChannel = requests.post(f"{url}channels/create/v2", json={
+            "token": user1[token],
+            "name": 'Channel',
+            "is_public": True}
+        )
+        channel = responseChannel.json()
+        requests.post(f"{url}channel/invite/v2", json={
+            "token": user1[token],
+            "channel_id": channel[cID],
+            "u_id": user2[AuID]}
+        )
+        dmresponse = requests.post(f"{url}dm/create/v1", json={
+            "token": user2[token],
+            "u_ids": [user3[AuID],user4[AuID]]}
+        )
+        dm = dmresponse.json()
+        ogmsg = requests.post(f"{url}message/send/v2", json={
+            "token": user1[token],
+            "channel_id": channel['channel_id'],
+            "message": 'hi'}
+        )
+        ogMessage = ogmsg.json()
+        user2[token], ogMessage['message_id'],'', -1, dm[dmID]
+        response = requests.post(f"{url}message/share/v1", json={
+            "token": user2[token],
+            "og_message_id": ogMessage['message_id'],
+            "message": '',
+            "channel_id": -1,
+            dmID: dm[dmID]
+            })
+        shared = response.json()
+    
+        check = requests.get(f"{url}dm/messages/v1", params={
+            "token": user2[token],
+            dmID: dm[dmID],
+            'start' : 0,}
+        )
+    
+        # verify message has been sent
+        checklog = check.json()
+        messageFound = False
+        for messageDict in checklog['messages']:
+>           if shared['message_id'] == messageDict['message_id']:
+E           KeyError: 'message_id'
+
+http_tests/message_http_test.py:383: KeyError
+__________________________ test_http_senddm_multiple ___________________________
+
+user1 = {'auth_user_id': 272, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjI3MiwibG9naW5fdGltZSI6MTYxOTE4OTkwMCwic2FsdCI6Ijc1NzZjMDdlLWY2MmYtNGQyOC04ZWU1LTAwY2FjNTg4NGE3NCJ9.OPA9wBc5u_0m3GcfLGOmoOZ9y5qq-SWW6lSpcPm4L7g'}
+user2 = {'auth_user_id': 273, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjI3MywibG9naW5fdGltZSI6MTYxOTE4OTkwMCwic2FsdCI6IjIwOTk0ODc2LTI2OGQtNDU0Zi1hYzA0LTY2MjAwZTA4YjNlMCJ9.XzGx4KZaEvy9OO71ufn5TfiVpJU8MskBPuHKwJT19Zs'}
+
+    def test_http_senddm_multiple(user1, user2):
+        dmResponse = requests.post(f"{url}dm/create/v1", json={
+            "token": user1[token],
+            "u_ids": [user2[AuID]]
+        })
+        dm1 = dmResponse.json()
+    
+        response0 = requests.post(f"{url}message/senddm/v1", json={
+            token: user1[token],
+            dmID: dm1[dmID],
+            'message': ''
+        })
+        message0 = response0.json()
+>       assert message0 == {'message_id': 0}
+E       AssertionError: assert {'message_id': 275} == {'message_id': 0}
+E         Differing items:
+E         {'message_id': 275} != {'message_id': 0}
+E         Use -v to get the full diff
+
+http_tests/message_http_test.py:444: AssertionError
+__________________________ test_http_search_channels ___________________________
+
+user1 = {'auth_user_id': 353, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM1MywibG9naW5fdGltZSI6MTYxOTE4OTkwMCwic2FsdCI6IjliOGRiZThiLTMyYmYtNDg1MC05YWY3LTBlZjE4ZjEzZGNiYiJ9.gM4YlR-TJSsQOdLhihTh0FDlwjJjVQ_n3NtX5Ka9JPc'}
+user2 = {'auth_user_id': 354, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM1NCwibG9naW5fdGltZSI6MTYxOTE4OTkwMCwic2FsdCI6IjE4NzM4ZjgyLTIyZmEtNGQ2Ny05YmZkLWE2YmFlNjEwZGNmYiJ9.9lUR3wOyC93Q3nn-z2C9M53l_NsMUJrstM8xk_scoow'}
+user3 = {'auth_user_id': 355, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM1NSwibG9naW5fdGltZSI6MTYxOTE4OTkwMCwic2FsdCI6ImE0ODc2MDIwLTExN2YtNDkyZC04MDFkLWZmYTg0NDY5YzFhMSJ9.AlY3-smdQLSbe1Co7Gc9wI0I82K9sAznJkk3UweRLsI'}
+user4 = {'auth_user_id': 356, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM1NiwibG9naW5fdGltZSI6MTYxOTE4OTkwMCwic2FsdCI6IjliNTk0YWY5LWExMDYtNDA4Mi1hMDNkLTJmNmEwNGZlNzdlNyJ9.6QxVXX2FOfC4hL0h7m6OEKblOXHuvYqLZ6z4AWtVVRU'}
+user5 = {'auth_user_id': 357, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM1NywibG9naW5fdGltZSI6MTYxOTE4OTkwMCwic2FsdCI6IjRjZmIzMDljLTY5NWYtNGEwYy05MGZjLTMzMGIxZmY3YjY2YiJ9.ZteCc6uuJk6qDy1Jl1gHYj3V29xej86l9Z8YahTSrKg'}
+channel1 = {'channel_id': 358}, channel2 = {'channel_id': 359}
+
+    def test_http_search_channels(user1, user2, user3, user4, user5, channel1, channel2):
+        #* This test is structured identically to test_search_channels in tests/other_test.py
+        assert requests.get(f"{url}search/v2", params={
+            "token": user5[token],
+            "query_str": "om"
+        }).json()['messages'] == []
+        requests.post(f"{url}channel/join/v2", json={
+            "token": user3[token],
+            "channel_id": channel1['channel_id']
+        })
+        requests.post(f"{url}channel/invite/v2", json={
+            "token": user2[token],
+            "channel_id": channel2[cID],
+            "u_id": user4[AuID]
+        })
+        requests.post(f"{url}channel/invite/v2", json={
+            "token": user1[token],
+            "channel_id": channel1[cID],
+            "u_id": user5[AuID]
+        })
+        requests.post(f"{url}channel/invite/v2", json={
+            "token": user2[token],
+            "channel_id": channel2[cID],
+            "u_id": user5[AuID]
+        })
+        requests.post(f"{url}message/send/v2", json={
+            "token": user1[token],
+            "channel_id": channel1['channel_id'],
+            "message": "Welcome"
+        }).json()
+        requests.post(f"{url}message/send/v2", json={
+            "token": user2[token],
+            "channel_id": channel2['channel_id'],
+            "message": "Akeome"
+        }).json()
+        requests.post(f"{url}message/send/v2", json={
+            "token": user3[token],
+            "channel_id": channel1['channel_id'],
+            "message": "omg"
+        }).json()
+        requests.post(f"{url}message/send/v2", json={
+            "token": user4[token],
+            "channel_id": channel2['channel_id'],
+            "message": "Nomnom"
+        }).json()
+        requests.post(f"{url}message/send/v2", json={
+            "token": user3[token],
+            "channel_id": channel1['channel_id'],
+            "message": "Bruh haha"
+        }).json()
+        messageFound = False
+        for messages in requests.get(f"{url}search/v2", params={
+            "token": user5[token],
+            "query_str": "om"
+        }).json()['messages']:
+            if messages['message'] == "Welcome":
+                messageFound = True
+        assert messageFound
+        messageFound = False
+        for messages in requests.get(f"{url}search/v2", params={
+            "token": user5[token],
+            "query_str": "om"
+        }).json()['messages']:
+            print(messages)
+            if messages['message'] == "Akeome":
+                messageFound = True
+        assert messageFound
+        messageFound = False
+        for messages in requests.get(f"{url}search/v2", params={
+            "token": user5[token],
+            "query_str": "om"
+        }).json()['messages']:
+            if messages['message'] == "omg":
+                messageFound = True
+        assert messageFound
+        messageFound = False
+        for messages in requests.get(f"{url}search/v2", params={
+            "token": user5[token],
+            "query_str": "om"
+        }).json()['messages']:
+            if messages['message'] == "Nomnom":
+                messageFound = True
+        assert messageFound
+    
+        messageFound = False
+        for messages in requests.get(f"{url}search/v2", params={
+            "token": user5[token],
+            "query_str": "om"
+        }).json()['messages']:
+            if messages['message'] == "Bruh haha":
+                messageFound = True
+        assert not messageFound
+    
+        tooLongMessage = ""
+        for _ in range(1002):
+            tooLongMessage += "@"
+        requests.get(f"{url}search/v2", params={
+            "token": user5[token],
+            "query_str": tooLongMessage
+        }).status_code == 400
+    
+        messageFound = False
+        for messages in requests.get(f"{url}search/v2", params={
+            "token": user2[token],
+            "query_str": "om"
+        }).json()['messages']:
+            if messages['message'] == "omg":
+                messageFound = True
+        assert not messageFound
+    
+        requests.post(f"{url}message/send/v2", json={
+            "token": user4[token],
+            "channel_id": channel2['channel_id'],
+            "message": "Joe Biden"
+        }).json()
+        messageFound = False
+        for messages in requests.get(f"{url}search/v2", params={
+            "token": user5[token],
+            "query_str": "jOE bIDEN"
+        }).json()['messages']:
+            if messages['message'] == "Joe Biden":
+                messageFound = True
+>       assert messageFound
+E       assert False
+
+http_tests/other_http_test.py:235: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{'is_pinned': False, 'message': 'Welcome', 'message_id': 360, 'reacts': [{'is_this_user_reacted': False, 'react_id': 1, 'u_ids': []}], 'time_created': 1619189900, 'u_id': 353}
+{'is_pinned': False, 'message': 'Akeome', 'message_id': 361, 'reacts': [{'is_this_user_reacted': False, 'react_id': 1, 'u_ids': []}], 'time_created': 1619189900, 'u_id': 354}
+{'is_pinned': False, 'message': 'omg', 'message_id': 362, 'reacts': [{'is_this_user_reacted': False, 'react_id': 1, 'u_ids': []}], 'time_created': 1619189900, 'u_id': 355}
+{'is_pinned': False, 'message': 'Nomnom', 'message_id': 363, 'reacts': [{'is_this_user_reacted': False, 'react_id': 1, 'u_ids': []}], 'time_created': 1619189900, 'u_id': 356}
+_____________________________ test_http_search_dms _____________________________
+
+user1 = {'auth_user_id': 366, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM2NiwibG9naW5fdGltZSI6MTYxOTE4OTkwMCwic2FsdCI6IjBjY2U3YWY5LWNjNGQtNDNjMC1iYjhiLTk5MTIyMzNmY2FjMyJ9.fdwYqNxd3Uusu79g6Whuuw8kISo25zJF5KkU5w7_CPY'}
+user2 = {'auth_user_id': 367, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM2NywibG9naW5fdGltZSI6MTYxOTE4OTkwMCwic2FsdCI6ImM2MjM4ZDBiLTZmZGUtNDMxMi1iYThmLWE4MDFiYThiYTYzMSJ9.iyQ-R6CTtQlbhKulZerckoL9U4Bcu4_JNA754CNwO-Y'}
+user3 = {'auth_user_id': 368, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM2OCwibG9naW5fdGltZSI6MTYxOTE4OTkwMCwic2FsdCI6ImI3OTY5NzE5LTJlYjctNDk0MS1hMTYyLTJmZjQ2ZDdhMWMzZiJ9.pgy2cP3Ox-hfZcVRZgNkxT1G5hT9pBTR7CRfM5E06d4'}
+dm1 = {'dm_id': 369, 'dm_name': 'user1, user2'}
+
+    def test_http_search_dms(user1, user2, user3, dm1):
+        #* This test is structured identically to test_search_dms in tests/other_test.py
+        requests.post(f"{url}message/senddm/v1", json={
+            "token": user1[token],
+            "dm_id": dm1[dmID],
+            "message": "Biden Harris 2020"
+        })
+        messageFound = False
+        for messages in requests.get(f"{url}search/v2", params={
+            "token": user2[token],
+            "query_str": "bIDEN h"
+        }).json()['messages']:
+            if messages['message'] == "Biden Harris 2020":
+                messageFound = True
+>       assert messageFound
+E       assert False
+
+http_tests/other_http_test.py:251: AssertionError
+______________________ test_http_user_profile_invalid_uid ______________________
+
+user1 = {'auth_user_id': 371, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM3MSwibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6IjA3MzI3YWQ3LTMwOWMtNDhlMS05ZDVhLTU5YWNhNDNmZDllYSJ9.0UJ3a_XuEGrj7jhrMoEbVZtpfkyIHWcD37-yx531mtA'}
+
+    def test_http_user_profile_invalid_uid(user1):
+        requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
+        token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+        response = requests.get(f"{url}user/profile/v2", params={'token': token, 'u_id': 1})
+>       assert response.status_code == 400
+E       assert 403 == 400
+E        +  where 403 = <Response [403]>.status_code
+
+http_tests/user_http_test.py:39: AssertionError
+_________________________ test_http_user_setname_valid _________________________
+
+user1 = {'auth_user_id': 372, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM3MiwibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6ImM4Nzc5ZWVlLTMxYjgtNGEyNi05ZGUwLTcxNDRlZjAxYjE1ZiJ9.109AwG_dEYyj2e5IEcSCuxLCeyhclX49PCzEaoCfALs'}
+
+    def test_http_user_setname_valid(user1):
+        requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
+        token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+        response_1 = requests.put(f"{url}user/profile/setname/v2", json={'token': token, 'name_first': 'kari', 'name_last': 'koleman'})
+>       payload_1 = response_1.json()
+
+http_tests/user_http_test.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/requests/models.py:900: in json
+    return complexjson.loads(self.text, **kwargs)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/__init__.py:525: in loads
+    return _default_decoder.decode(s)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:370: in decode
+    obj, end = self.raw_decode(s)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <simplejson.decoder.JSONDecoder object at 0x7f09fc7ff7b8>
+s = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>403 Forbidden</title>\n<h1>Forbidden</h1>\n<p>Invalid token</p>\n'
+idx = 0, _w = <built-in method match of re.Pattern object at 0x7f09fce3b9f0>
+_PY3 = True
+
+    def raw_decode(self, s, idx=0, _w=WHITESPACE.match, _PY3=PY3):
+        """Decode a JSON document from ``s`` (a ``str`` or ``unicode``
+        beginning with a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+        Optionally, ``idx`` can be used to specify an offset in ``s`` where
+        the JSON document begins.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        if idx < 0:
+            # Ensure that raw_decode bails on negative indexes, the regex
+            # would otherwise mask this behavior. #98
+            raise JSONDecodeError('Expecting value', s, idx)
+        if _PY3 and not isinstance(s, str):
+            raise TypeError("Input string must be text, not bytes")
+        # strip UTF-8 bom
+        if len(s) > idx:
+            ord0 = ord(s[idx])
+            if ord0 == 0xfeff:
+                idx += 1
+            elif ord0 == 0xef and s[idx:idx + 3] == '\xef\xbb\xbf':
+                idx += 3
+>       return self.scan_once(s, idx=_w(s, idx).end())
+E       simplejson.errors.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:400: JSONDecodeError
+________________ test_http_user_setname_invalid_long_first_name ________________
+
+user1 = {'auth_user_id': 373, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM3MywibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6ImQ3ODFlNTc5LTdmNmEtNDZmYi05NzM3LTMyYTYxMTM2YjNhMSJ9.JsqMzoGMValX_Kc0tf1wMaPIIj2PTHAD7tOW7qlcjVQ'}
+
+    def test_http_user_setname_invalid_long_first_name(user1):
+        requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
+        token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+        response = requests.put(f"{url}user/profile/setname/v2", json={'token': token, 'name_first': 'kariiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii', 'name_last': 'koleman'})
+>       assert response.status_code == 400
+E       assert 403 == 400
+E        +  where 403 = <Response [403]>.status_code
+
+http_tests/user_http_test.py:67: AssertionError
+________________ test_http_user_setname_invalid_long_last_name _________________
+
+user1 = {'auth_user_id': 374, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM3NCwibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6ImM3OTI0YmIyLTNiOWUtNGUxMi1hNTQ2LTk2MzQ3YTA0MmZhOCJ9.pzsysdZ7mU8tRHhLrKSVRSiAQlQ1oEVglJoflbpSKu4'}
+
+    def test_http_user_setname_invalid_long_last_name(user1):
+        requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
+        token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+        response = requests.put(f"{url}user/profile/setname/v2", json={'token': token, 'name_first': 'kari', 'name_last': 'kolemaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaan'})
+>       assert response.status_code == 400
+E       assert 403 == 400
+E        +  where 403 = <Response [403]>.status_code
+
+http_tests/user_http_test.py:74: AssertionError
+_________________ test_http_user_setname_invalid_no_first_name _________________
+
+user1 = {'auth_user_id': 375, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM3NSwibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6IjA1ZWYyMGFjLTQzYzktNDJhZC05MDAwLWFkOTgzMGUwNzg3YSJ9.GxnfX9F8tRx1VrMrRdZ0FCYOC-aRiwhvlFfnTrtJ378'}
+
+    def test_http_user_setname_invalid_no_first_name(user1):
+        requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
+        token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+        response = requests.put(f"{url}user/profile/setname/v2", json={'token': token, 'name_first': '', 'name_last': 'koleman'})
+>       assert response.status_code == 400
+E       assert 403 == 400
+E        +  where 403 = <Response [403]>.status_code
+
+http_tests/user_http_test.py:81: AssertionError
+_________________ test_http_user_setname_invalid_no_last_name __________________
+
+user1 = {'auth_user_id': 376, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM3NiwibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6IjQ2ZDJiZjRkLTZkNTEtNDk3NC05MTlhLTM1Zjg4NDllNjJlMyJ9.Jo4Tk0Pn7SQe1D2uYXPajsqMNy8HE3bLjMmsEKcpaRs'}
+
+    def test_http_user_setname_invalid_no_last_name(user1):
+        requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
+        token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+        response = requests.put(f"{url}user/profile/setname/v2", json={'token': token, 'name_first': 'kari', 'name_last': ''})
+>       assert response.status_code == 400
+E       assert 403 == 400
+E        +  where 403 = <Response [403]>.status_code
+
+http_tests/user_http_test.py:88: AssertionError
+________________________ test_http_user_setemail_valid _________________________
+
+user1 = {'auth_user_id': 377, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM3NywibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6ImM0YWY1MWM4LTcwZDEtNGJkMy1hMWJkLTk4YjBkMTRhMTkxMSJ9.-KqGtjWTezQGJOA2VeYulh5WtAe-Y_O4-wwWVfFMQlc'}
+
+    def test_http_user_setemail_valid(user1):
+        requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
+        token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+        response_1 = requests.put(f"{url}user/profile/setemail/v2", json={'token': token, 'email': 'karicoleman@gmail.com'})
+>       payload_1 = response_1.json()
+
+http_tests/user_http_test.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/requests/models.py:900: in json
+    return complexjson.loads(self.text, **kwargs)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/__init__.py:525: in loads
+    return _default_decoder.decode(s)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:370: in decode
+    obj, end = self.raw_decode(s)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <simplejson.decoder.JSONDecoder object at 0x7f09fc7ff7b8>
+s = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>403 Forbidden</title>\n<h1>Forbidden</h1>\n<p>Invalid token</p>\n'
+idx = 0, _w = <built-in method match of re.Pattern object at 0x7f09fce3b9f0>
+_PY3 = True
+
+    def raw_decode(self, s, idx=0, _w=WHITESPACE.match, _PY3=PY3):
+        """Decode a JSON document from ``s`` (a ``str`` or ``unicode``
+        beginning with a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+        Optionally, ``idx`` can be used to specify an offset in ``s`` where
+        the JSON document begins.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        if idx < 0:
+            # Ensure that raw_decode bails on negative indexes, the regex
+            # would otherwise mask this behavior. #98
+            raise JSONDecodeError('Expecting value', s, idx)
+        if _PY3 and not isinstance(s, str):
+            raise TypeError("Input string must be text, not bytes")
+        # strip UTF-8 bom
+        if len(s) > idx:
+            ord0 = ord(s[idx])
+            if ord0 == 0xfeff:
+                idx += 1
+            elif ord0 == 0xef and s[idx:idx + 3] == '\xef\xbb\xbf':
+                idx += 3
+>       return self.scan_once(s, idx=_w(s, idx).end())
+E       simplejson.errors.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:400: JSONDecodeError
+____________________ test_http_user_setemail_invalid_email _____________________
+
+user1 = {'auth_user_id': 378, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM3OCwibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6IjNjNDI3ODU0LWEwYmEtNGIxYi1iNTZjLTg0NGE3NDE5MTUwMyJ9.D0sPJze2nkjdwgvd8IvTpUEK6tA4UeI_bGSiWG4Tj8Y'}
+
+    def test_http_user_setemail_invalid_email(user1):
+        requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
+        token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+        response = requests.put(f"{url}user/profile/setemail/v2", json={'token': token, 'email': 'karicoleman.com'})
+>       assert response.status_code == 400
+E       assert 403 == 400
+E        +  where 403 = <Response [403]>.status_code
+
+http_tests/user_http_test.py:115: AssertionError
+_________________ test_http_user_setemail_invalid_email_in_use _________________
+
+user1 = {'auth_user_id': 379, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM3OSwibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6ImQ1NDUzMjNmLWM3NWEtNDA5Yi05NzI3LTBiZDBmOGE4OTQxZSJ9.qM-9kNU5l1B5Hvmg4tqSD1CGgWjcSiTtEToHHTGml_8'}
+user2 = {'auth_user_id': 380, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM4MCwibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6IjBiYjkxYmU1LTIyZjktNGVhOC1iM2VmLWNlMmUzZDExODM5YiJ9.HKUd1er1Rql0bNOVF6st8DCGV5lb3p70TFXIuyyJURs'}
+
+    def test_http_user_setemail_invalid_email_in_use(user1,user2):
+        requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
+        token_1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+        requests.post(f"{url}auth/login/v2", json={'email': "ericamondy@gmail.com", "password": "1234567"})
+        token_2 = encode({'session_id': 1, 'user_id': 1}, SECRET, algorithm='HS256')
+        requests.put(f"{url}user/profile/setemail/v2", json={'token': token_1, 'email': 'karicoleman.com'})
+        response = requests.put(f"{url}user/profile/setemail/v2", json={'token': token_2, 'email': 'karicoleman.com'})
+>       assert response.status_code == 400
+E       assert 403 == 400
+E        +  where 403 = <Response [403]>.status_code
+
+http_tests/user_http_test.py:125: AssertionError
+________________________ test_http_user_sethandle_valid ________________________
+
+user1 = {'auth_user_id': 381, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM4MSwibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6IjVmOTk0MjAxLWQ1NjUtNDg1Ny1hNmRkLTAwYzk2MTk1ZjE2ZSJ9.WUUXm3ZCngCovZjL2CD6czVI2qL3Vv-M8tOAAXVJ2wA'}
+
+    def test_http_user_sethandle_valid(user1):
+        requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
+        token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+        response_1 = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token, 'handle_str': 'karikoleman'})
+>       payload_1 = response_1.json()
+
+http_tests/user_http_test.py:132: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/requests/models.py:900: in json
+    return complexjson.loads(self.text, **kwargs)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/__init__.py:525: in loads
+    return _default_decoder.decode(s)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:370: in decode
+    obj, end = self.raw_decode(s)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <simplejson.decoder.JSONDecoder object at 0x7f09fc7ff7b8>
+s = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>404 Not Found</title>\n<h1>Not Found</h1>\n<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>\n'
+idx = 0, _w = <built-in method match of re.Pattern object at 0x7f09fce3b9f0>
+_PY3 = True
+
+    def raw_decode(self, s, idx=0, _w=WHITESPACE.match, _PY3=PY3):
+        """Decode a JSON document from ``s`` (a ``str`` or ``unicode``
+        beginning with a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+        Optionally, ``idx`` can be used to specify an offset in ``s`` where
+        the JSON document begins.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        if idx < 0:
+            # Ensure that raw_decode bails on negative indexes, the regex
+            # would otherwise mask this behavior. #98
+            raise JSONDecodeError('Expecting value', s, idx)
+        if _PY3 and not isinstance(s, str):
+            raise TypeError("Input string must be text, not bytes")
+        # strip UTF-8 bom
+        if len(s) > idx:
+            ord0 = ord(s[idx])
+            if ord0 == 0xfeff:
+                idx += 1
+            elif ord0 == 0xef and s[idx:idx + 3] == '\xef\xbb\xbf':
+                idx += 3
+>       return self.scan_once(s, idx=_w(s, idx).end())
+E       simplejson.errors.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:400: JSONDecodeError
+________________ test_http_user_sethandle_invalid_short_handle _________________
+
+user1 = {'auth_user_id': 382, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM4MiwibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6ImY1NTZhOTkwLTBmYzEtNGNiMy1iOTEyLTk1YmQyMDZjYTkxMCJ9.pnI-AWMLMKX_GK0qg4d4HBfwdnZn_9m8M5QESgtOxUc'}
+
+    def test_http_user_sethandle_invalid_short_handle(user1):
+        requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
+        token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+        response = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token, 'handle_str': 'cc'})
+>       assert response.status_code == 400
+E       assert 404 == 400
+E        +  where 404 = <Response [404]>.status_code
+
+http_tests/user_http_test.py:152: AssertionError
+_________________ test_http_user_sethandle_invalid_long_handle _________________
+
+user1 = {'auth_user_id': 383, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM4MywibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6IjgwMjVkOGRiLTM4ZmYtNDA4Yy04ZTIwLTk3ODlkYjk1OTM4NCJ9.Kqc5UyW5D2JwcehfsYEyzneK8hklhnBbl_gI3cCNYk8'}
+
+    def test_http_user_sethandle_invalid_long_handle(user1):
+        requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
+        token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+        response = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token, 'handle_str': 'cariiiiiiiiiiiiiiiiii'})
+>       assert response.status_code == 400
+E       assert 404 == 400
+E        +  where 404 = <Response [404]>.status_code
+
+http_tests/user_http_test.py:159: AssertionError
+________________ test_http_user_sethandle_invalid_handle_in_use ________________
+
+user1 = {'auth_user_id': 384, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM4NCwibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6Ijg3NTVhMWI3LWMxOWMtNDg2Ni04NDUyLTEyZDgzZGQ1YjI5YyJ9.bYNxKOllyo_wPKJNhXNMKZxvrzmkiyRAWxoWShF4e_E'}
+user2 = {'auth_user_id': 385, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM4NSwibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6IjcxY2VjOTI3LWQwN2QtNDY5OS05MGQ4LWNlOTE0NDNmYzViNyJ9.C4W63vSmxiLxchn5CLXFQ6PoUxivhaf0phMZXChNtaQ'}
+
+    def test_http_user_sethandle_invalid_handle_in_use(user1,user2):
+        requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
+        token_1 = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+        response_1 = requests.put(f"{url}user/profile/sethandle/v2", json={'token': token_1, 'handle_str': 'kari'})
+>       payload_1 = response_1.json()
+
+http_tests/user_http_test.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/requests/models.py:900: in json
+    return complexjson.loads(self.text, **kwargs)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/__init__.py:525: in loads
+    return _default_decoder.decode(s)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:370: in decode
+    obj, end = self.raw_decode(s)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <simplejson.decoder.JSONDecoder object at 0x7f09fc7ff7b8>
+s = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>404 Not Found</title>\n<h1>Not Found</h1>\n<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>\n'
+idx = 0, _w = <built-in method match of re.Pattern object at 0x7f09fce3b9f0>
+_PY3 = True
+
+    def raw_decode(self, s, idx=0, _w=WHITESPACE.match, _PY3=PY3):
+        """Decode a JSON document from ``s`` (a ``str`` or ``unicode``
+        beginning with a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+        Optionally, ``idx`` can be used to specify an offset in ``s`` where
+        the JSON document begins.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        if idx < 0:
+            # Ensure that raw_decode bails on negative indexes, the regex
+            # would otherwise mask this behavior. #98
+            raise JSONDecodeError('Expecting value', s, idx)
+        if _PY3 and not isinstance(s, str):
+            raise TypeError("Input string must be text, not bytes")
+        # strip UTF-8 bom
+        if len(s) > idx:
+            ord0 = ord(s[idx])
+            if ord0 == 0xfeff:
+                idx += 1
+            elif ord0 == 0xef and s[idx:idx + 3] == '\xef\xbb\xbf':
+                idx += 3
+>       return self.scan_once(s, idx=_w(s, idx).end())
+E       simplejson.errors.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:400: JSONDecodeError
+__________________________ test_http_users_all_valid ___________________________
+
+user1 = {'auth_user_id': 386, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM4NiwibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6ImRlYzViYTU1LWY0MWItNGJhZS1hYThiLWJlNjUwMjNkMzg3MiJ9.a_BLY_FXNSIj7UwsNS3MvZaTGCN6m-deMUrPs4V9Mp0'}
+user2 = {'auth_user_id': 387, 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnaWQiOjM4NywibG9naW5fdGltZSI6MTYxOTE4OTkwMSwic2FsdCI6Ijc2ZTNlNDJkLWIzNWMtNGU3Yy05YmYzLWMxMzc4YzIzZTNjNCJ9.ux9vwf8HehtQaGdjw9X6O7PdwD3dnU1lFFqU3SNqvm4'}
+
+    def test_http_users_all_valid(user1,user2):
+        requests.post(f"{url}auth/login/v2", json={'email': "caricoleman@gmail.com", "password": "1234567"})
+        token = encode({'session_id': 1, 'user_id': 0}, SECRET, algorithm='HS256')
+        requests.post(f"{url}auth/login/v2", json={'email': "ericamondy@gmail.com", "password": "1234567"})
+        response = requests.get(f"{url}users/all/v1", params={'token': token})
+>       payload = response.json()
+
+http_tests/user_http_test.py:179: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/requests/models.py:900: in json
+    return complexjson.loads(self.text, **kwargs)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/__init__.py:525: in loads
+    return _default_decoder.decode(s)
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:370: in decode
+    obj, end = self.raw_decode(s)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <simplejson.decoder.JSONDecoder object at 0x7f09fc7ff7b8>
+s = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>403 Forbidden</title>\n<h1>Forbidden</h1>\n<p>Invalid token</p>\n'
+idx = 0, _w = <built-in method match of re.Pattern object at 0x7f09fce3b9f0>
+_PY3 = True
+
+    def raw_decode(self, s, idx=0, _w=WHITESPACE.match, _PY3=PY3):
+        """Decode a JSON document from ``s`` (a ``str`` or ``unicode``
+        beginning with a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+        Optionally, ``idx`` can be used to specify an offset in ``s`` where
+        the JSON document begins.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        if idx < 0:
+            # Ensure that raw_decode bails on negative indexes, the regex
+            # would otherwise mask this behavior. #98
+            raise JSONDecodeError('Expecting value', s, idx)
+        if _PY3 and not isinstance(s, str):
+            raise TypeError("Input string must be text, not bytes")
+        # strip UTF-8 bom
+        if len(s) > idx:
+            ord0 = ord(s[idx])
+            if ord0 == 0xfeff:
+                idx += 1
+            elif ord0 == 0xef and s[idx:idx + 3] == '\xef\xbb\xbf':
+                idx += 3
+>       return self.scan_once(s, idx=_w(s, idx).end())
+E       simplejson.errors.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/import/kamen/3/cs1531/.local/lib/python3.7/site-packages/simplejson/decoder.py:400: JSONDecodeError
+=========================== short test summary info ============================
+FAILED http_tests/admin_http_test.py::test_http_admin_user_remove_valid - sim...
+FAILED http_tests/admin_http_test.py::test_http_userpermissions_change - Asse...
+FAILED http_tests/admin_http_test.py::test_http_admin_user_remove_valid - sim...
+FAILED http_tests/admin_http_test.py::test_http_userpermissions_change - Asse...
+FAILED http_tests/auth_http_test.py::test_http_auth_login_valid - AssertionEr...
+FAILED http_tests/auth_http_test.py::test_http_auth_register_valid - Assertio...
+FAILED http_tests/auth_http_test.py::test_http_auth_logout_valid - simplejson...
+FAILED http_tests/auth_http_test.py::test_http_auth_logout_v1_invalid - simpl...
+FAILED http_tests/channel_http_test.py::test_http_channel_invite - AssertionE...
+FAILED http_tests/channel_http_test.py::test_http_channel_details - Assertion...
+FAILED http_tests/channel_http_test.py::test_http_channel_leave - AssertionEr...
+FAILED http_tests/channel_http_test.py::test_http_channel_join - AssertionErr...
+FAILED http_tests/channel_http_test.py::test_http_channel_addowner - Assertio...
+FAILED http_tests/channel_http_test.py::test_http_channel_removeowner - Asser...
+FAILED http_tests/channel_http_test.py::test_http_channel_messages - assert -...
+FAILED http_tests/dm_http_test.py::test_http_dm_details_valid - AssertionErro...
+FAILED http_tests/dm_http_test.py::test_http_dm_create - AssertionError: asse...
+FAILED http_tests/dm_http_test.py::test_http_dm_invite_invalid_dm - assert 50...
+FAILED http_tests/dm_http_test.py::test_http_dm_invite_access_error - assert ...
+FAILED http_tests/dm_http_test.py::test_http_dm_messages - assert -1 == 51
+FAILED http_tests/echo_http_test.py::test_echo - json.decoder.JSONDecodeError...
+FAILED http_tests/message_http_test.py::test_http_message_share_todm - KeyErr...
+FAILED http_tests/message_http_test.py::test_http_senddm_multiple - Assertion...
+FAILED http_tests/other_http_test.py::test_http_search_channels - assert False
+FAILED http_tests/other_http_test.py::test_http_search_dms - assert False
+FAILED http_tests/user_http_test.py::test_http_user_profile_invalid_uid - ass...
+FAILED http_tests/user_http_test.py::test_http_user_setname_valid - simplejso...
+FAILED http_tests/user_http_test.py::test_http_user_setname_invalid_long_first_name
+FAILED http_tests/user_http_test.py::test_http_user_setname_invalid_long_last_name
+FAILED http_tests/user_http_test.py::test_http_user_setname_invalid_no_first_name
+FAILED http_tests/user_http_test.py::test_http_user_setname_invalid_no_last_name
+FAILED http_tests/user_http_test.py::test_http_user_setemail_valid - simplejs...
+FAILED http_tests/user_http_test.py::test_http_user_setemail_invalid_email - ...
+FAILED http_tests/user_http_test.py::test_http_user_setemail_invalid_email_in_use
+FAILED http_tests/user_http_test.py::test_http_user_sethandle_valid - simplej...
+FAILED http_tests/user_http_test.py::test_http_user_sethandle_invalid_short_handle
+FAILED http_tests/user_http_test.py::test_http_user_sethandle_invalid_long_handle
+FAILED http_tests/user_http_test.py::test_http_user_sethandle_invalid_handle_in_use
+FAILED http_tests/user_http_test.py::test_http_users_all_valid - simplejson.e...
+======================== 39 failed, 42 passed in 4.14s =========================
