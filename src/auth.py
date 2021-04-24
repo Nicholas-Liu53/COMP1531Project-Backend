@@ -9,6 +9,7 @@ from datetime import datetime
 import urllib.request
 from src.config import url
 from flask_mail import Message
+import requests
 
 def auth_register_v1(email, password, name_first, name_last):
     """ With the inputted data (email, password, name_first, name_last), checks whether the format of the data are valid. 
@@ -130,7 +131,9 @@ def auth_register_v1(email, password, name_first, name_last):
             ],
         }
 
-    urllib.request.urlretrieve('https://en.meming.world/images/en/thumb/7/7f/Polish_Jerry.jpg/300px-Polish_Jerry.jpg', "src/static/default.jpg")
+    response = requests.get(f"{url}static/default.jpg")
+    if response.status_code != 200:
+        urllib.request.urlretrieve('https://en.meming.world/images/en/thumb/7/7f/Polish_Jerry.jpg/300px-Polish_Jerry.jpg', "src/static/default.jpg")
 
     #* appending the user dictionary into the users list
     data['users'].append({
