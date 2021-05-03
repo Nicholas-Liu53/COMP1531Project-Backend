@@ -130,6 +130,8 @@ def auth_register_v1(email, password, name_first, name_last):
             ],
         }
 
+    urllib.request.urlretrieve('https://en.meming.world/images/en/thumb/7/7f/Polish_Jerry.jpg/300px-Polish_Jerry.jpg', "src/static/default.jpg")
+
     #* appending the user dictionary into the users list
     data['users'].append({
         'email' : email,
